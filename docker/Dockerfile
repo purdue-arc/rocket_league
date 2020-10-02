@@ -20,7 +20,7 @@ WORKDIR /home/$USER
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 
-RUN echo 'export ZSH="/home/danielg/.oh-my-zsh"' > /home/$USER/.zshrc && \
+RUN echo 'export ZSH="/home/$USER/.oh-my-zsh"' > /home/$USER/.zshrc && \
     echo 'ZSH_THEME="powerlevel10k/powerlevel10k"' >> /home/$USER/.zshrc && \
     echo 'plugins=(git alias-finder colored-man-pages https://github.com/zsh-users/zsh-autosuggestions https://github.com/zsh-users/zsh-completions)' >> /home/$USER/.zshrc && \
     echo 'source $ZSH/oh-my-zsh.sh' >> /home/$USER/.zshrc && \
