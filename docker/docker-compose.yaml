@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+    arc-dev:
+        build:
+            context: .
+            args:
+                - USER=$USER
+                - PW="robot"
+                - UID=$UID
+                - GID=$GID
+        environment: 
+            - DISPLAY
+            - IBGL_ALWAYS_INDIRECT
+        volumes:
+            - ../../../:/home/$USER/catkin_ws
+        image: arc-dev
+        hostname: arc-dev
