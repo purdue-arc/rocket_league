@@ -4,6 +4,7 @@ WS_DIR="$(readlink -f $(dirname $0)/../../../)"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
 docker run --rm -it \
+    -e USER \
     -e DISPLAY \
     -e LIBGL_ALWAYS_INDIRECT \
     -v $XAUTH:/home/$USER/.Xauthority \
