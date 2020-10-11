@@ -25,18 +25,16 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+# 3rd party packages
+import Box2D
+
 class Ball():
-    def __init__(self, world):
-        self.bodyDef = b2BodyDef()
-        self.bodyDef.type = b2_dynamicBody
-        self.bodyDef.position = (screenWidth / ppm / 3, screenHeight / ppm / 3)
+    def __init__(self, world, x, y, radius, density, restitution):
+        self.bodyDef = Box2D.b2BodyDef()
+        self.bodyDef.type = Box2D.b2_dynamicBody
+        self.bodyDef.position = (x, y)
         self.body = world.CreateBody(self.bodyDef)
 
-        self.shape = b2CircleShape(radius=(0.05))
-        self.body.CreateFixture(shape=self.shape, density=0.003, restitution=0.8)
-
-    def draw(self, screen):
-        x,y = self.body.position
-        x = int(x * ppm)
-        y = int(y * ppm)
-        pygame.draw.circle(screen, (255, 255, 255), (x, y), int(self.shape.radius * ppm))
+        self.shape = Box2D.b2CircleShape(radius=radius)
+        self.body.CreateFixture(shape=self.shape, density=density, 
+                                 restitution=restitution)
