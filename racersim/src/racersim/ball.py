@@ -1,4 +1,5 @@
-"""The classic game of snake, but in a continuous environment.
+"""Contains the Ball class.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -28,13 +29,13 @@ License:
 # 3rd party packages
 import Box2D
 
-class Ball():
+class Ball(object):
     def __init__(self, world, x, y, radius, density, restitution):
-        self.bodyDef = Box2D.b2BodyDef()
-        self.bodyDef.type = Box2D.b2_dynamicBody
-        self.bodyDef.position = (x, y)
-        self.body = world.CreateBody(self.bodyDef)
+        bodyDef = Box2D.b2BodyDef()
+        bodyDef.type = Box2D.b2_dynamicBody
+        bodyDef.position = (x, y)
+        self.body = world.CreateBody(bodyDef)
 
-        self.shape = Box2D.b2CircleShape(radius=radius)
-        self.body.CreateFixture(shape=self.shape, density=density, 
+        shape = Box2D.b2CircleShape(radius=radius)
+        self.body.CreateFixture(shape=shape, density=density, 
                                  restitution=restitution)

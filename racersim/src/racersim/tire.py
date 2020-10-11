@@ -1,4 +1,5 @@
-"""The classic game of snake, but in a continuous environment.
+"""Contains the Tire class.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -28,7 +29,7 @@ License:
 # 3rd party modules
 import Box2D
 
-class Tire:
+class Tire(object):
     """Simulates a single tire of a vehicle"""
     def __init__(self, world, width, length, density, torque, 
                     maxForwardSpeed, maxBackwardSpeed, maxDriveForce, 

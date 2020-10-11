@@ -1,4 +1,5 @@
-"""The classic game of snake, but in a continuous environment.
+"""Contains the Sim class.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -25,8 +26,15 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-
+# Local classes
+from racersim.ball import Ball
+from racersim.car import Car
+from racersim.renderer import Renderer
+from racersim.tire import Tire
+from racersim.world import World
 
 class Sim(object):
     """Oversees components of racersim"""
-    def __init__(self, headless=True, pixelPerMeter=500, dim=(600,600)):
+
+    def __init__(self, display=True, scale=500, dim=(3,3)):
+        pass

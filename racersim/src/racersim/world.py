@@ -1,4 +1,5 @@
-"""The classic game of snake, but in a continuous environment.
+"""Contains the World class.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)

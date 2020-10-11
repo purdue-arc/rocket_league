@@ -1,4 +1,5 @@
-"""The classic game of snake, but in a continuous environment.
+"""2D simulation of ARC's rocket league environment.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -28,5 +29,6 @@ License:
 from racersim.ball import Ball
 from racersim.car import Car
 from racersim.sim import Sim
+from racersim.renderer import Renderer
 from racersim.tire import Tire
-from racersim.wall import Wall
+from racersim.world import World

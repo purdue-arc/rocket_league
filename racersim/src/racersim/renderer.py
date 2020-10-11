@@ -1,4 +1,5 @@
 """Contains the Renderer class.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -25,14 +26,14 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+# Third party modules
 from threading import Thread
 import numpy as np
 import pygame
 
-from snakesim.geometry import Vector
-
 class Renderer(object):
-    """Render the Snake game in pygame."""
+    """Render field elements of racer sim"""
+
     COLOR_BACKGROUND = (200, 200, 200)  # Gray
     COLOR_GOAL = (255, 0, 0)            # Red
     COLOR_BODY = (0, 200, 0)            # Green
@@ -42,7 +43,7 @@ class Renderer(object):
         """Exception for when pygame is shut down"""
         pass
 
-    def __init__(self, bounds, padding, scaling=50):
+    def __init__(self, bounds, padding, scaling=500):
         self.bounds = bounds
         self.padding = padding
         self.scaling = scaling
@@ -98,3 +99,30 @@ class Renderer(object):
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()
+
+
+        # Tire
+           def draw(self, screen):
+        for fixture in self.body.fixtures:
+            shape = fixture.shape
+            vertices = [self.body.transform * v * ppm for v in shape.vertices]
+            vertices = [(v[0], v[1]) for v in vertices]
+            pygame.draw.polygon(screen, (255, 255, 255), vertices)
+
+        # Ball
+            def draw(self, screen):
+        x,y = self.body.position
+        x = int(x * ppm)
+        y = int(y * ppm)
+        pygame.draw.circle(screen, (255, 255, 255), (x, y), int(self.shape.radius * ppm))
+
+        # Car 
+            def draw(self, screen):
+        for fixture in self.body.fixtures:
+            shape = fixture.shape
+            vertices = [self.body.transform * v * ppm for v in shape.vertices]
+            vertices = [(v[0], v[1]) for v in vertices]
+            pygame.draw.polygon(screen, (0, 25, 156), vertices)
+
+        for tire in self.tires:
+            tire.draw(screen)
