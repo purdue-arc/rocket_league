@@ -33,12 +33,12 @@ class Tire:
     def __init__(self, world, width, length, density, torque, 
                     maxForwardSpeed, maxBackwardSpeed, maxDriveForce, 
                     maxLateralImpulse, dragForceCoeff, anglularImpulseCoeff):
-        self.bodyDef = Box2D.b2BodyDef()
-        self.bodyDef.type = Box2D.b2_dynamicBody
-        self.body = world.CreateBody(self.bodyDef)
+        bodyDef = Box2D.b2BodyDef()
+        bodyDef.type = Box2D.b2_dynamicBody
+        self.body = world.CreateBody(bodyDef)
 
-        self.shape = Box2D.b2PolygonShape(box=(width/2, length/2))
-        self.body.CreateFixture(shape=self.shape, density=density)
+        shape = Box2D.b2PolygonShape(box=(width/2, length/2))
+        self.body.CreateFixture(shape=shape, density=density)
 
         self.torque = torque
         self.maxForwardSpeed = maxForwardSpeed
@@ -93,14 +93,3 @@ class Tire:
 
         self.body.ApplyForce(force * currForwardNormal, \
                              self.body.worldCenter, wake=True)
-
-    def updateTurn(self, control):
-        desiredTorque = 0
-        if control[1] == 1:
-            desiredTorque = self.torque
-        elif control[1] == -1:
-            desiredTorque = -self.torque
-        else:
-            return
-
-        self.body.ApplyTorque(desiredTorque, wake=True)
