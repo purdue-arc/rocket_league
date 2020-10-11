@@ -4,7 +4,11 @@ RUN apt update && apt upgrade -y
 RUN apt install -y sudo nano vim git \
     x11-apps iputils-ping \
     python-catkin-tools python-pygame \
-    zsh curl
+    zsh curl ninja-build python3-pip \
+    libgtk-3-dev libnotify-dev libgstreamer1.0 \
+    libgstreamer-plugins-base1.0-dev \
+    gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+    libcanberra-gtk3-module
 
 ARG USER=arc
 ARG PW=password
@@ -16,6 +20,15 @@ RUN groupadd -o -g $GID $USER && \
     echo "$USER:$PW" | chpasswd && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python get-pip.py
+
+# Install aravis
+WORKDIR /aravis
+RUN pip3 install meson && \
+    curl -fsSLo aravis-0.8.1.tar.xz https://ftp.acc.umu.se/pub/GNOME/sources/aravis/0.8/aravis-0.8.1.tar.xz  && \
+    echo "5fab57711f158f2eec19c32c2b1b87f4e3761df456f23bd330050d91e0f664aa  aravis-0.8.1.tar.xz" | sha256sum --check && \
+    tar xf aravis-0.8.1.tar.xz && cd aravis-0.8.1 && \
+    meson build -Dviewer=enabled && \
+    cd build && ninja && ninja install && ldconfig
 
 USER $USER
 WORKDIR /home/$USER

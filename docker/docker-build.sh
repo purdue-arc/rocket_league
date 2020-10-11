@@ -5,6 +5,7 @@ docker build --build-arg USER=$USER \
              --build-arg UID=$(id -u) \
              --build-arg GID=$(id -g) \
              -t arc-rocket-league-dev \
+             $1 \
              .
 
 echo "
