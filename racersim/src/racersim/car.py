@@ -34,19 +34,20 @@ from tire import Tire
 
 class Car(object):
     """Simulates an ackerman-steering vehicle"""
+
     def __init__(self, world, x, y, vertices, density,
                     tireWidth, tireLength, tireLocalAnchors,
                     tireDensity, tireTorque, maxForwardSpeed, 
                     maxBackwardSpeed, maxDriveForce, maxLateralImpulse,
                     dragForceCoeff, angularImpulseCoeff, maxAngle, turnSpeed,
                     timestep):
-        self.bodyDef = Box2D.b2BodyDef()
-        self.bodyDef.type = Box2D.b2_dynamicBody
-        self.bodyDef.position = (x, y)
-        self.body = world.CreateBody(self.bodyDef)
+        bodyDef = Box2D.b2BodyDef()
+        bodyDef.type = Box2D.b2_dynamicBody
+        bodyDef.position = (x, y)
+        self.body = world.CreateBody(bodyDef)
 
-        self.shape = Box2D.b2PolygonShape(vertices=vertices)
-        self.fixture = self.body.CreateFixture(shape=self.shape, density=density)
+        shape = Box2D.b2PolygonShape(vertices=vertices)
+        self.body.CreateFixture(shape=shape, density=density)
 
         jointDef = Box2D.b2RevoluteJointDef()
         jointDef.bodyA = self.body
@@ -74,9 +75,8 @@ class Car(object):
             
             self.tires.append(tire)
         
-        self.maxAngle = maxAngle
-        self.turnSpeed = turnSpeed
-        self.timestep = timestep
+        self._maxAngle = math.radians(maxAngle)
+        self._turnPerTimeStep = math.radians(turnSpeed) / timestep
 
     def update(self, command):
         for tire in self.tires:
@@ -84,21 +84,15 @@ class Car(object):
         for tire in self.tires:
             tire.updateDrive(command.linear.Y)
 
-        lockAngle = math.radians(self.maxAngle)
-        turnSpeed = math.radians(self.turnSpeed)
-        turnPerTimeStep = turnSpeed / self.timestep
-        desiredAngle = 0
-
         desiredAngle = command.angular.Z
-        if abs(desiredAngle) > lockAngle:
-            desiredAngle = math.copysign(lockAngle, desiredAngle)
+        if abs(desiredAngle) > self._maxAngle:
+            desiredAngle = math.copysign(self._maxAngle, desiredAngle)
 
         angleNow = self.flJoint.angle
         angleToTurn = desiredAngle - angleNow
-        if angleToTurn != 0:
-            if turnPerTimeStep > angleToTurn:
-                turnPerTimeStep = angleToTurn
-            angleToTurn = math.copysign(turnPerTimeStep, angleToTurn)
+        if angleToTurn != 0 and abs(angleToTurn) > self._turnPerTimeStep:
+            angleToTurn = math.copysign(self._turnPerTimeStep, angleToTurn)
         newAngle = angleNow + angleToTurn
+
         self.flJoint.SetLimits(newAngle, newAngle)
         self.frJoint.SetLimits(newAngle, newAngle)
