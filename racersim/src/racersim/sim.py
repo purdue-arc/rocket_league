@@ -76,6 +76,6 @@ class Sim(object):
     def _render(self):
         """Render the current state of the sim."""
         try:
-            self.renderer.render(self.world)
+            self.renderer.render(self.car, self.ball, self.goal, self.world)
         except Renderer.ShutdownError:
             self.renderEnabled = False

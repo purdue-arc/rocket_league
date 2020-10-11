@@ -32,7 +32,7 @@ import Box2D
 class Ball(object):
     """Simulates game ball"""
 
-    def __init__(self, world, initPos=(0.05,0.05), radius=0.05,
+    def __init__(self, world, initPos=(0.15,0.15), radius=0.05,
                     density=0.003, restitution=0.8):
 
         bodyDef = Box2D.b2BodyDef()

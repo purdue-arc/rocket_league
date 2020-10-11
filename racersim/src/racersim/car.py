@@ -44,7 +44,7 @@ class CarDef(object):
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(0.05, 0.05), vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(0.5, 0.5), vertices=DEFAULT_VERTICES, 
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
                     maxAngle=30, turnSpeed=320):
@@ -85,7 +85,8 @@ class Car(object):
                         maxForwardSpeed=carDef.maxForwardSpeed,
                         maxBackwardSpeed=carDef.maxBackwardSpeed)
             jointDef.bodyB = tire.body
-            jointDef.localAnchorA.Set(carDef.tireAnchors[i])
+            jointDef.localAnchorA.Set(carDef.tireAnchors[i][0],
+                                      carDef.tireAnchors[i][1])
             
             # Store first and second joints as FL and FR respectively
             if i == 0:

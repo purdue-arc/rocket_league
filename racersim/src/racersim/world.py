@@ -35,7 +35,8 @@ class World(Box2D.b2World):
     WALL_THICKNESS = 0.02 # meters
 
     def __init__(self, width, height):
-        super(gravity=(0,0))
+        super(World, self).__init__()
+        self.gravity = (0,0)
         
         self.gndBody = self.CreateBody()
         gndShape = Box2D.b2PolygonShape(box=(width,height))

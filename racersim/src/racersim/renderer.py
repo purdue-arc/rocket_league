@@ -36,9 +36,10 @@ class Renderer(object):
 
     COLOR_BACKGROUND = (200, 200, 200)  # Gray
     COLOR_CAR = (255, 0, 0)             # Red
+    COLOR_TIRE = (94, 164, 191)         # Light-Blue
     COLOR_GOAL = (0, 200, 0)            # Green
     COLOR_BALL = (150, 200, 0)          # Yellow
-    TYPE_TO_COLOR = [COLOR_CAR, COLOR_GOAL, COLOR_BALL]
+    COLOR_WALL = (112, 48, 65)          # Dark-Red
 
     class ShutdownError(Exception):
         """Exception for when pygame is shut down"""
@@ -69,7 +70,7 @@ class Renderer(object):
             [int(x) for x in position],
              int(fixture.shape.radius * self.scaling))
 
-    def render(self, world):
+    def render(self, car, ball, goal, world):
         """Render the current state of the sim."""
 
         if self._thread is not None and self._thread.is_alive():
@@ -83,14 +84,22 @@ class Renderer(object):
 
         self._screen.fill(self.COLOR_BACKGROUND)
 
-        for body in world:
-            for fixture in body.fixtures:
-                if fixture.shape.type == Box2D.b2PolygonShape:
-                    # Temporary measure to color all polygons
-                    # TODO: Replace with body-based color
-                    self._draw_polygon(body, fixture, self.COLOR_CAR)
-                elif fixture.shape.type == Box2D.b2CircleShape:
-                    self._draw_circle(body, fixture, self.COLOR_BALL)
+        for fixture in goal.body.fixtures:
+            self._draw_polygon(goal.body, fixture, self.COLOR_GOAL)
+
+        for fixture in car.body.fixtures:
+            self._draw_polygon(car.body, fixture, self.COLOR_CAR)
+
+        for tire in car.tires:
+            for fixture in tire.body.fixtures:
+                self._draw_polygon(tire.body, fixture, self.COLOR_TIRE)
+        
+        for fixture in ball.body.fixtures:
+            self._draw_circle(ball.body, fixture, self.COLOR_BALL)
+        
+        for wallBody in world.wallBodies:
+            for fixture in wallBody.fixtures:
+                self._draw_polygon(wallBody, fixture, self.COLOR_WALL)
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()

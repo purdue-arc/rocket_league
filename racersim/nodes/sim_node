@@ -98,7 +98,7 @@ class RacerSimROS(object):
             # Publish ball pose with covariance and stamp
             ball_msg = PoseWithCovarianceStamped()
             ball_msg.header.stamp = now
-            ball_msg.frame_id = self.frame_id
+            ball_msg.header.frame_id = self.frame_id
             ball_point = self.sim.ball.getPoint()
             ball_msg.pose.pose.position.x = ball_point[0]
             ball_msg.pose.pose.position.y = ball_point[1]
@@ -118,17 +118,16 @@ class RacerSimROS(object):
             bot_msg.twist.twist.linear.x = linear[0]
             bot_msg.twist.twist.linear.y = linear[1]
             angular = self.sim.car.body.angularVelocity
-            bot_msg.twist.twist.angular.x = angular[0]
-            bot_msg.twist.twist.angular.y = angular[1]
+            bot_msg.twist.twist.angular.z = angular
             self.bot_pub.publish(bot_msg)
 
             # Publish goal pose with covariance and stamp
             goal_msg = PoseWithCovarianceStamped()
             goal_msg.header.stamp = now
-            goal_msg.frame_id = self.frame_id
-            goal_msg = self.sim.goal.getPoint()
-            goal_msg.pose.pose.position.x = goal_msg[0]
-            goal_msg.pose.pose.position.y = goal_msg[1]
+            goal_msg.header.frame_id = self.frame_id
+            goal_point = self.sim.goal.getPoint()
+            goal_msg.pose.pose.position.x = goal_point[0]
+            goal_msg.pose.pose.position.y = goal_point[1]
             self.ball_pub.publish(goal_msg)
 
         self.last_time = now

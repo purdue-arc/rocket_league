@@ -31,15 +31,16 @@ import Box2D
 
 class TireDef(object):
     """Holds relevent data for a tire instance"""
-    def __init__(self, width=0.0125, length=0.037, density=0.0124,
+    def __init__(self, width=0.0125, length=0.037, density=0.0125,
                     maxLateralImpulse=0.03, maxDriveForce=0.0001,
-                    angularImpulseCoeff=0.08):
+                    dragForceCoeff=-0.00002, angularImpulseCoeff=0.08):
         
         self.width = width
         self.length = length
         self.density = density
         self.maxLateralImpulse = maxLateralImpulse
         self.maxDriveForce = maxDriveForce
+        self.dragForceCoeff = dragForceCoeff
         self.angularImpulseCoeff = angularImpulseCoeff
 
 class Tire(object):
@@ -58,7 +59,7 @@ class Tire(object):
         self.maxDriveForce = tireDef.maxDriveForce
         self.maxLateralImpulse = tireDef.maxLateralImpulse
         self.dragForceCoeff = tireDef.dragForceCoeff
-        self.anglularImpulseCoeff = tireDef.anglularImpulseCoeff
+        self.angularImpulseCoeff = tireDef.angularImpulseCoeff
 
     def getForwardVelocity(self):
         normal = self.body.GetWorldVector((0,1))
@@ -73,7 +74,7 @@ class Tire(object):
         if impulse.length > self.maxLateralImpulse:
             impulse *= self.maxLateralImpulse / impulse.length
         self.body.ApplyLinearImpulse(impulse, self.body.worldCenter, wake=True)
-        self.body.ApplyAngularImpulse(self.anglularImpulseCoeff * \
+        self.body.ApplyAngularImpulse(self.angularImpulseCoeff * \
                                       self.body.inertia * \
                                       -self.body.angularVelocity, wake=True)
 
