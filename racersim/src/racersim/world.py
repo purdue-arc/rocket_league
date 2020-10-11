@@ -37,10 +37,10 @@ class World(object):
         self.world = Box2D.b2World(gravity=(0,0))
         
         self.gndBody = self.world.CreateBody()
-        self.gndShape = Box2D.b2PolygonShape(box=(width,height))
-        self.gndFixtureDef = Box2D.b2FixtureDef(shape=self.gndShape)
-        self.gndFixtureDef.isSensor = True
-        self.gndFixture = self.gndBody.CreateFixture(self.gndFixtureDef)
+        gndShape = Box2D.b2PolygonShape(box=(width,height))
+        gndFixtureDef = Box2D.b2FixtureDef(shape=gndShape)
+        gndFixtureDef.isSensor = True
+        self.gndBody.CreateFixture(gndFixtureDef)
 
         self.wallBodies = []
         wallPos = [(0, height), (width, 0), (0,0), (0,0)]
