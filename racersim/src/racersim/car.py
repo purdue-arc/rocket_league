@@ -1,4 +1,4 @@
-"""Contains the Car class.
+"""Contains the Car and CarDef class.
 
 License:
   BSD 3-Clause License
@@ -33,22 +33,30 @@ import math
 # Local classes
 from tire import Tire 
 
+class CarDef(object):
+    """Holds relevent data for a car instance"""
+
+    def __init__(self, vertices, tireAnchors, tireDef, density=0.0124,
+                    maxForwardSpeed=1, maxBackwardSpeed=-1):
+        
+        self.vertices = vertices
+        self.tireAnchors = tireAnchors
+        self.tireDef = tireDef
+        self.density = density
+        self.maxForwardSpeed = maxForwardSpeed
+        self.maxBackwardSpeed = maxBackwardSpeed
+
 class Car(object):
     """Simulates an ackerman-steering vehicle"""
 
-    def __init__(self, world, x, y, vertices, density,
-                    tireWidth, tireLength, tireLocalAnchors,
-                    tireDensity, tireTorque, maxForwardSpeed, 
-                    maxBackwardSpeed, maxDriveForce, maxLateralImpulse,
-                    dragForceCoeff, angularImpulseCoeff, maxAngle, turnSpeed,
-                    timestep):
+    def __init__(self, world, x, y, carDef, timestep):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
         bodyDef.position = (x, y)
         self.body = world.CreateBody(bodyDef)
 
-        shape = Box2D.b2PolygonShape(vertices=vertices)
-        self.body.CreateFixture(shape=shape, density=density)
+        shape = Box2D.b2PolygonShape(vertices=carDef.vertices)
+        self.body.CreateFixture(shape=shape, density=carDef.density)
 
         jointDef = Box2D.b2RevoluteJointDef()
         jointDef.bodyA = self.body
@@ -58,13 +66,13 @@ class Car(object):
         jointDef.localAnchorB.SetZero()
 
         self.tires = []
-        for i in range(len(tireLocalAnchors)):
-            tire = Tire(world, tireLength, tireWidth, tireDensity, 
-                        tireTorque, maxForwardSpeed, maxBackwardSpeed, 
-                        maxDriveForce, maxLateralImpulse, dragForceCoeff,
-                        angularImpulseCoeff)
+        for i in range(len(carDef.tireAnchors)):
+
+            tire = Tire(world, carDef.tireDef, 
+                        maxForwardSpeed=carDef.maxForwardSpeed,
+                        maxBackwardSpeed=carDef.maxBackwardSpeed)
             jointDef.bodyB = tire.body
-            jointDef.localAnchorA.Set(tireLocalAnchors[i])
+            jointDef.localAnchorA.Set(carDef.tireAnchors[i])
             
             # Store first and second joints as FL and FR respectively
             if i == 0:
@@ -76,8 +84,8 @@ class Car(object):
             
             self.tires.append(tire)
         
-        self.maxAngle = math.radians(maxAngle)
-        self.turnPerTimeStep = math.radians(turnSpeed) / timestep
+        self.maxAngle = carDef.maxAngle
+        self.turnPerTimeStep = carDef.turnSpeed / timestep
 
     def update(self, command):
         for tire in self.tires:

@@ -1,4 +1,4 @@
-"""Contains the Tire class.
+"""Contains the Tire and TireDef class.
 
 License:
   BSD 3-Clause License
@@ -29,25 +29,38 @@ License:
 # 3rd party modules
 import Box2D
 
+class TireDef(object):
+    """Holds relevent data for a tire instance"""
+    def __init__(self, width=0.0125, length=0.037, density=0.0124,
+                    maxLateralImpulse=0.03, maxDriveForce=0.0001,
+                    angularImpulseCoeff=0.08, maxAngle=30, turnSpeed=320):
+        
+        self.width = width
+        self.length = length
+        self.density = density
+        self.maxLateralImpulse = maxLateralImpulse
+        self.maxDriveForce = maxDriveForce
+        self.angularImpulseCoeff = angularImpulseCoeff
+        self.maxAngle = maxAngle
+        self.turnSpeed = turnSpeed
+
 class Tire(object):
     """Simulates a single tire of a vehicle"""
-    def __init__(self, world, width, length, density, torque, 
-                    maxForwardSpeed, maxBackwardSpeed, maxDriveForce, 
-                    maxLateralImpulse, dragForceCoeff, anglularImpulseCoeff):
+    def __init__(self, world, tireDef, maxForwardSpeed=1.0, 
+                    maxBackwardSpeed=-1.0):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
         self.body = world.CreateBody(bodyDef)
 
-        shape = Box2D.b2PolygonShape(box=(width/2, length/2))
-        self.body.CreateFixture(shape=shape, density=density)
+        shape = Box2D.b2PolygonShape(box=(tireDef.width/2, tireDef.length/2))
+        self.body.CreateFixture(shape=shape, density=tireDef.density)
 
-        self.torque = torque
         self.maxForwardSpeed = maxForwardSpeed
         self.maxBackwardSpeed = maxBackwardSpeed
-        self.maxDriveForce = maxDriveForce
-        self.maxLateralImpulse = maxLateralImpulse
-        self.dragForceCoeff = dragForceCoeff
-        self.anglularImpulseCoeff = anglularImpulseCoeff
+        self.maxDriveForce = tireDef.maxDriveForce
+        self.maxLateralImpulse = tireDef.maxLateralImpulse
+        self.dragForceCoeff = tireDef.dragForceCoeff
+        self.anglularImpulseCoeff = tireDef.anglularImpulseCoeff
 
     def getForwardVelocity(self):
         normal = self.body.GetWorldVector((0,1))
