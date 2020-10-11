@@ -25,13 +25,8 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-# 3rd party packages
+# 3rd party modules
 import Box2D
-
-maxForwardSpeed = 1
-maxBackwardSpeed = -1
-maxDriveForce = 0.0001
-maxLateralImpulse = 0.03
 
 class Tire:
     """Simulates a single tire of a vehicle"""

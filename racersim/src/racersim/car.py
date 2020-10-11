@@ -25,7 +25,7 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-# 3rd party packages
+# 3rd party modules
 import Box2D
 import math
 
