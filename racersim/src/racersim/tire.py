@@ -25,58 +25,75 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from pybox2d import *
+# 3rd party packages
+import Box2D
 from pygame import draw
+
+maxForwardSpeed = 1
+maxBackwardSpeed = -1
+maxDriveForce = 0.0001
+maxLateralImpulse = 0.03
 
 class Tire:
     """Simulates a single tire of a vehicle"""
-    def __init__(self, world, length, width):
-        self.bodyDef = b2BodyDef()
-        self.bodyDef.type = b2_dynamicBody
+    def __init__(self, world, width, length, density, torque, 
+                    maxForwardSpeed, maxBackwardSpeed, maxDriveForce, 
+                    maxLateralImpulse, dragForceCoeff, anglularImpulseCoeff):
+        self.bodyDef = Box2D.b2BodyDef()
+        self.bodyDef.type = Box2D.b2_dynamicBody
         self.body = world.CreateBody(self.bodyDef)
 
-        self.shape = b2PolygonShape(box=(width/2, length/2))
-        self.body.CreateFixture(shape=self.shape, density=0.01)
+        self.shape = Box2D.b2PolygonShape(box=(width/2, length/2))
+        self.body.CreateFixture(shape=self.shape, density=density)
+
+        self.torque = torque
+        self.maxForwardSpeed = maxForwardSpeed
+        self.maxBackwardSpeed = maxBackwardSpeed
+        self.maxDriveForce = maxDriveForce
+        self.maxLateralImpulse = maxLateralImpulse
+        self.dragForceCoeff = dragForceCoeff
+        self.anglularImpulseCoeff = anglularImpulseCoeff
 
     def getForwardVelocity(self):
         normal = self.body.GetWorldVector((0,1))
-        return b2Dot(normal, self.body.linearVelocity) * normal
+        return Box2D.b2Dot(normal, self.body.linearVelocity) * normal
 
     def getLateralVelocity(self):
         normal = self.body.GetWorldVector((1,0))
-        return b2Dot(normal, self.body.linearVelocity) * normal
+        return Box2D.b2Dot(normal, self.body.linearVelocity) * normal
 
     def updateFriction(self):
         impulse = self.body.mass * -self.getLateralVelocity()
-        if impulse.length > maxLateralImpulse:
-            impulse *= maxLateralImpulse / impulse.length
+        if impulse.length > self.maxLateralImpulse:
+            impulse *= self.maxLateralImpulse / impulse.length
         self.body.ApplyLinearImpulse(impulse, self.body.worldCenter, wake=True)
-        self.body.ApplyAngularImpulse(0.08 * self.body.inertia * \
+        self.body.ApplyAngularImpulse(self.anglularImpulseCoeff * \
+                                      self.body.inertia * \
                                       -self.body.angularVelocity, wake=True)
 
         currForwardNormal = self.getForwardVelocity()
         currForwardSpeed = currForwardNormal.Normalize()
-        dragForce = -0.00002 * currForwardSpeed
+        dragForce = self.dragForceCoeff * currForwardSpeed
         self.body.ApplyForce(dragForce * currForwardNormal, \
                              self.body.worldCenter, wake=True)
 
     def updateDrive(self, control):
         desiredSpeed = 0
         if control[0] == 1:
-            desiredSpeed = maxForwardSpeed
+            desiredSpeed = self.maxForwardSpeed
         elif control[0] == -1:
-            desiredSpeed = maxBackwardSpeed
+            desiredSpeed = self.maxBackwardSpeed
         else:
             return
 
         currForwardNormal = self.body.GetWorldVector((0,1))
-        currSpeed = b2Dot(self.getForwardVelocity(), currForwardNormal)
+        currSpeed = Box2D.b2Dot(self.getForwardVelocity(), currForwardNormal)
 
         force = 0
         if desiredSpeed > currSpeed:
-            force = maxDriveForce
+            force = self.maxDriveForce
         elif desiredSpeed < currSpeed:
-            force = -maxDriveForce
+            force = -self.maxDriveForce
         else:
             return
 
@@ -86,17 +103,10 @@ class Tire:
     def updateTurn(self, control):
         desiredTorque = 0
         if control[1] == 1:
-            desiredTorque = 0.0015
+            desiredTorque = self.torque
         elif control[1] == -1:
-            desiredTorque = -0.0015
+            desiredTorque = -self.torque
         else:
             return
 
         self.body.ApplyTorque(desiredTorque, wake=True)
-
-    def draw(self, screen):
-        for fixture in self.body.fixtures:
-            shape = fixture.shape
-            vertices = [self.body.transform * v * ppm for v in shape.vertices]
-            vertices = [(v[0], v[1]) for v in vertices]
-            pygame.draw.polygon(screen, (255, 255, 255), vertices)
