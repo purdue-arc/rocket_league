@@ -67,16 +67,16 @@ class Car(object):
             
             # Store first and second joints as FL and FR respectively
             if i == 0:
-                self.flJoint = world.CreateJoint(jointDef)
+                self._flJoint = world.CreateJoint(jointDef)
             elif i == 1:
-                self.frJoint = world.CreateJoint(jointDef)
+                self._frJoint = world.CreateJoint(jointDef)
             else:
                 world.CreateJoint(jointDef)
             
             self.tires.append(tire)
         
-        self._maxAngle = math.radians(maxAngle)
-        self._turnPerTimeStep = math.radians(turnSpeed) / timestep
+        self.maxAngle = math.radians(maxAngle)
+        self.turnPerTimeStep = math.radians(turnSpeed) / timestep
 
     def update(self, command):
         for tire in self.tires:
@@ -85,14 +85,14 @@ class Car(object):
             tire.updateDrive(command.linear.Y)
 
         desiredAngle = command.angular.Z
-        if abs(desiredAngle) > self._maxAngle:
-            desiredAngle = math.copysign(self._maxAngle, desiredAngle)
+        if abs(desiredAngle) > self.maxAngle:
+            desiredAngle = math.copysign(self.maxAngle, desiredAngle)
 
-        angleNow = self.flJoint.angle
+        angleNow = self._flJoint.angle
         angleToTurn = desiredAngle - angleNow
-        if angleToTurn != 0 and abs(angleToTurn) > self._turnPerTimeStep:
-            angleToTurn = math.copysign(self._turnPerTimeStep, angleToTurn)
+        if angleToTurn != 0 and abs(angleToTurn) > self.turnPerTimeStep:
+            angleToTurn = math.copysign(self.turnPerTimeStep, angleToTurn)
         newAngle = angleNow + angleToTurn
 
-        self.flJoint.SetLimits(newAngle, newAngle)
-        self.frJoint.SetLimits(newAngle, newAngle)
+        self._flJoint.SetLimits(newAngle, newAngle)
+        self._frJoint.SetLimits(newAngle, newAngle)
