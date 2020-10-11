@@ -27,7 +27,6 @@ License:
 
 # 3rd party packages
 import Box2D
-from pygame import draw
 
 maxForwardSpeed = 1
 maxBackwardSpeed = -1
