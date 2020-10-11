@@ -25,90 +25,80 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from Box2d import *
-from pygame import draw
+# 3rd party packages
+import Box2D
+import math
 
-from racersim.tire import Tire 
+# Local classes
+from tire import Tire 
 
 class Car(object):
     """Simulates an ackerman-steering vehicle"""
-    def __init__(self, world):
-        self.bodyDef = b2BodyDef()
-        self.bodyDef.type = b2_dynamicBody
-        self.bodyDef.position = carInit
+    def __init__(self, world, x, y, vertices, density,
+                    tireWidth, tireLength, tireLocalAnchors,
+                    tireDensity, tireTorque, maxForwardSpeed, 
+                    maxBackwardSpeed, maxDriveForce, maxLateralImpulse,
+                    dragForceCoeff, angularImpulseCoeff, maxAngle, turnSpeed,
+                    timestep):
+        self.bodyDef = Box2D.b2BodyDef()
+        self.bodyDef.type = Box2D.b2_dynamicBody
+        self.bodyDef.position = (x, y)
         self.body = world.CreateBody(self.bodyDef)
 
-        vertices = [(0.0225, 0), (0.0225, 0.155),
-                    (-0.0225, 0.155), (-0.0225, 0)]
-        self.shape = b2PolygonShape(vertices=vertices)
-        self.fixture = self.body.CreateFixture(shape=self.shape, density=0.0124)
+        self.shape = Box2D.b2PolygonShape(vertices=vertices)
+        self.fixture = self.body.CreateFixture(shape=self.shape, density=density)
 
-        self.tires = []
-
-        jointDef = b2RevoluteJointDef()
+        jointDef = Box2D.b2RevoluteJointDef()
         jointDef.bodyA = self.body
         jointDef.enableLimit = True
         jointDef.lowerAngle = 0
         jointDef.upperAngle = 0
         jointDef.localAnchorB.SetZero()
 
-        tireLength = 0.037
-        tireWidth = 0.0125
+        self.tires = []
+        for i in range(len(tireLocalAnchors)):
+            tire = Tire(world, tireLength, tireWidth, tireDensity, 
+                        tireTorque, maxForwardSpeed, maxBackwardSpeed, 
+                        maxDriveForce, maxLateralImpulse, dragForceCoeff,
+                        angularImpulseCoeff)
+            jointDef.bodyB = tire.body
+            jointDef.localAnchorA.Set(tireLocalAnchors[i])
+            
+            # Store first and second joints as FL and FR respectively
+            if i == 0:
+                self.flJoint = world.CreateJoint(jointDef)
+            elif i == 1:
+                self.frJoint = world.CreateJoint(jointDef)
+            else:
+                world.CreateJoint(jointDef)
+            
+            self.tires.append(tire)
+        
+        self.maxAngle = maxAngle
+        self.turnSpeed = turnSpeed
+        self.timestep = timestep
 
-        tireFL = Tire(world, tireLength, tireWidth)
-        jointDef.bodyB = tireFL.body
-        jointDef.localAnchorA.Set(-0.03525, 0.135)
-        self.flJoint = world.CreateJoint(jointDef)
-        self.tires.append(tireFL)
-
-        tireFR = Tire(world, tireLength, tireWidth)
-        jointDef.bodyB = tireFR.body
-        jointDef.localAnchorA.Set(0.03525, 0.135)
-        self.frJoint = world.CreateJoint(jointDef)
-        self.tires.append(tireFR)
-
-        tireBL = Tire(world, tireLength, tireWidth)
-        jointDef.bodyB = tireBL.body
-        jointDef.localAnchorA.Set(-0.03525, 0.0185)
-        world.CreateJoint(jointDef)
-        self.tires.append(tireBL)
-
-        tireBR = Tire(world, tireLength, tireWidth)
-        jointDef.bodyB = tireBR.body
-        jointDef.localAnchorA.Set(0.03525, 0.0185)
-        world.CreateJoint(jointDef)
-        self.tires.append(tireBR)
-
-    def update(self, control):
+    def update(self, command):
         for tire in self.tires:
             tire.updateFriction()
         for tire in self.tires:
-            tire.updateDrive(control)
+            tire.updateDrive(command.linear.Y)
 
-        lockAngle = math.radians(30)
-        turnSpeed = math.radians(320)
-        turnPerTimeStep = turnSpeed / 60
+        lockAngle = math.radians(self.maxAngle)
+        turnSpeed = math.radians(self.turnSpeed)
+        turnPerTimeStep = turnSpeed / self.timestep
         desiredAngle = 0
 
-        if control[1] == 1:
-            desiredAngle = lockAngle
-        elif control[1] == -1:
-            desiredAngle = -lockAngle
+        desiredAngle = command.angular.Z
+        if abs(desiredAngle) > lockAngle:
+            desiredAngle = math.copysign(lockAngle, desiredAngle)
 
         angleNow = self.flJoint.angle
         angleToTurn = desiredAngle - angleNow
         if angleToTurn != 0:
+            if turnPerTimeStep > angleToTurn:
+                turnPerTimeStep = angleToTurn
             angleToTurn = math.copysign(turnPerTimeStep, angleToTurn)
         newAngle = angleNow + angleToTurn
         self.flJoint.SetLimits(newAngle, newAngle)
         self.frJoint.SetLimits(newAngle, newAngle)
-
-    def draw(self, screen):
-        for fixture in self.body.fixtures:
-            shape = fixture.shape
-            vertices = [self.body.transform * v * ppm for v in shape.vertices]
-            vertices = [(v[0], v[1]) for v in vertices]
-            pygame.draw.polygon(screen, (0, 25, 156), vertices)
-
-        for tire in self.tires:
-            tire.draw(screen)
