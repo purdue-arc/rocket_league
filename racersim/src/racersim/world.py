@@ -25,33 +25,34 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from pybox2d import *
+# 3rd party modules
+import Box2D
 
 class World(object):
     """Simulates world for car to exist in"""
-    
+
     WALL_THICKNESS = 0.02 # meters
 
     def __init__(self, width, height):
-        self.world = b2World(gravity=(0,0))
+        self.world = Box2D.b2World(gravity=(0,0))
         
         self.gndBody = self.world.CreateBody()
-        self.gndShape = b2PolygonShape(box=(width,height))
-        self.gndFixtureDef = b2FixtureDef(shape=self.groundShape)
+        self.gndShape = Box2D.b2PolygonShape(box=(width,height))
+        self.gndFixtureDef = Box2D.b2FixtureDef(shape=self.gndShape)
         self.gndFixtureDef.isSensor = True
         self.gndFixture = self.gndBody.CreateFixture(self.gndFixtureDef)
 
-        wallPos = [(0, height), (width, 0), (0,0), (0,0)]
         self.wallBodies = []
+        wallPos = [(0, height), (width, 0), (0,0), (0,0)]
         for i in range(len(wallPos)):
-            wallBody = world.CreateBody(position=wallPos[i])
+            wallBody = self.world.CreateBody(position=wallPos[i])
 
-            if (pos % 2) == 0:
-                wallShape = b2PolygonShape(box=(width, WALL_THICKNESS))
+            if (i % 2) == 0:
+                wallShape = Box2D.b2PolygonShape(box=(width, self.WALL_THICKNESS))
             else:
-                wallShape = b2PolygonShape(box=(WALL_THICKNESS, height))
+                wallShape = Box2D.b2PolygonShape(box=(self.WALL_THICKNESS, height))
     
-            wallFixtureDef = b2FixtureDef(shape=wallShape)
-            wallFixture = wallBody.CreateFixture(wallFixtureDef)
+            wallFixtureDef = Box2D.b2FixtureDef(shape=wallShape)
+            wallBody.CreateFixture(wallFixtureDef)
 
             self.wallBodies.append(wallBody)
