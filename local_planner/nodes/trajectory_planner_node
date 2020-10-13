@@ -34,21 +34,20 @@ import rospy
 class TrajectoryPlannerROS(object):
 	"""A node to plan local car trajectories."""
 	def __init__(self):
-		rospy.init_node('trajectory_planner_node')
-		self.lock = Lock()
+        rospy.init_node('trajectory_planner_node')
+        self.lock = Lock()
         rate = rospy.Rate(30) # Hz
-
 
 		# Publishers
 
 		# Subscribers
 
-		while not rospy.is_shutdown():
-			self.loop_once()
-			try:
-				rate.sleep()
-			except rospy.ROSInterruptException:
-				pass
+        while not rospy.is_shutdown():
+            self.loop_once()
+            try:
+                rate.sleep()
+            except rospy.ROSInterruptException:
+                pass
 
 	def loop_once(self):
 		"""Main loop."""
