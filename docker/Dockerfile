@@ -27,4 +27,4 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
     ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/gitstatus/install && \
     rosdep update
 
-COPY files /home/$USER/
+COPY --chown=$USER files /home/$USER/
