@@ -4,7 +4,7 @@ RUN apt update && apt upgrade -y
 RUN apt install -y sudo nano vim git \
     x11-apps iputils-ping \
     python-catkin-tools python-pygame \
-    zsh curl ninja-build python3-pip \
+    zsh curl intltool gstreamer1.0-gtk3 \
     libgtk-3-dev libnotify-dev libgstreamer1.0 \
     libgstreamer-plugins-base1.0-dev \
     gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
@@ -23,12 +23,10 @@ RUN groupadd -o -g $GID $USER && \
 
 # Install aravis
 WORKDIR /aravis
-RUN pip3 install meson && \
-    curl -fsSLo aravis-0.8.1.tar.xz https://ftp.acc.umu.se/pub/GNOME/sources/aravis/0.8/aravis-0.8.1.tar.xz  && \
-    echo "5fab57711f158f2eec19c32c2b1b87f4e3761df456f23bd330050d91e0f664aa  aravis-0.8.1.tar.xz" | sha256sum --check && \
-    tar xf aravis-0.8.1.tar.xz && cd aravis-0.8.1 && \
-    meson build -Dviewer=enabled && \
-    cd build && ninja && ninja install && ldconfig
+RUN curl -fsSLo aravis-0.6.4.tar.xz http://ftp.gnome.org/pub/GNOME/sources/aravis/0.6/aravis-0.6.4.tar.xz && \
+    echo "b595a4724da51d0fdb71f2b6e2f1e12f328e423155c3e84607ee2ce704f516bd  aravis-0.6.4.tar.xz" | sha256sum --check && \
+    tar xf aravis-0.6.4.tar.xz && cd aravis-0.6.4 && \
+    ./configure && make && make install && ldconfig
 
 USER $USER
 WORKDIR /home/$USER
@@ -38,6 +36,9 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
     git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions && \
     git clone https://github.com/zsh-users/zsh-syntax-highlighting ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting && \
     ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/gitstatus/install && \
-    rosdep update
+    echo "Fetching rosdep definitions..." && rosdep update
 
 COPY files /home/$USER/
+
+ENV NVIDIA_VISIBLE_DEVICES ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics

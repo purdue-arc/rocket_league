@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker exec -it \
+nvidia-docker exec -it \
     -e DISPLAY \
     -e LIBGL_ALWAYS_INDIRECT \
     arc-rocket-league-dev \
