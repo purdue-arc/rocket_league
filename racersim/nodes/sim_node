@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Node to run the racersim with ROS bindings.
-
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -39,6 +38,7 @@ import racersim
 
 class RacerSimROS(object):
     """ROS wrapper for the racer sim."""
+
     def __init__(self):
         rospy.init_node('sim_node')
 
@@ -56,7 +56,7 @@ class RacerSimROS(object):
 
         self.frame_id = rospy.get_param('~frame_id', 'sim')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
-        rate = rospy.Rate(rospy.get_param('~rate', 30)) # Hz
+        rate = rospy.Rate(rospy.get_param('~rate', 60)) # Hz
 
         # Publishers
         self.ball_pub = rospy.Publisher('ball_pose', \
@@ -78,7 +78,7 @@ class RacerSimROS(object):
     def command_cb(self, command_msg):
         """Callback for command messages for snake."""
         # Put this all in one tuple so that it is atomic
-        self.last_command = (rospy.Time.now(), command_msg.linear.x, command_msg.angular.z)
+        self.last_command = (rospy.Time.now(), command_msg.linear, command_msg.angular)
 
     def loop_once(self):
         """Main loop."""
@@ -86,12 +86,13 @@ class RacerSimROS(object):
         now = rospy.Time.now()
 
         if self.last_time is not None:
-            # iterate game one step
+            # Iterate sim one step
             if self.last_command is not None:
                 delta_t = (now - self.last_time).to_sec()
                 last_command_time, linear, angular = self.last_command
                 if (now - last_command_time).to_sec() >= self.timeout:
-                    self.sim.step(0.0, 0.0, delta_t)
+                    empty = Twist()
+                    self.sim.step(empty.linear, empty.angular, delta_t)
                 else:
                     self.sim.step(linear, angular, delta_t)
 
@@ -128,7 +129,7 @@ class RacerSimROS(object):
             goal_point = self.sim.goal.getPoint()
             goal_msg.pose.pose.position.x = goal_point[0]
             goal_msg.pose.pose.position.y = goal_point[1]
-            self.ball_pub.publish(goal_msg)
+            self.goal_pub.publish(goal_msg)
 
         self.last_time = now
         self.lock.release()

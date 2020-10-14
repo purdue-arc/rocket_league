@@ -37,8 +37,8 @@ class Renderer(object):
     COLOR_BACKGROUND = (200, 200, 200)  # Gray
     COLOR_CAR = (255, 0, 0)             # Red
     COLOR_TIRE = (94, 164, 191)         # Light-Blue
-    COLOR_GOAL = (0, 200, 0)            # Green
-    COLOR_BALL = (150, 200, 0)          # Yellow
+    COLOR_GOAL = (133, 237, 171)        # Green
+    COLOR_BALL = (213, 133, 237)        # Purple
     COLOR_WALL = (112, 48, 65)          # Dark-Red
 
     class ShutdownError(Exception):
@@ -65,7 +65,7 @@ class Renderer(object):
     def _draw_circle(self, body, fixture, color):
         """Draws circles to the screen."""
         position = body.transform * fixture.shape.pos * self.scaling
-        position = (position[0], self.bounds - position[1])
+        position = (position[0], self.windowSize - position[1])
         pygame.draw.circle(self._screen, color, 
             [int(x) for x in position],
              int(fixture.shape.radius * self.scaling))

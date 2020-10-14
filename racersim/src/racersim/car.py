@@ -91,10 +91,12 @@ class Car(object):
             # Store first and second joints as FL and FR respectively
             if i == 0:
                 self._flJoint = world.CreateJoint(jointDef)
+                self._flJoint.SetLimits(0,0)
             elif i == 1:
                 self._frJoint = world.CreateJoint(jointDef)
             else:
                 world.CreateJoint(jointDef)
+                self._flJoint.SetLimits(0,0)
             
             self.tires.append(tire)
         
@@ -116,9 +118,10 @@ class Car(object):
     def step(self, linearVelocity, angularVelocity, dt):
         for tire in self.tires:
             tire.updateFriction()
+
         for tire in self.tires:
             tire.updateDrive(linearVelocity, dt)
-
+        
         desiredAngleDt = angularVelocity.z * dt
         angleNow = self._flJoint.angle
         if abs(desiredAngleDt) > self.turnSpeed:
