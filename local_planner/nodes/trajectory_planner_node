@@ -31,6 +31,10 @@ License:
 from threading import Lock
 import rospy 
 
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64
+
 class TrajectoryPlannerROS(object):
 	"""A node to plan local car trajectories."""
 	def __init__(self):
@@ -39,8 +43,18 @@ class TrajectoryPlannerROS(object):
         rate = rospy.Rate(30) # Hz
 
 		# Publishers
+        self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
+        self.final_speed_pub = rospy.Publisher("bot_final_speed", Float64, queue_size=1)
 
 		# Subscribers
+        rospy.Subscriber("ball_pose", PoseWithCovarianceStamped, self.ball_pose_cb)
+        rospy.Subscriber("goal_pose", PoseWithCovarianceStamped, self.goal_pose_cb)
+
+        # Variables
+        # no idea what speed will be yet
+        self.MOVE_SPEED = 1.0
+        self.FINAL_SPEED = 1.0
+        self.final_vector = None
 
         while not rospy.is_shutdown():
             self.loop_once()
@@ -54,6 +68,31 @@ class TrajectoryPlannerROS(object):
 		self.lock.acquire()
 		# Loop code
 		self.lock.release()
+
+    def ball_pose_cb(self, ball_pose_message):
+        """Callback for getting ball pose"""
+        self.ball_pose = ball_pose_message.data
+
+    def goal_pose_cb(self, goal_pose_message):
+        """Callback for getting goal pose"""
+        self.goal_pose = goal_pose_message.data
+
+    def calculate_final_vector():
+        """Calculate final vector (final heading) and possibly make line equation"""
+        print ("making final vector")
+
+    def generate_points():
+        """Generate 4 points using spline generation"""
+        if self.final_heading !== None:
+            print ("some stuff")
+    
+    def create_path():
+        """
+        Take the main points, and create more points bot can follow by smoothing it,
+        either via Bezier curves, or Legrange functions.
+        Publish these points as an array, resulting in path
+        """
+        print ("create path")
 
 if __name__ == "__main__":
 	TrajectoryPlannerROS()
