@@ -42,6 +42,14 @@ class TrajectoryPlannerROS(object):
         self.lock = Lock()
         rate = rospy.Rate(30) # Hz
 
+        # Variables
+        # no idea what speed will be yet
+        self.ball_pose = None
+        self.goal_pose = None
+        self.final_vector = None
+        self.MOVE_SPEED = 1.0
+        self.FINAL_SPEED = 1.0
+
 		# Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
         self.final_speed_pub = rospy.Publisher("bot_final_speed", Float64, queue_size=1)
@@ -49,12 +57,6 @@ class TrajectoryPlannerROS(object):
 		# Subscribers
         rospy.Subscriber("ball_pose", PoseWithCovarianceStamped, self.ball_pose_cb)
         rospy.Subscriber("goal_pose", PoseWithCovarianceStamped, self.goal_pose_cb)
-
-        # Variables
-        # no idea what speed will be yet
-        self.MOVE_SPEED = 1.0
-        self.FINAL_SPEED = 1.0
-        self.final_vector = None
 
         while not rospy.is_shutdown():
             self.loop_once()
@@ -79,7 +81,7 @@ class TrajectoryPlannerROS(object):
 
     def calculate_final_vector():
         """Calculate final vector (final heading) and possibly make line equation"""
-        print ("making final vector")
+        self.final_vector = (self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y)
 
     def generate_points():
         """Generate 4 points using spline generation"""
