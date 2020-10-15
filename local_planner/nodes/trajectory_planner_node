@@ -35,6 +35,7 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 import math
+import numpy as np
 
 class TrajectoryPlannerROS(object):
 	"""A node to plan local car trajectories."""
@@ -50,6 +51,13 @@ class TrajectoryPlannerROS(object):
         self.final_vector = None
         self.MOVE_SPEED = 1.0
         self.FINAL_SPEED = 1.0
+        self.bot_vel = None
+        self.bot_pose = None
+        self.bot_normalized_vel = None
+        self.main_points = []
+        self.DISTANCE_FROM_CAR = 1
+        self.DISTANCE_FROM_BALL = 1
+        self.SECOND_POINT_DISTANCE = 1
 
 		# Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
@@ -58,6 +66,7 @@ class TrajectoryPlannerROS(object):
 		# Subscribers
         rospy.Subscriber("ball_pose", PoseWithCovarianceStamped, self.ball_pose_cb)
         rospy.Subscriber("goal_pose", PoseWithCovarianceStamped, self.goal_pose_cb)
+        rospy.Subscriber("bot_odom", Odometry, self.bot_odom_cb)
 
         while not rospy.is_shutdown():
             self.loop_once()
@@ -66,10 +75,13 @@ class TrajectoryPlannerROS(object):
             except rospy.ROSInterruptException:
                 pass
 
+
+
 	def loop_once(self):
 		"""Main loop."""
 		self.lock.acquire()
 		# Loop code
+        self.generate_points()
 		self.lock.release()
 
     def ball_pose_cb(self, ball_pose_message):
@@ -80,18 +92,55 @@ class TrajectoryPlannerROS(object):
         """Callback for getting goal pose"""
         self.goal_pose = goal_pose_message.data
 
-    def calculate_final_vector():
-        """Calculate final vector (final heading) and possibly make line equation"""
-        self.final_vector = (self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y)
-        mag = math.sqrt(self.final_vector[0]**2 + self.final_vector[1]**2)
-        self.final_vector = (self.final_vector[0]/mag, self.final_vector[1]/mag)
+    def bot_odom_cb(self, bot_odom_message):
+        """ Callback for bot pose and velocity"""
+        self.bot_pose = bot_odom_message.data.pose
+        self.bot_vel = bot_odom_message.data.twist.twist
 
-    def generate_points():
+        mag = math.sqrt(self.bot_vel.linear.x**2 + self.bot_vel.linear.y**2)
+        self.bot_normalized_vel = np.array(self.bot_vel.linear.x/mag, self.bot_vel.linear.y/mag)
+
+    def calculate_final_vector(self):
+        """Calculate final vector (final heading) and possibly make line equation"""
+        self.final_vector = np.array(self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y)
+        mag = math.sqrt(self.final_vector[0]**2 + self.final_vector[1]**2)
+        self.final_vector = np.array(self.final_vector[0]/mag, self.final_vector[1]/mag)
+
+    def generate_points(self):
         """Generate 4 points using spline generation"""
-        if self.final_heading !== None:
+        if (self.final_heading !== None) and (self.bot_vel != None):
+            self.main_points = []
+            first_point = (self.bot_pose.position.x + self.CURVATURE*self.bot_vel.x, 
+                self.bot_pose.position.y + self.CURVATURE*self.bot_vel.y)
+            
+            fourth_point = np.array(self.ball_pose.position.x, self.ball_pose.position.y)
+
+            third_point = np.array((fourth_point[0] - self.final_vector[0], fourth_point[1] - self.final_vector[1]))
+
+            midpoint = np.array((third_point[0] + first_point[0])/2, (third_point[1] + first_point[1])/2)
+
+            perpendicular = np.array((midpoint[1],-midpoint[0]))
+
+            perpendicular = np.dot(perpendicular,self.bot_normalized_vel)*self.bot_normalized_vel 
+
+            perpendicular = perpendicular * ( 1- np.dot(self.bot_normalized_vel, self.final_vector)) * self.SECOND_POINT*DISTANCE
+
+            second_point = midpoint + perpendicular
+            
+            self.main_points = [first_point, second_point, third_point,fourth_point]
+
             print ("some stuff")
-    
-    def create_path():
+
+
+    def create_path_1(self):
+        """
+        Take the main points, and create more points bot can follow by smoothing it,
+        either via Bezier curves, or Legrange functions.
+        Publish these points as an array, resulting in path
+        """
+        print ("create path")
+
+    def create_path_2(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
         either via Bezier curves, or Legrange functions.
