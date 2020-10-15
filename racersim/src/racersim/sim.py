@@ -48,13 +48,15 @@ class Sim(object):
         self.scaling = scaling
         self.bounds = bounds
 
-        if carDef == None:
-            if tireDef != None:
-                carDef = CarDef(tireDef)
+        self.carDef = carDef
+        self.tireDef = tireDef
+        if self.carDef == None:
+            if self.tireDef != None:
+                self.carDef = CarDef(tireDef)
             else:
-                carDef = CarDef()
+                self.carDef = CarDef()
         
-        self.car = Car(self.world, carDef)
+        self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world)
         self.goal = Goal(self.world)
 
@@ -69,7 +71,26 @@ class Sim(object):
         if self.running:
             self.car.step(linearVelocity, angularVelocity, dt)
             self.world.Step(dt, self.velIters, self.posIters)
+            self.world.ClearForces()
         
+        if self.renderEnabled:
+            self._render()
+
+    def reset(self):
+        self.world.DestroyBody(self.car.body)
+        self.world.DestroyBody(self.ball.body)
+        self.world.DestroyBody(self.goal.body)
+                
+        if self.carDef == None:
+            if self.tireDef != None:
+                self.carDef = CarDef(self.tireDef)
+            else:
+                self.carDef = CarDef()
+        
+        self.car = Car(self.world, self.carDef)
+        self.ball = Ball(self.world)
+        self.goal = Goal(self.world)
+
         if self.renderEnabled:
             self._render()
 
