@@ -34,6 +34,7 @@ import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
+import math
 
 class TrajectoryPlannerROS(object):
 	"""A node to plan local car trajectories."""
@@ -82,6 +83,8 @@ class TrajectoryPlannerROS(object):
     def calculate_final_vector():
         """Calculate final vector (final heading) and possibly make line equation"""
         self.final_vector = (self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y)
+        mag = math.sqrt(self.final_vector[0]**2 + self.final_vector[1]**2)
+        self.final_vector = (self.final_vector[0]/mag, self.final_vector[1]/mag)
 
     def generate_points():
         """Generate 4 points using spline generation"""
