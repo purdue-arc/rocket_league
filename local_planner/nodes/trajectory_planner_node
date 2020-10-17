@@ -45,16 +45,18 @@ class TrajectoryPlannerROS(object):
         rate = rospy.Rate(30) # Hz
 
         # Variables
-        # no idea what speed will be yet
         self.ball_pose = None
         self.goal_pose = None
-        self.final_vector = None
+        self.bot_pose = None
+        self.bot_vel = None
+        self.bot_normalized_vel = None
+        # no idea what speed will be yet
         self.MOVE_SPEED = 1.0
         self.FINAL_SPEED = 1.0
-        self.bot_vel = None
-        self.bot_pose = None
-        self.bot_normalized_vel = None
+        self.final_vector = None
+        self.final_normalized_vector = None
         self.main_points = []
+        # These variables act as parameters to generate a path
         self.DISTANCE_FROM_CAR = 1
         self.DISTANCE_FROM_BALL = 1
         self.SECOND_POINT_DISTANCE = 1
@@ -75,8 +77,6 @@ class TrajectoryPlannerROS(object):
             except rospy.ROSInterruptException:
                 pass
 
-
-
 	def loop_once(self):
 		"""Main loop."""
 		self.lock.acquire()
@@ -94,42 +94,53 @@ class TrajectoryPlannerROS(object):
 
     def bot_odom_cb(self, bot_odom_message):
         """ Callback for bot pose and velocity"""
+        # Pose represents robot's position and orientation
         self.bot_pose = bot_odom_message.data.pose
+        # Bot velocity indicates the bot's heading through a vector
         self.bot_vel = bot_odom_message.data.twist.twist
-
-        mag = math.sqrt(self.bot_vel.linear.x**2 + self.bot_vel.linear.y**2)
-        self.bot_normalized_vel = np.array(self.bot_vel.linear.x/mag, self.bot_vel.linear.y/mag)
+        # Normalize bot velocity vector for future calculations
+        linear_vel = numpy.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
+        mag = np.linalg.norm(linear_vel)
+        self.bot_normalized_vel = linear_vel / mag
 
     def calculate_final_vector(self):
-        """Calculate final vector (final heading) and possibly make line equation"""
-        self.final_vector = np.array(self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y)
-        mag = math.sqrt(self.final_vector[0]**2 + self.final_vector[1]**2)
-        self.final_vector = np.array(self.final_vector[0]/mag, self.final_vector[1]/mag)
+        """Calculate final vector (final heading)"""
+        # Final vector is simply the goal's position minus the ball's position
+        self.final_vector = np.array([self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y])
+        # Normalize the vector for future calculations
+        mag = np.linalg.norm(self.final_vector)
+        self.final_normalized_vector = self.final_vector / mag
 
     def generate_points(self):
         """Generate 4 points using spline generation"""
         if (self.final_heading !== None) and (self.bot_vel != None):
+            # Clear previous points to generate new ones using updated subscriber info
             self.main_points = []
-            first_point = (self.bot_pose.position.x + self.CURVATURE*self.bot_vel.x, 
-                self.bot_pose.position.y + self.CURVATURE*self.bot_vel.y)
+            # Represent variables as numpy vectors for simplicity
+            ball_position = np.array([self.ball_pose.position.x, self.ball_pose.position.y])
+            bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
+            bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
             
-            fourth_point = np.array(self.ball_pose.position.x, self.ball_pose.position.y)
+            # First point is simply a certain distance ahead of car, which varies on the bot's velocity and a constant
+            first_point = bot_position + bot_linear_vel * self.DISTANCE_FROM_CAR
+            # Third point is a certain distance behind the ball
+            third_point = ball_position - self.final_normalized_vector * self.DISTANCE_FROM_BALL
+            # the fourth point will the ball's position itself
+            fourth_point = ball_position
 
-            third_point = np.array((fourth_point[0] - self.final_vector[0], fourth_point[1] - self.final_vector[1]))
-
-            midpoint = np.array((third_point[0] + first_point[0])/2, (third_point[1] + first_point[1])/2)
-
-            perpendicular = np.array((midpoint[1],-midpoint[0]))
-
-            perpendicular = np.dot(perpendicular,self.bot_normalized_vel)*self.bot_normalized_vel 
-
-            perpendicular = perpendicular * ( 1- np.dot(self.bot_normalized_vel, self.final_vector)) * self.SECOND_POINT*DISTANCE
-
+            # Second point is calculated by finding midpoint between first and third point
+            midpoint = (third_point + first_point) / 2
+            # and using the line perpendicular to the line between first and third point
+            perpendicular = third_point - first_point
+            perpendicular = np.array([perpendicular[1], -perpendicular[0]])
+            # Figure out what direction this perpendicular line needs to go by projecting bot heading onto this perpendicular. Normalize it
+            perpendicular = np.dot(perpendicular, self.bot_normalized_vel) * perpendicular
+            perpendicular = perpendicular / np.linalg.norm(perpendicular)
+            # Make the magnitude (distance from midpoint) vary by error of bot heading and final heading, and constant
+            perpendicular = perpendicular * np.abs(1 - np.dot(self.bot_normalized_vel, self.final_normalized_vector)) * self.SECOND_POINT_DISTANCE
             second_point = midpoint + perpendicular
             
             self.main_points = [first_point, second_point, third_point,fourth_point]
-
-            print ("some stuff")
 
 
     def create_path_1(self):
