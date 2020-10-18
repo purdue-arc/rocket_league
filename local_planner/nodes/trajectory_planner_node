@@ -146,10 +146,19 @@ class TrajectoryPlannerROS(object):
     def create_path_1(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
-        either via Bezier curves, or Legrange functions.
+        Using Bezier curves.
         Publish these points as an array, resulting in path
         """
-        print ("create path")
+        points = self.main_points
+        for x in range(0, 3):
+            temp = []
+            temp.append(points[0])
+            for i in range(0, len(points) - 1):
+                midpoint = (points[i] + points[i + 1]) / 2
+                temp.append(midpoint)
+            temp.append(points[len(points) - 1])
+            points = temp
+        
 
     def create_path_2(self):
         """
