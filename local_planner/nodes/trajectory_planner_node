@@ -60,6 +60,8 @@ class TrajectoryPlannerROS(object):
         self.DISTANCE_FROM_CAR = 1
         self.DISTANCE_FROM_BALL = 1
         self.SECOND_POINT_DISTANCE = 1
+        # This variable determines the number of points published to the waypoint controller
+        self.RESOLUTION
 
 		# Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
@@ -82,6 +84,8 @@ class TrajectoryPlannerROS(object):
 		self.lock.acquire()
 		# Loop code
         self.generate_points()
+        self.create_path_1()   # could also be 2
+        self.publish_final_speed()
 		self.lock.release()
 
     def ball_pose_cb(self, ball_pose_message):
@@ -110,6 +114,15 @@ class TrajectoryPlannerROS(object):
         # Normalize the vector for future calculations
         mag = np.linalg.norm(self.final_vector)
         self.final_normalized_vector = self.final_vector / mag
+
+    def publish_final_speed(self):
+        """Calculates and publishes the final velocity. Will be set as a constant for now."""
+        final_velocity = self.FINAL_SPEED
+
+        # Convert final velocity to a float64 and publish
+        new_float = Float64()
+        new_float = final_velocity
+        self.final_speed_pub.publish(new_float)
 
     def generate_points(self):
         """Generate 4 points using spline generation"""
@@ -140,7 +153,7 @@ class TrajectoryPlannerROS(object):
             perpendicular = perpendicular * np.abs(1 - np.dot(self.bot_normalized_vel, self.final_normalized_vector)) * self.SECOND_POINT_DISTANCE
             second_point = midpoint + perpendicular
             
-            self.main_points = [first_point, second_point, third_point,fourth_point]
+            self.main_points = np.array([first_point, second_point, third_point,fourth_point])
 
 
     def create_path_1(self):
@@ -177,7 +190,40 @@ class TrajectoryPlannerROS(object):
         either via Bezier curves, or Legrange functions.
         Publish these points as an array, resulting in path
         """
-        print ("create path")
+        # Check to make sure main points have been generated first
+        if (self.main_points != None):
+
+            # Create dependent parameter of function
+            t = np.linspace(0, len(self.main_points) - 1, self.RESOLUTION)
+
+            # Initialize functions
+            B = np.ones(len(self.main_points))
+
+            # Define Lagrange Interpolated Curve functions
+            for i in range(0,len(self.main_points)):
+                for j in range(0,len(self.main_points)):
+                    if (i != j):
+                        B[i] = B[i] * (t - j)/(i - j)
+
+            # Find x and y values of main points
+            x = self.main_points[:,0]
+            y = self.main_points[:,1]
+
+            # Create points of path by taking dot product of functions and main points
+            path_x = np.dot(x, B)
+            path_y = np.dot(y, B)
+
+            # Convert points to poses and publish
+            pose_array_msg = PoseArray()
+            pose_array_msg.poses = []
+            for i in range(0,len(path_x)):
+                new_pose = Pose()
+                new_pose.position.x = path_x[i]
+                new_pose.position.y = path_y[i]
+                pose_array_msg.poses.append(new_pose)
+            self.path_pub.publish(pose_array_msg)
+
+
 
 if __name__ == "__main__":
 	TrajectoryPlannerROS()
