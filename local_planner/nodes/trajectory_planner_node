@@ -61,7 +61,7 @@ class TrajectoryPlannerROS(object):
         self.DISTANCE_FROM_BALL = 1
         self.SECOND_POINT_DISTANCE = 1
         # This variable determines the number of points published to the waypoint controller
-        self.RESOLUTION
+        self.RESOLUTION = 20
 
 		# Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
