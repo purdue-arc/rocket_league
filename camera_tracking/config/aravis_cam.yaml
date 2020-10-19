@@ -1,6 +1,6 @@
+# Camera Info for camera_aravis node, 
+
 guid: PointGrey-00EA99A2
-camera_info_url: ''
-#frame_id: aravis_cam
 #publish_tf: true
 #tf_publish_rate: 20
 #PixelFormat: BGR8
@@ -13,3 +13,33 @@ camera_info_url: ''
 ExposureAuto: Continuous
 #GainAuto: Continuous
 #BalanceWhiteAuto: Continuous
+
+# Camera Calibration Info
+# gotten from running 'rosrun camera_calibration cameracalibrator.py'
+
+image_width: 1288
+image_height: 964
+camera_name: aravis_cam
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [ 615.13695,    0.     ,  615.52925,
+            0.     ,  615.614  ,  533.1167 ,
+            0.     ,    0.     ,    1.     ]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.262925, 0.064727, 0.001171, 0.000057, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [ 1.,  0.,  0.,
+          0.,  1.,  0.,
+          0.,  0.,  1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [ 463.39472,    0.     ,  617.284  ,    0.     ,
+            0.     ,  481.17279,  552.19677,    0.     ,
+            0.     ,    0.     ,    1.     ,    0.     ]
