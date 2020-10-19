@@ -3,7 +3,7 @@
 WS_DIR="$(readlink -f $(dirname $0)/../../../)"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
-nvidia-docker run --rm -it \
+docker run --rm -it \
     -e USER \
     -e DISPLAY \
     -v $XAUTHORITY:/home/$USER/.Xauthority \

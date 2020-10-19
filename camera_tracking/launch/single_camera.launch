@@ -6,7 +6,6 @@
   <arg name="launch_dynamic_reconfigure" default="$(arg load_manager)"/>
 
   <arg name="camera_name" default="aravis_cam"/>
-  <arg name="show_image" default=""/>
 
   <!-- Nodelet Manager -->
   <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">

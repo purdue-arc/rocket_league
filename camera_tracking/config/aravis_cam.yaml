@@ -1,8 +1,11 @@
-# Camera Info for camera_aravis node, 
+# Input/Output parameters
 
 guid: PointGrey-00EA99A2
-#publish_tf: true
-#tf_publish_rate: 20
+publish_tf: false
+tf_publish_rate: 30
+
+# GenICam-specific settings
+
 #PixelFormat: BGR8
 #Width: 640
 #Height: 480

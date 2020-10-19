@@ -1,6 +1,6 @@
 #!/bin/bash
 
-nvidia-docker build --build-arg USER=$USER \
+docker build --build-arg USER=$USER \
              --build-arg PW="robot" \
              --build-arg UID=$(id -u) \
              --build-arg GID=$(id -g) \
