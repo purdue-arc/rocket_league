@@ -83,6 +83,7 @@ class TrajectoryPlannerROS(object):
 		"""Main loop."""
 		self.lock.acquire()
 		# Loop code
+        self.calculate_final_vector()
         self.generate_points()
         self.create_path_1()   # could also be 2
         self.publish_final_speed()
@@ -126,7 +127,7 @@ class TrajectoryPlannerROS(object):
 
     def generate_points(self):
         """Generate 4 points using spline generation"""
-        if (self.final_vector != None) and (self.bot_vel != None):
+        try:
             # Clear previous points to generate new ones using updated subscriber info
             self.main_points = []
             # Represent variables as numpy vectors for simplicity
@@ -154,6 +155,8 @@ class TrajectoryPlannerROS(object):
             second_point = midpoint + perpendicular
             
             self.main_points = np.array([first_point, second_point, third_point,fourth_point])
+        except:
+            print("Uh, oh. Something's wrong with generating points!")
 
 
     def create_path_1(self):
@@ -191,13 +194,13 @@ class TrajectoryPlannerROS(object):
         Publish these points as an array, resulting in path
         """
         # Check to make sure main points have been generated first
-        if (self.main_points != None):
+        try:
 
             # Create dependent parameter of function
             t = np.linspace(0, len(self.main_points) - 1, self.RESOLUTION)
 
             # Initialize functions
-            B = np.ones(len(self.main_points))
+            B = np.ones((len(self.main_points),len(t)))
 
             # Define Lagrange Interpolated Curve functions
             for i in range(0,len(self.main_points)):
@@ -222,6 +225,8 @@ class TrajectoryPlannerROS(object):
                 new_pose.position.y = path_y[i]
                 pose_array_msg.poses.append(new_pose)
             self.path_pub.publish(pose_array_msg)
+        except:
+            print("Whoops! We couldn't make a path.")
 
 
 
