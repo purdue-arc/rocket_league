@@ -126,7 +126,7 @@ class TrajectoryPlannerROS(object):
 
     def generate_points(self):
         """Generate 4 points using spline generation"""
-        if (self.final_heading != None) and (self.bot_vel != None):
+        if (self.final_vector != None) and (self.bot_vel != None):
             # Clear previous points to generate new ones using updated subscriber info
             self.main_points = []
             # Represent variables as numpy vectors for simplicity
