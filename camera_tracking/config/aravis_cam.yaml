@@ -1,0 +1,15 @@
+guid: PointGrey-00EA99A2
+camera_info_url: ''
+#frame_id: aravis_cam
+#publish_tf: true
+#tf_publish_rate: 20
+#PixelFormat: BGR8
+#Width: 640
+#Height: 480
+#AcquisitionFrameRate: 20
+#Gamma: 0.41
+#Gain: 0.0
+#AutoFunctionsROIPreset: AutoFunctionsROIPreset_Full
+ExposureAuto: Continuous
+#GainAuto: Continuous
+#BalanceWhiteAuto: Continuous

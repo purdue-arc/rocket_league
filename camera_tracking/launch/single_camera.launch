@@ -1,0 +1,28 @@
+<launch>
+  <arg name="load_manager" default="true"/>
+  <arg name="manager_name" default="camera_manager"/>
+  <arg name="manager" value="/$(arg manager_name)"/>
+  <arg name="manager_threads" default="4"/>
+  <arg name="launch_dynamic_reconfigure" default="$(arg load_manager)"/>
+
+  <arg name="camera_name" default="aravis_cam"/>
+  <arg name="show_image" default=""/>
+
+  <!-- Nodelet Manager -->
+  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
+    <param name="num_worker_threads" value="$(arg manager_threads)" />
+  </node>
+
+  <!-- Load Parameters -->
+
+  <!-- Aravis RGB camera nodelet -->
+  <node pkg="nodelet" type="nodelet" name="$(arg camera_name)" args="load camera_aravis/CameraAravisNodelet $(arg manager)" output="screen">
+    <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name).yaml" />
+  </node>
+
+  <!-- De-Bayer / rectify -->
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="screen"/>
+
+  <!-- Dynamic reconfigure -->
+  <node if="$(arg launch_dynamic_reconfigure)" name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="screen" />
+</launch> 
