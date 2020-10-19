@@ -103,7 +103,7 @@ class TrajectoryPlannerROS(object):
         # Bot velocity indicates the bot's heading through a vector
         self.bot_vel = bot_odom_message.data.twist.twist
         # Normalize bot velocity vector for future calculations
-        linear_vel = numpy.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
+        linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
         mag = np.linalg.norm(linear_vel)
         self.bot_normalized_vel = linear_vel / mag
 
@@ -126,7 +126,7 @@ class TrajectoryPlannerROS(object):
 
     def generate_points(self):
         """Generate 4 points using spline generation"""
-        if (self.final_heading !== None) and (self.bot_vel != None):
+        if (self.final_heading != None) and (self.bot_vel != None):
             # Clear previous points to generate new ones using updated subscriber info
             self.main_points = []
             # Represent variables as numpy vectors for simplicity
