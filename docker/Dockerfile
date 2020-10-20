@@ -8,7 +8,8 @@ RUN apt install -y sudo nano vim git \
     libgtk-3-dev libnotify-dev libgstreamer1.0 \
     libgstreamer-plugins-base1.0-dev \
     gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-    libcanberra-gtk3-module
+    libcanberra-gtk3-module \
+    ros-melodic-apriltag-ros
 
 ARG USER=arc
 ARG PW=password

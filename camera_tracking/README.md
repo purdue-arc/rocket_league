@@ -11,6 +11,7 @@ branch.
 ## Dependencies
 - [```camera_aravis```](https://github.com/purdue-arc/camera_aravis)
 - [```image_proc```](https://wiki.ros.org/image_proc)
+- [```apriltag_ros```](https://wiki.ros.org/apriltag_ros)
 
 ## Nodes
 None currently

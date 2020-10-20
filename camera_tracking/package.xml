@@ -49,13 +49,9 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>camera_aravis</build_depend>
-  <build_depend>image_proc</build_depend>
-  <build_export_depend>camera_aravis</build_export_depend>
-  <build_export_depend>image_proc</build_export_depend>
-  <exec_depend>camera_aravis</exec_depend>
-  <exec_depend>image_proc</exec_depend>
-
+  <depend>camera_aravis</depend>
+  <depend>image_proc</depend>
+  <depend>apriltag_ros</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
