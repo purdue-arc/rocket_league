@@ -162,27 +162,29 @@ class TrajectoryPlannerROS(object):
         Using Bezier curves, which draws a line connecting to all the midpoints. Repeat for desired level of smoothness
         Publish these points as an array, resulting in path
         """
-        points = self.main_points
-        # Perform Bezier smoothing for certain amount of times
-        for x in range(0, 3):
-            temp = []
-            temp.append(points[0])
-            # Taking the midpoint of the current point and the next point
-            for i in range(0, len(points) - 1):
-                midpoint = (points[i] + points[i + 1]) / 2
-                temp.append(midpoint)
-            temp.append(points[len(points) - 1])
-            points = temp
-        
-        # Convert points to poses and publish
-        pose_array_msg = PoseArray()
-        pose_array_msg.poses = []
-        for x in range(len(points)):
-            new_pose = Pose()
-            new_pose.position.x = points[x][0]
-            new_pose.position.y = points[x][1]
-            pose_array_msg.poses.append(new_pose)
-        self.path_pub.publish(pose_array_msg)
+        # Check to make sure main points have been generated first
+        if (self.main_points != None and len(self.main_points) != 0):
+            points = self.main_points
+            # Perform Bezier smoothing for certain amount of times
+            for x in range(0, 3):
+                temp = []
+                temp.append(points[0])
+                # Taking the midpoint of the current point and the next point
+                for i in range(0, len(points) - 1):
+                    midpoint = (points[i] + points[i + 1]) / 2
+                    temp.append(midpoint)
+                temp.append(points[len(points) - 1])
+                points = temp
+            
+            # Convert points to poses and publish
+            pose_array_msg = PoseArray()
+            pose_array_msg.poses = []
+            for x in range(len(points)):
+                new_pose = Pose()
+                new_pose.position.x = points[x][0]
+                new_pose.position.y = points[x][1]
+                pose_array_msg.poses.append(new_pose)
+            self.path_pub.publish(pose_array_msg)
 
     def create_path_2(self):
         """
