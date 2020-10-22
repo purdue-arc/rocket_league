@@ -230,6 +230,63 @@ class TrajectoryPlannerROS(object):
         except:
             print("Whoops! We couldn't make a path.")
 
+    def create_path_3(self):
+        """
+        Take the main points, and create more points bot can follow by smoothing it,
+        using Hermite Splines.
+        Publish these points as an array, resulting in path
+        """
+        try:
+            # Create parameter for our function to operate over, and divide the resolution
+            # into parts for each splice. We may end up with slightly fewer points than
+            # the resolution calls for... Something to look into.
+            t = np.array([np.linspace(0, 1, int(self.RESOLUTION / (len(self.main_points - 1))))])
+
+            # Initialize tangent vectors
+            tangents = np.zeros((len(self.main_points) + 1, 2))  # Plus 1 is because I'm starting the curve at the bot
+
+            # Define tangents at midpoints
+            for i in range(1, len(self.main_points) - 1):
+                tangents[i+1] = (1 - 0.5)* (self.main_points[i + 1] - self.main_points[i - 1])
+
+            # Define tangents at endpoints
+            tangents[0] = self.bot_normalized_vel
+            tangents[len(tangents) - 1] = self.final_normalized_vector
+
+            # Creating matrices to multiply into splines
+            tees = np.array((t ** 3, t ** 2, t, 1))
+            constants = np.array(([2, -2, 1, 1], [-3, 3, -2, -1], [0, 0, 1, 0], [1, 0, 0, 0]))
+            points = np.vstack([self.bot_pose, self.main_points])
+
+            # Initializing smoother curve sets
+            path_x = np.array(())
+            path_y = np.array(())
+
+            # Creating the splines
+            for i in range(0, len(self.main_points)):
+                # Points and slopes for ith spline
+                x = np.array((points[i], points[i + 1], tangents[i], tangents[i + 1]))
+                # Function to operate on x... Probably could move out of loop
+                B = np.matmul(tees, constants)
+                # Final spline equation
+                F = np.matmul(B,x)
+
+                # Adding new points to curve sets
+                path_x = np.append(path_x,F[0])
+                path_y = np.append(path_y,F[1])
+            
+            # Convert points to poses and publish
+            pose_array_msg = PoseArray()
+            pose_array_msg.poses = []
+            for i in range(len(path_x)):
+                new_pose = Pose()
+                new_pose.position.x = path_x[i]
+                new_pose.position.y = path_y[i]
+                pose_array_msg.poses.append(new_pose)
+            self.path_pub.publish(pose_array_msg)
+        
+        except:
+            print("path failed")
 
 
 if __name__ == "__main__":
