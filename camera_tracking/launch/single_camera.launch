@@ -25,12 +25,12 @@
   <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="screen"/>
 
   <!-- Apriltag detection -->
-  <rosparam command="load" file="$(find apriltag_ros)/config/settings.yaml" ns="$(arg camera_name)/apriltag" />
-  <rosparam command="load" file="$(find apriltag_ros)/config/tags.yaml" ns="$(arg camera_name)/apriltag" />
-
-  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg camera_name)" name="apriltag" clear_params="true" output="screen">
+  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg camera_name)" name="apriltag" output="screen">
     <param name="camera_frame" type="str" value="$(arg camera_name)" />
     <param name="publish_tag_detections_image" type="bool" value="true" />
+
+    <rosparam command="load" file="$(find camera_tracking)/config/settings.yaml" />
+    <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml" />
   </node>
 
   <!-- Dynamic reconfigure -->
