@@ -80,7 +80,7 @@ class TrajectoryPlannerROS(object):
         self.calculate_final_vector()
         self.generate_main_points()
         # This function is swappable
-        self.create_path_1(2)
+        self.create_path_0()
         self.publish_final_speed()
 
     def ball_pose_cb(self, ball_pose_message):
