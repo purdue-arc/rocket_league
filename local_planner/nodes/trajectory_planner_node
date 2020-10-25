@@ -36,6 +36,7 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 import math
 import numpy as np
+from tf.transformations import euler_from_quaternion
 
 class TrajectoryPlannerROS(object):
 	"""A node to plan local car trajectories."""
@@ -50,11 +51,12 @@ class TrajectoryPlannerROS(object):
         self.bot_pose = None
         self.bot_vel = None
         self.bot_normalized_vel = None
+        self.bot_init_heading = None
         # no idea what speed will be yet
         self.MOVE_SPEED = 1.0
         self.FINAL_SPEED = 1.0
-        self.final_vector = None
-        self.final_normalized_vector = None
+        self.final_heading = None
+        self.final_normalized_heading = None
         self.main_points = []
         # These variables act as parameters to generate a path
         self.DISTANCE_FROM_CAR = 1
@@ -72,22 +74,14 @@ class TrajectoryPlannerROS(object):
         rospy.Subscriber("goal_pose", PoseWithCovarianceStamped, self.goal_pose_cb)
         rospy.Subscriber("bot_odom", Odometry, self.bot_odom_cb)
 
-        while not rospy.is_shutdown():
-            self.loop_once()
-            try:
-                rate.sleep()
-            except rospy.ROSInterruptException:
-                pass
+        self.loop_once()
 
 	def loop_once(self):
-		"""Main loop."""
-		self.lock.acquire()
-		# Loop code
         self.calculate_final_vector()
-        self.generate_points()
-        self.create_path_1()   # could also be 2
+        self.generate_main_points()
+        # This function is swappable
+        self.create_path_1(2)
         self.publish_final_speed()
-		self.lock.release()
 
     def ball_pose_cb(self, ball_pose_message):
         """Callback for getting ball pose"""
@@ -101,20 +95,29 @@ class TrajectoryPlannerROS(object):
         """ Callback for bot pose and velocity"""
         # Pose represents robot's position and orientation
         self.bot_pose = bot_odom_message.data.pose
-        # Bot velocity indicates the bot's heading through a vector
+        # Get bot velocity vector and normalize it for future calculations
         self.bot_vel = bot_odom_message.data.twist.twist
-        # Normalize bot velocity vector for future calculations
         linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
         mag = np.linalg.norm(linear_vel)
         self.bot_normalized_vel = linear_vel / mag
+        # Get bot's init vector heading through orientation
+        # TODO: convert to euler angles correctly
+        quat = (self.bot_pose.orientation.x,
+                self.bot_pose.orientation.y,
+                self.bot_pose.orientation.z,
+                self.bot_pose.orientation.w)
+        __, __, heading = euler_from_quaternion(quat)
+        x = np.cos(heading)
+        y = np.sin(heading)
+        self.bot_init_heading = np([x, y])
 
-    def calculate_final_vector(self):
+    def calculate_final_heading(self):
         """Calculate final vector (final heading)"""
         # Final vector is simply the goal's position minus the ball's position
-        self.final_vector = np.array([self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y])
+        self.final_heading = np.array([self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y])
         # Normalize the vector for future calculations
-        mag = np.linalg.norm(self.final_vector)
-        self.final_normalized_vector = self.final_vector / mag
+        mag = np.linalg.norm(self.final_heading)
+        self.final_normalized_heading = self.final_heading / mag
 
     def publish_final_speed(self):
         """Calculates and publishes the final velocity. Will be set as a constant for now."""
@@ -125,51 +128,84 @@ class TrajectoryPlannerROS(object):
         new_float = final_velocity
         self.final_speed_pub.publish(new_float)
 
-    def generate_points(self):
-        """Generate 4 points using spline generation"""
+    def poses_from_points(points):
+        """Converts points from list or numpy array to pose array"""
+        pose_array_msg = PoseArray()
+        pose_array_msg.poses = []
+        for x in range(len(points)):
+            new_pose = Pose()
+            new_pose.position.x = points[x][0]
+            new_pose.position.y = points[x][1]
+            pose_array_msg.poses.append(new_pose)
+        return pose_array_msg
+
+    def create_spline(self, init_position, init_heading, final_position, final_heading, second_point_distance):
+        """
+        Generate 3 points using spline generation given parameters
+        The 3 points are first position, a calculated second point between, and the final position
+        """
         try:
-            # Clear previous points to generate new ones using updated subscriber info
-            self.main_points = []
+            # Normalize everything before calculating
+            init_normalized_heading = init_heading / np.linalg.norm(init_heading)
+            final_normalized_heading = final_heading / np.linalg.norm(final_heading)
+            # Midpoint, and draw line between final and init position
+            midpoint = (final_position + init_position) / 2
+            line_between = final_position - init_position
+            # Use line to make a perpendicular, and then calculate second point
+            # that is second_point_distance away from the midpoint
+            perpendicular = np.array([line_between[1], -line_between[0]])
+            perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
+            perpendicular = perpendicular / np.linalg.norm(perpendicular)
+            perpendicular = perpendicular * np.abs(1 - np.dot(init_normalized_heading, final_normalized_heading)) * second_point_factor
+            second_point = midpoint + perpendicular
+            return [init_position, second_point, final_position]
+        except:
+            print("Uh oh,something went wrong with creating spline!")
+            return []
+
+    def generate_main_points(self):
+        """Return 4 points primarily used in the path, given car and goal position"""
+        try:
             # Represent variables as numpy vectors for simplicity
             ball_position = np.array([self.ball_pose.position.x, self.ball_pose.position.y])
             bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
             bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
             
-            # First point is simply a certain distance ahead of car, which varies on the bot's velocity and a constant
+            # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
             first_point = bot_position + bot_linear_vel * self.DISTANCE_FROM_CAR
             # Third point is a certain distance behind the ball
             third_point = ball_position - self.final_normalized_vector * self.DISTANCE_FROM_BALL
-            # the fourth point will the ball's position itself
+            # Last point will the ball's position itself, as the car still needs to hit it
             fourth_point = ball_position
-
-            # Second point is calculated by finding midpoint between first and third point
-            midpoint = (third_point + first_point) / 2
-            # and using the line perpendicular to the line between first and third point
-            perpendicular = third_point - first_point
-            perpendicular = np.array([perpendicular[1], -perpendicular[0]])
-            # Figure out what direction this perpendicular line needs to go by projecting bot heading onto this perpendicular. Normalize it
-            perpendicular = np.dot(perpendicular, self.bot_normalized_vel) * perpendicular
-            perpendicular = perpendicular / np.linalg.norm(perpendicular)
-            # Make the magnitude (distance from midpoint) vary by error of bot heading and final heading, and constant
-            perpendicular = perpendicular * np.abs(1 - np.dot(self.bot_normalized_vel, self.final_normalized_vector)) * self.SECOND_POINT_DISTANCE
-            second_point = midpoint + perpendicular
-            
-            self.main_points = np.array([first_point, second_point, third_point,fourth_point])
+            # Get the second point by creating a spline between the first and third
+            points = create_spline(first_point, self.bot_init_heading, third_point, self.final_heading, SECOND_POINT_DISTANCE)
+            points.append(fourth_point)
+            self.main_points = np.array([points])
         except:
-            print("Uh, oh. Something's wrong with generating points!")
+            print("Uh oh,something went wrong with generating main points!")
+            self.main_points = np.array([])
 
 
-    def create_path_1(self):
+    def create_path_0(self):
+        """
+        Publish the main points.
+        Might be useful so on the real field, we can adjust main points first before doing complicated smoothing
+        """
+        if (len(self.main_points) != 0):
+            self.path_pub.publish(poses_from_points(self.main_points))
+
+
+    def create_path_1(self, smoothness):
         """
         Take the main points, and create more points by smoothing it,
         Using Bezier curves, which draws a line connecting to all the midpoints. Repeat for desired level of smoothness
         Publish these points as an array, resulting in path
         """
         # Check to make sure main points have been generated first
-        if (self.main_points != None and len(self.main_points) != 0):
+        if (len(self.main_points) != 0):
             points = self.main_points
             # Perform Bezier smoothing for certain amount of times
-            for x in range(0, 3):
+            for x in range(0, smoothness):
                 temp = []
                 temp.append(points[0])
                 # Taking the midpoint of the current point and the next point
@@ -180,24 +216,16 @@ class TrajectoryPlannerROS(object):
                 points = temp
             
             # Convert points to poses and publish
-            pose_array_msg = PoseArray()
-            pose_array_msg.poses = []
-            for x in range(len(points)):
-                new_pose = Pose()
-                new_pose.position.x = points[x][0]
-                new_pose.position.y = points[x][1]
-                pose_array_msg.poses.append(new_pose)
-            self.path_pub.publish(pose_array_msg)
+            self.path_pub.publish(poses_from_points(points))
 
     def create_path_2(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
-        either via Bezier curves, or Legrange functions.
+        Using Legrange functions.
         Publish these points as an array, resulting in path
         """
         # Check to make sure main points have been generated first
         try:
-
             # Create dependent parameter of function
             t = np.linspace(0, len(self.main_points) - 1, self.RESOLUTION)
 
@@ -233,7 +261,7 @@ class TrajectoryPlannerROS(object):
     def create_path_3(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
-        using Hermite Splines.
+        Using Hermite Splines.
         Publish these points as an array, resulting in path
         """
         try:
@@ -251,7 +279,7 @@ class TrajectoryPlannerROS(object):
 
             # Define tangents at endpoints
             tangents[0] = self.bot_normalized_vel
-            tangents[len(tangents) - 1] = self.final_normalized_vector
+            tangents[len(tangents) - 1] = self.final_normalized_heading
 
             # Creating matrices to multiply into splines
             tees = np.array((t ** 3, t ** 2, t, 1))
@@ -288,6 +316,51 @@ class TrajectoryPlannerROS(object):
         except:
             print("path failed")
 
+    def create_path_4(self, angle_limit, smoothness, distance_reduction):
+        """
+        Take the main points, and create more points bot can follow by smoothing it,
+        Using repetitive spline generation. If our points exceed angle limit, generate another spline between them
+        Publish these points as an array, resulting in path
+        """
+        try:
+            if (len(self.main_points) != 0):
+                # To smooth things, we are only looking at every point except the very last point (the ball's position)
+                points = [self.main_points[0], self.main_points[1], self.main_points[2]]
+                distance_over_time = SECOND_POINT_DISTANCE / 2
+                smoothed = False
+                # Repeatedly create spline until we've reached max level of smoothness or it's already smooth
+                for i in range(0, smoothness):
+                    smoothed = True
+                    # This array will keep track of our smoothed points while we loop thru our current points
+                    temp = []
+                    temp.append(points[0])
+                    for x in range(1, len(points)):
+                        # Calculate the angle between the current point and the last point
+                        first_vector = self.bot_init_heading if x == 1 else points[x - 1] - points[x - 2]
+                        second_vector = points[x] - points[x - 1]
+                        angle = np.degrees(np.arccos(np.dot(first_vector, second_vector) / (np.linalg.norm(first_vector) * np.linalg.norm(second_vector))))
+                        # If our angle is > angle_limit, create another spline between those points
+                        if (not np.isnan(angle) and angle > angle_limit):
+                            final_vector = points[x + 1] - points[x] if x < len(points) - 1 else self.final_heading
+                            new_points = create_spline(points[x - 1], first_vector, points[x], final_vector, distance_over_time)
+                            distance_over_time *= distance_reduction
+                            # We don't want to include the generated spline's first point, as it's the same as our current point and we are trying to smooth it
+                            temp.append(new_points[1])
+                            temp.append(new_points[2])
+                            smoothed = False
+                        elif (not np.isnan(angle)):
+                            # If our angle is fine, do nothing to it
+                            temp.append(points[x])
+                    # Reassign our current points to the new smoothed ones
+                    points = temp
+                    # If we are already smoothed, don't bother looping again
+                    if (smoothed):
+                        break
+                # Add out ball's position back
+                points.append(self.main_points[3])
+                self.path_pub.publish(poses_from_points(points))
+        except:
+            print("path failed")
 
 if __name__ == "__main__":
 	TrajectoryPlannerROS()
