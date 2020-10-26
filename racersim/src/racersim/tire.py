@@ -33,7 +33,7 @@ class TireDef(object):
     """Holds relevent data for a tire instance"""
     def __init__(self, width=0.0125, length=0.037, density=0.0125,
                     maxLateralImpulse=0.03, maxDriveForce=0.0001,
-                    dragForceCoeff=-0.00002, angularImpulseCoeff=0.08):
+                    dragForceCoeff=-0.00002, angularImpulseCoeff=0.02):
         
         self.width = width
         self.length = length

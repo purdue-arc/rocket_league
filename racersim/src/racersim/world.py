@@ -54,7 +54,7 @@ class World(Box2D.b2World):
             else:
                 wallShape = Box2D.b2PolygonShape(box=(self.WALL_THICKNESS, height))
     
-            wallFixtureDef = Box2D.b2FixtureDef(shape=wallShape)
+            wallFixtureDef = Box2D.b2FixtureDef(shape=wallShape, restitution=0.01)
             wallBody.CreateFixture(wallFixtureDef)
 
             self.wallBodies.append(wallBody)

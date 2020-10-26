@@ -28,12 +28,14 @@ License:
 
 # 3rd party packages
 import Box2D
+import math
+from tf.transformations import quaternion_from_euler
 
 class Ball(object):
     """Simulates game ball."""
 
     def __init__(self, world, initPos=(0.55,0.35), radius=0.05,
-                    density=0.003, restitution=0.8):
+                    density=0.00001, restitution=1.0):
 
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
@@ -46,3 +48,7 @@ class Ball(object):
 
     def getPoint(self):
         return (self.body.position[0], self.body.position[1], 0)
+
+    def getQuaternion(self):
+        angle = self.body.angle % (2.0 * math.pi)
+        return quaternion_from_euler(0, 0, angle)

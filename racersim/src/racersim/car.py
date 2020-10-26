@@ -29,6 +29,7 @@ License:
 # 3rd party modules
 import Box2D
 import math
+from tf.transformations import quaternion_from_euler
 
 # Local classes
 from tire import Tire, TireDef
@@ -108,12 +109,7 @@ class Car(object):
 
     def getQuaternion(self):
         angle = self.body.angle % (2.0 * math.pi)
-        w =  math.cos(angle/2)
-        z =  math.sin(angle/2)
-        mag = math.sqrt(math.pow(w,2) + math.pow(z,2))
-        w /= mag
-        z /= mag
-        return (w, 0, 0, z)
+        return quaternion_from_euler(0, 0, angle)
 
     def step(self, linearVelocity, angularVelocity, dt):
         for tire in self.tires:

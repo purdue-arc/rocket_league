@@ -28,6 +28,8 @@ License:
 
 # 3rd party packages
 import Box2D
+import math
+from tf.transformations import quaternion_from_euler
 
 class Goal(object):
     """Simulates goal position"""
@@ -45,3 +47,7 @@ class Goal(object):
 
     def getPoint(self):
         return (self.body.position[0], self.body.position[1], 0)
+
+    def getQuaternion(self):
+        angle = self.body.angle % (2.0 * math.pi)
+        return quaternion_from_euler(0, 0, angle)
