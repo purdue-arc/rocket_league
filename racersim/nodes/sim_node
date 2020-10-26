@@ -56,17 +56,20 @@ class RacerSimROS(object):
 
         self.frame_id = rospy.get_param('~frame_id', 'sim')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
-        rate = rospy.Rate(rospy.get_param('~rate', 60)) # Hz
+        rate = rospy.Rate(rospy.get_param('~rate', 45)) # Hz
 
         # Publishers
         self.ball_pub = rospy.Publisher('ball_pose', \
-             PoseWithCovarianceStamped, queue_size=3)
-        self.bot_pub = rospy.Publisher('bot_odom', Odometry, queue_size=3)
+             PoseWithCovarianceStamped, queue_size=1)
+        self.bot_pub = rospy.Publisher('bot_odom', Odometry, queue_size=1)
         self.goal_pub = rospy.Publisher('goal_pose', \
-             PoseWithCovarianceStamped, queue_size=3)
+             PoseWithCovarianceStamped, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('bot_velocity_command', Twist, self.command_cb)
+        
+        # Services
+        rospy.Service('sim_reset', Empty, self.reset_cb)
 
         while not rospy.is_shutdown():
             self.loop_once()
@@ -75,10 +78,19 @@ class RacerSimROS(object):
             except rospy.ROSInterruptException:
                 pass
 
+    def reset_cb(self, _):
+        """Resets simulator."""
+        self.lock.acquire()
+        self.sim.reset()
+        self.last_command = None
+        self.last_time = None
+        self.lock.release()
+        return EmptyResponse()
+
     def command_cb(self, command_msg):
         """Callback for command messages for snake."""
         # Put this all in one tuple so that it is atomic
-        self.last_command = (rospy.Time.now(), command_msg.linear, command_msg.angular)
+        self.last_command = (command_msg.linear, command_msg.angular)
 
     def loop_once(self):
         """Main loop."""
@@ -87,14 +99,16 @@ class RacerSimROS(object):
 
         if self.last_time is not None:
             # Iterate sim one step
-            if self.last_command is not None:
-                delta_t = (now - self.last_time).to_sec()
-                last_command_time, linear, angular = self.last_command
-                if (now - last_command_time).to_sec() >= self.timeout:
-                    empty = Twist()
-                    self.sim.step(empty.linear, empty.angular, delta_t)
-                else:
-                    self.sim.step(linear, angular, delta_t)
+            delta_t = (now - self.last_time).to_sec()
+
+            if self.last_command != None:
+                linear, angular = self.last_command
+            else:
+                empty = Twist()
+                linear = empty.linear
+                angular = empty.angular
+
+            self.sim.step(linear, angular, delta_t)
 
             # Publish ball pose with covariance and stamp
             ball_msg = PoseWithCovarianceStamped()
@@ -103,6 +117,9 @@ class RacerSimROS(object):
             ball_point = self.sim.ball.getPoint()
             ball_msg.pose.pose.position.x = ball_point[0]
             ball_msg.pose.pose.position.y = ball_point[1]
+            ball_quat = self.sim.ball.getQuaternion()
+            ball_msg.pose.pose.orientation.w = ball_quat[0]
+            ball_msg.pose.pose.orientation.z = ball_quat[3]
             self.ball_pub.publish(ball_msg)
 
             # Publish bot odometry
@@ -129,6 +146,9 @@ class RacerSimROS(object):
             goal_point = self.sim.goal.getPoint()
             goal_msg.pose.pose.position.x = goal_point[0]
             goal_msg.pose.pose.position.y = goal_point[1]
+            goal_quat = self.sim.goal.getQuaternion()
+            goal_msg.pose.pose.orientation.w = goal_quat[0]
+            goal_msg.pose.pose.orientation.z = goal_quat[3]
             self.goal_pub.publish(goal_msg)
 
         self.last_time = now
