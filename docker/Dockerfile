@@ -3,7 +3,7 @@ RUN apt update && apt upgrade -y
 
 RUN apt install -y sudo nano vim git \
     x11-apps iputils-ping \
-    python-catkin-tools python-pygame \
+    python-catkin-tools python-pygame python-box2d \
     zsh curl
 
 ARG USER=arc
