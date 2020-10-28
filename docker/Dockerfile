@@ -3,7 +3,7 @@ RUN apt update && apt upgrade -y
 
 RUN apt install -y sudo nano vim git \
     x11-apps iputils-ping \
-    python-catkin-tools python-pygame \
+    python-catkin-tools python-pygame python-box2d \
     zsh curl
 
 ARG USER=arc
@@ -27,4 +27,4 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
     ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/gitstatus/install && \
     rosdep update
 
-COPY files /home/$USER/
+COPY --chown=$USER files /home/$USER/
