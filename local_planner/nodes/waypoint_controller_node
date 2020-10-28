@@ -28,32 +28,87 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from threading import Lock
-import rospy 
+# 3rd party modules
+import rospy
+import numpy
+import math
+from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
+from nav_msgs.msg import Odometry
 
 class WaypointControllerROS(object):
-	"""A node to ensure the car maintains a trajectory."""
+	"""A node to ensure the car follows a given trajectory."""
+    # TODO: turn relevant constants into ROS params
+    self.LOOKAHEAD_GAIN = 0.1
+    self.LOOKAHEAD_POINTS = -1
+    self.AXLE_OFFSET = 0
+    self.WHEEL_BASE = 1.0
+    self.CURVATURE = 0
+
+    self.K_p = 0.0
+    self.K_i = 0.0
+
 	def __init__(self):
         rospy.init_node('waypoint_controller_node')
-        self.lock = Lock()
         rate = rospy.Rate(30) # Hz
 
+        self.path_start_time = None
+        self.path = None
+        self.final_speed = None
+
 		# Publishers
+        self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command', \
+         Twist, queue_size=1) 
 
 		# Subscribers
+        rospy.Subscriber('bot_path', self.path_cb)
+        rospy.Subscriber('final_speed_cb', self.final_speed_cb)
+        rospy.Subscriber('odob_cb', self.odom_cb)
 
-        while not rospy.is_shutdown():
-            self.loop_once()
-            try:
-                rate.sleep()
-            except rospy.ROSInterruptException:
-                pass
+    def path_cb(self, pose_arr_msg):
+        self.path_start_time = pose_arr_msg.header.stamp
+        self.path = pose_arr_msgs.poses
 
-	def loop_once(self):
-		"""Main loop."""
-		self.lock.acquire()
-		# Loop code
-		self.lock.release()
+    def final_speed_cb(self, float64_msg):
+        self.final_speed = float64_msg.data
+
+    def odom_cb(self, odom_msg):
+        if self.path:
+            # Converting odom msg to numpy arrays
+            bot_pnt = odom_msg.pose.pose.position
+            bot_pnt = numpy([bot_pnt.x, bot_pnt.y, bot_pnt.z])
+
+            bot_linear_speed = odom_msg.twist.twist.linear
+            bot_linear_speed = numpy([bot_linear_speed.x,
+                                      bot_linear_speed.y,
+                                      bot_linear_speed.z])
+
+            # Set lookahead dist by lookahead gain and current speed
+            lookahead_dist = numpy.linalg.norm(bot_linear_speed) \
+                                * self.LOOKAHEAD_GAIN
+
+            # Set number of waypoints to check
+            if self.LOOKAHEAD_POINTS == -1:
+                lookahead_pnts = len(self.path_arr)
+            else:
+                lookahead_pnts = self.LOOKAHEAD_POINTS
+
+            # Find next waypoint within lookahead range
+
+            # Pop passed waypoints
+            while self.path[0].position != goal_pnt:
+                self.path.pop()
+
+            # Calculate steering angle
+            
+
+            # Use PI control to find angular speed
+
+            # Calculate necessary speed
+
+            # Publish data to bot_velocity_cmd
+
+        
 
 if __name__ == "__main__":
     WaypointControllerROS()
