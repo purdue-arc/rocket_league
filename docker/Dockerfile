@@ -4,7 +4,8 @@ FROM osrf/ros:melodic-desktop-full
 RUN apt update && apt upgrade -y && apt autoremove -y
 RUN apt install -y sudo \
     nano vim zsh git python-pip \
-    x11-apps iputils-ping python-catkin-tools \
+    x11-apps iputils-ping \
+    python-catkin-tools pylint \
     python-pygame python-box2d
 
 # create user
