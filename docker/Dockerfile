@@ -4,7 +4,7 @@ RUN apt update && apt upgrade -y
 RUN apt install -y sudo nano vim git \
     x11-apps iputils-ping \
     python-catkin-tools python-pygame \
-    zsh curl
+    zsh curl ros-melodic-apriltag-ros
 
 ARG USER=arc
 ARG PW=password

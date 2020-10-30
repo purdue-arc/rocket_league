@@ -4,6 +4,9 @@ project(hardware_controller)
 # Find catkin macros
 find_package(catkin REQUIRED)
 
+# install python module(s)
+catkin_python_setup()
+
 # generates cmake config files and set variables for installation
 catkin_package()
 

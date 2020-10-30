@@ -27,13 +27,13 @@ License:
 """
 
 # package
-from pid import PIDController
+from pid_control import PIDController
 
 # ROS
 import rospy
 from geometry_msgs.msg import Twist
-from nag_msgs.msg import Odometry
-from std_msgs.mgs import Float64
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64
 
 class VelocityControllerROS(object):
     """ROS wrapper for the snake game."""

@@ -31,7 +31,7 @@ from math import sin, cos
 
 # ROS
 import rospy
-from apriltag_ros import AprilTagDetectionArray
+from apriltag_ros.msg import AprilTagDetectionArray
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 
