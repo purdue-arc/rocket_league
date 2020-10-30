@@ -1,0 +1,4 @@
+<launch>
+  <node type="waypoint_controller_node" pkg="local_planner" name="waypoint_controller" output="screen">
+  </node>
+</launch>
