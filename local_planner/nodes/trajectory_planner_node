@@ -28,13 +28,11 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from threading import Lock
 import rospy 
 
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
-import math
 import numpy as np
 from tf.transformations import euler_from_quaternion
 
@@ -42,8 +40,6 @@ class TrajectoryPlannerROS(object):
     """A node to plan local car trajectories."""
     def __init__(self):
         rospy.init_node('trajectory_planner_node')
-        self.lock = Lock()
-        rate = rospy.Rate(30) # Hz
 
         # Variables
         self.ball_pose = None
@@ -74,10 +70,18 @@ class TrajectoryPlannerROS(object):
         rospy.Subscriber("goal_pose", PoseWithCovarianceStamped, self.goal_pose_cb)
         rospy.Subscriber("bot_odom", Odometry, self.bot_odom_cb)
 
-        self.loop_once()
+        while not rospy.is_shutdown():
+            if False:
+                self.loop_once()
+                break
+            else:
+                try:
+                    rospy.Rate(10).sleep()
+                except rospy.ROSInterruptException:
+                    pass
 
-    def loop_once(self):
-        self.calculate_final_vector()
+    def loop_once(self, event):
+        self.calculate_final_heading()
         self.generate_main_points()
         # This function is swappable
         self.create_path_0()
