@@ -1,0 +1,7 @@
+<launch>
+  <arg name="use_pygame" default="true"/>
+
+  <node type="sim_node" pkg="racersim" name="sim_node" output="screen">
+    <param name="render/enabled" value="$(arg use_pygame)"/>
+  </node>
+</launch>
