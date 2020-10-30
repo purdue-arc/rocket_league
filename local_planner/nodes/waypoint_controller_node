@@ -33,82 +33,105 @@ import rospy
 import numpy
 import math
 from std_msgs.msg import Float64
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray
 from nav_msgs.msg import Odometry
 
+# Local modules
+import local_planner.convert as convert
+import local_planner.pure_pursuit as pure_pursuit
+
 class WaypointControllerROS(object):
-	"""A node to ensure the car follows a given trajectory."""
-    # TODO: turn relevant constants into ROS params
-    self.LOOKAHEAD_GAIN = 0.1
-    self.LOOKAHEAD_POINTS = -1
-    self.AXLE_OFFSET = 0
-    self.WHEEL_BASE = 1.0
-    self.CURVATURE = 0
+    """A node to ensure the car follows a given trajectory."""
+    LOOKAHEAD_GAIN = 0.1
+    LOOKAHEAD_POINTS = -1
+    AXLE_OFFSET = 0
+    WHEEL_BASE = 1.0
+    CURVATURE = 0
 
-    self.K_p = 0.0
-    self.K_i = 0.0
-
-	def __init__(self):
+    def __init__(self):
         rospy.init_node('waypoint_controller_node')
         rate = rospy.Rate(30) # Hz
 
         self.path_start_time = None
         self.path = None
+        self.last_pose_idx = None
         self.final_speed = None
 
-		# Publishers
+        # Publishers
         self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command', \
-         Twist, queue_size=1) 
+            Twist, queue_size=1) 
 
-		# Subscribers
-        rospy.Subscriber('bot_path', self.path_cb)
-        rospy.Subscriber('final_speed_cb', self.final_speed_cb)
-        rospy.Subscriber('odob_cb', self.odom_cb)
+        # Subscribers
+        rospy.Subscriber('bot_path', PoseArray, self.path_cb)
+        rospy.Subscriber('final_speed_cb', Float64, self.final_speed_cb)
+        rospy.Subscriber('odob_cb', Odometry, self.odom_cb)
+
+        rospy.spin()
 
     def path_cb(self, pose_arr_msg):
         self.path_start_time = pose_arr_msg.header.stamp
-        self.path = pose_arr_msgs.poses
+        self.path = pose_arr_msg.poses
+        self.last_pnt_idx = 0
 
     def final_speed_cb(self, float64_msg):
         self.final_speed = float64_msg.data
 
     def odom_cb(self, odom_msg):
         if self.path:
+            if self.last_pose_idx == None:
+                self.last_pose_idx = 0
+            
             # Converting odom msg to numpy arrays
-            bot_pnt = odom_msg.pose.pose.position
-            bot_pnt = numpy([bot_pnt.x, bot_pnt.y, bot_pnt.z])
-
-            bot_linear_speed = odom_msg.twist.twist.linear
-            bot_linear_speed = numpy([bot_linear_speed.x,
-                                      bot_linear_speed.y,
-                                      bot_linear_speed.z])
+            bot_pos, bot_orient, _ = convert.pose_covar_to_array(odom_msg.pose)
+            bot_linear, bot_angular, _ = convert.twist_covar_to_array(odom_msg.twist)
 
             # Set lookahead dist by lookahead gain and current speed
-            lookahead_dist = numpy.linalg.norm(bot_linear_speed) \
+            lookahead_dist = numpy.linalg.norm(bot_linear) \
                                 * self.LOOKAHEAD_GAIN
 
             # Set number of waypoints to check
             if self.LOOKAHEAD_POINTS == -1:
-                lookahead_pnts = len(self.path_arr)
+                lookahead_pnts = len(self.path)
             else:
                 lookahead_pnts = self.LOOKAHEAD_POINTS
 
             # Find next waypoint within lookahead range
+            start_pose_idx = None
+            start_pose_dist = float("inf")
+            for i in range(lookahead_pnts):
+                try:
+                    pose = self.path[self.last_pose_idx + i]
+                    pos, _ = convert.pose_to_array(pose)
+                    dist = numpy.linalg.norm(pos - bot_pos)
+                    if dist < start_pnt_dist:
+                        start_pnt_dist = dist
+                        start_pnt_idx = self.last_pnt_idx + i
+                except IndexError:
+                    print("Path finished")
 
-            # Pop passed waypoints
-            while self.path[0].position != goal_pnt:
-                self.path.pop()
+            start_pos, _ = convert.pose_to_array(self.path[start_pose_idx])
+            end_pos = None
+            if self.last_pose_idx == (len(self.path) - 1):
+                end_pos = start_pos
+            else:
+                end_pose_idx = start_pose_idx + 1
+                end_pos, _ = convert.pose_to_array(self.path[end_pose_idx])
 
-            # Calculate steering angle
+            path_seg = end_pos - start_pos
+            bot_path = start_pos - bot_pos
+            intersect = pure_pursuit.find_intersection(path_seg, bot_path, \
+                                                        lookahead_dist)
+            intersect += start_pos
+
+            curv = pure_pursuit.calculate_curvature(intersect, bot_pos, \
+                                                    bot_orient, lookahead_dist)
+            angular_speed = pure_pursuit.get_angular_speed(self.final_speed, curv)
+
+            twist = Twist()
+            twist.linear.y = self.final_speed
+            twist.linear.z = angular_speed
+
+            self.bot_velocity_cmd.publish(twist)
             
-
-            # Use PI control to find angular speed
-
-            # Calculate necessary speed
-
-            # Publish data to bot_velocity_cmd
-
-        
-
 if __name__ == "__main__":
     WaypointControllerROS()
