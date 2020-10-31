@@ -81,10 +81,11 @@ class TrajectoryPlannerROS(object):
                     pass
 
     def loop_once(self):
-        self.calculate_final_heading()
+        print("going")
+        #self.calculate_final_heading()
         self.generate_main_points()
         # This function is swappable
-        self.create_path_0()
+        self.create_path_3()
         self.publish_final_speed()
 
     def ball_pose_cb(self, ball_pose_message):
@@ -144,7 +145,7 @@ class TrajectoryPlannerROS(object):
         new_float = final_velocity
         self.final_speed_pub.publish(new_float)
 
-    def poses_from_points(points):
+    def poses_from_points(self,points):
         """Converts points from list or numpy array to pose array"""
         pose_array_msg = PoseArray()
         pose_array_msg.poses = []
@@ -172,7 +173,7 @@ class TrajectoryPlannerROS(object):
             perpendicular = np.array([line_between[1], -line_between[0]])
             perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
             perpendicular = perpendicular / np.linalg.norm(perpendicular)
-            perpendicular = perpendicular * np.abs(1 - np.dot(init_normalized_heading, final_normalized_heading)) * second_point_factor
+            perpendicular = perpendicular * np.abs(1 - np.dot(init_normalized_heading, final_normalized_heading)) * second_point_distance
             second_point = midpoint + perpendicular
             return [init_position, second_point, final_position]
         except:
@@ -190,13 +191,13 @@ class TrajectoryPlannerROS(object):
             # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
             first_point = bot_position + bot_linear_vel * self.DISTANCE_FROM_CAR
             # Third point is a certain distance behind the ball
-            third_point = ball_position - self.final_normalized_vector * self.DISTANCE_FROM_BALL
+            third_point = ball_position - self.final_normalized_heading * self.DISTANCE_FROM_BALL
             # Last point will the ball's position itself, as the car still needs to hit it
             fourth_point = ball_position
             # Get the second point by creating a spline between the first and third
-            points = create_spline(first_point, self.bot_init_heading, third_point, self.final_heading, SECOND_POINT_DISTANCE)
+            points = self.create_spline(first_point, self.bot_init_heading, third_point, self.final_heading, self.SECOND_POINT_DISTANCE)
             points.append(fourth_point)
-            self.main_points = np.array([points])
+            self.main_points = np.array(points)
         except:
             print("Uh oh,something went wrong with generating main points!")
             self.main_points = np.array([])
@@ -207,7 +208,7 @@ class TrajectoryPlannerROS(object):
         Might be useful so on the real field, we can adjust main points first before doing complicated smoothing
         """
         if (len(self.main_points) != 0):
-            self.path_pub.publish(poses_from_points(self.main_points))
+            self.path_pub.publish(self.poses_from_points(self.main_points))
 
 
     def create_path_1(self, smoothness):
@@ -231,7 +232,7 @@ class TrajectoryPlannerROS(object):
                 points = temp
             
             # Convert points to poses and publish
-            self.path_pub.publish(poses_from_points(points))
+            self.path_pub.publish(self.poses_from_points(points))
 
     def create_path_2(self):
         """
@@ -282,12 +283,12 @@ class TrajectoryPlannerROS(object):
         try:
             # Create an array of points to work with
             points = self.main_points
-            points = np.vstack([self.bot_pose, points])
+            points = np.vstack([np.array([self.bot_pose.position.x, self.bot_pose.position.y]),points])
 
             # Create parameter for our function to operate over, and divide the resolution
             # into parts for each splice. We may end up with slightly fewer points than
             # the resolution calls for... Something to look into.
-            t = np.array([np.linspace(0, 1, int(self.RESOLUTION / (len(points)-1)))])
+            t = np.linspace(0, 1, int(self.RESOLUTION / (len(points)-1)))
 
             # Initialize tangent vectors
             tangents = np.zeros((len(points), 2))  # Plus 1 is because I'm starting the curve at the bot
@@ -315,7 +316,9 @@ class TrajectoryPlannerROS(object):
             tangents = tangents * c
 
             # Creating splines
-            tees = np.array([t ** 3, t ** 2, t, 1])
+            tees = np.reshape([t ** 3, t ** 2, t, np.ones(len(t))],(len(t),4))
+            #tees = np.reshape(tees,(len(t),4))
+            #tees = tees.astype(float)
             constants = np.array(([2, -2, 1, 1], [-3, 3, -2, -1], [0, 0, 1, 0], [1, 0, 0, 0]))
 
             # initialize paths
@@ -386,7 +389,7 @@ class TrajectoryPlannerROS(object):
                         break
                 # Add out ball's position back
                 points.append(self.main_points[3])
-                self.path_pub.publish(poses_from_points(points))
+                self.path_pub.publish(self.poses_from_points(points))
         except:
             print("path failed")
 
