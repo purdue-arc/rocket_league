@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Contains pure pursuit helper functions.
+"""Publishes simple paths to the network.
 
 License:
   BSD 3-Clause License
@@ -28,46 +28,44 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-# 3rd party modules
-import numpy as np
-import math
-from tf.transformations import euler_from_quaternion
+#3rd party modules
+import rospy
+from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist, Pose, PoseArray
+from std_srvs.srv import Empty, EmptyResponse
 
-def find_intersection(path_seg, bot_path, lookahead_dist):
-    a = np.dot(path_seg, path_seg)
-    print("a: ", a)
-    b = 2 * np.dot(bot_path, path_seg)
-    print("b: ", b)
-    c = np.dot(bot_path, bot_path) - (lookahead_dist * lookahead_dist)
-    print("c: ", c)
-    discrim = b*b - 4*a*c
-    print("discrim: ", discrim)
+class SimplePathPublisherROS(object):
+    def __init__(self):
+        rospy.init_node('simple_path_publisher')
 
-    if discrim >= 0:
-        discrim = math.sqrt(discrim)
-        t1 = (-b - discrim)/(2*a)
-        t2 = (-b + discrim)/(2*a)
+        # Publishers
+        self.path = rospy.Publisher('bot_path', PoseArray)
+        self.final_speed = rospy.Publisher('bot_final_speed', Float64)
 
-        if t1 >= 0 and t1 <= 1:
-            return path_seg * t1
-        if t2 >= 0 and t2 <= 1:
-            return path_seg * t2
-    return None
+        # Services
+        rospy.Service('publish_simple_path', Empty, self.publish_simple_path)
 
-def calculate_curvature(pos, bot_pos, bot_orient, lookahead_dist): 
-    _, _, bot_yaw = euler_from_quaternion(bot_orient)
-    a = -math.tan(bot_yaw)
-    b = 1
-    c = math.tan(bot_yaw) * bot_pos[0] + bot_pos[1]
-    x = abs((a * pos[0]) + pos[1] + c) / math.dist([a],[b])
+        rospy.spin()
 
-    bot_line_x = bot_pos[0] + math.cos(bot_yaw)
-    bot_line_y = bot_pos[1] + math.sin(bot_yaw)
-    curv_dir = math.sign(math.sin(bot_yaw) * (pos[0] - bot_pos[0]) - 
-                            math.cos(bot_yaw) * (pos[1] - bot_pos[1]))
+    def publish_simple_path(self, _):
+        path_msg = PoseArray()
+        pose = Pose()
+        pose.position.x = 0.5
+        pose.position.y = 0.5
+        path_msg.poses.append(pose)
 
-    curv = (2 * x)/(lookahead_dist * lookahead_dist)
-    curv *= curv_dir
+        pose = Pose()
+        pose.position.x = 0.75
+        pose.position.y = 0.75
+        path_msg.poses.append(pose)
 
-def get_angular_speed(target_vel, curv):
-    return target_vel * curv
+        final_speed_msg = Float64(0.25)
+        self.path.publish(path_msg)
+        self.final_speed.publish(final_speed_msg)
+        return EmptyResponse()
+
+if __name__ == '__main__':
+    try:
+        SimplePathPublisherROS()
+    except rospy.ROSInterruptException:
+        pass

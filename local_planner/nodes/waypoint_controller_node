@@ -50,7 +50,6 @@ class WaypointControllerROS(object):
 
     def __init__(self):
         rospy.init_node('waypoint_controller_node')
-        rate = rospy.Rate(30) # Hz
 
         self.path_start_time = None
         self.path = None
@@ -63,8 +62,8 @@ class WaypointControllerROS(object):
 
         # Subscribers
         rospy.Subscriber('bot_path', PoseArray, self.path_cb)
-        rospy.Subscriber('final_speed_cb', Float64, self.final_speed_cb)
-        rospy.Subscriber('odob_cb', Odometry, self.odom_cb)
+        rospy.Subscriber('bot_final_speed', Float64, self.final_speed_cb)
+        rospy.Subscriber('bot_odom', Odometry, self.odom_cb)
 
         rospy.spin()
 
@@ -72,6 +71,7 @@ class WaypointControllerROS(object):
         self.path_start_time = pose_arr_msg.header.stamp
         self.path = pose_arr_msg.poses
         self.last_pnt_idx = 0
+        print(self.path)
 
     def final_speed_cb(self, float64_msg):
         self.final_speed = float64_msg.data
@@ -103,9 +103,9 @@ class WaypointControllerROS(object):
                     pose = self.path[self.last_pose_idx + i]
                     pos, _ = convert.pose_to_array(pose)
                     dist = numpy.linalg.norm(pos - bot_pos)
-                    if dist < start_pnt_dist:
-                        start_pnt_dist = dist
-                        start_pnt_idx = self.last_pnt_idx + i
+                    if dist < start_pose_dist:
+                        start_pose_dist = dist
+                        start_pose_idx = self.last_pose_idx + i
                 except IndexError:
                     print("Path finished")
 
@@ -121,6 +121,7 @@ class WaypointControllerROS(object):
             bot_path = start_pos - bot_pos
             intersect = pure_pursuit.find_intersection(path_seg, bot_path, \
                                                         lookahead_dist)
+            #print(intersect)
             intersect += start_pos
 
             curv = pure_pursuit.calculate_curvature(intersect, bot_pos, \
