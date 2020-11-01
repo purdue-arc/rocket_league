@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find hardware_controller)/launch/pose_estimator.launch"/>
+  <include file="$(find hardware_controller)/launch/velocity_controller.launch"/>
+</launch>

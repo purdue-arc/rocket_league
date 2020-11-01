@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>hardware_controller</name>
+  <version>0.0.0</version>
+  <description>All hardware specific software for the rocket league project.</description>
+  <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
+  <license>BSD 3 Clause</license>
+  <url type="website">http://www.purduearc.com</url>
+  <author email="baxter26@purdue.edu">James Baxter</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>apriltag_ros</exec_depend>
+</package>

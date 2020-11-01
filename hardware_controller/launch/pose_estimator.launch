@@ -1,0 +1,5 @@
+<launch>
+  <node type="velocity_controller" pkg="hardware_controller" name="velocity_controller">
+    <param name="tag_id" value="0"/>
+  </node>
+</launch>
