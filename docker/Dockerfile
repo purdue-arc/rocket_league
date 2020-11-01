@@ -33,6 +33,7 @@ RUN curl -fsSLo aravis-0.6.4.tar.xz http://ftp.gnome.org/pub/GNOME/sources/aravi
     tar xf aravis-0.6.4.tar.xz && cd aravis-0.6.4 && \
     ./configure && make && make install && ldconfig
 USER $USER
+WORKDIR /home/$USER
 
 # install zsh
 RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
