@@ -1,5 +1,6 @@
-FROM osrf/ros:melodic-desktop-full
+FROM arm64v8/ros:melodic-perception
 RUN apt update && apt upgrade -y
+RUN apt install ros-melodic-desktop-full -y
 
 RUN apt install -y sudo nano vim git \
     x11-apps iputils-ping \
