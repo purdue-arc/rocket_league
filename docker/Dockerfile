@@ -6,7 +6,8 @@ RUN apt install -y sudo \
     nano vim zsh git python-pip \
     x11-apps iputils-ping \
     python-catkin-tools pylint \
-    python-pygame python-box2d
+    python-pygame python-box2d \
+    ros-melodic-apriltag-ros
 
 # create user
 ARG USER=arc
