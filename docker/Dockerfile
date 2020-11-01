@@ -7,7 +7,12 @@ RUN apt install -y sudo \
     x11-apps iputils-ping \
     python-catkin-tools pylint \
     python-pygame python-box2d \
-    ros-melodic-apriltag-ros
+    ros-melodic-apriltag-ros \
+    intltool gstreamer1.0-gtk3 \
+    libgtk-3-dev libnotify-dev libgstreamer1.0 \
+    libgstreamer-plugins-base1.0-dev \
+    gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+    libcanberra-gtk3-module
 
 # create user
 ARG USER=arc
@@ -17,6 +22,16 @@ ARG GID=1000
 RUN groupadd -o -g $GID $USER && \
     useradd -om -u $UID -g $GID -G sudo -s /bin/bash $USER && \
     echo "$USER:$PW" | chpasswd
+USER $USER
+WORKDIR /home/$USER
+
+# install aravis
+USER root
+WORKDIR /aravis
+RUN curl -fsSLo aravis-0.6.4.tar.xz http://ftp.gnome.org/pub/GNOME/sources/aravis/0.6/aravis-0.6.4.tar.xz && \
+    echo "b595a4724da51d0fdb71f2b6e2f1e12f328e423155c3e84607ee2ce704f516bd  aravis-0.6.4.tar.xz" | sha256sum --check && \
+    tar xf aravis-0.6.4.tar.xz && cd aravis-0.6.4 && \
+    ./configure && make && make install && ldconfig
 USER $USER
 WORKDIR /home/$USER
 
@@ -30,4 +45,5 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
 ARG FILES=files
 COPY --chown=$USER $FILES /home/$USER/
 
-RUN rosdep update
+# rosdep update
+RUN echo "Fetching rosdep definitions..." && rosdep update
