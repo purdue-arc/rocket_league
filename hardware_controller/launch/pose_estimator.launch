@@ -1,5 +1,8 @@
 <launch>
-  <node type="velocity_controller" pkg="hardware_controller" name="velocity_controller">
-    <param name="tag_id" value="0"/>
+  <node type="pose_estimator" pkg="hardware_controller" name="pose_estimator">
+    <rosparam command="load" file="$(find hardware_controller)/params/pose_estimator.yaml" />
+    <!-- <param name="tag_id" value="0"/> -->
+    <remap from="tag_detections" to="aravis_cam/tag_detections"/>
+    <remap from="odom" to="bot_odom"/>
   </node>
 </launch>

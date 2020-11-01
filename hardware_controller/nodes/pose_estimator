@@ -33,7 +33,7 @@ from math import sin, cos
 import rospy
 from apriltag_ros.msg import AprilTagDetectionArray
 from nav_msgs.msg import Odometry
-from tf.transformations import euler_from_quaternion
+from tf.transformations import *
 
 class OdomEstimator(object):
     """Simple node that derives velocity from position."""
@@ -64,19 +64,26 @@ class OdomEstimator(object):
         header = detection_msg.header
         pose_cov = None
         for detection in detection_msg.detections:
-            if detection.id == self.tag_id:
+            if detection.id[0] == self.tag_id:
                 pose_cov = detection.pose.pose
 
         if pose_cov is None:
             rospy.logwarn_throttle(2, "no matching tag id found")
             return
 
+
+
         quat = (pose_cov.pose.orientation.x,
                 pose_cov.pose.orientation.y,
                 pose_cov.pose.orientation.z,
                 pose_cov.pose.orientation.w)
 
+        # hack for camera tf:
+        rotation = quaternion_from_euler(3.14, 0.0, 3.14)
+        quat = quaternion_multiply(quat, rotation)
+
         (__, __, theta) = euler_from_quaternion(quat)
+
         theta += self.offset_theta
         x = pose_cov.pose.position.x + self.offset_x*cos(theta) + self.offset_y*sin(theta)
         y = pose_cov.pose.position.y + self.offset_x*sin(theta) + self.offset_y*cos(theta)
@@ -90,7 +97,7 @@ class OdomEstimator(object):
 
             # deltas
             dt = (self.last_time - header.stamp).to_sec()
-            d_theta = theta - self.last_pose[3]
+            d_theta = theta - self.last_pose[2]
 
             # global frame
             dX = x - self.last_pose[0]
