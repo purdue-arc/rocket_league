@@ -28,8 +28,9 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import rospy 
+import rospy
 
+import pdb
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
@@ -73,35 +74,35 @@ class TrajectoryPlannerROS(object):
         while not rospy.is_shutdown():
             if self.check_if_GO():
                 self.loop_once()
-                break
+                # break
             else:
                 try:
-                    rospy.Rate(10).sleep()
+                    rospy.Rate(1).sleep()
                 except rospy.ROSInterruptException:
                     pass
 
     def loop_once(self):
-        print("going")
-        #self.calculate_final_heading()
+        rospy.logwarn("going")
+        self.calculate_final_heading()
         self.generate_main_points()
         # This function is swappable
-        self.create_path_3()
+        self.create_path_0()
         self.publish_final_speed()
 
     def ball_pose_cb(self, ball_pose_message):
         """Callback for getting ball pose"""
-        self.ball_pose = ball_pose_message.data
+        self.ball_pose = ball_pose_message.pose.pose
 
     def goal_pose_cb(self, goal_pose_message):
         """Callback for getting goal pose"""
-        self.goal_pose = goal_pose_message.data
+        self.goal_pose = goal_pose_message.pose.pose
 
     def bot_odom_cb(self, bot_odom_message):
         """ Callback for bot pose and velocity"""
         # Pose represents robot's position and orientation
-        self.bot_pose = bot_odom_message.data.pose
+        self.bot_pose = bot_odom_message.pose.pose
         # Get bot velocity vector and normalize it for future calculations
-        self.bot_vel = bot_odom_message.data.twist.twist
+        self.bot_vel = bot_odom_message.twist.twist
         linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
         mag = np.linalg.norm(linear_vel)
         self.bot_normalized_vel = linear_vel / mag
@@ -114,7 +115,7 @@ class TrajectoryPlannerROS(object):
         __, __, heading = euler_from_quaternion(quat)
         x = np.cos(heading)
         y = np.sin(heading)
-        self.bot_init_heading = np([x, y])
+        self.bot_init_heading = np.array([x, y])
 
     def check_if_GO(self):
         if (self.ball_pose is not None) and (self.goal_pose is not None) and (self.bot_pose is not None) and \
@@ -148,11 +149,13 @@ class TrajectoryPlannerROS(object):
     def poses_from_points(self,points):
         """Converts points from list or numpy array to pose array"""
         pose_array_msg = PoseArray()
+        pose_array_msg.header.frame_id = "map"
         pose_array_msg.poses = []
         for x in range(len(points)):
             new_pose = Pose()
             new_pose.position.x = points[x][0]
             new_pose.position.y = points[x][1]
+            new_pose.orientation.w = 1
             pose_array_msg.poses.append(new_pose)
         return pose_array_msg
 
@@ -187,7 +190,7 @@ class TrajectoryPlannerROS(object):
             ball_position = np.array([self.ball_pose.position.x, self.ball_pose.position.y])
             bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
             bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
-            
+
             # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
             first_point = bot_position + bot_linear_vel * self.DISTANCE_FROM_CAR
             # Third point is a certain distance behind the ball
@@ -230,7 +233,7 @@ class TrajectoryPlannerROS(object):
                     temp.append(midpoint)
                 temp.append(points[len(points) - 1])
                 points = temp
-            
+
             # Convert points to poses and publish
             self.path_pub.publish(self.poses_from_points(points))
 
@@ -332,7 +335,7 @@ class TrajectoryPlannerROS(object):
                 F = np.matmul(B,x)
                 path_x = np.append(path_x,F[0])
                 path_y = np.append(path_y,F[1])
-                
+
             # Convert points to poses and publish
             pose_array_msg = PoseArray()
             pose_array_msg.poses = []
