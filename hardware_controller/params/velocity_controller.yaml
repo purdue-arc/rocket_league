@@ -1,0 +1,23 @@
+throttle:
+    gains:
+        kp: 1.0
+        ki: 0.0
+        kd: 0.0
+        kff: 0.0
+    anti_windup: 0.1
+    deadband: 0.05
+    limits:
+        min: -1.0
+        max: 1.0
+
+steering:
+    gains:
+        kp: 1.0
+        ki: 0.0
+        kd: 0.0
+        kff: 0.0
+    anti_windup: 0.1
+    deadband: 0.05
+    limits:
+        min: -1.0
+        max: 1.0
