@@ -86,7 +86,7 @@ class TrajectoryPlannerROS(object):
         self.calculate_final_heading()
         self.generate_main_points()
         # This function is swappable
-        self.create_path_0()
+        self.create_path_3()
         self.publish_final_speed()
 
     def ball_pose_cb(self, ball_pose_message):
@@ -105,7 +105,7 @@ class TrajectoryPlannerROS(object):
         self.bot_vel = bot_odom_message.twist.twist
         linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
         mag = np.linalg.norm(linear_vel)
-        self.bot_normalized_vel = linear_vel / mag
+        self.bot_normalized_vel = normalize(linear_vel)
         # Get bot's init vector heading through orientation
         # TODO: convert to euler angles correctly
         quat = (self.bot_pose.orientation.x,
@@ -264,16 +264,11 @@ class TrajectoryPlannerROS(object):
             # Create points of path by taking dot product of functions and main points
             path_x = np.dot(x, B)
             path_y = np.dot(y, B)
+            path = np.column_stack([path_x,path_y])
 
             # Convert points to poses and publish
-            pose_array_msg = PoseArray()
-            pose_array_msg.poses = []
-            for i in range(0,len(path_x)):
-                new_pose = Pose()
-                new_pose.position.x = path_x[i]
-                new_pose.position.y = path_y[i]
-                pose_array_msg.poses.append(new_pose)
-            self.path_pub.publish(pose_array_msg)
+            self.path_pub.publish(self.poses_from_points(path))
+
         except:
             print("Whoops! We couldn't make a path.")
 
@@ -336,15 +331,11 @@ class TrajectoryPlannerROS(object):
                 path_x = np.append(path_x,F[0])
                 path_y = np.append(path_y,F[1])
 
+            # Create path to use in poses_from_points,.
+            path = np.column_stack([path_x,path_y])
+
             # Convert points to poses and publish
-            pose_array_msg = PoseArray()
-            pose_array_msg.poses = []
-            for i in range(0,len(path_x)):
-                new_pose = Pose()
-                new_pose.position.x = path_x[i]
-                new_pose.position.y = path_y[i]
-                pose_array_msg.poses.append(new_pose)
-            self.path_pub.publish(pose_array_msg)
+            self.path_pub.publish(self.poses_from_points(path))
 
         except:
             print("path failed")
