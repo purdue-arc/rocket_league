@@ -42,6 +42,7 @@ import local_planner.pure_pursuit as pure_pursuit
 
 class WaypointControllerROS(object):
     """A node to ensure the car follows a given trajectory."""
+    LOOKAHEAD_DIST = 0.6
     LOOKAHEAD_GAIN = 0.1
     LOOKAHEAD_POINTS = -1
     AXLE_OFFSET = 0
@@ -86,8 +87,10 @@ class WaypointControllerROS(object):
             bot_linear, bot_angular, _ = convert.twist_covar_to_array(odom_msg.twist)
 
             # Set lookahead dist by lookahead gain and current speed
-            lookahead_dist = numpy.linalg.norm(bot_linear) \
+            lookhead_drawback = numpy.linalg.norm(bot_linear) \
                                 * self.LOOKAHEAD_GAIN
+            lookahead_dist = self.LOOKAHEAD_DIST - lookhead_drawback
+                                
 
             # Set number of waypoints to check
             if self.LOOKAHEAD_POINTS == -1:
@@ -119,6 +122,9 @@ class WaypointControllerROS(object):
 
             path_seg = end_pos - start_pos
             bot_path = start_pos - bot_pos
+            print("path_seg: ", path_seg)
+            print("bot_path: ", bot_path)
+            print("lookahead_dist: ", lookahead_dist)
             intersect = pure_pursuit.find_intersection(path_seg, bot_path, \
                                                         lookahead_dist)
             #print(intersect)

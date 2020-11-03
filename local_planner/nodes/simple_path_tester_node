@@ -33,30 +33,42 @@ import rospy
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Twist, Pose, PoseArray
 from std_srvs.srv import Empty, EmptyResponse
+from nav_msgs.msg import Odometry
+
+# Local modules
+import local_planner.convert as convert
 
 class SimplePathPublisherROS(object):
     def __init__(self):
         rospy.init_node('simple_path_publisher')
 
+        self.bot_pos = None
+
         # Publishers
         self.path = rospy.Publisher('bot_path', PoseArray)
         self.final_speed = rospy.Publisher('bot_final_speed', Float64)
+
+        # Subscribers
+        rospy.Subscriber('bot_odom', Odometry, self.odom_cb)
 
         # Services
         rospy.Service('publish_simple_path', Empty, self.publish_simple_path)
 
         rospy.spin()
 
+    def odom_cb(self, odom_msg):
+        self.bot_pos, _, _ = convert.pose_covar_to_array(odom_msg.pose)
+
     def publish_simple_path(self, _):
         path_msg = PoseArray()
         pose = Pose()
-        pose.position.x = 0.5
-        pose.position.y = 0.5
+        pose.position.x = self.bot_pos[0] + 0.5
+        pose.position.y = self.bot_pos[1] + 0.5
         path_msg.poses.append(pose)
 
         pose = Pose()
-        pose.position.x = 0.75
-        pose.position.y = 0.75
+        pose.position.x = self.bot_pos[0] + 0.75
+        pose.position.y = self.bot_pos[1] + 0.75
         path_msg.poses.append(pose)
 
         final_speed_msg = Float64(0.25)

@@ -36,7 +36,7 @@ from tf.transformations import euler_from_quaternion
 def find_intersection(path_seg, bot_path, lookahead_dist):
     a = np.dot(path_seg, path_seg)
     print("a: ", a)
-    b = 2 * np.dot(bot_path, path_seg)
+    b = 2 * np.dot(path_seg, bot_path)
     print("b: ", b)
     c = np.dot(bot_path, bot_path) - (lookahead_dist * lookahead_dist)
     print("c: ", c)
@@ -47,11 +47,13 @@ def find_intersection(path_seg, bot_path, lookahead_dist):
         discrim = math.sqrt(discrim)
         t1 = (-b - discrim)/(2*a)
         t2 = (-b + discrim)/(2*a)
+        print("t1: ", t1)
+        print("t2: ", t2)
 
-        if t1 >= 0 and t1 <= 1:
-            return path_seg * t1
-        if t2 >= 0 and t2 <= 1:
-            return path_seg * t2
+        # if t1 >= 0 and t1 <= 1:
+        #     return path_seg * t1
+        # if t2 >= 0 and t2 <= 1:
+        return path_seg * t2 * -1
     return None
 
 def calculate_curvature(pos, bot_pos, bot_orient, lookahead_dist): 
