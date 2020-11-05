@@ -31,7 +31,7 @@ from math import sin, cos
 
 # ROS
 import rospy
-from apriltag_ros.msg import AprilTagDetectionArray
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from tf.transformations import *
 
@@ -43,7 +43,6 @@ class OdomEstimator(object):
         self.last_pose = None
         self.last_time = None
 
-        self.tag_id = rospy.get_param('~tag_id')
         self.map = rospy.get_param('~map', 'map')
         self.base_link = rospy.get_param('~base_link', 'base_link')
         self.offset_theta = rospy.get_param('~offset/theta', 0.0)
@@ -54,7 +53,7 @@ class OdomEstimator(object):
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('tag_detections', AprilTagDetectionArray, self.detection_cb)
+        rospy.Subscriber('bot_posecov', PoseWithCovarianceStamped, self.detection_cb)
 
         rospy.spin()
 
@@ -62,16 +61,7 @@ class OdomEstimator(object):
         """Callback for detection messages."""
         # extract relevant info
         header = detection_msg.header
-        pose_cov = None
-        for detection in detection_msg.detections:
-            if detection.id[0] == self.tag_id:
-                pose_cov = detection.pose.pose
-
-        if pose_cov is None:
-            rospy.logwarn_throttle(2, "no matching tag id found")
-            return
-
-
+        pose_cov = detection_msg.pose
 
         quat = (pose_cov.pose.orientation.x,
                 pose_cov.pose.orientation.y,
@@ -119,3 +109,4 @@ class OdomEstimator(object):
 
 if __name__ == "__main__":
     OdomEstimator()
+
