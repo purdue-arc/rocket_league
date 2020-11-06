@@ -111,12 +111,17 @@ class Car(object):
         angle = self.body.angle % (2.0 * math.pi)
         return quaternion_from_euler(0, 0, angle)
 
+    def set_angle(self, angle):
+        self._flJoint.SetLimits(angle, angle)
+        self._frJoint.SetLimits(angle, angle)
+
     def step(self, linearVelocity, angularVelocity, dt):
         for tire in self.tires:
             tire.updateFriction()
 
         for tire in self.tires:
-            tire.updateDrive(linearVelocity, dt)
+            pass
+            #tire.updateDrive(linearVelocity, dt)
         
         desiredAngleDt = angularVelocity.z * dt
         angleNow = self._flJoint.angle

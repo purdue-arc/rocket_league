@@ -54,7 +54,7 @@ class RacerSimROS(object):
         self.last_command = None
         self.last_time = None
 
-        self.frame_id = rospy.get_param('~frame_id', 'sim')
+        self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
         rate = rospy.Rate(rospy.get_param('~rate', 45)) # Hz
 
@@ -127,11 +127,11 @@ class RacerSimROS(object):
             bot_msg.header.stamp = now
             bot_msg.header.frame_id = self.frame_id
             bot_point = self.sim.car.getPoint()
-            bot_msg.pose.pose.position.x = bot_point[0]
-            bot_msg.pose.pose.position.y = bot_point[1]
+            bot_msg.pose.pose.position.x = bot_point[1]
+            bot_msg.pose.pose.position.y = -bot_point[0]
             bot_quat = self.sim.car.getQuaternion()
-            bot_msg.pose.pose.orientation.w = bot_quat[0]
-            bot_msg.pose.pose.orientation.z = bot_quat[3]
+            bot_msg.pose.pose.orientation.z = bot_quat[2]
+            bot_msg.pose.pose.orientation.w = bot_quat[3]
             linear = self.sim.car.body.linearVelocity
             bot_msg.twist.twist.linear.x = linear[0]
             bot_msg.twist.twist.linear.y = linear[1]
