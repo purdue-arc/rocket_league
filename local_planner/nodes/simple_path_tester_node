@@ -30,6 +30,7 @@ License:
 
 #3rd party modules
 import rospy
+import numpy as np
 from std_msgs.msg import Float64
 from geometry_msgs.msg import Twist, Pose, PoseArray
 from std_srvs.srv import Empty, EmptyResponse
@@ -43,6 +44,7 @@ class SimplePathPublisherROS(object):
         rospy.init_node('simple_path_publisher')
 
         self.bot_pos = None
+        self.frame_id = rospy.get_param('~frame_id', 'map')
 
         # Publishers
         self.path = rospy.Publisher('bot_path', PoseArray)
@@ -57,18 +59,32 @@ class SimplePathPublisherROS(object):
         rospy.spin()
 
     def odom_cb(self, odom_msg):
-        self.bot_pos, _, _ = convert.pose_covar_to_array(odom_msg.pose)
+        self.bot_pos, self.bot_orientation, _ = convert.pose_covar_to_array(odom_msg.pose)
 
     def publish_simple_path(self, _):
         path_msg = PoseArray()
+        path_msg.header.frame_id = self.frame_id
+
+        bot_dir = 
+
         pose = Pose()
-        pose.position.x = self.bot_pos[0] + 0.5
-        pose.position.y = self.bot_pos[1] + 0.5
+        position = (self.bot_pos / (np.linalg.norm(self.bot_pos))) + self.bot_pos
+        pose.position.x = position[0]
+        pose.position.y = position[1]
+        pose.orientation.x = self.bot_orientation[0]
+        pose.orientation.y = self.bot_orientation[1]
+        pose.orientation.z = self.bot_orientation[2]
+        pose.orientation.w = self.bot_orientation[3]
         path_msg.poses.append(pose)
 
         pose = Pose()
-        pose.position.x = self.bot_pos[0] + 0.75
-        pose.position.y = self.bot_pos[1] + 0.75
+        position = (self.bot_pos / (np.linalg.norm(self.bot_pos))) * 1.5 + self.bot_pos
+        pose.position.x = position[0]
+        pose.position.y = position[1]
+        pose.orientation.x = self.bot_orientation[0]
+        pose.orientation.y = self.bot_orientation[1]
+        pose.orientation.z = self.bot_orientation[2]
+        pose.orientation.w = self.bot_orientation[3]
         path_msg.poses.append(pose)
 
         final_speed_msg = Float64(0.25)

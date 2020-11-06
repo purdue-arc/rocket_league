@@ -35,41 +35,38 @@ from tf.transformations import euler_from_quaternion
 
 def find_intersection(path_seg, bot_path, lookahead_dist):
     a = np.dot(path_seg, path_seg)
-    print("a: ", a)
     b = 2 * np.dot(path_seg, bot_path)
-    print("b: ", b)
     c = np.dot(bot_path, bot_path) - (lookahead_dist * lookahead_dist)
-    print("c: ", c)
     discrim = b*b - 4*a*c
-    print("discrim: ", discrim)
 
     if discrim >= 0:
         discrim = math.sqrt(discrim)
         t1 = (-b - discrim)/(2*a)
         t2 = (-b + discrim)/(2*a)
-        print("t1: ", t1)
-        print("t2: ", t2)
 
-        # if t1 >= 0 and t1 <= 1:
-        #     return path_seg * t1
-        # if t2 >= 0 and t2 <= 1:
-        return path_seg * t2 * -1
+        if t1 >= 0 and t1 <= 1:
+            return path_seg * t1
+        if t2 >= 0 and t2 <= 1:
+            return path_seg * t2
     return None
 
-def calculate_curvature(pos, bot_pos, bot_orient, lookahead_dist): 
+def calculate_curvature(pos, bot_pos, bot_orient, lookahead_dist):
+    print "Bot orient: {}".format(bot_orient)
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
+    print "Bot Yaw: {}".format(bot_yaw)
     a = -math.tan(bot_yaw)
     b = 1
     c = math.tan(bot_yaw) * bot_pos[0] + bot_pos[1]
-    x = abs((a * pos[0]) + pos[1] + c) / math.dist([a],[b])
+    dist = math.sqrt(math.pow(a,2) + math.pow(b, 2))
+    x = abs(((a * pos[0]) + pos[1] + c) / dist)
 
     bot_line_x = bot_pos[0] + math.cos(bot_yaw)
     bot_line_y = bot_pos[1] + math.sin(bot_yaw)
-    curv_dir = math.sign(math.sin(bot_yaw) * (pos[0] - bot_pos[0]) - 
-                            math.cos(bot_yaw) * (pos[1] - bot_pos[1]))
+    curv_dir = math.sin(bot_yaw) * (pos[0] - bot_pos[0]) - \
+                        math.cos(bot_yaw) * (pos[1] - bot_pos[1])
 
     curv = (2 * x)/(lookahead_dist * lookahead_dist)
-    curv *= curv_dir
+    return math.copysign(curv, curv_dir)
 
 def get_angular_speed(target_vel, curv):
     return target_vel * curv

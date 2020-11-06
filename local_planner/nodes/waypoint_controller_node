@@ -122,21 +122,23 @@ class WaypointControllerROS(object):
 
             path_seg = end_pos - start_pos
             bot_path = start_pos - bot_pos
-            print("path_seg: ", path_seg)
-            print("bot_path: ", bot_path)
-            print("lookahead_dist: ", lookahead_dist)
+
             intersect = pure_pursuit.find_intersection(path_seg, bot_path, \
                                                         lookahead_dist)
-            #print(intersect)
             intersect += start_pos
+            print "Start Pos: {}".format(start_pos) 
+            print "Bot Pos: {}".format(bot_pos)
+            print "Intersection: {}".format(intersect)
 
             curv = pure_pursuit.calculate_curvature(intersect, bot_pos, \
                                                     bot_orient, lookahead_dist)
+            print "Curvature: {}".format(curv)
             angular_speed = pure_pursuit.get_angular_speed(self.final_speed, curv)
 
             twist = Twist()
             twist.linear.y = self.final_speed
-            twist.linear.z = angular_speed
+            twist.angular.z = angular_speed
+            print "Linear Y: {}, Linear X: {}".format(twist.linear.y, twist.linear.z)
 
             self.bot_velocity_cmd.publish(twist)
             
