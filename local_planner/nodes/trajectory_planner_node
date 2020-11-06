@@ -33,7 +33,7 @@ import rospy
 import pdb
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Empty
 import numpy as np
 from tf.transformations import euler_from_quaternion
 
@@ -73,11 +73,16 @@ class TrajectoryPlannerROS(object):
         rospy.Subscriber("ball_pose", PoseWithCovarianceStamped, self.ball_pose_cb)
         rospy.Subscriber("goal_pose", PoseWithCovarianceStamped, self.goal_pose_cb)
         rospy.Subscriber("bot_odom", Odometry, self.bot_odom_cb)
+        rospy.Subscriber("trigger", Empty, self.trigger_cb)
 
+        rospy.spin()
+
+    def trigger_cb(self, trigger_message):
+        """ Callback to run loop_once() when node is triggered"""
         while not rospy.is_shutdown():
             if self.check_if_GO():
                 self.loop_once()
-                #break
+                break
             else:
                 try:
                     rospy.Rate(1).sleep()
@@ -143,8 +148,7 @@ class TrajectoryPlannerROS(object):
         self.final_heading = np.array([self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y])
         
         # Normalize the vector for future calculations
-        mag = np.linalg.norm(self.final_heading)
-        self.final_normalized_heading = self.final_heading / mag
+        self.final_normalized_heading = normalize(self.final_heading)
 
     def publish_final_speed(self):
         """Calculates and publishes the final velocity. Will be set as a constant for now."""
@@ -175,8 +179,8 @@ class TrajectoryPlannerROS(object):
         """
         try:
             # Normalize everything before calculating
-            init_normalized_heading = init_heading / np.linalg.norm(init_heading)
-            final_normalized_heading = final_heading / np.linalg.norm(final_heading)
+            init_normalized_heading = normalize(init_heading)
+            final_normalized_heading = normalize(final_heading)
 
             # Midpoint, and draw line between final and init position
             midpoint = (final_position + init_position) / 2
