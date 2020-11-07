@@ -1,0 +1,121 @@
+#!/usr/bin/env python
+"""Very simple node to estimate odometry from poses over time.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+  3. Neither the name of the copyright holder nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
+# Python
+from math import sin, cos
+
+# ROS
+import rospy
+from apriltag_ros.msg import AprilTagDetectionArray
+from nav_msgs.msg import Odometry
+from tf.transformations import *
+
+class OdomEstimator(object):
+    """Simple node that derives velocity from position."""
+    def __init__(self):
+        rospy.init_node('pose_estimation')
+
+        self.last_pose = None
+        self.last_time = None
+
+        self.tag_id = rospy.get_param('~tag_id')
+        self.map = rospy.get_param('~map', 'map')
+        self.base_link = rospy.get_param('~base_link', 'base_link')
+        self.offset_theta = rospy.get_param('~offset/theta', 0.0)
+        self.offset_x = rospy.get_param('~offset/x', 0.0)
+        self.offset_y = rospy.get_param('~offset/y', 0.0)
+
+        # Publishers
+        self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber('tag_detections', AprilTagDetectionArray, self.detection_cb)
+
+        rospy.spin()
+
+    def detection_cb(self, detection_msg):
+        """Callback for detection messages."""
+        # extract relevant info
+        header = detection_msg.header
+        pose_cov = None
+        for detection in detection_msg.detections:
+            if detection.id[0] == self.tag_id:
+                pose_cov = detection.pose.pose
+
+        if pose_cov is None:
+            rospy.logwarn_throttle(2, "no matching tag id found")
+            return
+
+
+
+        quat = (pose_cov.pose.orientation.x,
+                pose_cov.pose.orientation.y,
+                pose_cov.pose.orientation.z,
+                pose_cov.pose.orientation.w)
+
+        # hack for camera tf:
+        rotation = quaternion_from_euler(3.14, 0.0, 3.14)
+        quat = quaternion_multiply(quat, rotation)
+
+        (__, __, theta) = euler_from_quaternion(quat)
+
+        theta += self.offset_theta
+        x = pose_cov.pose.position.x + self.offset_x*cos(theta) + self.offset_y*sin(theta)
+        y = pose_cov.pose.position.y + self.offset_x*sin(theta) + self.offset_y*cos(theta)
+
+        if self.last_time is not None:
+            odom_msg = Odometry()
+            odom_msg.header = header
+            odom_msg.header.frame_id = self.map
+            odom_msg.child_frame_id = self.base_link
+            odom_msg.pose = pose_cov
+
+            # deltas
+            dt = (self.last_time - header.stamp).to_sec()
+            d_theta = theta - self.last_pose[2]
+
+            # global frame
+            dX = x - self.last_pose[0]
+            dY = y - self.last_pose[1]
+
+            # local frame
+            dx = dX*cos(theta) + dY*sin(theta)
+            dy = dX*sin(theta) + dY*cos(theta)
+
+            # velocities
+            odom_msg.twist.twist.linear.x = dx / dt
+            odom_msg.twist.twist.linear.y = dy / dt
+            odom_msg.twist.twist.angular.z = d_theta / dt
+
+            self.odom_pub.publish(odom_msg)
+
+        self.last_time = header.stamp
+        self.last_pose = (x, y, theta)
+
+if __name__ == "__main__":
+    OdomEstimator()
