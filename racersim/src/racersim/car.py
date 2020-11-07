@@ -120,10 +120,9 @@ class Car(object):
             tire.updateFriction()
 
         for tire in self.tires:
-            pass
-            #tire.updateDrive(linearVelocity, dt)
+            tire.updateDrive(linearVelocity, dt)
         
-        desiredAngleDt = angularVelocity.z * dt
+        desiredAngleDt = angularVelocity.z * dt * -1
         angleNow = self._flJoint.angle
         if abs(desiredAngleDt) > self.turnSpeed:
             desiredAngleDt = math.copysign(self.turnSpeed, desiredAngleDt)

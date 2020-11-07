@@ -38,7 +38,7 @@ from nav_msgs.msg import Odometry
 
 # Local modules
 import local_planner.convert as convert
-import local_planner.pure_pursuit as pure_pursuit
+import local_planner.pure_pursuit as pursuit
 
 class WaypointControllerROS(object):
     """A node to ensure the car follows a given trajectory."""
@@ -72,7 +72,6 @@ class WaypointControllerROS(object):
         self.path_start_time = pose_arr_msg.header.stamp
         self.path = pose_arr_msg.poses
         self.last_pnt_idx = 0
-        print(self.path)
 
     def final_speed_cb(self, float64_msg):
         self.final_speed = float64_msg.data
@@ -99,46 +98,36 @@ class WaypointControllerROS(object):
                 lookahead_pnts = self.LOOKAHEAD_POINTS
 
             # Find next waypoint within lookahead range
-            start_pose_idx = None
-            start_pose_dist = float("inf")
-            for i in range(lookahead_pnts):
-                try:
-                    pose = self.path[self.last_pose_idx + i]
-                    pos, _ = convert.pose_to_array(pose)
-                    dist = numpy.linalg.norm(pos - bot_pos)
-                    if dist < start_pose_dist:
-                        start_pose_dist = dist
-                        start_pose_idx = self.last_pose_idx + i
-                except IndexError:
-                    print("Path finished")
+            intersect = None
+            final_pose_idx = min(len(self.path) - 1, \
+                                 self.last_pose_idx + lookahead_pnts)
+            for i in range(self.last_pose_idx, final_pose_idx):
+                start_pos, _ = convert.pose_to_array(self.path[i])
+                end_pos, _ = convert.pose_to_array(self.path[i + 1])
 
-            start_pos, _ = convert.pose_to_array(self.path[start_pose_idx])
-            end_pos = None
-            if self.last_pose_idx == (len(self.path) - 1):
-                end_pos = start_pos
-            else:
-                end_pose_idx = start_pose_idx + 1
-                end_pos, _ = convert.pose_to_array(self.path[end_pose_idx])
+                path_seg = end_pos - start_pos
+                bot_path = start_pos - bot_pos
 
-            path_seg = end_pos - start_pos
-            bot_path = start_pos - bot_pos
+                intersect = pursuit.find_intersection(path_seg, bot_path, \
+                                                      lookahead_dist)
 
-            intersect = pure_pursuit.find_intersection(path_seg, bot_path, \
-                                                        lookahead_dist)
-            intersect += start_pos
-            print "Start Pos: {}".format(start_pos) 
-            print "Bot Pos: {}".format(bot_pos)
-            print "Intersection: {}".format(intersect)
+                if intersect is not None:
+                    self.last_pose_idx = i
+                    intersect += start_pos
+                    break
+            
+            if intersect is None:
+                rospy.logwarn("Path could not be followed.")
+                self.bot_velocity_cmd.publish(Twist())
+                return
 
-            curv = pure_pursuit.calculate_curvature(intersect, bot_pos, \
-                                                    bot_orient, lookahead_dist)
-            print "Curvature: {}".format(curv)
-            angular_speed = pure_pursuit.get_angular_speed(self.final_speed, curv)
+            curv = pursuit.calculate_curvature(intersect, bot_pos, \
+                                               bot_orient, lookahead_dist)
+            angular_speed = pursuit.get_angular_speed(self.final_speed, curv)
 
             twist = Twist()
             twist.linear.y = self.final_speed
             twist.angular.z = angular_speed
-            print "Linear Y: {}, Linear X: {}".format(twist.linear.y, twist.linear.z)
 
             self.bot_velocity_cmd.publish(twist)
             
