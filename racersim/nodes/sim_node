@@ -88,7 +88,7 @@ class RacerSimROS(object):
         return EmptyResponse()
 
     def command_cb(self, command_msg):
-        """Callback for command messages for snake."""
+        """Callback for command messages."""
         # Put this all in one tuple so that it is atomic
         self.last_command = (command_msg.linear, command_msg.angular)
 
@@ -115,8 +115,8 @@ class RacerSimROS(object):
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id
             ball_point = self.sim.ball.getPoint()
-            ball_msg.pose.pose.position.x = ball_point[0]
-            ball_msg.pose.pose.position.y = ball_point[1]
+            ball_msg.pose.pose.position.x = ball_point[1]
+            ball_msg.pose.pose.position.y = -ball_point[0]
             ball_quat = self.sim.ball.getQuaternion()
             ball_msg.pose.pose.orientation.w = ball_quat[0]
             ball_msg.pose.pose.orientation.z = ball_quat[3]
@@ -144,8 +144,8 @@ class RacerSimROS(object):
             goal_msg.header.stamp = now
             goal_msg.header.frame_id = self.frame_id
             goal_point = self.sim.goal.getPoint()
-            goal_msg.pose.pose.position.x = goal_point[0]
-            goal_msg.pose.pose.position.y = goal_point[1]
+            goal_msg.pose.pose.position.x = goal_point[1]
+            goal_msg.pose.pose.position.y = -goal_point[0]
             goal_quat = self.sim.goal.getQuaternion()
             goal_msg.pose.pose.orientation.w = goal_quat[0]
             goal_msg.pose.pose.orientation.z = goal_quat[3]

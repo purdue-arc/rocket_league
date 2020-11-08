@@ -45,7 +45,7 @@ class CarDef(object):
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(0.25, 0.5), vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(1.25, 1.25), vertices=DEFAULT_VERTICES, 
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
                     maxAngle=30, turnSpeed=320):
@@ -67,7 +67,6 @@ class Car(object):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
         bodyDef.position = carDef.initPos
-        bodyDef.angle = 0
         self.body = world.CreateBody(bodyDef)
 
         shape = Box2D.b2PolygonShape(vertices=carDef.vertices)

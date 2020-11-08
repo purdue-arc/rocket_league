@@ -26,6 +26,9 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+# 3rd party modules
+import math
+
 # Local classes
 from racersim.ball import Ball
 from racersim.car import Car, CarDef
@@ -63,8 +66,6 @@ class Sim(object):
         if renderEnabled:
             self.renderer = Renderer(bounds, scaling=scaling)
             self._render()
-
-        self.car.set_angle(0)
         
         self.running = True
 
