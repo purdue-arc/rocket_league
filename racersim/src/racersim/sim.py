@@ -63,6 +63,8 @@ class Sim(object):
         if renderEnabled:
             self.renderer = Renderer(bounds, scaling=scaling)
             self._render()
+
+        self.car.set_angle(0)
         
         self.running = True
 
@@ -93,6 +95,8 @@ class Sim(object):
 
         if self.renderEnabled:
             self._render()
+
+        self.car.set_angle(0)
 
     def _render(self):
         """Render the current state of the sim."""

@@ -1,0 +1,5 @@
+<launch>
+  <node type="waypoint_controller_node" pkg="local_planner" name="waypoint_controller" output="screen" />
+  <node type="trajectory_planner_node" pkg="local_planner" name="trajectory_planner_node" output="screen" />
+  <node type="sim_node" pkg="racersim" name="sim_node" output="screen" />
+</launch>
