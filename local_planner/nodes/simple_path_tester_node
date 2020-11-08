@@ -68,7 +68,7 @@ class SimplePathPublisherROS(object):
         path_msg.header.frame_id = self.frame_id
 
         _, _, yaw = euler_from_quaternion(self.bot_orientation)
-        bot_dir = np.array([math.cos(yaw), math.sin(yaw), 0]) * 0.5
+        bot_dir = np.array([math.cos(yaw), math.sin(yaw), 0]) * 0.25
         position = bot_dir + self.bot_pos
 
         pose = Pose()
@@ -80,30 +80,43 @@ class SimplePathPublisherROS(object):
         pose.orientation.w = self.bot_orientation[3]
         path_msg.poses.append(pose)
 
+        # yaw -= math.pi / 2
+        # quaternion = quaternion_from_euler(0,0,yaw)
         yaw -= math.pi / 2
-        quaternion = quaternion_from_euler(0,0,yaw)
-        bot_dir = np.array([math.cos(yaw), math.sin(yaw), 0]) * 1
-        position = position + self.bot_pos
+        bot_dir = np.array([math.cos(yaw), math.sin(yaw), 0]) * 0.6
+        position += bot_dir
 
         pose = Pose()
         pose.position.x = position[0]
         pose.position.y = position[1]
-        pose.orientation.x = quaternion[0]
-        pose.orientation.y = quaternion[1]
-        pose.orientation.z = quaternion[2]
-        pose.orientation.w = quaternion[3]
+        pose.orientation.x = self.bot_orientation[0]
+        pose.orientation.y = self.bot_orientation[1]
+        pose.orientation.z = self.bot_orientation[2]
+        pose.orientation.w = self.bot_orientation[3]
         path_msg.poses.append(pose)
 
-        bot_dir = np.array([math.cos(yaw), math.sin(yaw), 0]) * 1
-        position = position + self.bot_pos
+        yaw -= math.pi/2
+        bot_dir = np.array([math.cos(yaw), math.sin(yaw), 0]) * 0.5
+        position += bot_dir
 
         pose = Pose()
         pose.position.x = position[0]
         pose.position.y = position[1]
-        pose.orientation.x = quaternion[0]
-        pose.orientation.y = quaternion[1]
-        pose.orientation.z = quaternion[2]
-        pose.orientation.w = quaternion[3]
+        pose.orientation.x = self.bot_orientation[0]
+        pose.orientation.y = self.bot_orientation[1]
+        pose.orientation.z = self.bot_orientation[2]
+        pose.orientation.w = self.bot_orientation[3]
+        path_msg.poses.append(pose)
+
+        position += bot_dir
+
+        pose = Pose()
+        pose.position.x = position[0]
+        pose.position.y = position[1]
+        pose.orientation.x = self.bot_orientation[0]
+        pose.orientation.y = self.bot_orientation[1]
+        pose.orientation.z = self.bot_orientation[2]
+        pose.orientation.w = self.bot_orientation[3]
         path_msg.poses.append(pose)
 
         final_speed_msg = Float64(0.1)

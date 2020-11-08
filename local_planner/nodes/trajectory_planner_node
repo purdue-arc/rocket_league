@@ -51,8 +51,8 @@ class TrajectoryPlannerROS(object):
         self.bot_init_heading = None
 
         # no idea what speed will be yet
-        self.MOVE_SPEED = 1.0
-        self.FINAL_SPEED = 1.0
+        self.MOVE_SPEED = 0.08
+        self.FINAL_SPEED = 0.08
         self.final_heading = None
         self.final_normalized_heading = None
         self.main_points = []

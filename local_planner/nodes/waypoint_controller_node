@@ -33,7 +33,7 @@ import rospy
 import numpy
 import math
 from std_msgs.msg import Float64
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 
 # Local modules
@@ -42,7 +42,7 @@ import local_planner.pure_pursuit as pursuit
 
 class WaypointControllerROS(object):
     """A node to ensure the car follows a given trajectory."""
-    LOOKAHEAD_DIST = 0.6
+    LOOKAHEAD_DIST = 0.5
     LOOKAHEAD_GAIN = 0.1
     LOOKAHEAD_POINTS = -1
     AXLE_OFFSET = 0
@@ -60,6 +60,7 @@ class WaypointControllerROS(object):
         # Publishers
         self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command', \
             Twist, queue_size=1) 
+        self.lookahead_pnt = rospy.Publisher('lookahead_pnt', PoseWithCovarianceStamped, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('bot_path', PoseArray, self.path_cb)
@@ -114,12 +115,19 @@ class WaypointControllerROS(object):
                 if intersect is not None:
                     self.last_pose_idx = i
                     intersect += start_pos
+                    pose = PoseWithCovarianceStamped()
+                    pose.header.frame_id = "map"
+                    pose.pose.pose.position.x = intersect[0]
+                    pose.pose.pose.position.y = intersect[1]
+                    self.lookahead_pnt.publish(pose)
                     break
             
             if intersect is None:
                 rospy.logwarn("Path could not be followed.")
                 self.bot_velocity_cmd.publish(Twist())
                 return
+
+            print "IDX: {}".format(self.last_pose_idx)
 
             curv = pursuit.calculate_curvature(intersect, bot_pos, \
                                                bot_orient, lookahead_dist)
