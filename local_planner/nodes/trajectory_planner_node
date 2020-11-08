@@ -58,12 +58,12 @@ class TrajectoryPlannerROS(object):
         self.main_points = []
 
         # These variables act as parameters to generate a path
-        self.DISTANCE_FROM_CAR = 1
-        self.DISTANCE_FROM_BALL = 1
-        self.SECOND_POINT_DISTANCE = 1
+        self.DISTANCE_FROM_CAR = 0.25
+        self.DISTANCE_FROM_BALL = 0.08
+        self.SECOND_POINT_DISTANCE = 0.25
         
         # This variable determines the number of points published to the waypoint controller
-        self.RESOLUTION = 20
+        self.RESOLUTION = 5
 
         # Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
