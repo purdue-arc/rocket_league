@@ -35,7 +35,7 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64, Empty
 import numpy as np
-from tf.transformations import euler_from_quaternion
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 class TrajectoryPlannerROS(object):
     """A node to plan local car trajectories."""
@@ -95,7 +95,7 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        self.create_path_0()
+        self.create_path_3()
 
         self.publish_final_speed()
 
@@ -136,7 +136,7 @@ class TrajectoryPlannerROS(object):
                 and (self.MOVE_SPEED is not None) and (self.FINAL_SPEED is not None) and (self.DISTANCE_FROM_CAR is not None) and \
                     (self.DISTANCE_FROM_BALL is not None) and (self.SECOND_POINT_DISTANCE is not None) and\
                          (self.bot_init_heading is not None) and (self.RESOLUTION is not None) and\
-                              (self.bot_vel is not None) and (self.bot_normalized_vel is not None):
+                              (self.bot_vel is not None):
             return True
         else:
             return False
@@ -207,7 +207,7 @@ class TrajectoryPlannerROS(object):
             bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
 
             # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
-            first_point = bot_position + bot_linear_vel * self.DISTANCE_FROM_CAR
+            first_point = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * np.linalg.norm(bot_linear_vel)
 
             # Third point is a certain distance behind the ball
             third_point = ball_position - self.final_normalized_heading * self.DISTANCE_FROM_BALL
@@ -374,7 +374,7 @@ class TrajectoryPlannerROS(object):
             if (len(self.main_points) != 0):
                 # To smooth things, we are only looking at every point except the very last point (the ball's position)
                 points = [self.main_points[0], self.main_points[1], self.main_points[2]]
-                distance_over_time = SECOND_POINT_DISTANCE / 2
+                distance_over_time = self.SECOND_POINT_DISTANCE / 2
                 smoothed = False
 
                 # Repeatedly create spline until we've reached max level of smoothness or it's already smooth
@@ -387,13 +387,13 @@ class TrajectoryPlannerROS(object):
                     for x in range(1, len(points)):
                         # Calculate the angle between the current point and the last point
                         first_vector = self.bot_init_heading if x == 1 else points[x - 1] - points[x - 2]
-                        second_vector = points[x] - points[x - 1]
+                        second_vector = points[x] - points[x - 1]                    
                         angle = np.degrees(np.arccos(np.dot(first_vector, second_vector) / (np.linalg.norm(first_vector) * np.linalg.norm(second_vector))))
                         
                         # If our angle is > angle_limit, create another spline between those points
                         if (not np.isnan(angle) and angle > angle_limit):
                             final_vector = points[x + 1] - points[x] if x < len(points) - 1 else self.final_heading
-                            new_points = create_spline(points[x - 1], first_vector, points[x], final_vector, distance_over_time)
+                            new_points = self.create_spline(points[x - 1], first_vector, points[x], final_vector, distance_over_time)
                             distance_over_time *= distance_reduction
                             
                             # We don't want to include the generated spline's first point, as it's the same as our current point and we are trying to smooth it
@@ -403,7 +403,7 @@ class TrajectoryPlannerROS(object):
                         elif (not np.isnan(angle)):
                             # If our angle is fine, do nothing to it
                             temp.append(points[x])
-                   
+                    
                     # Reassign our current points to the new smoothed ones
                     points = temp
                     
