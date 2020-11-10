@@ -49,7 +49,7 @@ class OdomEstimator(object):
         self.base_link = rospy.get_param('~base_link', 'base_link')
 
         # publishers
-        self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
+        self.odom_pub = rospy.Publisher('bot_odom', Odometry, queue_size=1)
 
         # subscribers
         rospy.Subscriber('tag_detections', PoseWithCovarianceStamped, self.pose_cb)
@@ -57,7 +57,7 @@ class OdomEstimator(object):
         rospy.spin()
 
     def pose_cb(self, pose_msg):
-        """Callback for detection messages."""
+        """Callback for pose messages."""
         # extract header and pose information
         header = pose_msg.header
         pose_cov = pose_msg.pose
