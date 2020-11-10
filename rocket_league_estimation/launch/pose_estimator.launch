@@ -1,0 +1,7 @@
+<launch>
+  <node type="pose_estimator" pkg="rocket_league_estimation" name="pose_estimator">
+    <rosparam command="load" file="$(find rocket_league_estimation)/params/pose_estimator.yaml" />
+    <remap from="tag_detections" to="aravis_cam/tag_detections"/>
+    <remap from="odom" to="bot_odom"/>
+  </node>
+</launch>

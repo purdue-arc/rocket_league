@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(hardware_controller)
+project(rocket_league_control)
 
 # Find catkin macros
 find_package(catkin REQUIRED)
@@ -17,7 +17,6 @@ catkin_package()
 # Mark executable python scripts and nodes for installation
 catkin_install_python(PROGRAMS
   nodes/velocity_controller
-  nodes/pose_estimator
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
