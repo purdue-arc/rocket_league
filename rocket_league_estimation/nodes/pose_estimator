@@ -45,7 +45,6 @@ class OdomEstimator(object):
         self.last_time = None
 
         # params
-        self.map = rospy.get_param('~map', 'map')
         self.base_link = rospy.get_param('~base_link', 'base_link')
 
         # publishers
@@ -58,19 +57,13 @@ class OdomEstimator(object):
 
     def pose_cb(self, pose_msg):
         """Callback for detection messages."""
-        # verify frames are correct
-        if ((pose_msg.header.frame_id != self.map) or
-                (pose_msg.child_frame_id != self.base_link)):
-            rospy.logwarn("Coordinate frames do not match expected values.")
-            return
-
         # extract bot position & angle
-        x = pose_msg.pose.position.x
-        y = pose_msg.pose.position.y
-        quat = (pose_msg.pose.orientation.x,
-                pose_msg.pose.orientation.y,
-                pose_msg.pose.orientation.z,
-                pose_msg.pose.orientation.w)
+        x = pose_msg.pose.pose.position.x
+        y = pose_msg.pose.pose.position.y
+        quat = (pose_msg.pose.pose.orientation.x,
+                pose_msg.pose.pose.orientation.y,
+                pose_msg.pose.pose.orientation.z,
+                pose_msg.pose.pose.orientation.w)
         (__, __, theta) = euler_from_quaternion(quat)
 
         # publish odom if there is a previous timestamp
@@ -79,7 +72,7 @@ class OdomEstimator(object):
             odom_msg = Odometry()
             odom_msg.header = pose_msg.header
             odom_msg.child_frame_id = self.base_link
-            odom_msg.pose = pose_msg
+            odom_msg.pose = pose_msg.pose
 
             # deltas to calculate twist velocities
             dx = x - self.last_pose[0]

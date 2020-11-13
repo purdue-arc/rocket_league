@@ -26,8 +26,9 @@
 
 #include "rocket_league_estimation/DetectionToPose.h"
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
+    ros::init(argc, argv, "detection_to_pose");
     DetectionToPose converter;
     ros::spin();
     return 0;
