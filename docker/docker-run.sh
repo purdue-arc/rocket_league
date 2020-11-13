@@ -13,4 +13,4 @@ docker run --rm -it \
     --name arc-rocket-league-dev \
     --privileged \
     arc-rocket-league-dev \
-    /bin/zsh
+    ${1:-/bin/zsh}

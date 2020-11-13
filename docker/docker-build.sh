@@ -1,12 +1,13 @@
 #!/bin/bash
 
-DOCKER_DIR="$(readlink -f $(dirname $0))/"
+DOCKER_DIR="$(readlink -f $(dirname $0))"
 
 docker build --build-arg USER=$USER \
              --build-arg PW="robot" \
              --build-arg UID=$(id -u) \
              --build-arg GID=$(id -g) \
              -t arc-rocket-league-dev \
+             $1 \
              $DOCKER_DIR
 
 echo "

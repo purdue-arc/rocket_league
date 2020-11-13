@@ -1,0 +1,10 @@
+catkin
+rospy
+std_msgs
+nav_msgs
+geometry_msgs
+apriltag_ros
+image_proc
+std_srvs
+python-pygame
+python-box2d
