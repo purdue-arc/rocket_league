@@ -16,7 +16,7 @@ catkin_package()
 
 # Mark executable python scripts and nodes for installation
 catkin_install_python(PROGRAMS
-  nodes/sim_node
+  nodes/racersim_node
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

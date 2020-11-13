@@ -6,7 +6,7 @@
   <arg name="scaling" default="500"/>
   <arg name="bounds" default="1.5"/>
 
-  <node type="sim_node" pkg="racersim" name="sim_node" output="screen">
+  <node type="racersim_node" pkg="racersim" name="racersim_node" output="screen">
     <param name="~frame_id" value="$(arg frame_id)"/>
     <param name="~timeout" value="$(arg timeout)"/>
     <param name="~rate" value="$(arg rate)"/>
