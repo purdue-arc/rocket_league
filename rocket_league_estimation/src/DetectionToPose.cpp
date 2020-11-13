@@ -26,7 +26,7 @@
 
 #include "rocket_league_estimation/DetectionToPose.h"
 
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -34,7 +34,8 @@
 DetectionToPose::DetectionToPose() :
     m_nh{},
     m_pnh{"~"},
-    m_posePub{m_nh.advertise<geometry_msgs::PoseStamped>("pose", 1)},
+    m_posePub{m_nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
+        "pose", 1)},
     m_detectionSub{m_nh.subscribe(
         "tag_detections", 1, &DetectionToPose::DetectionCallback, this)},
     m_tfBuffer{},
@@ -112,10 +113,11 @@ void DetectionToPose::DetectionCallback(
     // publish as ROS message
 
     if (m_publishPose) {
-        geometry_msgs::PoseStamped msg;
+        geometry_msgs::PoseWithCovarianceStamped msg;
         msg.header.stamp = detection_msg.header.stamp;
         msg.header.frame_id = m_parentBodyName;
-        tf2::toMsg(child_body_to_parent, msg.pose);
+        tf2::toMsg(child_body_to_parent, msg.pose.pose);
+        // TODO: handle covariances
         m_posePub.publish(msg);
     }
 }
