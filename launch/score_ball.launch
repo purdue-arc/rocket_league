@@ -1,5 +1,4 @@
 <launch>
-  <node type="waypoint_controller_node" pkg="local_planner" name="waypoint_controller" output="screen" />
-  <node type="trajectory_planner_node" pkg="local_planner" name="trajectory_planner_node" output="screen" />
-  <node type="racersim_node" pkg="racersim" name="racersim_node" output="screen" />
+  <include file="$(find local_planner)/launch/local_planner.launch"/>
+  <include file="$(find racersim)/launch/racersim.launch"/>
 </launch>
