@@ -55,23 +55,31 @@ def find_intersection(path_seg, bot_path, lookahead_dist):
             return path_seg * t2
     return None
 
-def calculate_curvature(pos, bot_pos, bot_orient, lookahead_dist):
-    """Determines necessary curvature to reach intersection point."""
+def calculate_dist(pos, bot_pos, bot_orient, lookahead_dist):
+    """Determines arc distance to reach intersection point."""
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
     a = -math.tan(bot_yaw)
-    b = 1
     c = math.tan(bot_yaw) * bot_pos[0] - bot_pos[1]
-    dist = math.sqrt(math.pow(a,2) + math.pow(b, 2))
+    dist = math.sqrt(math.pow(a,2) + 1)
     x = abs(((a * pos[0]) + pos[1] + c) / dist)
+    radius = (lookahead_dist * lookahead_dist)/(2 * x)
 
-    bot_line_x = bot_pos[0] + math.cos(bot_yaw)
-    bot_line_y = bot_pos[1] + math.sin(bot_yaw)
-    curv_dir = math.sin(bot_yaw) * (pos[0] - bot_pos[0]) - \
-                        math.cos(bot_yaw) * (pos[1] - bot_pos[1])
+    dist = abs(np.linalg.norm(pos - bot_pos))
+    arc_angle = 2 * math.asin((dist / 2) / radius)
+    return arc_angle * radius
 
-    curv = (2 * x)/(lookahead_dist * lookahead_dist)
-    return math.copysign(curv, curv_dir)
+def calculate_angle(pos, bot_pos, bot_orient, lookahead_dist):
+    """Determines necessary curvature to reach intersection point."""
+    _, _, bot_yaw = euler_from_quaternion(bot_orient)
 
-def get_angular_speed(target_vel, curv):
-    """Relates curvature to the angular velocity."""
-    return target_vel * curv * 0.9 * -1
+    bot_line_x = bot_pos[0] + math.cos(bot_yaw) * lookahead_dist
+    bot_line_y = bot_pos[1] + math.sin(bot_yaw) * lookahead_dist
+    bot_line = np.array([bot_line_x, bot_line_y, 0])
+
+    dist = np.linalg.norm(pos - bot_line)
+    return 2 * math.asin(dist/(lookahead_dist*2))
+
+def get_angular_speed(target_vel, angle, dist):
+    """Relates path to the angular velocity."""
+    dt = dist / target_vel
+    return angle / dt

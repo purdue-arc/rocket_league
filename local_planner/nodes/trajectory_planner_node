@@ -95,7 +95,7 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        self.create_path_0()
+        self.create_path_3()
 
         self.publish_final_speed()
 

@@ -141,14 +141,17 @@ class WaypointControllerROS(object):
                 return
 
             # Calculate steering rate
-            curv = pursuit.calculate_curvature(intersect, bot_pos, \
-                                               bot_orient, lookahead_dist)
-            angular_speed = pursuit.get_angular_speed(self.final_speed, curv)
+            angle = pursuit.calculate_angle(intersect, bot_pos, \
+                                            bot_orient, lookahead_dist)
+            arc_dist = pursuit.calculate_dist(intersect, bot_pos, \
+                                              bot_orient, lookahead_dist)
+            angular_speed = pursuit.get_angular_speed(self.final_speed, \
+                                                      angle, arc_dist)
 
             # Send data to car controller
             twist = Twist()
             twist.linear.y = self.final_speed
-            twist.angular.z = angular_speed
+            twist.angular.z = angular_speed - odom_msg.twist.twist.angular.z
             self.bot_velocity_cmd.publish(twist)
             
 if __name__ == "__main__":
