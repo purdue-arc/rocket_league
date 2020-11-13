@@ -43,24 +43,24 @@ class TrajectoryPlannerROS(object):
         rospy.init_node('trajectory_planner_node')
 
         # Variables
-        self.ball_pose = None
-        self.goal_pose = None
-        self.bot_pose = None
-        self.bot_vel = None
-        self.bot_normalized_vel = None
-        self.bot_init_heading = None
+        self.ball_pose = None   # Position of the ball
+        self.goal_pose = None    #Position of goal
+        self.bot_pose = None    # Position of car
+        self.bot_vel = None    # velocity of car (in car's reference frame)
+        self.bot_normalized_vel = None    # velocity of car after being normalized
+        self.bot_init_heading = None    # The initial heading of the car (map frame)
 
-        # no idea what speed will be yet
-        self.MOVE_SPEED = 1.0
-        self.FINAL_SPEED = 1.0
-        self.final_heading = None
-        self.final_normalized_heading = None
-        self.main_points = []
+        # Info about the paths we're using
+        self.FINAL_SPEED = 1.0    # Final speed of the car. Currently set at 1, but can be changed
+        self.final_heading = None    # Final heading of the car so it hits the ball the correct way
+        self.final_normalized_heading = None    # Normalized heading vector
+        self.main_points = []    # Array of the main points all create_paths use
 
         # These variables act as parameters to generate a path
-        self.DISTANCE_FROM_CAR = 1
-        self.DISTANCE_FROM_BALL = 1
-        self.SECOND_POINT_DISTANCE = 1
+        self.DISTANCE_FROM_CAR = 1    # Multiplier for distance of 1st main point in front of the car
+        self.DISTANCE_FROM_BALL = 1    # Defines the distance away from the ball that our final (lined up) point should be
+        self.SECOND_POINT_DISTANCE = 1    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+                                          # (adjusts curvature somewhat)
         
         # This variable determines the number of points published to the waypoint controller
         self.RESOLUTION = 20
@@ -90,12 +90,13 @@ class TrajectoryPlannerROS(object):
                     pass
 
     def loop_once(self):
+        """ Runs code to generate the paths"""
         #rospy.logwarn("going")
         self.calculate_final_heading()
         self.generate_main_points()
 
         # This function is swappable
-        self.create_path_3()
+        self.create_path_0()
 
         self.publish_final_speed()
 
@@ -119,7 +120,6 @@ class TrajectoryPlannerROS(object):
         self.bot_normalized_vel = normalize(linear_vel)
 
         # Get bot's init vector heading through orientation
-        # TODO: convert to euler angles correctly
         quat = (self.bot_pose.orientation.x,
                 self.bot_pose.orientation.y,
                 self.bot_pose.orientation.z,
@@ -133,7 +133,7 @@ class TrajectoryPlannerROS(object):
         """ Checks if needed variables are properly initialized to run loop_once()"""
         if (self.ball_pose is not None) and (self.goal_pose is not None) and (self.bot_pose is not None) and \
             (self.bot_vel is not None) and (self.bot_normalized_vel is not None) and (self.bot_init_heading is not None) \
-                and (self.MOVE_SPEED is not None) and (self.FINAL_SPEED is not None) and (self.DISTANCE_FROM_CAR is not None) and \
+                and (self.FINAL_SPEED is not None) and (self.DISTANCE_FROM_CAR is not None) and \
                     (self.DISTANCE_FROM_BALL is not None) and (self.SECOND_POINT_DISTANCE is not None) and\
                          (self.bot_init_heading is not None) and (self.RESOLUTION is not None) and\
                               (self.bot_vel is not None):
@@ -145,7 +145,8 @@ class TrajectoryPlannerROS(object):
     def calculate_final_heading(self):
         """Calculate final vector (final heading)"""
         # Final vector is simply the goal's position minus the ball's position
-        self.final_heading = np.array([self.goal_pose.position.x - self.ball_pose.position.x, self.goal_pose.position.y - self.ball_pose.position.y])
+        self.final_heading = np.array([self.goal_pose.position.x - self.ball_pose.position.x,\
+             self.goal_pose.position.y - self.ball_pose.position.y])
         
         # Normalize the vector for future calculations
         self.final_normalized_heading = normalize(self.final_heading)
@@ -164,12 +165,18 @@ class TrajectoryPlannerROS(object):
         pose_array_msg = PoseArray()
         pose_array_msg.header.frame_id = "map"
         pose_array_msg.poses = []
-        for x in range(len(points)):
+        for i in range(len(points)):
             new_pose = Pose()
-            new_pose.position.x = points[x][0]
-            new_pose.position.y = points[x][1]
-            new_pose.orientation.w = 1
+            new_pose.position.x = points[i][0]
+            new_pose.position.y = points[i][1]
+
+            # Generate quaternion for orientation
+            yaw = np.arctan2(points[i][1],points[i][0])
+            (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
+                new_pose.orientation.w) = quaternion_from_euler(0,0,yaw) 
+            #new_pose.orientation.w = 1
             pose_array_msg.poses.append(new_pose)
+        print("ready to publish")
         return pose_array_msg
 
     def create_spline(self, init_position, init_heading, final_position, final_heading, second_point_distance):
@@ -191,7 +198,8 @@ class TrajectoryPlannerROS(object):
             perpendicular = np.array([line_between[1], -line_between[0]])
             perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
             perpendicular = normalize(perpendicular)
-            perpendicular = perpendicular * np.abs(1 - np.dot(init_normalized_heading, final_normalized_heading)) * second_point_distance
+            perpendicular = perpendicular * np.abs(1 - np.dot(init_normalized_heading, final_normalized_heading))\
+                 * second_point_distance
             second_point = midpoint + perpendicular
             return [init_position, second_point, final_position]
         except:
@@ -216,7 +224,8 @@ class TrajectoryPlannerROS(object):
             fourth_point = ball_position
 
             # Get the second point by creating a spline between the first and third
-            points = self.create_spline(first_point, self.bot_init_heading, third_point, self.final_heading, self.SECOND_POINT_DISTANCE)
+            points = self.create_spline(first_point, self.bot_init_heading, third_point, self.final_heading,\
+                 self.SECOND_POINT_DISTANCE)
             points.append(fourth_point)
             self.main_points = np.array(points)
         except:
@@ -388,12 +397,14 @@ class TrajectoryPlannerROS(object):
                         # Calculate the angle between the current point and the last point
                         first_vector = self.bot_init_heading if x == 1 else points[x - 1] - points[x - 2]
                         second_vector = points[x] - points[x - 1]                    
-                        angle = np.degrees(np.arccos(np.dot(first_vector, second_vector) / (np.linalg.norm(first_vector) * np.linalg.norm(second_vector))))
+                        angle = np.degrees(np.arccos(np.dot(first_vector, second_vector) / (np.linalg.norm(first_vector)\
+                             * np.linalg.norm(second_vector))))
                         
                         # If our angle is > angle_limit, create another spline between those points
                         if (not np.isnan(angle) and angle > angle_limit):
                             final_vector = points[x + 1] - points[x] if x < len(points) - 1 else self.final_heading
-                            new_points = self.create_spline(points[x - 1], first_vector, points[x], final_vector, distance_over_time)
+                            new_points = self.create_spline(points[x - 1], first_vector, points[x], final_vector,\
+                                 distance_over_time)
                             distance_over_time *= distance_reduction
                             
                             # We don't want to include the generated spline's first point, as it's the same as our current point and we are trying to smooth it
