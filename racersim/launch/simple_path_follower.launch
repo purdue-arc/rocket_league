@@ -1,5 +1,0 @@
-<launch>
-  <node type="waypoint_controller_node" pkg="local_planner" name="waypoint_controller" output="screen" />
-  <node type="simple_path_tester_node" pkg="local_planner" name="simple_path_tester" output="screen" />
-  <node type="sim_node" pkg="racersim" name="sim_node" output="screen" />
-</launch>
