@@ -40,6 +40,9 @@ class Renderer(object):
     COLOR_GOAL = (133, 237, 171)        # Green
     COLOR_BALL = (213, 133, 237)        # Purple
     COLOR_WALL = (112, 48, 65)          # Dark-Red
+    COLOR_PNT = (245, 173, 66)          # Orange
+
+    SIZE_PNT = 20
 
     class ShutdownError(Exception):
         """Exception for when pygame is shut down"""
@@ -66,11 +69,16 @@ class Renderer(object):
         """Draws circles to the screen."""
         position = body.transform * fixture.shape.pos * self.scaling
         position = (position[0], self.windowSize - position[1])
+        #print position
         pygame.draw.circle(self._screen, color, 
             [int(x) for x in position],
              int(fixture.shape.radius * self.scaling))
 
-    def render(self, car, ball, goal, world):
+    def _draw_pnt(self, pnt, size, color):
+        """Draws point to the screen."""
+        pygame.draw.circle(self._screen, color, pnt, size)
+
+    def render(self, car, ball, goal, world, path=None):
         """Render the current state of the sim."""
 
         if self._thread is not None and self._thread.is_alive():
@@ -100,6 +108,14 @@ class Renderer(object):
         for wallBody in world.wallBodies:
             for fixture in wallBody.fixtures:
                 self._draw_polygon(wallBody, fixture, self.COLOR_WALL)
+
+        if path is not None:
+            for pose in path:
+                pnt = (int(pose.position.x * self.scaling), \
+                       int(self.windowSize - (pose.position.y * self.scaling)))
+                print(pnt)
+                self._draw_pnt(pnt, self.SIZE_PNT, self.COLOR_PNT)
+
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()

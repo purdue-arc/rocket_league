@@ -66,13 +66,13 @@ class WaypointControllerROS(object):
         self.is_debug = rospy.get_param('~is_debug', True)
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command', \
-            Twist, queue_size=1) 
+        self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command',
+                                                Twist, queue_size=1) 
         
         if self.is_debug:
-            self.lookahead_pnt = rospy.Publisher('lookahead_pnt', \
-                                                 PoseWithCovarianceStamped,
-                                                 queue_size=1)
+            self.lookahead_pnt_pub = rospy.Publisher('lookahead_pnt',
+                                                     PoseWithCovarianceStamped,
+                                                     queue_size=1)
 
         # Subscribers
         rospy.Subscriber('bot_path', PoseArray, self.path_cb)
@@ -135,7 +135,7 @@ class WaypointControllerROS(object):
                         pose.header.frame_id = self.frame_id
                         pose.pose.pose.position.x = intersect[0]
                         pose.pose.pose.position.y = intersect[1]
-                        self.lookahead_pnt.publish(pose)
+                        self.lookahead_pnt_pub.publish(pose)
 
                     break
             

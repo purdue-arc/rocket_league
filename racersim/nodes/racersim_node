@@ -29,7 +29,7 @@ License:
 # 3rd party modules
 from threading import Lock
 import rospy
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty, EmptyResponse
 
@@ -53,6 +53,7 @@ class RacerSimROS(object):
         self.lock = Lock()
         self.last_command = None
         self.last_time = None
+        self.path = None
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
@@ -67,6 +68,7 @@ class RacerSimROS(object):
 
         # Subscribers
         rospy.Subscriber('bot_velocity_command', Twist, self.command_cb)
+        rospy.Subscriber('bot_path', PoseArray, self.pose_arr_cb)
         
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -86,6 +88,10 @@ class RacerSimROS(object):
         self.last_time = None
         self.lock.release()
         return EmptyResponse()
+
+    def pose_arr_cb(self, pose_arr_msg):
+        """Callback for pose array messages."""
+        self.path = pose_arr_msg.poses
 
     def command_cb(self, command_msg):
         """Callback for command messages."""
@@ -109,6 +115,7 @@ class RacerSimROS(object):
                 angular = empty.angular
 
             self.sim.step(linear, angular, delta_t)
+            self.sim.render_path(self.path)
 
             # Publish ball pose with covariance and stamp
             ball_msg = PoseWithCovarianceStamped()
