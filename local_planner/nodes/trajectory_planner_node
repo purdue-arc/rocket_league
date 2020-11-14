@@ -97,6 +97,10 @@ class TrajectoryPlannerROS(object):
 
         # This function is swappable
         self.create_path_0()
+        # self.create_path_1(smoothness=2)
+        # self.create_path_2()
+        # self.create_path_3()
+        # self.create_path_4(angle_limit=30,smoothness=10, distance_reduction=0.65)
 
         self.publish_final_speed()
 
@@ -249,6 +253,11 @@ class TrajectoryPlannerROS(object):
         Take the main points, and create more points by smoothing it,
         Using Bezier curves, which draws a line connecting to all the midpoints. Repeat for desired level of smoothness
         Publish these points as an array, resulting in path
+        
+        Parameters needed:
+        - smoothness
+            - determines how many times the bezier algorithm should be applied
+            - the higher, the smoother it will be, but the more it will deviate from the original main points
         """
         # Check to make sure main points have been generated first
         if (len(self.main_points) != 0):
@@ -381,6 +390,17 @@ class TrajectoryPlannerROS(object):
         Take the main points, and create more points bot can follow by smoothing it,
         Using repetitive spline generation. If our points exceed angle limit, generate another spline between them
         Publish these points as an array, resulting in path
+
+        Parameters needed:
+        - angle_limit
+            - Max angle between the points
+            - Algorithm will repeat until angles < angle_limit, or after its iterated thru algorithm 'smoothness' times
+        - smoothness
+            - Max amount of times the algorithms should repeat
+            - Algorithm will repeat until angles < angle_limit, or after its iterated thru algorithm 'smoothness' times
+        - distance_reduction
+            - When repeating algorithm and generating splines, reduce the second_point_distance with distance_reduction
+            - distance_reduction * second_point_distance = new_second_point_distance
         """
         try:
             if (len(self.main_points) != 0):
