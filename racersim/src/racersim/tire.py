@@ -85,12 +85,12 @@ class Tire(object):
                              self.body.worldCenter, wake=True)
 
     def updateDrive(self, linearVelocity, dt):
-        if linearVelocity.x > self.maxForwardSpeed:
+        if linearVelocity.y > self.maxForwardSpeed:
             desiredSpeed = self.maxForwardSpeed
-        elif linearVelocity < self.maxBackwardSpeed:
+        elif linearVelocity.y < self.maxBackwardSpeed:
             desiredSpeed = self.maxBackwardSpeed
         else:
-            desiredSpeed = linearVelocity.x
+            desiredSpeed = linearVelocity.y
 
         currForwardNormal = self.body.GetWorldVector((0,1))
         currSpeed = Box2D.b2Dot(self.getForwardVelocity(), currForwardNormal)
