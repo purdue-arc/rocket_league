@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>launch</name>
+  <version>0.0.0</version>
+  <description>The launch package</description>
+
+  <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
+  <license>BSD 3 Clause</license>
+  <url type="website">https://www.purduearc.com</url>
+  <author email="baxter26@purdue.edu">James Baxter</author>
+  <author email="mccarth@purdue.edu">Harrison McCarty</author>
+  <author email="mcnama20@purdue.edu">Arianna McNamara</author>
+  <author email="vvvu@purdue.edu">Vincent Vu</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+</package>

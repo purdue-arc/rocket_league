@@ -51,19 +51,20 @@ class TrajectoryPlannerROS(object):
         self.bot_init_heading = None    # The initial heading of the car (map frame)
 
         # Info about the paths we're using
-        self.FINAL_SPEED = 1.0    # Final speed of the car. Currently set at 1, but can be changed
+        self.MOVE_SPEED = 0.08
+        self.FINAL_SPEED = 0.08    # Final speed of the car. Currently set at 1, but can be changed
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
 
         # These variables act as parameters to generate a path
-        self.DISTANCE_FROM_CAR = 1    # Multiplier for distance of 1st main point in front of the car
-        self.DISTANCE_FROM_BALL = 1    # Defines the distance away from the ball that our final (lined up) point should be
-        self.SECOND_POINT_DISTANCE = 1    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+        self.DISTANCE_FROM_CAR = 0.25    # Multiplier for distance of 1st main point in front of the car
+        self.DISTANCE_FROM_BALL = 0.08    # Defines the distance away from the ball that our final (lined up) point should be
+        self.SECOND_POINT_DISTANCE = 0.25    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
-        
+          
         # This variable determines the number of points published to the waypoint controller
-        self.RESOLUTION = 20
+        self.RESOLUTION = 5
 
         # Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
@@ -96,7 +97,11 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        self.create_path_0()
+        self.three_point_path()
+        # self.bezier_curves_path(smoothness=2)
+        # self.legrange_functions_path()
+        # self.hermine_splines_path()
+        # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
 
         self.publish_final_speed()
 
@@ -235,7 +240,7 @@ class TrajectoryPlannerROS(object):
             print("Uh oh,something went wrong with generating main points!")
             self.main_points = np.array([])
 
-    def create_path_0(self):
+    def three_point_path(self):
         """
         Publish the main points.
         Might be useful so on the real field, we can adjust main points first before doing complicated smoothing
@@ -244,11 +249,16 @@ class TrajectoryPlannerROS(object):
             self.path_pub.publish(self.poses_from_points(self.main_points))
 
 
-    def create_path_1(self, smoothness):
+    def bezier_curves_path(self, smoothness):
         """
         Take the main points, and create more points by smoothing it,
         Using Bezier curves, which draws a line connecting to all the midpoints. Repeat for desired level of smoothness
         Publish these points as an array, resulting in path
+        
+        Parameters needed:
+        - smoothness
+            - determines how many times the bezier algorithm should be applied
+            - the higher, the smoother it will be, but the more it will deviate from the original main points
         """
         # Check to make sure main points have been generated first
         if (len(self.main_points) != 0):
@@ -269,7 +279,7 @@ class TrajectoryPlannerROS(object):
             # Convert points to poses and publish
             self.path_pub.publish(self.poses_from_points(points))
 
-    def create_path_2(self):
+    def legrange_functions_path(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
         Using Legrange functions.
@@ -303,7 +313,7 @@ class TrajectoryPlannerROS(object):
         except:
             print("Whoops! We couldn't make a path.")
 
-    def create_path_3(self):
+    def hermine_splines_path(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
         Using Hermite Splines.
@@ -376,11 +386,22 @@ class TrajectoryPlannerROS(object):
             print("path failed")
 
 
-    def create_path_4(self, angle_limit, smoothness, distance_reduction):
+    def recursive_splines_path(self, angle_limit, smoothness, distance_reduction):
         """
         Take the main points, and create more points bot can follow by smoothing it,
         Using repetitive spline generation. If our points exceed angle limit, generate another spline between them
         Publish these points as an array, resulting in path
+
+        Parameters needed:
+        - angle_limit
+            - Max angle between the points
+            - Algorithm will repeat until angles < angle_limit, or after its iterated thru algorithm 'smoothness' times
+        - smoothness
+            - Max amount of times the algorithms should repeat
+            - Algorithm will repeat until angles < angle_limit, or after its iterated thru algorithm 'smoothness' times
+        - distance_reduction
+            - When repeating algorithm and generating splines, reduce the second_point_distance with distance_reduction
+            - distance_reduction * second_point_distance = new_second_point_distance
         """
         try:
             if (len(self.main_points) != 0):

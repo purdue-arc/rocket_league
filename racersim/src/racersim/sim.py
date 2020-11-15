@@ -26,6 +26,9 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+# 3rd party modules
+import math
+
 # Local classes
 from racersim.ball import Ball
 from racersim.car import Car, CarDef
@@ -59,6 +62,7 @@ class Sim(object):
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world)
         self.goal = Goal(self.world)
+        self.path = None
 
         if renderEnabled:
             self.renderer = Renderer(bounds, scaling=scaling)
@@ -76,7 +80,11 @@ class Sim(object):
         if self.renderEnabled:
             self._render()
 
+    def render_path(self, path):
+        self.path = path
+
     def reset(self):
+        """Reset simulator to original state."""
         self.world.DestroyBody(self.car.body)
         self.world.DestroyBody(self.ball.body)
         self.world.DestroyBody(self.goal.body)
@@ -94,9 +102,12 @@ class Sim(object):
         if self.renderEnabled:
             self._render()
 
+        self.car.set_angle(0)
+
     def _render(self):
         """Render the current state of the sim."""
         try:
-            self.renderer.render(self.car, self.ball, self.goal, self.world)
+            self.renderer.render(self.car, self.ball, self.goal, \
+                                 self.world, path=self.path)
         except Renderer.ShutdownError:
             self.renderEnabled = False

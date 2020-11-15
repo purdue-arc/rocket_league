@@ -1,4 +1,4 @@
-"""Contains the Goal class.
+"""Helper modules for the local planner package.
 
 License:
   BSD 3-Clause License
@@ -25,29 +25,3 @@ License:
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
-# 3rd party packages
-import Box2D
-import math
-from tf.transformations import quaternion_from_euler
-
-class Goal(object):
-    """Simulates goal position"""
-
-    def __init__(self, world, initPos=(0.55,0.1), width=0.1, height=0.1):
-        bodyDef = Box2D.b2BodyDef()
-        bodyDef.type = Box2D.b2_staticBody
-        bodyDef.position = initPos
-        self.body = world.CreateBody(bodyDef)
-
-        shape = Box2D.b2PolygonShape(box=(width,height))
-        fixtureDef = Box2D.b2FixtureDef(shape=shape)
-        fixtureDef.isSensor = True
-        self.body.CreateFixture(fixtureDef)
-
-    def getPoint(self):
-        return (self.body.position[0], self.body.position[1], 0)
-
-    def getQuaternion(self):
-        angle = self.body.angle % (2.0 * math.pi)
-        return quaternion_from_euler(0, 0, angle)
