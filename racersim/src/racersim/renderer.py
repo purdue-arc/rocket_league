@@ -64,6 +64,7 @@ class Renderer(object):
                     for v in fixture.shape.vertices]
         vertices = [(v[0], self.windowSize - v[1]) \
                     for v in vertices]
+	print('vertices: ' + str(vertices))
         pygame.draw.polygon(self._screen, color, vertices)
 
     def _draw_circle(self, body, fixture, color):
@@ -82,8 +83,8 @@ class Renderer(object):
     def _visualize_point(self, color, coords, size):
         for coord in coords:
 	    print('coord: ' + str(coord))
-            x = int(coord[0] * self.scaling)
-            y = int(- coord[1] * self.scaling)
+            x = int(-coord[1] * self.scaling)
+            y = int(self.windowSize - coord[0] * self.scaling)
 	    print('x: ' + str(x) + ', y: ' + str(y))
             pygame.draw.circle(self._screen, color, [x, y], size)
 
