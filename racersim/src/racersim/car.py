@@ -45,7 +45,7 @@ class CarDef(object):
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(0.5, 0.5), vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(0.75, 1.25), vertices=DEFAULT_VERTICES, 
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
                     maxAngle=30, turnSpeed=320):
@@ -111,13 +111,17 @@ class Car(object):
         angle = self.body.angle % (2.0 * math.pi)
         return quaternion_from_euler(0, 0, angle)
 
+    def set_angle(self, angle):
+        self._flJoint.SetLimits(angle, angle)
+        self._frJoint.SetLimits(angle, angle)
+
     def step(self, linearVelocity, angularVelocity, dt):
         for tire in self.tires:
             tire.updateFriction()
 
         for tire in self.tires:
             tire.updateDrive(linearVelocity, dt)
-        
+
         desiredAngleDt = angularVelocity.z * dt
         angleNow = self._flJoint.angle
         if abs(desiredAngleDt) > self.turnSpeed:

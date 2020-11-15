@@ -29,7 +29,7 @@ License:
 # 3rd party modules
 from threading import Lock
 import rospy
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty, EmptyResponse
 
@@ -53,8 +53,9 @@ class RacerSimROS(object):
         self.lock = Lock()
         self.last_command = None
         self.last_time = None
+        self.path = None
 
-        self.frame_id = rospy.get_param('~frame_id', 'sim')
+        self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
         rate = rospy.Rate(rospy.get_param('~rate', 45)) # Hz
 
@@ -67,6 +68,7 @@ class RacerSimROS(object):
 
         # Subscribers
         rospy.Subscriber('bot_velocity_command', Twist, self.command_cb)
+        rospy.Subscriber('bot_path', PoseArray, self.pose_arr_cb)
         
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -87,8 +89,12 @@ class RacerSimROS(object):
         self.lock.release()
         return EmptyResponse()
 
+    def pose_arr_cb(self, pose_arr_msg):
+        """Callback for pose array messages."""
+        self.path = pose_arr_msg.poses
+
     def command_cb(self, command_msg):
-        """Callback for command messages for snake."""
+        """Callback for command messages."""
         # Put this all in one tuple so that it is atomic
         self.last_command = (command_msg.linear, command_msg.angular)
 
@@ -109,14 +115,15 @@ class RacerSimROS(object):
                 angular = empty.angular
 
             self.sim.step(linear, angular, delta_t)
+            self.sim.render_path(self.path)
 
             # Publish ball pose with covariance and stamp
             ball_msg = PoseWithCovarianceStamped()
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id
             ball_point = self.sim.ball.getPoint()
-            ball_msg.pose.pose.position.x = ball_point[0]
-            ball_msg.pose.pose.position.y = ball_point[1]
+            ball_msg.pose.pose.position.x = ball_point[1]
+            ball_msg.pose.pose.position.y = -ball_point[0]
             ball_quat = self.sim.ball.getQuaternion()
             ball_msg.pose.pose.orientation.w = ball_quat[0]
             ball_msg.pose.pose.orientation.z = ball_quat[3]
@@ -127,11 +134,11 @@ class RacerSimROS(object):
             bot_msg.header.stamp = now
             bot_msg.header.frame_id = self.frame_id
             bot_point = self.sim.car.getPoint()
-            bot_msg.pose.pose.position.x = bot_point[0]
-            bot_msg.pose.pose.position.y = bot_point[1]
+            bot_msg.pose.pose.position.x = bot_point[1]
+            bot_msg.pose.pose.position.y = -bot_point[0]
             bot_quat = self.sim.car.getQuaternion()
-            bot_msg.pose.pose.orientation.w = bot_quat[0]
-            bot_msg.pose.pose.orientation.z = bot_quat[3]
+            bot_msg.pose.pose.orientation.z = bot_quat[2]
+            bot_msg.pose.pose.orientation.w = bot_quat[3]
             linear = self.sim.car.body.linearVelocity
             bot_msg.twist.twist.linear.x = linear[0]
             bot_msg.twist.twist.linear.y = linear[1]
@@ -144,8 +151,8 @@ class RacerSimROS(object):
             goal_msg.header.stamp = now
             goal_msg.header.frame_id = self.frame_id
             goal_point = self.sim.goal.getPoint()
-            goal_msg.pose.pose.position.x = goal_point[0]
-            goal_msg.pose.pose.position.y = goal_point[1]
+            goal_msg.pose.pose.position.x = goal_point[1]
+            goal_msg.pose.pose.position.y = -goal_point[0]
             goal_quat = self.sim.goal.getQuaternion()
             goal_msg.pose.pose.orientation.w = goal_quat[0]
             goal_msg.pose.pose.orientation.z = goal_quat[3]

@@ -51,19 +51,20 @@ class TrajectoryPlannerROS(object):
         self.bot_init_heading = None    # The initial heading of the car (map frame)
 
         # Info about the paths we're using
-        self.FINAL_SPEED = 1.0    # Final speed of the car. Currently set at 1, but can be changed
+        self.MOVE_SPEED = 0.08
+        self.FINAL_SPEED = 0.08    # Final speed of the car. Currently set at 1, but can be changed
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
 
         # These variables act as parameters to generate a path
-        self.DISTANCE_FROM_CAR = 1    # Multiplier for distance of 1st main point in front of the car
-        self.DISTANCE_FROM_BALL = 1    # Defines the distance away from the ball that our final (lined up) point should be
-        self.SECOND_POINT_DISTANCE = 1    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+        self.DISTANCE_FROM_CAR = 0.25    # Multiplier for distance of 1st main point in front of the car
+        self.DISTANCE_FROM_BALL = 0.08    # Defines the distance away from the ball that our final (lined up) point should be
+        self.SECOND_POINT_DISTANCE = 0.25    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
-        
+          
         # This variable determines the number of points published to the waypoint controller
-        self.RESOLUTION = 20
+        self.RESOLUTION = 5
 
         # Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)

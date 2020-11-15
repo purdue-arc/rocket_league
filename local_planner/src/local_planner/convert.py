@@ -1,4 +1,6 @@
-"""Contains the Goal class.
+#!/usr/bin/env python
+
+"""Contains ROS message conversions.
 
 License:
   BSD 3-Clause License
@@ -26,28 +28,47 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-# 3rd party packages
-import Box2D
-import math
-from tf.transformations import quaternion_from_euler
+import numpy as np
 
-class Goal(object):
-    """Simulates goal position"""
+def odom_to_array(msg):
+    """Convert odom msg to numpy arrays."""
+    
+    p, q, pc = pose_covar_to_array(msg.pose)
+    l, q, tc = twist_covar_to_array(msg.twist)
+    
+    return p, q, pc, l, q, tc
 
-    def __init__(self, world, initPos=(0.55,0.1), width=0.1, height=0.1):
-        bodyDef = Box2D.b2BodyDef()
-        bodyDef.type = Box2D.b2_staticBody
-        bodyDef.position = initPos
-        self.body = world.CreateBody(bodyDef)
+def pose_covar_to_array(msg):
+    """Convert pose with covariance msg to numpy arrays."""
 
-        shape = Box2D.b2PolygonShape(box=(width,height))
-        fixtureDef = Box2D.b2FixtureDef(shape=shape)
-        fixtureDef.isSensor = True
-        self.body.CreateFixture(fixtureDef)
+    p, q = pose_to_array(msg.pose)
+    c = np.array(msg.covariance)
+    c = np.reshape(c, (6,6))
 
-    def getPoint(self):
-        return (self.body.position[0], self.body.position[1], 0)
+    return p, q, c
 
-    def getQuaternion(self):
-        angle = self.body.angle % (2.0 * math.pi)
-        return quaternion_from_euler(0, 0, angle)
+def twist_covar_to_array(msg):
+    """Convert twist with covariance msg to numpy arrays."""
+
+    l, a = twist_to_array(msg.twist)
+    c = np.array(msg.covariance)
+    c = np.reshape(c, (6,6))
+
+    return l, a, c
+
+def pose_to_array(msg):
+    """Convert pose msg to numpy arrays."""
+
+    p = np.array([msg.position.x, msg.position.y, msg.position.z])
+    q = np.array([msg.orientation.x, msg.orientation.y, \
+                    msg.orientation.z, msg.orientation.w])
+
+    return p, q
+
+def twist_to_array(msg):
+    """Convert twist msg to numpy arrays."""
+
+    l = np.array([msg.linear.x, msg.linear.y, msg.linear.z])
+    a = np.array([msg.angular.x, msg.angular.y, msg.angular.z])
+
+    return l, a
