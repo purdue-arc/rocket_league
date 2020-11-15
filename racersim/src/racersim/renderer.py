@@ -126,7 +126,7 @@ class Renderer(object):
                 self._draw_pnt(pnt, self.SIZE_PNT, self.COLOR_PNT)
 
         #Renders the lookahead point
-        #self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], 10)
+        self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], 10)
 
 	#Renders the path points
 	self._visualize_point(self.COLOR_PNT, path_points, 10)
