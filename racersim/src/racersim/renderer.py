@@ -41,6 +41,7 @@ class Renderer(object):
     COLOR_BALL = (213, 133, 237)        # Purple
     COLOR_WALL = (112, 48, 65)          # Dark-Red
     COLOR_PNT = (245, 173, 66)          # Orange
+    COLOR_LOOKAHEAD = (255, 255, 255)   # White
 
     SIZE_PNT = 20
 
@@ -78,7 +79,14 @@ class Renderer(object):
         """Draws point to the screen."""
         pygame.draw.circle(self._screen, color, pnt, size)
 
-    def render(self, car, ball, goal, world, path=None):
+    def _visualize_point(self, color, coords, size):
+        for coord in coords:
+            x = int(coords[0] * self.scaling)
+            y = int(self.windowSize / 2.0 - coords[1] * self.scaling)
+            #print('lookahead: ' + str([x,y]))
+            pygame.draw.circle(self._screen, color, [x, y], size)
+
+    def render(self, car, ball, goal, world, lookahead, path=None):
         """Render the current state of the sim."""
 
         if self._thread is not None and self._thread.is_alive():
@@ -116,6 +124,8 @@ class Renderer(object):
                 print(pnt)
                 self._draw_pnt(pnt, self.SIZE_PNT, self.COLOR_PNT)
 
+        #Renders the lookahead point
+        self._visualize_point(self.COLOR_LOOKAHEAD, lookahead, 50)
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()
