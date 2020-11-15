@@ -1,0 +1,166 @@
+#!/usr/bin/env python
+
+"""Contains the WaypointControllerROS Node.
+
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+  3. Neither the name of the copyright holder nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
+# 3rd party modules
+import rospy
+import numpy
+import math
+from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
+from nav_msgs.msg import Odometry
+
+# Local modules
+import local_planner.convert as convert
+import local_planner.pure_pursuit as pursuit
+
+class WaypointControllerROS(object):
+    """A node to ensure the car follows a given trajectory."""
+
+    def __init__(self):
+        rospy.init_node('waypoint_controller_node')
+
+        self.path_start_time = None
+        self.path = None
+        self.last_pose_idx = None
+        self.final_speed = None
+
+        self.frame_id = rospy.get_param('~frame_id', 'map')
+
+        # Radius to search for intersections
+        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.25)
+
+        # Coeffient to adjust lookahead distance by speed
+        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.1)
+
+        # Number of waypoints to search per pass (-1 is full path)
+        self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
+
+        # Enables debug publishers such as lookahead_pnt pose
+        self.is_debug = rospy.get_param('~is_debug', True)
+
+        # Publishers
+        self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command',
+                                                Twist, queue_size=1) 
+        
+        if self.is_debug:
+            self.lookahead_pnt_pub = rospy.Publisher('lookahead_pnt',
+                                                     PoseWithCovarianceStamped,
+                                                     queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber('bot_path', PoseArray, self.path_cb)
+        rospy.Subscriber('bot_final_speed', Float64, self.final_speed_cb)
+        rospy.Subscriber('bot_odom', Odometry, self.odom_cb)
+
+        rospy.spin()
+
+    def path_cb(self, pose_arr_msg):
+        """Creates path using pose array."""
+        self.path_start_time = pose_arr_msg.header.stamp
+        self.path = pose_arr_msg.poses
+        self.last_pnt_idx = 0
+
+    def final_speed_cb(self, float64_msg):
+        """Sets final path speed with a float64 message."""
+        self.final_speed = float64_msg.data
+
+    def odom_cb(self, odom_msg):
+        """Updates car odometry and follows current path."""
+        if self.path:
+            if self.last_pose_idx == None:
+                self.last_pose_idx = 0
+            
+            # Converting odom msg to numpy arrays
+            bot_pos, bot_orient, _ = convert.pose_covar_to_array(odom_msg.pose)
+            bot_linear, bot_angular, _ = convert.twist_covar_to_array(odom_msg.twist)
+
+            # Set lookahead dist by lookahead gain and current speed
+            lookhead_drawback = numpy.linalg.norm(bot_linear) \
+                                * self.lookahead_gain
+            lookahead_dist = self.lookahead_dist - lookhead_drawback
+                                
+            # Set number of waypoints to check
+            if self.lookahead_pnts == -1:
+                lookahead_pnts = len(self.path)
+            else:
+                lookahead_pnts = self.lookahead_pnts
+
+            # Find next valid intersection along path
+            intersect = None
+            final_pose_idx = min(len(self.path) - 1, \
+                                 self.last_pose_idx + lookahead_pnts)
+            for i in range(self.last_pose_idx, final_pose_idx):
+                start_pos, _ = convert.pose_to_array(self.path[i])
+                end_pos, _ = convert.pose_to_array(self.path[i + 1])
+
+                path_seg = end_pos - start_pos
+                bot_path = start_pos - bot_pos
+
+                intersect = pursuit.find_intersection(path_seg, bot_path, \
+                                                      lookahead_dist)
+
+                if intersect is not None:
+                    self.last_pose_idx = i
+                    intersect += start_pos
+
+                    if self.is_debug:
+                        pose = PoseWithCovarianceStamped()
+                        pose.header.frame_id = self.frame_id
+                        pose.pose.pose.position.x = intersect[0]
+                        pose.pose.pose.position.y = intersect[1]
+                        self.lookahead_pnt_pub.publish(pose)
+
+                    break
+            
+            # If no intersection found, stop moving
+            if intersect is None:
+                twist = Twist()
+                twist.linear.y = self.final_speed
+                twist.angular.z = 0
+                self.bot_velocity_cmd.publish(twist)
+                return
+
+            # Calculate angular velocity
+            d_angle = pursuit.calculate_angle(intersect, bot_pos, \
+                                              bot_orient, lookahead_dist)
+            arc_dist = pursuit.calculate_dist(intersect, bot_pos, \
+                                              bot_orient, lookahead_dist)
+            angular_vel = pursuit.get_angular_speed(self.final_speed, \
+                                                    d_angle, arc_dist)
+            angular_vel -= odom_msg.twist.twist.angular.z
+
+            # Publish command data
+            twist = Twist()
+            twist.linear.y = self.final_speed
+            twist.angular.z = angular_vel
+            self.bot_velocity_cmd.publish(twist)
+            
+if __name__ == "__main__":
+    WaypointControllerROS()
