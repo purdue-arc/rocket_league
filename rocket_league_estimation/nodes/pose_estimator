@@ -31,91 +31,67 @@ from math import sin, cos
 
 # ROS
 import rospy
-from apriltag_ros.msg import AprilTagDetectionArray
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
-from tf.transformations import *
+from tf.transformations import euler_from_quaternion
 
 class OdomEstimator(object):
     """Simple node that derives velocity from position."""
     def __init__(self):
         rospy.init_node('pose_estimation')
 
+        # variables to store previous pose and timestamp
         self.last_pose = None
         self.last_time = None
 
-        self.tag_id = rospy.get_param('~tag_id')
-        self.map = rospy.get_param('~map', 'map')
+        # params
         self.base_link = rospy.get_param('~base_link', 'base_link')
-        self.offset_theta = rospy.get_param('~offset/theta', 0.0)
-        self.offset_x = rospy.get_param('~offset/x', 0.0)
-        self.offset_y = rospy.get_param('~offset/y', 0.0)
 
-        # Publishers
+        # publishers
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
 
-        # Subscribers
-        rospy.Subscriber('tag_detections', AprilTagDetectionArray, self.detection_cb)
+        # subscribers
+        rospy.Subscriber('pose', PoseWithCovarianceStamped, self.pose_cb)
 
         rospy.spin()
 
-    def detection_cb(self, detection_msg):
+    def pose_cb(self, pose_msg):
         """Callback for detection messages."""
-        # extract relevant info
-        header = detection_msg.header
-        pose_cov = None
-        for detection in detection_msg.detections:
-            if detection.id[0] == self.tag_id:
-                pose_cov = detection.pose.pose
-
-        if pose_cov is None:
-            rospy.logwarn_throttle(2, "no matching tag id found")
-            return
-
-
-
-        quat = (pose_cov.pose.orientation.x,
-                pose_cov.pose.orientation.y,
-                pose_cov.pose.orientation.z,
-                pose_cov.pose.orientation.w)
-
-        # hack for camera tf:
-        rotation = quaternion_from_euler(3.14, 0.0, 3.14)
-        quat = quaternion_multiply(quat, rotation)
-
+        # extract bot position & angle
+        x = pose_msg.pose.pose.position.x
+        y = pose_msg.pose.pose.position.y
+        quat = (pose_msg.pose.pose.orientation.x,
+                pose_msg.pose.pose.orientation.y,
+                pose_msg.pose.pose.orientation.z,
+                pose_msg.pose.pose.orientation.w)
         (__, __, theta) = euler_from_quaternion(quat)
 
-        theta += self.offset_theta
-        x = pose_cov.pose.position.x + self.offset_x*cos(theta) + self.offset_y*sin(theta)
-        y = pose_cov.pose.position.y + self.offset_x*sin(theta) + self.offset_y*cos(theta)
-
+        # publish odom if there is a previous timestamp
         if self.last_time is not None:
+            # create new odometry message
             odom_msg = Odometry()
-            odom_msg.header = header
-            odom_msg.header.frame_id = self.map
+            odom_msg.header = pose_msg.header
             odom_msg.child_frame_id = self.base_link
-            odom_msg.pose = pose_cov
+            odom_msg.pose = pose_msg.pose
 
-            # deltas
-            dt = (self.last_time - header.stamp).to_sec()
+            # deltas to calculate twist velocities
+            dx = x - self.last_pose[0]
+            dy = y - self.last_pose[1]
+            dt = (self.last_time - pose_msg.header.stamp).to_sec()
             d_theta = theta - self.last_pose[2]
 
-            # global frame
-            dX = x - self.last_pose[0]
-            dY = y - self.last_pose[1]
-
-            # local frame
-            dx = dX*cos(theta) + dY*sin(theta)
-            dy = dX*sin(theta) + dY*cos(theta)
-
-            # velocities
+            # set odom velocities
             odom_msg.twist.twist.linear.x = dx / dt
             odom_msg.twist.twist.linear.y = dy / dt
             odom_msg.twist.twist.angular.z = d_theta / dt
 
+            # publish odom message
             self.odom_pub.publish(odom_msg)
 
-        self.last_time = header.stamp
+        # reset last pose and timestamp
+        self.last_time = pose_msg.header.stamp
         self.last_pose = (x, y, theta)
 
 if __name__ == "__main__":
     OdomEstimator()
+

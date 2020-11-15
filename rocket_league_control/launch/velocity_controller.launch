@@ -1,0 +1,5 @@
+<launch>
+  <node type="velocity_controller" pkg="rocket_league_control" name="velocity_controller">
+    <rosparam command="load" file="$(find rocket_league_control)/params/velocity_controller.yaml" />
+  </node>
+</launch>
