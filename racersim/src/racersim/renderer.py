@@ -81,12 +81,13 @@ class Renderer(object):
 
     def _visualize_point(self, color, coords, size):
         for coord in coords:
-            x = int(coords[0] * self.scaling)
-            y = int(self.windowSize / 2.0 - coords[1] * self.scaling)
-            #print('lookahead: ' + str([x,y]))
+	    print('coord: ' + str(coord))
+            x = int(coord[0] * self.scaling)
+            y = int(- coord[1] * self.scaling)
+	    print('x: ' + str(x) + ', y: ' + str(y))
             pygame.draw.circle(self._screen, color, [x, y], size)
 
-    def render(self, car, ball, goal, world, lookahead, path=None):
+    def render(self, car, ball, goal, world, lookahead, path_points, path=None):
         """Render the current state of the sim."""
 
         if self._thread is not None and self._thread.is_alive():
@@ -125,7 +126,10 @@ class Renderer(object):
                 self._draw_pnt(pnt, self.SIZE_PNT, self.COLOR_PNT)
 
         #Renders the lookahead point
-        self._visualize_point(self.COLOR_LOOKAHEAD, lookahead, 10)
+        #self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], 10)
+
+	#Renders the path points
+	self._visualize_point(self.COLOR_PNT, path_points, 10)
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()

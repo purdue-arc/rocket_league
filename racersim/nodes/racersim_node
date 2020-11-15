@@ -55,6 +55,7 @@ class RacerSimROS(object):
         self.last_time = None
         self.path = None
         self.lookahead = [0, 0]
+	self.path_points = [[0,0]]
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
@@ -94,6 +95,19 @@ class RacerSimROS(object):
     def pose_arr_cb(self, pose_arr_msg):
         """Callback for pose array messages."""
         self.path = pose_arr_msg.poses
+	self.path_points = []
+
+	print('pose_arr_msg.poses')
+	print(pose_arr_msg.poses)
+	print()
+
+	for point in pose_arr_msg.poses:
+		x = point.position.x
+		y = point.position.y
+		self.path_points.append([x, y])
+
+	if self.path_points is None:
+		self.path_points = [[0, 0]]
 
     def lookahead_cb(self, pose_msg):
         """Callback for lookahead_pnt messages."""
@@ -169,6 +183,9 @@ class RacerSimROS(object):
 
             #Update the lookahead point
             self.sim.lookahead = self.lookahead
+
+	    #Update the path points
+	    self.sim.path_points = self.path_points
 
         self.last_time = now
         self.lock.release()
