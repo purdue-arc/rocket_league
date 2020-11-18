@@ -177,7 +177,7 @@ class TrajectoryPlannerROS(object):
 
             # Generate quaternion for orientation (they just point at the next point in the path)
             if i + 1 < len(points):
-                yaw = np.arctan2(points[i][1] - points[i + 1][1],points[i][0])
+                yaw = np.arctan2(points[i][1] - points[i + 1][1],points[i][0] - points[i + 1][0])
             else:
                 yaw = np.arctan2(self.final_heading[1],self.final_heading[0])
             (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
