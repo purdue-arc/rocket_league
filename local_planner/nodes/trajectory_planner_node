@@ -52,7 +52,7 @@ class TrajectoryPlannerROS(object):
 
         # Info about the paths we're using
         self.MOVE_SPEED = 0.08
-        self.FINAL_SPEED = 0.08    # Final speed of the car. Currently set at 1, but can be changed
+        self.FINAL_SPEED = 0.6    # Final speed of the car. Currently set at 1, but can be changed
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
@@ -62,9 +62,9 @@ class TrajectoryPlannerROS(object):
         self.DISTANCE_FROM_BALL = 0.08    # Defines the distance away from the ball that our final (lined up) point should be
         self.SECOND_POINT_DISTANCE = 0.25    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
-          
+
         # This variable determines the number of points published to the waypoint controller
-        self.RESOLUTION = 5
+        self.RESOLUTION = 10
 
         # Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
@@ -97,11 +97,11 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        self.three_point_path()
+        # self.three_point_path()
         # self.bezier_curves_path(smoothness=2)
-        # self.legrange_functions_path()
+        self.legrange_functions_path()
         # self.hermine_splines_path()
-        # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
+        # self.recursive_splines_path(angle_limit=30,smoothness=100, distance_reduction=0.65)
 
         self.publish_final_speed()
 
@@ -152,7 +152,7 @@ class TrajectoryPlannerROS(object):
         # Final vector is simply the goal's position minus the ball's position
         self.final_heading = np.array([self.goal_pose.position.x - self.ball_pose.position.x,\
              self.goal_pose.position.y - self.ball_pose.position.y])
-        
+
         # Normalize the vector for future calculations
         self.final_normalized_heading = normalize(self.final_heading)
 
@@ -181,7 +181,7 @@ class TrajectoryPlannerROS(object):
             else:
                 yaw = np.arctan2(self.final_heading[1],self.final_heading[0])
             (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
-                new_pose.orientation.w) = quaternion_from_euler(0,0,yaw) 
+                new_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
             #new_pose.orientation.w = 1
             pose_array_msg.poses.append(new_pose)
         print("ready to publish")
@@ -254,7 +254,7 @@ class TrajectoryPlannerROS(object):
         Take the main points, and create more points by smoothing it,
         Using Bezier curves, which draws a line connecting to all the midpoints. Repeat for desired level of smoothness
         Publish these points as an array, resulting in path
-        
+
         Parameters needed:
         - smoothness
             - determines how many times the bezier algorithm should be applied
@@ -420,17 +420,17 @@ class TrajectoryPlannerROS(object):
                     for x in range(1, len(points)):
                         # Calculate the angle between the current point and the last point
                         first_vector = self.bot_init_heading if x == 1 else points[x - 1] - points[x - 2]
-                        second_vector = points[x] - points[x - 1]                    
+                        second_vector = points[x] - points[x - 1]
                         angle = np.degrees(np.arccos(np.dot(first_vector, second_vector) / (np.linalg.norm(first_vector)\
                              * np.linalg.norm(second_vector))))
-                        
+
                         # If our angle is > angle_limit, create another spline between those points
                         if (not np.isnan(angle) and angle > angle_limit):
                             final_vector = points[x + 1] - points[x] if x < len(points) - 1 else self.final_heading
                             new_points = self.create_spline(points[x - 1], first_vector, points[x], final_vector,\
                                  distance_over_time)
                             distance_over_time *= distance_reduction
-                            
+
                             # We don't want to include the generated spline's first point, as it's the same as our current point and we are trying to smooth it
                             temp.append(new_points[1])
                             temp.append(new_points[2])
@@ -438,14 +438,14 @@ class TrajectoryPlannerROS(object):
                         elif (not np.isnan(angle)):
                             # If our angle is fine, do nothing to it
                             temp.append(points[x])
-                    
+
                     # Reassign our current points to the new smoothed ones
                     points = temp
-                    
+
                     # If we are already smoothed, don't bother looping again
                     if (smoothed):
                         break
-                
+
                 # Add out ball's position back
                 points.append(self.main_points[3])
                 self.path_pub.publish(self.poses_from_points(points))
