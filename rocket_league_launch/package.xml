@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>launch</name>
+  <name>rocket_league_launch</name>
   <version>0.0.0</version>
   <description>The launch package</description>
 
