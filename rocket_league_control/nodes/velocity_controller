@@ -33,7 +33,7 @@ from pid_control import PIDController
 import rospy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32
 
 class VelocityControllerROS(object):
     """ROS wrapper for the snake game."""
@@ -51,6 +51,7 @@ class VelocityControllerROS(object):
             rospy.get_param('~throttle/anti_windup'),
             rospy.get_param('~throttle/deadband')
         )
+        self.throttle_static_friction = rospy.get_param('~throttle/static_friction')
         self.throttle_kff = rospy.get_param('~throttle/gains/kff')
         self.throttle_limits = (
             rospy.get_param('~throttle/limits/min'),
@@ -74,12 +75,12 @@ class VelocityControllerROS(object):
         rate = rospy.Rate(rospy.get_param('~rate', 30)) # Hz
 
         # Publishers
-        self.throttle_pub = rospy.Publisher('effort/throttle', Float64, queue_size=1)
-        self.steering_pub = rospy.Publisher('effort/steering', Float64, queue_size=1)
+        self.throttle_pub = rospy.Publisher('effort/throttle', Float32, queue_size=1)
+        self.steering_pub = rospy.Publisher('effort/steering', Float32, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('cmd_vel', Twist, self.command_cb)
-        rospy.Subscriber('odom', Twist, self.odom_cb)
+        rospy.Subscriber('odom', Odometry, self.odom_cb)
 
         while not rospy.is_shutdown():
             self.loop_once()
@@ -113,10 +114,15 @@ class VelocityControllerROS(object):
 
             if ((now - time_ref) < self.timeout
                     and (now - time_est) < self.timeout):
+
                 # feed forward
                 throttle_effort = velocity_ref * self.throttle_kff
                 steering_effort = yaw_rate_ref * self.steering_kff
-                
+
+                # static friction
+                if abs(velocity_ref) > 0.05:
+                    throttle_effort += velocity_ref / abs(velocity_ref) * self.throttle_static_friction
+
                 # feedback
                 delta_t = (now - self.last_time).to_sec()
                 throttle_effort += self.throttle_controller.step(
@@ -125,7 +131,7 @@ class VelocityControllerROS(object):
                     yaw_rate_ref - yaw_rate_est, delta_t)
 
                 self.throttle_pub.publish(self.clamp(throttle_effort, self.throttle_limits))
-                self.steering_pub.publish(self.clamp(steering_effort, self.steering_limits))
+                self.steering_pub.publish(-self.clamp(steering_effort, self.steering_limits))
 
         self.last_time = now
 
