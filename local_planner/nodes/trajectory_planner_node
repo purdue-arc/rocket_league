@@ -51,20 +51,20 @@ class TrajectoryPlannerROS(object):
         self.bot_init_heading = None    # The initial heading of the car (map frame)
 
         # Info about the paths we're using
-        self.MOVE_SPEED = rospy.get_param('~MOVE_SPEED', '0.08')
-        self.FINAL_SPEED = rospy.get_param('~FINAL_SPEED', '0.08')    # Final speed of the car. Currently set at 1, but can be changed
+        self.MOVE_SPEED = rospy.get_param('~MOVE_SPEED', 0.08)
+        self.FINAL_SPEED = rospy.get_param('~FINAL_SPEED', 0.08)    # Final speed of the car. Currently set at 1, but can be changed
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
 
         # These variables act as parameters to generate a path
-        self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR', '0.25')    # Multiplier for distance of 1st main point in front of the car
-        self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', '0.08')    # Defines the distance away from the ball that our final (lined up) point should be
-        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', '0.25')    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+        self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.25)    # Multiplier for distance of 1st main point in front of the car
+        self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
+        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
           
         # This variable determines the number of points published to the waypoint controller
-        self.RESOLUTION = 5
+        self.RESOLUTION = rospy.get_param('~RESOLUTION', 5) 
 
         # Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
@@ -97,10 +97,10 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        self.three_point_path()
+        #self.three_point_path()
         # self.bezier_curves_path(smoothness=2)
         # self.legrange_functions_path()
-        # self.hermine_splines_path()
+        #self.hermine_splines_path()
         # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
 
         self.publish_final_speed()
