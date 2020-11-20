@@ -99,8 +99,8 @@ class TrajectoryPlannerROS(object):
         # This function is swappable
         #self.three_point_path()
         # self.bezier_curves_path(smoothness=2)
-        # self.legrange_functions_path()
-        #self.hermine_splines_path()
+        # self.lagrange_functions_path()
+        #self.hermite_splines_path()
         # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
 
         self.publish_final_speed()
@@ -279,10 +279,10 @@ class TrajectoryPlannerROS(object):
             # Convert points to poses and publish
             self.path_pub.publish(self.poses_from_points(points))
 
-    def legrange_functions_path(self):
+    def lagrange_functions_path(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
-        Using Legrange functions.
+        Using Lagrange functions.
         Publish these points as an array, resulting in path
         """
         try:
@@ -313,7 +313,7 @@ class TrajectoryPlannerROS(object):
         except:
             print("Whoops! We couldn't make a path.")
 
-    def hermine_splines_path(self):
+    def hermite_splines_path(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
         Using Hermite Splines.
