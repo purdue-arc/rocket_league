@@ -51,20 +51,29 @@ class TrajectoryPlannerROS(object):
         self.bot_init_heading = None    # The initial heading of the car (map frame)
 
         # Info about the paths we're using
+<<<<<<< HEAD
         self.MOVE_SPEED = 0.08
         self.FINAL_SPEED = 0.6    # Final speed of the car. Currently set at 1, but can be changed
+=======
+        self.MOVE_SPEED = rospy.get_param('~MOVE_SPEED', 0.08)
+        self.FINAL_SPEED = rospy.get_param('~FINAL_SPEED', 0.08)    # Final speed of the car. Currently set at 1, but can be changed
+>>>>>>> traj-planner
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
 
         # These variables act as parameters to generate a path
-        self.DISTANCE_FROM_CAR = 0.25    # Multiplier for distance of 1st main point in front of the car
-        self.DISTANCE_FROM_BALL = 0.08    # Defines the distance away from the ball that our final (lined up) point should be
-        self.SECOND_POINT_DISTANCE = 0.25    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+        self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.25)    # Multiplier for distance of 1st main point in front of the car
+        self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
+        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
 
         # This variable determines the number of points published to the waypoint controller
+<<<<<<< HEAD
         self.RESOLUTION = 10
+=======
+        self.RESOLUTION = rospy.get_param('~RESOLUTION', 5) 
+>>>>>>> traj-planner
 
         # Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
@@ -81,10 +90,23 @@ class TrajectoryPlannerROS(object):
     def trigger_cb(self, trigger_message):
         """ Callback to run loop_once() when node is triggered"""
         while not rospy.is_shutdown():
+            self.MOVE_SPEED = rospy.get_param('~MOVE_SPEED', 0.08)
+            self.FINAL_SPEED = rospy.get_param('~FINAL_SPEED', 0.08)    # Final speed of the car. Currently set at 1, but can be changed
+
+            # These variables act as parameters to generate a path
+            self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.25)    # Multiplier for distance of 1st main point in front of the car
+            self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
+            self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+                                            # (adjusts curvature somewhat)
+            
+            # This variable determines the number of points published to the waypoint controller
+            self.RESOLUTION = rospy.get_param('~RESOLUTION', 5) 
+
             if self.check_if_GO():
                 self.loop_once()
                 break
             else:
+                print("no go")
                 try:
                     rospy.Rate(1).sleep()
                 except rospy.ROSInterruptException:
@@ -97,11 +119,19 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
+<<<<<<< HEAD
         # self.three_point_path()
         # self.bezier_curves_path(smoothness=2)
         self.legrange_functions_path()
         # self.hermine_splines_path()
         # self.recursive_splines_path(angle_limit=30,smoothness=100, distance_reduction=0.65)
+=======
+        self.four_point_path()
+        # self.bezier_curves_path(smoothness=2)
+        # self.lagrange_functions_path()
+        #self.hermite_splines_path()
+        # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
+>>>>>>> traj-planner
 
         self.publish_final_speed()
 
@@ -177,7 +207,7 @@ class TrajectoryPlannerROS(object):
 
             # Generate quaternion for orientation (they just point at the next point in the path)
             if i + 1 < len(points):
-                yaw = np.arctan2(points[i][1] - points[i + 1][1],points[i][0])
+                yaw = np.arctan2(points[i][1] - points[i + 1][1],points[i][0] - points[i + 1][0])
             else:
                 yaw = np.arctan2(self.final_heading[1],self.final_heading[0])
             (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
@@ -240,7 +270,7 @@ class TrajectoryPlannerROS(object):
             print("Uh oh,something went wrong with generating main points!")
             self.main_points = np.array([])
 
-    def three_point_path(self):
+    def four_point_path(self):
         """
         Publish the main points.
         Might be useful so on the real field, we can adjust main points first before doing complicated smoothing
@@ -279,10 +309,10 @@ class TrajectoryPlannerROS(object):
             # Convert points to poses and publish
             self.path_pub.publish(self.poses_from_points(points))
 
-    def legrange_functions_path(self):
+    def lagrange_functions_path(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
-        Using Legrange functions.
+        Using Lagrange functions.
         Publish these points as an array, resulting in path
         """
         try:
@@ -313,7 +343,7 @@ class TrajectoryPlannerROS(object):
         except:
             print("Whoops! We couldn't make a path.")
 
-    def hermine_splines_path(self):
+    def hermite_splines_path(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
         Using Hermite Splines.
