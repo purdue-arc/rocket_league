@@ -97,6 +97,7 @@ class TrajectoryPlannerROS(object):
                 self.loop_once()
                 break
             else:
+                print("no go")
                 try:
                     rospy.Rate(1).sleep()
                 except rospy.ROSInterruptException:
@@ -109,7 +110,7 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        #self.three_point_path()
+        self.four_point_path()
         # self.bezier_curves_path(smoothness=2)
         # self.lagrange_functions_path()
         #self.hermite_splines_path()
@@ -252,7 +253,7 @@ class TrajectoryPlannerROS(object):
             print("Uh oh,something went wrong with generating main points!")
             self.main_points = np.array([])
 
-    def three_point_path(self):
+    def four_point_path(self):
         """
         Publish the main points.
         Might be useful so on the real field, we can adjust main points first before doing complicated smoothing
