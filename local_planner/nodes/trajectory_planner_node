@@ -51,13 +51,8 @@ class TrajectoryPlannerROS(object):
         self.bot_init_heading = None    # The initial heading of the car (map frame)
 
         # Info about the paths we're using
-<<<<<<< HEAD
-        self.MOVE_SPEED = 0.08
-        self.FINAL_SPEED = 0.6    # Final speed of the car. Currently set at 1, but can be changed
-=======
         self.MOVE_SPEED = rospy.get_param('~MOVE_SPEED', 0.08)
         self.FINAL_SPEED = rospy.get_param('~FINAL_SPEED', 0.08)    # Final speed of the car. Currently set at 1, but can be changed
->>>>>>> traj-planner
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
@@ -69,11 +64,7 @@ class TrajectoryPlannerROS(object):
                                           # (adjusts curvature somewhat)
 
         # This variable determines the number of points published to the waypoint controller
-<<<<<<< HEAD
-        self.RESOLUTION = 10
-=======
         self.RESOLUTION = rospy.get_param('~RESOLUTION', 5) 
->>>>>>> traj-planner
 
         # Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
@@ -119,19 +110,11 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-<<<<<<< HEAD
-        # self.three_point_path()
-        # self.bezier_curves_path(smoothness=2)
-        self.legrange_functions_path()
-        # self.hermine_splines_path()
-        # self.recursive_splines_path(angle_limit=30,smoothness=100, distance_reduction=0.65)
-=======
         self.four_point_path()
         # self.bezier_curves_path(smoothness=2)
         # self.lagrange_functions_path()
         #self.hermite_splines_path()
         # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
->>>>>>> traj-planner
 
         self.publish_final_speed()
 
