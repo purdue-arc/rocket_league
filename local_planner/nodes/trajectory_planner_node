@@ -62,6 +62,7 @@ class TrajectoryPlannerROS(object):
         self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
         self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
+        self.FOLLOW_THROUGH_DISTANCE = rospy.get_param('~FOLLOW_THROUGH_DISTANCE',0.08)
 
         # This variable determines the number of points published to the waypoint controller
         self.RESOLUTION = rospy.get_param('~RESOLUTION', 5) 
@@ -180,6 +181,7 @@ class TrajectoryPlannerROS(object):
 
     def poses_from_points(self,points):
         """Converts points from list or numpy array to pose array"""
+        points = np.vstack([points,self.follow_through_path()])
         pose_array_msg = PoseArray()
         pose_array_msg.header.frame_id = "map"
         pose_array_msg.poses = []
@@ -197,6 +199,7 @@ class TrajectoryPlannerROS(object):
                 new_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
             #new_pose.orientation.w = 1
             pose_array_msg.poses.append(new_pose)
+
         print("ready to publish")
         return pose_array_msg
 
@@ -253,6 +256,15 @@ class TrajectoryPlannerROS(object):
             print("Uh oh,something went wrong with generating main points!")
             self.main_points = np.array([])
 
+    def follow_through_path(self):
+        """
+        Add point a short distance past the ball to ensure the bot follows through and return it as a pose
+        """
+        ball_position = np.array([self.ball_pose.position.x, self.ball_pose.position.y])
+        point = self.final_normalized_heading * self.FOLLOW_THROUGH_DISTANCE + ball_position
+        return np.array(point)
+        
+    
     def four_point_path(self):
         """
         Publish the main points.
