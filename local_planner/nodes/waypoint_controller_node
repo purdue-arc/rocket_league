@@ -67,8 +67,8 @@ class WaypointControllerROS(object):
 
         # Publishers
         self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command',
-                                                Twist, queue_size=1) 
-        
+                                                Twist, queue_size=1)
+
         if self.is_debug:
             self.lookahead_pnt_pub = rospy.Publisher('lookahead_pnt',
                                                      PoseWithCovarianceStamped,
@@ -96,7 +96,7 @@ class WaypointControllerROS(object):
         if self.path:
             if self.last_pose_idx == None:
                 self.last_pose_idx = 0
-            
+
             # Converting odom msg to numpy arrays
             bot_pos, bot_orient, _ = convert.pose_covar_to_array(odom_msg.pose)
             bot_linear, bot_angular, _ = convert.twist_covar_to_array(odom_msg.twist)
@@ -105,7 +105,7 @@ class WaypointControllerROS(object):
             lookahead_boost = numpy.linalg.norm(bot_linear) \
                                 * self.lookahead_gain
             lookahead_dist = self.lookahead_dist + lookahead_boost
-                                
+
             # Set number of waypoints to check
             if self.lookahead_pnts == -1:
                 lookahead_pnts = len(self.path)
@@ -141,10 +141,10 @@ class WaypointControllerROS(object):
                         self.lookahead_pnt_pub.publish(pose)
 
                     break
-                
+
                 i += 1
                 pnts_checked += 1
-            
+
             # If no intersection found, stop moving
             if intersect is None:
                 self.bot_velocity_cmd.publish(Twist())
@@ -168,9 +168,9 @@ class WaypointControllerROS(object):
 
             # Publish command data
             twist = Twist()
-            twist.linear.y = self.final_speed
+            twist.linear.x = self.final_speed
             twist.angular.z = angular_vel
             self.bot_velocity_cmd.publish(twist)
-            
+
 if __name__ == "__main__":
     WaypointControllerROS()
