@@ -11,7 +11,6 @@ docker run --rm -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --hostname arc-rocket-league-dev \
     --name arc-rocket-league-dev \
-    --gpus all \
     --privileged \
     arc-rocket-league-dev \
     /bin/zsh

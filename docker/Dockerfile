@@ -1,8 +1,4 @@
-FROM arm64v8/ros:melodic-perception
-
-# apt upgrade and install full ROS
-RUN apt update && apt upgrade -y
-RUN apt install ros-melodic-desktop-full -y
+FROM osrf/ros:melodic-desktop-full
 
 # install tools and dependencies from apt
 RUN apt update && apt upgrade -y && apt autoremove -y
