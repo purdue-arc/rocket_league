@@ -90,9 +90,9 @@ class TrajectoryPlannerROS(object):
             self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
             self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                             # (adjusts curvature somewhat)
-            
+
             # This variable determines the number of points published to the waypoint controller
-            self.RESOLUTION = rospy.get_param('~RESOLUTION', 5) 
+            self.RESOLUTION = rospy.get_param('~RESOLUTION', 5)
 
             if self.check_if_GO():
                 self.loop_once()
@@ -111,8 +111,8 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        self.four_point_path()
-        # self.bezier_curves_path(smoothness=2)
+        # self.four_point_path()
+        self.bezier_curves_path(smoothness=2)
         # self.lagrange_functions_path()
         #self.hermite_splines_path()
         # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
