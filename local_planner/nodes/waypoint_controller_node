@@ -54,10 +54,10 @@ class WaypointControllerROS(object):
         self.frame_id = rospy.get_param('~frame_id', 'map')
 
         # Radius to search for intersections
-        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.25)
+        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.025)
 
         # Coeffient to adjust lookahead distance by speed
-        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.1)
+        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.025)
 
         # Number of waypoints to search per pass (-1 is full path)
         self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
@@ -67,8 +67,8 @@ class WaypointControllerROS(object):
 
         # Publishers
         self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command',
-                                                Twist, queue_size=1)
-
+                                                Twist, queue_size=1) 
+        
         if self.is_debug:
             self.lookahead_pnt_pub = rospy.Publisher('lookahead_pnt',
                                                      PoseWithCovarianceStamped,
@@ -96,16 +96,16 @@ class WaypointControllerROS(object):
         if self.path:
             if self.last_pose_idx == None:
                 self.last_pose_idx = 0
-
+            
             # Converting odom msg to numpy arrays
             bot_pos, bot_orient, _ = convert.pose_covar_to_array(odom_msg.pose)
             bot_linear, bot_angular, _ = convert.twist_covar_to_array(odom_msg.twist)
 
             # Set lookahead dist by lookahead gain and current speed
-            lookhead_drawback = numpy.linalg.norm(bot_linear) \
+            lookahead_boost = numpy.linalg.norm(bot_linear) \
                                 * self.lookahead_gain
-            lookahead_dist = self.lookahead_dist - lookhead_drawback
-
+            lookahead_dist = self.lookahead_dist + lookahead_boost
+                                
             # Set number of waypoints to check
             if self.lookahead_pnts == -1:
                 lookahead_pnts = len(self.path)
@@ -114,9 +114,12 @@ class WaypointControllerROS(object):
 
             # Find next valid intersection along path
             intersect = None
-            final_pose_idx = min(len(self.path) - 1, \
-                                 self.last_pose_idx + lookahead_pnts)
-            for i in range(self.last_pose_idx, final_pose_idx):
+            i = self.last_pose_idx
+            pnts_checked = 0
+            while pnts_checked < lookahead_pnts:
+                if i == len(self.path) - 1:
+                    i = 0
+
                 start_pos, _ = convert.pose_to_array(self.path[i])
                 end_pos, _ = convert.pose_to_array(self.path[i + 1])
 
@@ -138,18 +141,25 @@ class WaypointControllerROS(object):
                         self.lookahead_pnt_pub.publish(pose)
 
                     break
-
+                
+                i += 1
+                pnts_checked += 1
+            
             # If no intersection found, stop moving
             if intersect is None:
-                twist = Twist()
-                twist.linear.x = self.final_speed
-                twist.angular.z = 0
-                self.bot_velocity_cmd.publish(twist)
+                self.bot_velocity_cmd.publish(Twist())
+                rospy.logwarn("No intersection could be found.")
                 return
 
             # Calculate angular velocity
+            is_last_pose = (self.last_pose_idx == len(self.path) - 2)
             d_angle = pursuit.calculate_angle(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
+            if abs(d_angle) > math.pi/2:
+                self.bot_velocity_cmd.publish(Twist())
+                rospy.logwarn("Car facing opposite direction of intersection.")
+                return
+
             arc_dist = pursuit.calculate_dist(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
             angular_vel = pursuit.get_angular_speed(self.final_speed, \
@@ -158,9 +168,9 @@ class WaypointControllerROS(object):
 
             # Publish command data
             twist = Twist()
-            twist.linear.x = self.final_speed
+            twist.linear.y = self.final_speed
             twist.angular.z = angular_vel
             self.bot_velocity_cmd.publish(twist)
-
+            
 if __name__ == "__main__":
     WaypointControllerROS()
