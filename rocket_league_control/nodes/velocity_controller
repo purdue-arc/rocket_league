@@ -65,6 +65,7 @@ class VelocityControllerROS(object):
             rospy.get_param('~steering/anti_windup'),
             rospy.get_param('~steering/deadband')
         )
+        self.steering_static_friction = rospy.get_param('~steering/static_friction')
         self.steering_kff = rospy.get_param('~steering/gains/kff')
         self.steering_limits = (
             rospy.get_param('~steering/limits/min'),
@@ -122,6 +123,8 @@ class VelocityControllerROS(object):
                 # static friction
                 if abs(velocity_ref) > 0.05:
                     throttle_effort += velocity_ref / abs(velocity_ref) * self.throttle_static_friction
+                if abs(yaw_rate_ref) > 0.05:
+                    steering_effort += yaw_rate_ref / abs(yaw_rate_ref) * self.steering_static_friction
 
                 # feedback
                 delta_t = (now - self.last_time).to_sec()
