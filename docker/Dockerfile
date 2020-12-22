@@ -11,7 +11,7 @@ RUN apt install -y sudo \
     libgtk-3-dev libnotify-dev libgstreamer1.0 \
     libgstreamer-plugins-base1.0-dev \
     gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-    libcanberra-gtk3-module
+    libcanberra-gtk3-module net-tools mesa-utils
 
 # create user
 ARG USER=arc
@@ -30,8 +30,7 @@ COPY $DEPENDENCIES /home/$USER/$DEPENDENCIES
 RUN echo "Fetching rosdep definitions..." && rosdep update
 USER root
 RUN echo "Installing dependencies..." && \
-    xargs rosdep resolve < /home/$USER/$DEPENDENCIES \
-    | grep -v "#" | xargs apt install -y
+    xargs rosdep resolve < /home/$USER/$DEPENDENCIES | grep -v "#" | xargs apt install -y
 
 # install aravis
 WORKDIR /aravis
