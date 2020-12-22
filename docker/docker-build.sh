@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOCKER_DIR="$(readlink -f $(dirname $0))"
+DOCKER_DIR=$(readlink -f $(dirname $0))
 
 docker build --build-arg USER=$USER \
              --build-arg PW="robot" \

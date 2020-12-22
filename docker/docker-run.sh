@@ -1,7 +1,19 @@
 #!/bin/bash
 
-WS_DIR="$(readlink -f $(dirname $0)/../../../)"
+WS_DIR=$(readlink -f $(dirname $0)/../../../)
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
+
+CMD="/bin/zsh"
+for ARGS in "$@"; do
+shift
+    case "$ARGS" in
+        "--use-gpu") NVIDIA_ARGS="
+                        --gpus all \
+                        -e NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all} \
+                        -e NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}compute,graphics" ;;
+        *) CMD=$ARGS
+    esac
+done
 
 docker run --rm -it \
     -e USER \
@@ -12,5 +24,6 @@ docker run --rm -it \
     --hostname arc-rocket-league-dev \
     --name arc-rocket-league-dev \
     --privileged \
+    $NVIDIA_ARGS \
     arc-rocket-league-dev \
-    ${1:-/bin/zsh}
+    $CMD
