@@ -1,0 +1,16 @@
+FROM purduearc/rocket-league
+
+USER root
+
+# create user
+ARG BASE_USER=arc
+ARG USER=user
+ARG PW=password
+ARG UID=1000
+ARG GID=1000
+RUN usermod -l $USER -u $UID -d /home/$USER $BASE_USER && \
+    groupmod -n $USER -g $GID $BASE_USER && \
+    cp -a /home/$BASE_USER/. /home/$USER
+
+USER $USER
+WORKDIR /home/$USER

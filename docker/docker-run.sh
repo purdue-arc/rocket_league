@@ -1,6 +1,7 @@
 #!/bin/bash
 
 WS_DIR=$(readlink -f $(dirname $0)/../../../)
+REPO_NAME="purduearc/rocket-league"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
 CMD="/bin/zsh"
@@ -25,5 +26,5 @@ docker run --rm -it \
     --name arc-rocket-league-dev \
     --privileged \
     $NVIDIA_ARGS \
-    arc-rocket-league-dev \
+    $REPO_NAME:local \
     $CMD
