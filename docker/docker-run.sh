@@ -2,6 +2,7 @@
 
 WS_DIR=$(readlink -f $(dirname $0)/../../../)
 REPO_NAME="purduearc/rocket-league"
+IMAGE_NAME="arc-rocket-league-dev"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
 CMD="/bin/zsh"
@@ -22,8 +23,8 @@ docker run --rm -it \
     -v $XAUTHORITY:/home/$USER/.Xauthority \
     -v $WS_DIR:/home/$USER/catkin_ws \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    --hostname arc-rocket-league-dev \
-    --name arc-rocket-league-dev \
+    --hostname $IMAGE_NAME \
+    --name $IMAGE_NAME \
     --privileged \
     $NVIDIA_ARGS \
     $REPO_NAME:local \

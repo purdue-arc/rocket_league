@@ -1,9 +1,9 @@
 #!/bin/bash
 
-REPO_NAME="purduearc/rocket-league"
+IMAGE_NAME="arc-rocket-league-dev"
 
 docker exec -it \
     -e DISPLAY \
     -e LIBGL_ALWAYS_INDIRECT \
-    $REPO_NAME:local \
+    $IMAGE_NAME \
     /bin/zsh
