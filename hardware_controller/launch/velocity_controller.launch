@@ -1,5 +1,0 @@
-<launch>
-  <node type="velocity_controller" pkg="hardware_controller" name="velocity_controller">
-    <rosparam command="load" file="$(find hardware_controller)/params/velocity_controller.yaml" />
-  </node>
-</launch>

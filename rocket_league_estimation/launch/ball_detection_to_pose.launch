@@ -1,0 +1,19 @@
+<launch>
+  <arg name="camera_ns" default="aravis_cam"/>
+
+  <node type="detection_to_pose" pkg="rocket_league_estimation" name="ball_detection_to_pose">
+    <rosparam command="load" file="$(find rocket_league_estimation)/params/map_tag_detections.yaml"/>
+
+    <param name="child/tag_id"    value="1"/>
+    <param name="child/tag_name"  value="ball_tag"/>
+    <param name="child/body_name" value="ball"/>
+
+    <param name="publish_tf" value="true"/>
+    <param name="publish_pose" value="true"/>
+
+    <remap from="tag_detections" to="$(arg camera_ns)/tag_detections"/>
+    <remap from="pose" to="ball_pose"/>
+  </node>
+  
+  <node pkg="tf2_ros" type="static_transform_publisher" name="ball_tag_publisher" args="0 0 0 0 0 0 ball ball_tag" />
+</launch>

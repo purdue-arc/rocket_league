@@ -1,0 +1,6 @@
+<!-- Launches system in simulation for basic testing. -->
+
+<launch>
+  <include file="$(find local_planner)/launch/local_planner.launch"/>
+  <include file="$(find racersim)/launch/racersim.launch"/>
+</launch>
