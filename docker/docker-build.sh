@@ -9,15 +9,18 @@ ROS_DEP_IGNORE="camera_aravis"
 
 # Tags to search for in the package.xml files
 TAGS=(depend build_depend build_export_depend exec_depend test_depend buildtool_depend doc_depend)
-ROS_DEPS=$(find "$DOCKER_DIR/.." -name package.xml \
-         | xargs xmllint --xpath "$(printf '/package/%s/text()|' "${TAGS[@]}" | sed 's/|$//')" \
-         | sort | uniq | sed -E "s/$ROS_DEP_IGNORE//g" | tr '\n' ' ')
 
+# Find all ROS dependencies
+ROS_DEPS="$(find "$DOCKER_DIR/.." -name package.xml                                             \ # Find all files named package.xml
+          | xargs xmllint --xpath "$(printf '/package/%s/text()|' "${TAGS[@]}" | sed 's/|$//')" \ # For each package.xml, get the contents of dependency tags (contents of $TAGS) from XPath
+          | sort | uniq                                                                         \ # Remove all duplicates
+          | sed -E "s/$ROS_DEP_IGNORE//g"                                                       \ # Remove all local dependencies
+          | tr '\n' ' ')"                                                                         # Reduce to one line for passing to docker build
 docker build --build-arg USER=$USER \
              --build-arg PW="robot" \
              --build-arg UID=$(id -u) \
              --build-arg GID=$(id -g) \
-             --build-arg ROS_DEPS="$ROS_DEPS" \
+             --build-arg ROS_DEPS=$ROS_DEPS \
              -t $REPO_NAME:local \
              -f $DOCKER_DIR/Dockerfile.local \
              $1 \
