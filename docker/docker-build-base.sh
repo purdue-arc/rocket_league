@@ -3,7 +3,7 @@
 DOCKER_DIR=$(readlink -f $(dirname $0))
 REPO_NAME="purduearc/rocket-league"
 
-docker build -t $REPO_NAME $DOCKER_DIR
+docker build -t $REPO_NAME $1 $DOCKER_DIR
 
 echo "
 ARC Rocket League development image built as '$REPO_NAME'

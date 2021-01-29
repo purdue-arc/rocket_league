@@ -21,16 +21,6 @@ ARG GID=1000
 RUN groupadd -o -g $GID $USER && \
     useradd -om -u $UID -g $GID -G sudo -s /bin/bash $USER && \
     echo "$USER:$PW" | chpasswd
-USER $USER
-WORKDIR /home/$USER
-
-# install dependencies
-ARG DEPENDENCIES=.dependencies
-COPY $DEPENDENCIES /home/$USER/$DEPENDENCIES
-RUN echo "Fetching rosdep definitions..." && rosdep update
-USER root
-RUN echo "Installing dependencies..." && \
-    xargs rosdep resolve < /home/$USER/$DEPENDENCIES | grep -v "#" | xargs apt install -y
 
 # install aravis
 WORKDIR /aravis
