@@ -10,7 +10,7 @@
 ## You don't have to read this
 
 ### Remote Image
-`Dockerfile` is used to build `purduearc/rocket_league:latest`.
+`Dockerfile` is used to build `purduearc/rocket-league:latest`.
 [DockerHub](https://hub.docker.com/repository/docker/purduearc/rocket-league/)
 is set up to automatically build this image when changes are made to the `main`
 branch to this repository. You can build this image locally by running
@@ -21,14 +21,14 @@ include any code from this repository or install any ROS dependencies other than
 those found in the standard `ros-melodic-desktop-full` install.
 
 ### Local Image
-`Dockerfile.local` is used to build `purduearc/rocket_league:local`. DockerHub
+`Dockerfile.local` is used to build `purduearc/rocket-league:local`. DockerHub
 will not automatically build this image, you have to do that yourself by running
 `docker-build.sh`. Running this will install all ROS dependencies in the image
 and add your user so files can be accessed and modified from both the container
 and your computer.
 
 ### Running the image
-Run `docker-run.sh` to start the image (`purduearc/rocket_league:local`) and
+Run `docker-run.sh` to start the image (`purduearc/rocket-league:local`) and
 mount your local catkin workspace. If you have an NVidia GPU, you can use the
 `--use-gpu` option if you need to use your GPU from within the container (if you
 need OpenGL for RViz, for example). If you want to run a command on container

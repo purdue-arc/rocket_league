@@ -13,6 +13,7 @@ ARG ROS_DEPS=""
 RUN usermod -l $USER -u $UID -d /home/$USER $BASE_USER && \
     groupmod -n $USER -g $GID $BASE_USER && \
     cp -a /home/$BASE_USER/. /home/$USER && \
+    echo "$USER:$PW" | chpasswd && \
     apt update && apt upgrade -y && apt autoremove -y && \
     echo $ROS_DEPS | xargs rosdep resolve | grep -v "#" | xargs apt install -y
 
