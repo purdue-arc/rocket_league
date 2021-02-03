@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>launch</name>
+  <name>rocket_league_launch</name>
   <version>0.0.0</version>
-  <description>The launch package</description>
+  <description>The rocket_league_launch package</description>
 
   <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
   <license>BSD 3 Clause</license>

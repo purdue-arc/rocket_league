@@ -50,6 +50,7 @@
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <depend>camera_aravis</depend>
+  <depend>usb_cam</depend>
   <depend>image_proc</depend>
   <depend>apriltag_ros</depend>
 

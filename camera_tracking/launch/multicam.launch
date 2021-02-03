@@ -1,0 +1,11 @@
+<launch>
+   <include file="$(find camera_tracking)/launch/single_webcam.launch">
+    <arg name="load_manager" value="true"/>
+    <arg name="camera_name" value="gerblick_logitech"/>
+   </include>
+
+   <include file="$(find camera_tracking)/launch/single_webcam.launch">
+    <arg name="load_manager" value="false"/>
+    <arg name="camera_name" value="gerblick_laptop"/>
+   </include>
+</launch> 
