@@ -2,12 +2,10 @@
 
 using namespace camera_tracking;
 
-TransformRebroadcaster::TransformRebroadcaster(const ros::NodeHandle& nh,
-                                               const ros::NodeHandle& pnh)
-  : _nh(nh), _pnh(pnh), _queueSize(100) {
+TransformRebroadcaster::TransformRebroadcaster(const ros::NodeHandle& nh)
+  : _nh(nh), _queueSize(100) {
   // Get ROS Params
   ros::param::param<std::string>("~prefix", _prefix, "prefix");
-  ROS_ERROR("prefix: %s", _prefix.c_str());
 
   // Set up Publishers
   _tfPub = _nh.advertise<tf2_msgs::TFMessage>("/tf", _queueSize);

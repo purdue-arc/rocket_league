@@ -22,6 +22,10 @@
   <node pkg="camera_tracking" type="transform_rebroadcaster" ns="$(arg camera_name)" name="transform_rebroadcaster" output="screen">
     <param name="prefix" value="$(arg camera_name)" />
   </node>
+  <node pkg="camera_tracking" type="camera_origin" ns="$(arg camera_name)" name="camera_origin" output="screen">
+    <param name="camera_name" value="$(arg camera_name)" />
+    <param name="origin_id" value="tag_0" />
+  </node>
 
   <!-- De-Bayer / rectify -->
   <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="screen"/>

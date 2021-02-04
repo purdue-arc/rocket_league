@@ -8,7 +8,7 @@ namespace camera_tracking {
 
 class TransformRebroadcaster {
 public:
-  TransformRebroadcaster(const ros::NodeHandle& nh, const ros::NodeHandle& pnh);
+  TransformRebroadcaster(const ros::NodeHandle& nh);
   ~TransformRebroadcaster();
 
 private:
@@ -17,7 +17,6 @@ private:
   void tfStaticCallback(tf2_msgs::TFMessageConstPtr msg);
 
   ros::NodeHandle _nh;
-  ros::NodeHandle _pnh;
   unsigned int _queueSize;
   std::string _prefix;
 
