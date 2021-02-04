@@ -18,6 +18,11 @@
     <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name).yaml" />
   </node>
 
+  <!-- tf Remapping -->
+  <node pkg="camera_tracking" type="transform_rebroadcaster" ns="$(arg camera_name)" name="transform_rebroadcaster" output="screen">
+    <param name="prefix" value="$(arg camera_name)" />
+  </node>
+
   <!-- De-Bayer / rectify -->
   <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="screen"/>
 
@@ -28,5 +33,7 @@
 
     <rosparam command="load" file="$(find camera_tracking)/config/settings.yaml" />
     <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml" />
+
+    <remap from="/tf" to="tf" />
   </node>
 </launch> 

@@ -53,6 +53,7 @@
   <depend>usb_cam</depend>
   <depend>image_proc</depend>
   <depend>apriltag_ros</depend>
+  <depend>tf2</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

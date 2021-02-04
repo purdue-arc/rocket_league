@@ -11,7 +11,8 @@ RUN apt install -y sudo \
     libgtk-3-dev libnotify-dev libgstreamer1.0 \
     libgstreamer-plugins-base1.0-dev \
     gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-    libcanberra-gtk3-module net-tools mesa-utils
+    libcanberra-gtk3-module net-tools mesa-utils \
+    jq clang-format
 
 # create user
 ARG USER=arc

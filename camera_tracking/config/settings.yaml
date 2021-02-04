@@ -7,4 +7,4 @@ tag_refine_edges:  1
 tag_refine_decode: 0
 tag_refine_pose:   0
 tag_debug:         0
-publish_tf:        false
+publish_tf:        true

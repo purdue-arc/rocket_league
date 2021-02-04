@@ -7,18 +7,24 @@
 
   <arg name="camera_name" default="aravis_cam"/>
 
+  <!-- Remap /tf topic to private /tf topic -->
+  <remap from="/tf" to="$(arg camera_name)/tf" />
+
   <!-- Nodelet Manager -->
   <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
     <param name="num_worker_threads" value="$(arg manager_threads)" />
   </node>
-
-  <!-- Load Parameters -->
 
   <!-- Aravis RGB camera nodelet -->
   <node pkg="nodelet" type="nodelet" name="$(arg camera_name)" args="load camera_aravis/CameraAravisNodelet $(arg manager)" output="screen">
     <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name).yaml" />
     <param name="frame_id" value="$(arg camera_name)" />
     <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name).yaml" />
+  </node>
+
+  <!-- tf Remapping -->
+  <node pkg="camera_tracking" type="transform_rebroadcaster" ns="$(arg camera_name)" name="transform_rebroadcaster" output="screen">
+    <param name="prefix" value="$(arg camera_name)" />
   </node>
 
   <!-- De-Bayer / rectify -->
@@ -31,6 +37,8 @@
 
     <rosparam command="load" file="$(find camera_tracking)/config/settings.yaml" />
     <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml" />
+
+    <remap from="/tf" to="tf" />
   </node>
 
   <!-- Dynamic reconfigure -->
