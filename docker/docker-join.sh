@@ -1,7 +1,9 @@
 #!/bin/bash
 
+IMAGE_NAME="arc-rocket-league-dev"
+
 docker exec -it \
     -e DISPLAY \
     -e LIBGL_ALWAYS_INDIRECT \
-    arc-rocket-league-dev \
+    $IMAGE_NAME \
     /bin/zsh
