@@ -44,7 +44,7 @@ class PIDController(object):
             return self._last_output
 
         kk = self.kp * error
-        if abs(error) > self.anti_windup:
+        if abs(error) < self.anti_windup:
             self._integral += error * delta_t
         ii = self.ki * self._integral
         dd = self.kd * (error - self._last_error) / delta_t
@@ -52,7 +52,7 @@ class PIDController(object):
         output = kk + ii + dd
         self._last_output = output
         return output
-    
+
     def reset(self):
         """Reset to initialse state."""
         self._integral = 0.0

@@ -14,6 +14,6 @@
     <remap from="tag_detections" to="$(arg camera_ns)/tag_detections"/>
     <remap from="pose" to="bot_pose"/>
   </node>
-  
-  <node pkg="tf2_ros" type="static_transform_publisher" name="car_tag_publisher" args="0 0 0 0 0 0 car car_tag" />
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="car_tag_publisher" args="0.0 0 0.0 1.57 0 0 car car_tag" />
 </launch>

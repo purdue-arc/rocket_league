@@ -1,9 +1,10 @@
 throttle:
     gains:
-        kp: 1.0
+        kp: 0.5
         ki: 0.0
         kd: 0.0
         kff: 0.0
+    static_friction: 0.35
     anti_windup: 0.1
     deadband: 0.05
     limits:
@@ -12,10 +13,11 @@ throttle:
 
 steering:
     gains:
-        kp: 1.0
+        kp: 0.5
         ki: 0.0
         kd: 0.0
-        kff: 0.0
+        kff: 0.5
+    static_friction: 0.5
     anti_windup: 0.1
     deadband: 0.05
     limits:
