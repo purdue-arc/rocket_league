@@ -1,5 +1,9 @@
 <launch>
-  <node type="velocity_controller" pkg="rocket_league_control" name="velocity_controller">
+  <node type="velocity_controller" pkg="rocket_league_control" name="velocity_controller" output="screen">
     <rosparam command="load" file="$(find rocket_league_control)/params/velocity_controller.yaml" />
+    <remap from="effort/throttle" to ="control_effort/throttle"/>
+    <remap from="effort/steering" to ="control_effort/steering"/>
+    <remap from="odom" to ="bot_odom"/>
+    <remap from="cmd_vel" to ="bot_velocity_command"/>
   </node>
 </launch>

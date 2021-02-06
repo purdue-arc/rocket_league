@@ -44,8 +44,13 @@ class OdomEstimator(object):
         self.last_pose = None
         self.last_time = None
 
+        self.x_buffer = []
+        self.y_buffer = []
+        self.theta_buffer = []
+
         # params
-        self.base_link = rospy.get_param('~base_link', 'base_link')
+        self.BASE_LINK = rospy.get_param('~base_link', 'base_link')
+        self.BUFFER_SIZE = rospy.get_param('~buffer_size', 3)
 
         # publishers
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
@@ -71,19 +76,49 @@ class OdomEstimator(object):
             # create new odometry message
             odom_msg = Odometry()
             odom_msg.header = pose_msg.header
-            odom_msg.child_frame_id = self.base_link
+            odom_msg.child_frame_id = self.BASE_LINK
             odom_msg.pose = pose_msg.pose
 
             # deltas to calculate twist velocities
             dx = x - self.last_pose[0]
             dy = y - self.last_pose[1]
-            dt = (self.last_time - pose_msg.header.stamp).to_sec()
+            dt = (pose_msg.header.stamp - self.last_time).to_sec()
             d_theta = theta - self.last_pose[2]
 
+            # this is gross, but we're gonna do it
+            dx /= dt
+            dy /= dt
+            d_theta /= dt
+
+            # this is also gross
+            # add to buffers
+            self.x_buffer.append(dx*cos(theta) + dy*sin(theta))
+            self.y_buffer.append(-dx*sin(theta) + dy*cos(theta))
+            self.theta_buffer.append(d_theta)
+
+            # trim buffers
+            if len(self.x_buffer) > self.BUFFER_SIZE:
+                self.x_buffer.pop(0)
+            if len(self.y_buffer) > self.BUFFER_SIZE:
+                self.y_buffer.pop(0)
+            if len(self.theta_buffer) > self.BUFFER_SIZE:
+                self.theta_buffer.pop(0)
+
+            # get averages
+            dx = 0
+            dy = 0
+            d_theta = 0
+            for i in self.x_buffer:
+                dx += i / len(self.x_buffer)
+            for i in self.y_buffer:
+                dy += i / len(self.y_buffer)
+            for i in self.theta_buffer:
+                d_theta += i / len(self.theta_buffer)
+
             # set odom velocities
-            odom_msg.twist.twist.linear.x = dx / dt
-            odom_msg.twist.twist.linear.y = dy / dt
-            odom_msg.twist.twist.angular.z = d_theta / dt
+            odom_msg.twist.twist.linear.x = dx
+            odom_msg.twist.twist.linear.y = dy
+            odom_msg.twist.twist.angular.z = d_theta
 
             # publish odom message
             self.odom_pub.publish(odom_msg)
@@ -94,4 +129,3 @@ class OdomEstimator(object):
 
 if __name__ == "__main__":
     OdomEstimator()
-

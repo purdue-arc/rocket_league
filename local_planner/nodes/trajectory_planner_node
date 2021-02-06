@@ -51,20 +51,21 @@ class TrajectoryPlannerROS(object):
         self.bot_init_heading = None    # The initial heading of the car (map frame)
 
         # Info about the paths we're using
-        self.MOVE_SPEED = 0.08
-        self.FINAL_SPEED = 0.08    # Final speed of the car. Currently set at 1, but can be changed
+        self.MOVE_SPEED = rospy.get_param('~MOVE_SPEED', 0.08)
+        self.FINAL_SPEED = rospy.get_param('~FINAL_SPEED', 0.08)    # Final speed of the car. Currently set at 1, but can be changed
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
 
         # These variables act as parameters to generate a path
-        self.DISTANCE_FROM_CAR = 0.25    # Multiplier for distance of 1st main point in front of the car
-        self.DISTANCE_FROM_BALL = 0.08    # Defines the distance away from the ball that our final (lined up) point should be
-        self.SECOND_POINT_DISTANCE = 0.25    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+        self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.25)    # Multiplier for distance of 1st main point in front of the car
+        self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
+        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
-          
+        self.FOLLOW_THROUGH_DISTANCE = rospy.get_param('~FOLLOW_THROUGH_DISTANCE',0.08)
+
         # This variable determines the number of points published to the waypoint controller
-        self.RESOLUTION = 5
+        self.RESOLUTION = rospy.get_param('~RESOLUTION', 5) 
 
         # Publishers
         self.path_pub = rospy.Publisher("bot_path", PoseArray, queue_size=1)
@@ -81,10 +82,23 @@ class TrajectoryPlannerROS(object):
     def trigger_cb(self, trigger_message):
         """ Callback to run loop_once() when node is triggered"""
         while not rospy.is_shutdown():
+            self.MOVE_SPEED = rospy.get_param('~MOVE_SPEED', 0.08)
+            self.FINAL_SPEED = rospy.get_param('~FINAL_SPEED', 0.08)    # Final speed of the car. Currently set at 1, but can be changed
+
+            # These variables act as parameters to generate a path
+            self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.25)    # Multiplier for distance of 1st main point in front of the car
+            self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
+            self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+                                            # (adjusts curvature somewhat)
+
+            # This variable determines the number of points published to the waypoint controller
+            self.RESOLUTION = rospy.get_param('~RESOLUTION', 5)
+
             if self.check_if_GO():
                 self.loop_once()
                 break
             else:
+                print("no go")
                 try:
                     rospy.Rate(1).sleep()
                 except rospy.ROSInterruptException:
@@ -97,10 +111,10 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        self.three_point_path()
-        # self.bezier_curves_path(smoothness=2)
-        # self.legrange_functions_path()
-        # self.hermine_splines_path()
+        # self.four_point_path()
+        self.bezier_curves_path(smoothness=2)
+        # self.lagrange_functions_path()
+        #self.hermite_splines_path()
         # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
 
         self.publish_final_speed()
@@ -152,7 +166,7 @@ class TrajectoryPlannerROS(object):
         # Final vector is simply the goal's position minus the ball's position
         self.final_heading = np.array([self.goal_pose.position.x - self.ball_pose.position.x,\
              self.goal_pose.position.y - self.ball_pose.position.y])
-        
+
         # Normalize the vector for future calculations
         self.final_normalized_heading = normalize(self.final_heading)
 
@@ -167,6 +181,7 @@ class TrajectoryPlannerROS(object):
 
     def poses_from_points(self,points):
         """Converts points from list or numpy array to pose array"""
+        points = np.vstack([points,self.follow_through_path()])
         pose_array_msg = PoseArray()
         pose_array_msg.header.frame_id = "map"
         pose_array_msg.poses = []
@@ -177,13 +192,14 @@ class TrajectoryPlannerROS(object):
 
             # Generate quaternion for orientation (they just point at the next point in the path)
             if i + 1 < len(points):
-                yaw = np.arctan2(points[i][1] - points[i + 1][1],points[i][0])
+                yaw = np.arctan2(points[i][1] - points[i + 1][1],points[i][0] - points[i + 1][0])
             else:
                 yaw = np.arctan2(self.final_heading[1],self.final_heading[0])
             (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
-                new_pose.orientation.w) = quaternion_from_euler(0,0,yaw) 
+                new_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
             #new_pose.orientation.w = 1
             pose_array_msg.poses.append(new_pose)
+
         print("ready to publish")
         return pose_array_msg
 
@@ -240,7 +256,16 @@ class TrajectoryPlannerROS(object):
             print("Uh oh,something went wrong with generating main points!")
             self.main_points = np.array([])
 
-    def three_point_path(self):
+    def follow_through_path(self):
+        """
+        Add point a short distance past the ball to ensure the bot follows through and return it as a pose
+        """
+        ball_position = np.array([self.ball_pose.position.x, self.ball_pose.position.y])
+        point = self.final_normalized_heading * self.FOLLOW_THROUGH_DISTANCE + ball_position
+        return np.array(point)
+        
+    
+    def four_point_path(self):
         """
         Publish the main points.
         Might be useful so on the real field, we can adjust main points first before doing complicated smoothing
@@ -254,7 +279,7 @@ class TrajectoryPlannerROS(object):
         Take the main points, and create more points by smoothing it,
         Using Bezier curves, which draws a line connecting to all the midpoints. Repeat for desired level of smoothness
         Publish these points as an array, resulting in path
-        
+
         Parameters needed:
         - smoothness
             - determines how many times the bezier algorithm should be applied
@@ -279,10 +304,10 @@ class TrajectoryPlannerROS(object):
             # Convert points to poses and publish
             self.path_pub.publish(self.poses_from_points(points))
 
-    def legrange_functions_path(self):
+    def lagrange_functions_path(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
-        Using Legrange functions.
+        Using Lagrange functions.
         Publish these points as an array, resulting in path
         """
         try:
@@ -313,7 +338,7 @@ class TrajectoryPlannerROS(object):
         except:
             print("Whoops! We couldn't make a path.")
 
-    def hermine_splines_path(self):
+    def hermite_splines_path(self):
         """
         Take the main points, and create more points bot can follow by smoothing it,
         Using Hermite Splines.
@@ -420,17 +445,17 @@ class TrajectoryPlannerROS(object):
                     for x in range(1, len(points)):
                         # Calculate the angle between the current point and the last point
                         first_vector = self.bot_init_heading if x == 1 else points[x - 1] - points[x - 2]
-                        second_vector = points[x] - points[x - 1]                    
+                        second_vector = points[x] - points[x - 1]
                         angle = np.degrees(np.arccos(np.dot(first_vector, second_vector) / (np.linalg.norm(first_vector)\
                              * np.linalg.norm(second_vector))))
-                        
+
                         # If our angle is > angle_limit, create another spline between those points
                         if (not np.isnan(angle) and angle > angle_limit):
                             final_vector = points[x + 1] - points[x] if x < len(points) - 1 else self.final_heading
                             new_points = self.create_spline(points[x - 1], first_vector, points[x], final_vector,\
                                  distance_over_time)
                             distance_over_time *= distance_reduction
-                            
+
                             # We don't want to include the generated spline's first point, as it's the same as our current point and we are trying to smooth it
                             temp.append(new_points[1])
                             temp.append(new_points[2])
@@ -438,14 +463,14 @@ class TrajectoryPlannerROS(object):
                         elif (not np.isnan(angle)):
                             # If our angle is fine, do nothing to it
                             temp.append(points[x])
-                    
+
                     # Reassign our current points to the new smoothed ones
                     points = temp
-                    
+
                     # If we are already smoothed, don't bother looping again
                     if (smoothed):
                         break
-                
+
                 # Add out ball's position back
                 points.append(self.main_points[3])
                 self.path_pub.publish(self.poses_from_points(points))

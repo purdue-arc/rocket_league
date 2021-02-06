@@ -68,16 +68,22 @@ def calculate_dist(pos, bot_pos, bot_orient, lookahead_dist):
     arc_angle = 2 * math.asin((dist / 2) / radius)
     return arc_angle * radius
 
-def calculate_angle(pos, bot_pos, bot_orient, lookahead_dist):
-    """Determines necessary curvature to reach intersection point."""
+def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist):
+    """
+    Determines angle from heading to the intersection point.
+    Angle is from -pi to pi, with 0 at car's heading.
+    """
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
 
     bot_line_x = bot_pos[0] + math.cos(bot_yaw) * lookahead_dist
     bot_line_y = bot_pos[1] + math.sin(bot_yaw) * lookahead_dist
     bot_line = np.array([bot_line_x, bot_line_y, 0])
 
-    dist = np.linalg.norm(pos - bot_line)
-    return 2 * math.asin(dist/(lookahead_dist*2))
+    tang_line = intersect_pos - bot_line
+    dist = np.linalg.norm(tang_line)
+    angle = (2 * math.asin((dist / 2)/lookahead_dist))
+    sign = np.sign(np.cross(tang_line, bot_line))[2]
+    return angle * sign
 
 def get_angular_speed(target_vel, angle, dist):
     """Relates path to the angular velocity."""
