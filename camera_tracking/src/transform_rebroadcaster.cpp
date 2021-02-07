@@ -1,6 +1,6 @@
 #include <camera_tracking/transform_rebroadcaster.h>
 
-using namespace camera_tracking;
+namespace camera_tracking {
 
 TransformRebroadcaster::TransformRebroadcaster(const ros::NodeHandle& nh)
   : _nh(nh), _queueSize(100) {
@@ -47,3 +47,5 @@ void TransformRebroadcaster::tfCallback(tf2_msgs::TFMessageConstPtr msg) {
 void TransformRebroadcaster::tfStaticCallback(tf2_msgs::TFMessageConstPtr msg) {
   _tfStaticPub.publish(tfAdapter(msg));
 }
+
+}  // namespace camera_tracking
