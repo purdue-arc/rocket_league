@@ -23,7 +23,7 @@
   </node>
 
   <!-- tf Remapping -->
-  <node pkg="camera_tracking" type="transform_rebroadcaster" ns="$(arg camera_name)" name="transform_rebroadcaster" output="screen">
+  <node pkg="camera_tracking" type="tf_rebroadcaster" ns="$(arg camera_name)" name="tf_rebroadcaster" output="screen">
     <param name="prefix" value="$(arg camera_name)" />
   </node>
   <node pkg="camera_tracking" type="camera_origin" ns="$(arg camera_name)" name="camera_origin" output="screen">
