@@ -54,6 +54,8 @@ class RacerSimROS(object):
         self.last_command = None
         self.last_time = None
         self.path = None
+        self.lookahead = [0, 0]
+	self.path_points = [[0,0]]
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
@@ -69,7 +71,8 @@ class RacerSimROS(object):
         # Subscribers
         rospy.Subscriber('bot_velocity_command', Twist, self.command_cb)
         rospy.Subscriber('bot_path', PoseArray, self.pose_arr_cb)
-        
+        rospy.Subscriber('lookahead_pnt', PoseWithCovarianceStamped, self.lookahead_cb)
+
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
 
@@ -92,6 +95,26 @@ class RacerSimROS(object):
     def pose_arr_cb(self, pose_arr_msg):
         """Callback for pose array messages."""
         self.path = pose_arr_msg.poses
+	self.path_points = []
+
+	print('pose_arr_msg.poses')
+	print(pose_arr_msg.poses)
+	print()
+
+	for point in pose_arr_msg.poses:
+		x = point.position.x
+		y = point.position.y
+		self.path_points.append([x, y])
+
+	if self.path_points is None:
+		self.path_points = [[0, 0]]
+
+    def lookahead_cb(self, pose_msg):
+        """Callback for lookahead_pnt messages."""
+        x = pose_msg.pose.pose.position.x
+        y = pose_msg.pose.pose.position.y
+        self.lookahead = [x, y]
+        #Convert x, y to whatever the sim uses
 
     def command_cb(self, command_msg):
         """Callback for command messages."""
@@ -157,6 +180,12 @@ class RacerSimROS(object):
             goal_msg.pose.pose.orientation.w = goal_quat[0]
             goal_msg.pose.pose.orientation.z = goal_quat[3]
             self.goal_pub.publish(goal_msg)
+
+            #Update the lookahead point
+            self.sim.lookahead = self.lookahead
+
+	    #Update the path points
+	    self.sim.path_points = self.path_points
 
         self.last_time = now
         self.lock.release()
