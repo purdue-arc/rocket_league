@@ -37,6 +37,15 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
     git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
     git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions && \
     git clone https://github.com/zsh-users/zsh-syntax-highlighting ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting && \
-    ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/gitstatus/install 
+    ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/gitstatus/install
 ARG FILES=files
 COPY --chown=$USER $FILES /home/$USER/
+
+# install ROS dependencies. To add a dependency, add it to the below variable, seperated by a space
+ARG ROS_DEPS="apriltag_ros usb_cam"
+RUN rosdep update
+USER root
+# Normally you can just do `rosdep install PACKAGE_NAME`, but it throws a fit if you tell it to install a package that's already installed
+RUN rosdep resolve $ROS_DEPS | sed 's/#.*$//'| xargs apt install -y
+USER $USER
+
