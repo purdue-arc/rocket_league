@@ -4,7 +4,8 @@
 - Run `docker-build.sh` to build the development image.
 - Run `docker-run.sh` to start the container.
 - Run `docker-join.sh` to join the currently running container.
-- If you add a ROS dependency or edit `Dockerfile.local`, re-run `docker-build.sh`.
+- If you edit `Dockerfile.local`, re-run `docker-build.sh`.
+- To add a ROS dependency, edit `Dockerfile`
 - If you edit `Dockerfile`, run `docker-build-base.sh`, then `docker-build.sh`.
 
 ## You don't have to read this
@@ -23,9 +24,8 @@ those found in the standard `ros-melodic-desktop-full` install.
 ### Local Image
 `Dockerfile.local` is used to build `purduearc/rocket-league:local`. DockerHub
 will not automatically build this image, you have to do that yourself by running
-`docker-build.sh`. Running this will install all ROS dependencies in the image
-and add your user so files can be accessed and modified from both the container
-and your computer.
+`docker-build.sh`. Running this will add your user so files can be accessed and
+modified from both the container and your bare-metal computer.
 
 ### Running the image
 Run `docker-run.sh` to start the image (`purduearc/rocket-league:local`) and
@@ -48,4 +48,4 @@ aren't any parameters for this. Just run it.
 
 If you have to use an external camera (not including webcams) for some reason,
 run `udev-aravis.sh` on your bare-metal computer (not in the container). You
-only have to do this once.
+only have to do this once.o
