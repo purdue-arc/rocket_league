@@ -3,13 +3,12 @@ FROM nvidia/cudagl:11.0-runtime-ubuntu18.04
 # update, upgrade, and install basics
 RUN apt update && apt upgrade -y && \
     apt install -y sudo \
-    nano vim zsh git curl wget \
-    net-tools putils-ping \
+    nano vim git curl wget \
+    net-tools iputils-ping \
     x11-apps mesa-utils \
     python-dev python3-dev \
     python-pip python3-pip \
-    python-catkin-tools pylint \
-    software-properties-common
+    pylint
 
 # install Nvidia software for deep learning
 RUN apt install -y --no-install-recommends \
@@ -19,7 +18,9 @@ RUN apt install -y --no-install-recommends \
 RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
     apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 && \
     apt update && \
-    apt install -y ros-melodic-desktop-full
+    apt install -y \
+    ros-melodic-desktop-full \
+    python-catkin-tools
 
 # install libraries for ROS and deep learning with python3
 RUN pip3 install --upgrade pip && \
