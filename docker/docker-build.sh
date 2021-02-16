@@ -10,7 +10,7 @@ docker build --build-arg USER=$USER \
              --build-arg ROS_DEPS="$ROS_DEPS" \
              -t $REPO_NAME:local \
              -f $DOCKER_DIR/Dockerfile.local \
-             $1 \
+             $@ \
              $DOCKER_DIR
 
 echo "

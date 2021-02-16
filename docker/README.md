@@ -29,23 +29,22 @@ modified from both the container and your bare-metal computer.
 
 ### Running the image
 Run `docker-run.sh` to start the image (`purduearc/rocket-league:local`) and
-mount your local catkin workspace. If you have an NVidia GPU, you can use the
-`--use-gpu` option if you need to use your GPU from within the container (if you
-need OpenGL for RViz, for example). If you want to run a command on container
-startup, you can specify it by surrounding it with double quotes. Otherwise, a
-shell (specifically, [zsh](https://en.wikipedia.org/wiki/Z_shell)) will launch.
+mount your local catkin workspace. You can pass in additional arguments directly
+to the `docker run` command. For example, if you have an Nvidia GPU and have
+[`docker-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+installed, you can use your GPU from within the container by using `--gpus all`.
+Other useful commands are `--net host` and `--priviledged` for access to host
+networking and peripheral devices respecrively.
 For example:
   - `docker-run.sh`: Run the container and start the shell
-  - `docker-run.sh --use-gpu`: Run the container with NVidia GPU support and
-      start the shell 
-  - `docker-run.sh "roscore"`: Run the container and start `roscore`
-  - `docker-run.sh --use-gpu "roscore"`: Run the container with NVidia GPU
-      support and start `roscore`
+  - `docker-run.sh --gpus all`: Run the container with Nvidia GPU support
+  - `docker-run.sh --gpus all --net host --priviledged`: Run the container with
+  Nvidia GPU support, host networking, and complete access to peripherals.
 
 ### Other things
-You can also run `docker-join.sh` to attach a shell to the container. There
-aren't any parameters for this. Just run it.
+You can also run `docker-join.sh` to attach a shell to the container. You can
+pass in arbitrary arguments similar to `docker-run.sh`.
 
-If you have to use an external camera (not including webcams) for some reason,
-run `udev-aravis.sh` on your bare-metal computer (not in the container). You
-only have to do this once.o
+If you have to use an external camera (not including webcams) you need to
+configure permissions. Run `udev-aravis.sh` on your bare-metal computer (not in
+the container) to do this. You only have to do this once.
