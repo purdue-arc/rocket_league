@@ -34,7 +34,7 @@ to the `docker run` command. For example, if you have an Nvidia GPU and have
 [`docker-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 installed, you can use your GPU from within the container by using `--gpus all`.
 Other useful commands are `--net host` and `--priviledged` for access to host
-networking and peripheral devices respecrively.
+networking and peripheral devices respectively.
 For example:
   - `docker-run.sh`: Run the container and start the shell
   - `docker-run.sh --gpus all`: Run the container with Nvidia GPU support
