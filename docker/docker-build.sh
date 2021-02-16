@@ -13,7 +13,7 @@ docker build --build-arg USER=$USER \
              $@ \
              $DOCKER_DIR
 
-+if [ $? -eq 0 ]; then
+if [ $? -eq 0 ]; then
 echo "
 ARC Rocket League development image built as '$REPO_NAME:local'
 sudo password in container is 'robot'.

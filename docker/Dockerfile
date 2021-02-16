@@ -55,8 +55,6 @@ RUN apt install -y intltool gstreamer1.0-gtk3 \
     echo "b595a4724da51d0fdb71f2b6e2f1e12f328e423155c3e84607ee2ce704f516bd  aravis-0.6.4.tar.xz" | sha256sum --check && \
     tar xf aravis-0.6.4.tar.xz && cd aravis-0.6.4 && \
     ./configure && make && make install && ldconfig
-USER $USER
-WORKDIR /home/$USER
 
 # install zsh
 RUN apt install zsh && \
@@ -72,7 +70,8 @@ COPY --chown=$USER $FILES /home/$USER/
 # install ROS dependencies. To add a dependency, add it to the below variable, seperated by a space
 ARG ROS_DEPS="apriltag_ros usb_cam"
 RUN rosdep update
-USER root
 # Normally you can just do `rosdep install PACKAGE_NAME`, but it throws a fit if you tell it to install a package that's already installed
 RUN rosdep resolve $ROS_DEPS | sed 's/#.*$//'| xargs apt install -y
+
 USER $USER
+WORKDIR /home/$USER
