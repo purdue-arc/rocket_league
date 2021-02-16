@@ -2,13 +2,14 @@ FROM nvidia/cudagl:11.0-runtime-ubuntu18.04
 
 # update, upgrade, and install basics
 RUN apt update && apt upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive \
     apt install -y sudo \
     nano vim git curl wget \
     net-tools iputils-ping \
     x11-apps mesa-utils \
     python-dev python3-dev \
     python-pip python3-pip \
-    pylint
+    pylint software-properties-common
 
 # install Nvidia software for deep learning
 RUN apt install -y --no-install-recommends \
