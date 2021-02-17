@@ -71,3 +71,4 @@ RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/inst
     ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k/gitstatus/install
 ARG FILES=files
 COPY --chown=$USER $FILES /home/$USER/
+CMD /bin/zsh
