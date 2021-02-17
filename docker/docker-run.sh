@@ -14,5 +14,4 @@ docker run --rm -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --name $CONTAINER_NAME \
     $@ \
-    $REPO_NAME:local \
-    /bin/zsh
+    $REPO_NAME:local

@@ -6,5 +6,4 @@ docker exec -it \
     -e DISPLAY \
     -e LIBGL_ALWAYS_INDIRECT \
     $@ \
-    $IMAGE_NAME \
-    /bin/zsh
+    $IMAGE_NAME
