@@ -3,7 +3,7 @@ FROM nvidia/cudagl:11.0-runtime-ubuntu18.04
 # update, upgrade, and install basics
 RUN apt update && apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive \
-    apt install -y sudo \
+    apt install -y sudo tmux \
     nano vim git curl wget \
     net-tools iputils-ping \
     x11-apps mesa-utils \
