@@ -129,7 +129,7 @@ class HighLevelPlannerROS(object):
       distance = np.dot(car_pose,self.goal0_pose)
       distance = np.sqrt(distance)
 
-      self.target_time = distance/self.final_speed
+      self.target_time = 2 * distance/self.final_speed   # multiplying by 2 because path might not be direct
 
 
 
