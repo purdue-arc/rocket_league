@@ -130,3 +130,6 @@ dmypy.json
 
 # Vim Editor
 *.swp
+
+#PyCharm
+.idea/

@@ -63,6 +63,8 @@ class Sim(object):
         self.ball = Ball(self.world)
         self.goal = Goal(self.world)
         self.path = None
+        self.lookahead = [0, 0]
+	self.path_points = [[0, 0]]
 
         if renderEnabled:
             self.renderer = Renderer(bounds, scaling=scaling)
@@ -108,6 +110,6 @@ class Sim(object):
         """Render the current state of the sim."""
         try:
             self.renderer.render(self.car, self.ball, self.goal, \
-                                 self.world, path=self.path)
+                                 self.world, self.lookahead, self.path_points, path=self.path)
         except Renderer.ShutdownError:
             self.renderEnabled = False
