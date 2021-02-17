@@ -36,6 +36,7 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64, Empty
 import numpy as np
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
 
 class TrajectoryPlannerROS(object):
     """A node to plan local car trajectories."""

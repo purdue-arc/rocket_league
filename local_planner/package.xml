@@ -20,4 +20,7 @@
   <exec_depend>std_srvs</exec_depend>
   <exec_depend>tf</exec_depend>
   <exec_depend>python-numpy</exec_depend>
+  <exec_depend>rocket_league_msgs</exec_depend>
+  <build_depend>rocket_league_msgs</build_depend>
+
 </package>
