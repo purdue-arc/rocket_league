@@ -1,4 +1,5 @@
 FROM nvidia/cudagl:11.0-runtime-ubuntu18.04
+ENV ROS_DISTRO melodic
 
 # update, upgrade, and install basics
 RUN apt update && apt upgrade -y && \
@@ -16,7 +17,7 @@ RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main"
     apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 && \
     apt update && \
     apt install -y \
-    ros-melodic-desktop-full \
+    ros-${ROS_DISTRO}-desktop-full \
     python-catkin-tools
 
 # install deep learning software
@@ -46,8 +47,8 @@ RUN apt install -y intltool gstreamer1.0-gtk3 \
 RUN apt install -y \
     python-pygame \
     python-box2d \
-    ros-melodic-usb-cam \
-    ros-melodic-apriltag-ros
+    ros-${ROS_DISTRO}-usb-cam \
+    ros-${ROS_DISTRO}-apriltag-ros
 
 # create user
 ARG USER=arc
