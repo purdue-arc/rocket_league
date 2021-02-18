@@ -42,13 +42,14 @@ def find_intersection(path_seg, bot_path, lookahead_dist):
     a = np.dot(path_seg, path_seg)
     b = 2 * np.dot(path_seg, bot_path)
     c = np.dot(bot_path, bot_path) - (lookahead_dist * lookahead_dist)
-    discrim = b*b - 4*a*c
+    discrim = (b*b) - (4*a*c)
 
     if discrim >= 0:
         discrim = math.sqrt(discrim)
         t1 = (-b - discrim)/(2*a)
         t2 = (-b + discrim)/(2*a)
-
+        print(t1)
+        print(t2)
         if t1 >= 0 and t1 <= 1:
             return path_seg * t1
         if t2 >= 0 and t2 <= 1:

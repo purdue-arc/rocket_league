@@ -108,6 +108,7 @@ class Car(object):
         return (self.body.position[0], self.body.position[1], 0)
 
     def getQuaternion(self):
+        print(self.body.angle)
         angle = self.body.angle % (2.0 * math.pi)
         return quaternion_from_euler(0, 0, angle)
 
