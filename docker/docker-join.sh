@@ -1,11 +1,13 @@
 #!/bin/bash
 
 CONTAINER_NAME="arc-rocket-league-dev"
+DOCKER_CMD=${DOCKER_CMD:+source /home/$USER/.zshrc && $DOCKER_CMD}
+
+echo /bin/zsh $DOCKER_CMD
 
 docker exec -it \
     -e DISPLAY \
     -e LIBGL_ALWAYS_INDIRECT \
     $@ \
-    $IMAGE_NAME \
-    ${DOCKER_CMD:+/bin/zsh -c "source /home/$USER/.zshrc && $DOCKER_CMD"}
-
+    $CONTAINER_NAME \
+    /bin/zsh ${DOCKER_CMD:+-c "$DOCKER_CMD"}
