@@ -97,10 +97,6 @@ class RacerSimROS(object):
         self.path = pose_arr_msg.poses
 	self.path_points = []
 
-	print('pose_arr_msg.poses')
-	print(pose_arr_msg.poses)
-	print()
-
 	for point in pose_arr_msg.poses:
 		x = point.position.x
 		y = point.position.y

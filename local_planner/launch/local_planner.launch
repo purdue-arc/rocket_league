@@ -5,7 +5,7 @@
   <node type="waypoint_controller_node" pkg="local_planner" name="waypoint_controller" output="screen">
     <param name="~frame_id" value="$(arg frame_id)"/>
     <param name="~is_debug" value="$(arg is_debug)"/>
-    <param name="~lookahead_dist" value="0.5"/>
+    <param name="~lookahead_dist" value="0.22"/>
     <param name="~lookahead_gain" value="0.1"/>
     <param name="~lookahead_pnts" value="-1"/>
   </node>
