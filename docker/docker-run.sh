@@ -14,4 +14,6 @@ docker run --rm -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --name $CONTAINER_NAME \
     $@ \
-    $REPO_NAME:local
+    $REPO_NAME:local \
+    ${DOCKER_CMD:+/bin/zsh -c "source /home/$USER/.zshrc && $DOCKER_CMD"}
+

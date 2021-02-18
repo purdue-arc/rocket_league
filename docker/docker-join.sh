@@ -6,4 +6,6 @@ docker exec -it \
     -e DISPLAY \
     -e LIBGL_ALWAYS_INDIRECT \
     $@ \
-    $IMAGE_NAME
+    $IMAGE_NAME \
+    ${DOCKER_CMD:+/bin/zsh -c "source /home/$USER/.zshrc && $DOCKER_CMD"}
+
