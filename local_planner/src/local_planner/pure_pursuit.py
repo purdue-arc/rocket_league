@@ -48,8 +48,7 @@ def find_intersection(path_seg, bot_path, lookahead_dist):
         discrim = math.sqrt(discrim)
         t1 = (-b - discrim)/(2*a)
         t2 = (-b + discrim)/(2*a)
-        print(t1)
-        print(t2)
+
         if t1 >= 0 and t1 <= 1:
             return path_seg * t1
         if t2 >= 0 and t2 <= 1:
