@@ -10,4 +10,4 @@ docker exec -it \
     -e LIBGL_ALWAYS_INDIRECT \
     $@ \
     $CONTAINER_NAME \
-    /bin/zsh ${DOCKER_CMD:+-c "$DOCKER_CMD"}
+    $DOCKER_CMD

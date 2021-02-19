@@ -15,5 +15,4 @@ docker run --rm -it \
     --name $CONTAINER_NAME \
     $@ \
     $REPO_NAME:local \
-    ${DOCKER_CMD:+/bin/zsh -c "source /home/$USER/.zshrc && $DOCKER_CMD"}
-
+    $DOCKER_CMD
