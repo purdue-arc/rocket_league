@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+
+"""ROS wrapper to run DQN for snake controller.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+  3. Neither the name of the copyright holder nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
+# package
+
+
+# ROS
+import rospy
+from geometry_msgs.msg import Twist, PoseArray, PointStamped
+from std_msgs.msg import Int32, Bool
+from std_srvs.srv import Empty
+
+class SnakeDQN(object):
+    """ROS wrapper for the snake game DQN."""
+    def __init__(self):
+        rospy.init_node('snake_dqn')
+
+        # Services
+        self.reset_serv = rospy.ServiceProxy('snake/reset', Empty)
+
+        # Publishers
+        self.twist_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber('snake/pose', PoseArray, self.pose_cb)
+        rospy.Subscriber('snake/goal', PointStamped, self.goal_cb)
+        rospy.Subscriber('snake/score', Int32, self.score_cb)
+        rospy.Subscriber('snake/active', Bool, self.alive_cb)
+
+        rospy.spin()
+
+    def pose_cb(self, pose_msg):
+        """Callback for poses of each segment of snake."""
+        pass
+
+    def goal_cb(self, goal_msg):
+        """Callback for location of goal."""
+        pass
+
+    def score_cb(self, score_msg):
+        """Callback for score of game."""
+        pass
+
+    def alive_cb(self, alive_msg):
+        """Callback for active state of snake."""
+        pass
+
+if __name__ == "__main__":
+    SnakeDQN()
