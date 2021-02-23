@@ -60,7 +60,7 @@ class HighLevelPlannerROS(object):
       # rospy.Subscriber("car1/odom", Odometry, self.car1_odom_cb)   TODO add this
       
       # TODO remove this subscriber and have better method for triggering
-      rospy.Subscriber("trigger", Empty, self.trigger_cb)
+      rospy.Subscriber("starter", Empty, self.starter_cb)
 
       # Publishers
       self.target_pub = rospy.Publisher("car0/target", Target, queue_size=1)
@@ -69,7 +69,7 @@ class HighLevelPlannerROS(object):
 
 
 
-   def trigger_cb(self):
+   def starter_cb(self):
       while not rospy.is_shutdown():
          self.goal0_pose = np.array(rospy.get_param('~GOAL0_POSE',[0,0,0]))
          self.final_speed = np.array(rospy.get_param('~FINAL_SPEED',0.1))
