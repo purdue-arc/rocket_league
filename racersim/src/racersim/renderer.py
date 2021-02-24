@@ -83,6 +83,10 @@ class Renderer(object):
         for coord in coords:
             x = int(-coord[1] * self.scaling)
             y = int(self.windowSize - coord[0] * self.scaling)
+
+            #Gradually darkens the points
+            color = (max(color[0] - 15, 0), max(color[1] - 15, 0), max(color[2] - 15, 0))
+            
             pygame.draw.circle(self._screen, color, [x, y], size)
 
     def render(self, car, ball, goal, world, lookahead, path_points, path=None):
