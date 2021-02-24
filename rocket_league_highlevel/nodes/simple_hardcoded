@@ -69,8 +69,8 @@ class HighLevelPlannerROS(object):
 
 
 
-   def starter_cb(self):
-      while not rospy.is_shutdown():
+   def starter_cb(self, starter_message):
+      if not rospy.is_shutdown():
          self.goal0_pose = np.array(rospy.get_param('~GOAL0_POSE',[0,0,0]))
          self.final_speed = np.array(rospy.get_param('~FINAL_SPEED',0.1))
 
@@ -78,13 +78,13 @@ class HighLevelPlannerROS(object):
             and (self.car0_pose is not None): 
             self.publish_stuff
             print("published")
-            break
+            #break
          else:
             print("not ready")
-            try:
-               rospy.Rate(1).sleep()
-            except rospy.ROSInterruptException:
-               pass
+            #try:
+             #  rospy.Rate(1).sleep()
+            #except rospy.ROSInterruptException:
+             #  pass
 
 
    def publish_stuff(self):
@@ -122,7 +122,7 @@ class HighLevelPlannerROS(object):
 
 
    def car0_odom_cb(self, car0_odom_message):
-      self.car0_pose = car0_odom_message.pose.pose
+      self.car0_pose = car0_odom_message.pose.position
       car_pose = np.array(self.car0_pose)
 
       # calculate final time

@@ -39,6 +39,8 @@ from nav_msgs.msg import Odometry
 # Local modules
 import local_planner.convert as convert
 import local_planner.pure_pursuit as pursuit
+from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
+
 
 class WaypointControllerROS(object):
     """A node to ensure the car follows a given trajectory."""
@@ -66,8 +68,10 @@ class WaypointControllerROS(object):
         self.is_debug = rospy.get_param('~is_debug', True)
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command',
+        self.bot_velocity_cmd = rospy.Publisher('car0/velocity',\
                                                 Twist, queue_size=1)
+
+        self.path_error_pub = rospy.Publisher('car0/path_error', PathError, queue_size=1)
 
         if self.is_debug:
             self.lookahead_pnt_pub = rospy.Publisher('lookahead_pnt',
@@ -75,21 +79,21 @@ class WaypointControllerROS(object):
                                                      queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('bot_path', PoseArray, self.path_cb)
-        rospy.Subscriber('bot_final_speed', Float64, self.final_speed_cb)
-        rospy.Subscriber('bot_odom', Odometry, self.odom_cb)
+        rospy.Subscriber('car0/path', Path, self.path_cb)
+        #rospy.Subscriber('bot_final_speed', Float64, self.final_speed_cb)
+        rospy.Subscriber('car0/odom', Odometry, self.odom_cb)
 
         rospy.spin()
 
-    def path_cb(self, pose_arr_msg):
-        """Creates path using pose array."""
+    def path_cb(self, path_arr_msg):
+        """Creates path using waypoints in Path message."""
         self.path_start_time = pose_arr_msg.header.stamp
-        self.path = pose_arr_msg.poses
+        self.path = path_arr_msg.waypoint.pose
         self.last_pnt_idx = 0
 
-    def final_speed_cb(self, float64_msg):
-        """Sets final path speed with a float64 message."""
-        self.final_speed = float64_msg.data
+        last_waypoint = path_arr_msg.waypoint[len(path_arr_msg.waypoint) - 1]
+        final_vel = np.array(last_waypoint.twist.linear)
+        self.final_speed = np.sqrt(np.dot(final_vel,final_vel))
 
     def odom_cb(self, odom_msg):
         """Updates car odometry and follows current path."""
@@ -171,6 +175,16 @@ class WaypointControllerROS(object):
             twist.linear.y = self.final_speed
             twist.angular.z = angular_vel
             self.bot_velocity_cmd.publish(twist)
+
+            # publish error data. TODO: replace zeros with actual values
+            error = PathError()
+            error.time = 0
+            error.position = 0
+            error.orientation = 0
+            error.linear_velocity = 0
+            error.angular_velocity = 0
+            self.path_error_pub.publish(error)
+
 
 if __name__ == "__main__":
     WaypointControllerROS()
