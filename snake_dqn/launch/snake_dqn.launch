@@ -1,0 +1,21 @@
+<launch>
+  <arg name="render"    default="false"/>
+  <arg name="size"      default="7"/>
+  <arg name="rate"      default="30.0"/>
+  <arg name="training"  default="false"/>
+
+  <param name="/use_sim_time" value="$(arg training)"/>
+
+  <node type="snake_node" pkg="snakesim" name="snake_node" output="screen">
+    <param name="render/enabled"          value="$(arg render)"/>
+    <param name="snake/initial_segments"  value="$(arg size)"/>
+    <param name="snake/growth"            value="0"/>
+    <param name="rate"                    value="$(arg rate)"/>
+  </node>
+
+  <node type="snake_dqn" pkg="snake_dqn" name="snake_dwn" output="screen">
+    <param name="num_segments"  value="$(arg size)"/>
+    <param name="training"      value="$(arg training)"/>
+    <param name="rate"          value="$(arg rate)"/>
+  </node>
+</launch>

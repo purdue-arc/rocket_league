@@ -34,42 +34,216 @@ License:
 import rospy
 from geometry_msgs.msg import Twist, PoseArray, PointStamped
 from std_msgs.msg import Int32, Bool
+from rosgraph_msgs.msg import Clock
 from std_srvs.srv import Empty
 
-class SnakeDQN(object):
+from tf.transformations import quaternion_to_euler
+
+# System
+import time
+import numpy as np
+
+class SnakeDQNROS(object):
     """ROS wrapper for the snake game DQN."""
     def __init__(self):
         rospy.init_node('snake_dqn')
 
+        # Constants
+        self.ANGULAR_VELOCITY = rospy.get_param('~angular_velocity', 6.28)
+        self.LINEAR_VELOCITY  = rospy.get_param('~linear_velocity', 2.0)
+        self.NUM_SEGMENTS     = rospy.get_param('~num_segments', 7)
+        self.DEATH_PENALTY    = rospy.get_param('~death_penalty', 50)
+        self.EPISODE_TIME     = rospy.Duration.from_sec(rospy.get_param('~episode_time', 30))
+        self.GOAL_REWARD      = rospy.get_param('~goal_reward', 10)
+        self.TRAINING         = rospy.get_param('~training', False)
+
         # Services
-        self.reset_serv = rospy.ServiceProxy('snake/reset', Empty)
+        self.reset_srv = rospy.ServiceProxy('snake/reset', Empty)
 
         # Publishers
-        self.twist_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
+        self.action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self.pose_cb)
         rospy.Subscriber('snake/goal', PointStamped, self.goal_cb)
-        rospy.Subscriber('snake/score', Int32, self.score_cb)
         rospy.Subscriber('snake/active', Bool, self.alive_cb)
 
-        rospy.spin()
+        # Sim time
+        if self.TRAINING:
+            self.time = rospy.Time.from_sec(time.time())
+            self.DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
+            self.clock_pub = rospy.Publisher('/clock', Clock, queue_size=1)
+
+        # State variables
+        self.alive = None
+        self.score = None
+        self.pose = None
+        self.goal = None
+
+        # Tracking variables
+        self.last_score = None
+        self.start_time = None
+
+        # DQN Agent
+        self.agent = None
+
+        # Main loop
+        if self.TRAINING:
+            # kickstart sim time
+            self.time += self.DELTA_T / 2.0
+            self.clock_pub.publish(self.time)
+
+            # initialize variables
+            self.reset()
+
+            # begin agent's training routine
+            self.agent.train(self.step, self.reset)
+        else:
+            # initialize to wall time
+            self.time = rospy.Time.now()
+
+            # initialize variables
+            self.reset()
+
+            # begin reaction routine
+            while not not rospy.is_shutdown():
+                self.loop_once()
+
+    def spin_once(self):
+        """Simple wait to allow other threads to handle callbacks."""
+        time.sleep(0.001)
+
+    def loop_once(self):
+        # Wait for state
+        while(not self.has_state()):
+            self.spin_once()
+
+        # update state
+        self.time = rospy.Time.now()
+        state = self.get_state()
+
+        # check for end of game
+        if state[3]:
+            rospy.loginfo(
+                "End of game; final score is %d; final time is %0.1f\n",
+                self.score, (self.time - self.start_time).to_sec())
+            self.reset()
+        else:
+            # take action
+            self.action_pub.publish(
+                self.get_action_msg(
+                    self.agent.get_action(state)))
+
+    def step(self, action):
+        """Step simulation one time step and return new state."""
+        # Publish action
+        self.action_pub.publish(self.get_action_msg(action))
+
+        # Advance sim time
+        self.time += self.DELTA_T
+        self.clock_pub.publish(self.time)
+
+        # Wait for sim process actions
+        while(not self.has_state()):
+            self.spin_once()
+
+        # return state
+        return self.get_state()
+
+    def get_action_msg(self, action):
+        """Take the raw action from the deep learner and turn into message."""
+        assert action == 0 or action == 1
+
+        action_msg = Twist()
+        action_msg.linear.x = self.LINEAR_VELOCITY
+        if action:
+            action_msg.angular.z = self.ANGULAR_VELOCITY
+        else:
+            action_msg.angular.z = -self.ANGULAR_VELOCITY
+        return action_msg
+
+    def has_state(self):
+        """Check if all required data is available to form state."""
+        return (
+            self.alive is not None and
+            self.score is not None and
+            self.pose is not None and
+            self.goal is not None
+        )
+
+    def clear_state(self):
+        """Clear state variables to wait for next callbacks."""
+        self.alive = None
+        self.score = None
+        self.pose = None
+        self.goal = None
+        assert not self.has_state()
+
+    def get_state(self):
+        """Format the game state to pass to the deep learning algorithm."""
+        assert self.has_state()
+
+        # format pose and goal into state column vector
+        pose = np.asarray(self.pose, dtype=np.float32)
+        goal = np.asarray(self.goal, dtype=np.float32)
+        state = np.concatenate(pose, goal)
+        state.reshape((state.size, 1))
+
+        # Determine reward and if done
+        reward = 0
+        done = False
+
+        if self.last_score is not None:
+            reward = self.GOAL_REWARD * (self.score - self.last_score)
+        self.last_score = self.score
+
+        if not self.alive:
+            reward = -self.DEATH_PENALTY
+            done = True
+
+        if (self.time - self.start_time) >= self.EPISODE_TIME:
+            done = True
+
+        # match Gym's env.step() API
+        return (state, reward, done, {})
+
+    def reset(self):
+        """reset for new episode."""
+        self.clear_state()
+        self.last_score = None
+        self.start_time = rospy.Time.from_sec(self.time.to_sec())
+        self.reset_srv.call()
 
     def pose_cb(self, pose_msg):
         """Callback for poses of each segment of snake."""
-        pass
+        assert len(pose_msg.poses) == self.NUM_SEGMENTS
+        __, __, yaw = quaternion_to_euler(
+            pose_msg.pose[0].orientation.x,
+            pose_msg.pose[0].orientation.y,
+            pose_msg.pose[0].orientation.z,
+            pose_msg.pose[0].orientation.w
+        )
+        self.pose = tuple(
+            [yaw] +
+            [func(pose_msg.poses[i]) for i in range(self.NUM_SEGMENTS)
+                for func in (
+                    lambda pose: pose.position.x,
+                    lambda pose: pose.position.y
+                )
+            ]
+        )
 
     def goal_cb(self, goal_msg):
         """Callback for location of goal."""
-        pass
+        self.goal = (goal_msg.point.x, goal_msg.point.y)
 
     def score_cb(self, score_msg):
         """Callback for score of game."""
-        pass
+        self.score = score_msg.data
 
     def alive_cb(self, alive_msg):
         """Callback for active state of snake."""
-        pass
+        self.alive = alive_msg.data
 
 if __name__ == "__main__":
-    SnakeDQN()
+    SnakeDQNROS()
