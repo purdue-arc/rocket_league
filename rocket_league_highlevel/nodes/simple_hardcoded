@@ -74,17 +74,22 @@ class HighLevelPlannerROS(object):
          self.goal0_pose = np.array(rospy.get_param('~GOAL0_POSE',[0,0,0]))
          self.final_speed = np.array(rospy.get_param('~FINAL_SPEED',0.1))
 
-         if (self.target_pose is not None) and (self.target_time is not None) and (self.linear_vel is not None)\
-            and (self.car0_pose is not None): 
-            self.publish_stuff
-            print("published")
-            #break
-         else:
-            print("not ready")
-            #try:
-             #  rospy.Rate(1).sleep()
-            #except rospy.ROSInterruptException:
-             #  pass
+
+         while True:
+            if (self.target_pose is not None) and (self.target_time is not None) and (self.linear_vel is not None)\
+               and (self.car0_pose is not None):
+               self.publish_stuff
+               print("published")
+               break
+            else:
+               print("not ready")
+               print("target_pose:" + str(self.target_pose))
+               print("target_time:" + str(self.target_time))
+               print("linear_vel:" + str(self.linear_vel))
+               try:
+                 rospy.Rate(1).sleep()
+               except rospy.ROSInterruptException:
+                 pass
 
 
    def publish_stuff(self):
@@ -122,11 +127,12 @@ class HighLevelPlannerROS(object):
 
 
    def car0_odom_cb(self, car0_odom_message):
-      self.car0_pose = car0_odom_message.pose.position
-      car_pose = np.array(self.car0_pose)
+      self.car0_pose = car0_odom_message.pose.pose.position
+      #car_pose = np.array(self.car0_pose)
+      car_pose = np.array([self.car0_pose.x, self.car0_pose.y, self.car0_pose.z])
 
       # calculate final time
-      distance = np.dot(car_pose,self.goal0_pose)
+      distance = np.dot(car_pose, self.goal0_pose)
       distance = np.sqrt(distance)
 
       self.target_time = 2 * distance/self.final_speed   # multiplying by 2 because path might not be direct
@@ -134,8 +140,10 @@ class HighLevelPlannerROS(object):
 
 
    def ball_odom_cb(self, ball_odom_message):
+      print("ball_odom_cb:" + str(ball_odom_message))
       self.target_pose = ball_odom_message.pose.pose
       pose = np.array(self.target_pose)
+      pose = np.array([self.target_pose.position.x, self.target_pose.position.y, self.target_pose.position.z])
 
       # find orientation
       target_orientation = self.goal0_pose - pose

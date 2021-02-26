@@ -35,7 +35,7 @@ from std_srvs.srv import Empty, EmptyResponse
 
 # Local library
 import racersim
-
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
 from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
 
 
@@ -153,8 +153,8 @@ class RacerSimROS(object):
             ball_msg.twist.twist.linear.x = ball_linear[0]
             ball_msg.twist.twist.linear.y = ball_linear[1]
             ball_angular = self.sim.ball.body.angularVelocity
-            ball__msg.twist.twist.angular.z = ball_angular
-            self.bot_pub.publish(ball_msg)
+            ball_msg.twist.twist.angular.z = ball_angular
+            self.ball_pub.publish(ball_msg)
 
             # Publish bot odometry
             bot_msg = Odometry()

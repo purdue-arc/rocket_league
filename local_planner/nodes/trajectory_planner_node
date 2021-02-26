@@ -110,10 +110,10 @@ class TrajectoryPlannerROS(object):
     def car_odom_cb(self, bot_odom_message):
         """ Callback for car pose and velocity"""
         # Pose represents robot's position and orientation
-        self.bot_pose = bot_odom_message.pose.position
+        self.bot_pose = bot_odom_message.pose.pose
 
         # Get bot velocity vector and normalize it for future calculations
-        self.bot_vel = bot_odom_message.twist
+        self.bot_vel = bot_odom_message.twist.twist
         linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
         mag = np.linalg.norm(linear_vel)
         self.bot_normalized_vel = normalize(linear_vel)
