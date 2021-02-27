@@ -46,6 +46,7 @@ class Goal(object):
         self.body.CreateFixture(fixtureDef)
 
     def getPoint(self):
+        print(self.body.position[0], self.body.position[1], 0)
         return (self.body.position[0], self.body.position[1], 0)
 
     def getQuaternion(self):

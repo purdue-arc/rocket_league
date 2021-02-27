@@ -31,9 +31,9 @@ License:
 import rospy
 
 import pdb
-from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose, Twist
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float32, Empty
+from std_msgs.msg import Float32, Empty, Float64
 import numpy as np
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
@@ -75,24 +75,26 @@ class HighLevelPlannerROS(object):
          self.final_speed = np.array(rospy.get_param('~FINAL_SPEED',0.1))
 
 
-         while True:
-            if (self.target_pose is not None) and (self.target_time is not None) and (self.linear_vel is not None)\
-               and (self.car0_pose is not None):
-               self.publish_stuff
-               print("published")
-               break
-            else:
-               print("not ready")
-               print("target_pose:" + str(self.target_pose))
-               print("target_time:" + str(self.target_time))
-               print("linear_vel:" + str(self.linear_vel))
-               try:
-                 rospy.Rate(1).sleep()
-               except rospy.ROSInterruptException:
-                 pass
+         #while True:
+         if (self.target_pose is not None) and (self.target_time is not None) and (self.linear_vel is not None)\
+            and (self.car0_pose is not None):
+
+            self.publish_stuff()
+            print("published")
+            #break
+         else:
+            print("not ready")
+            print("target_pose:" + str(self.target_pose))
+            print("target_time:" + str(self.target_time))
+            print("linear_vel:" + str(self.linear_vel))
+            #try:
+            #   rospy.Rate(1).sleep()
+            #except rospy.ROSInterruptException:
+             #  pass
 
 
    def publish_stuff(self):
+      print("publishing")
       # turn time into proper type
       time_float = Float32()
       time_float = self.target_time
@@ -118,11 +120,12 @@ class HighLevelPlannerROS(object):
 
       target_message = Target()
       # TODO add header info
-      target_message.delta_t = time_float
+      target_message.delta_t = Float32(time_float)
       target_message.pose = self.target_pose
       target_message.twist = twist
 
       self.target_pub.publish(target_message)
+      print("hello" + str(target_message))
 
 
 
@@ -140,7 +143,7 @@ class HighLevelPlannerROS(object):
 
 
    def ball_odom_cb(self, ball_odom_message):
-      print("ball_odom_cb:" + str(ball_odom_message))
+      #print("ball_odom_cb:" + str(ball_odom_message))
       self.target_pose = ball_odom_message.pose.pose
       pose = np.array(self.target_pose)
       pose = np.array([self.target_pose.position.x, self.target_pose.position.y, self.target_pose.position.z])

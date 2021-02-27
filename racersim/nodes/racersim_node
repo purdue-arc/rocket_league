@@ -95,14 +95,14 @@ class RacerSimROS(object):
         self.lock.release()
         return EmptyResponse()
 
-    def path_arr_cb(self, pose_arr_msg):
-        """Callback for pose array messages."""
-        self.path = path_arr_msg.waypoint.pose
+    def path_arr_cb(self, path_arr_msg):
+        """Callback for path array messages."""
+        self.path = path_arr_msg.waypoint
         self.path_points = []
 
 	for point in self.path:
-		x = point.position.x
-		y = point.position.y
+		x = point.pose.position.x
+		y = point.pose.position.y
 		self.path_points.append([x, y])
 
 	if self.path_points is None:

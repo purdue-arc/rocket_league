@@ -87,13 +87,14 @@ class WaypointControllerROS(object):
 
     def path_cb(self, path_arr_msg):
         """Creates path using waypoints in Path message."""
-        self.path_start_time = pose_arr_msg.header.stamp
-        self.path = path_arr_msg.waypoint.pose
+        self.path_start_time = path_arr_msg.stamp
+        self.path = path_arr_msg.waypoint
         self.last_pnt_idx = 0
 
         last_waypoint = path_arr_msg.waypoint[len(path_arr_msg.waypoint) - 1]
-        final_vel = np.array(last_waypoint.twist.linear)
-        self.final_speed = np.sqrt(np.dot(final_vel,final_vel))
+        final_vel = last_waypoint.twist.linear
+        final_vel = numpy.array([final_vel.x,final_vel.y,final_vel.z])
+        self.final_speed = numpy.sqrt(numpy.dot(final_vel,final_vel))
 
     def odom_cb(self, odom_msg):
         """Updates car odometry and follows current path."""
@@ -124,8 +125,8 @@ class WaypointControllerROS(object):
                 if i == len(self.path) - 1:
                     i = 0
 
-                start_pos, _ = convert.pose_to_array(self.path[i])
-                end_pos, _ = convert.pose_to_array(self.path[i + 1])
+                start_pos, _ = convert.pose_to_array(self.path[i].pose)
+                end_pos, _ = convert.pose_to_array(self.path[i + 1].pose)
 
                 path_seg = end_pos - start_pos
                 bot_path = start_pos - bot_pos

@@ -117,7 +117,8 @@ class Renderer(object):
                 self._draw_polygon(wallBody, fixture, self.COLOR_WALL)
 
         if path is not None:
-            for pose in path:
+            for posed in path:
+                pose = posed.pose
                 pnt = (int(pose.position.x * self.scaling), \
                        int(self.windowSize - (pose.position.y * self.scaling)))
                 print(pnt)
