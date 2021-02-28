@@ -32,6 +32,8 @@ import torch
 from collections import deque
 import random
 
+import pdb
+
 class Agent(object):
     """High level DQN controller for snake tutorial."""
     def __init__(self, state_size, action_size, training=False):
@@ -89,7 +91,6 @@ class Agent(object):
     def train(self, step, reset):
         """Train the agent using provided step and reset functions."""
         for episode in range(self.EPISODES):
-            self.model.eval()
             state, __, __, __ = reset()
             done = False
             while not done:
@@ -106,9 +107,10 @@ class Agent(object):
 
     def get_action(self, state):
         """Use forward propagation to get the predicted action from the model."""
-        state = torch.cuda.from_numpy(state)
+        state = torch.from_numpy(state).to(self.device).float()
+        self.model.eval()
         reward = self.model(state)
-        return torch.cuda.argmax(reward)
+        return torch.argmax(reward).item()
      
     def save(self, name):
         """Save weights to file."""

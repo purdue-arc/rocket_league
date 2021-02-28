@@ -46,8 +46,6 @@ import pdb
 class SnakeDQNROS(object):
     """ROS wrapper for the snake game DQN."""
     def __init__(self):
-        # pdb.set_trace()
-
         rospy.init_node('snake_dqn')
 
         # Constants
@@ -68,6 +66,7 @@ class SnakeDQNROS(object):
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self.pose_cb)
         rospy.Subscriber('snake/goal', PointStamped, self.goal_cb)
+        rospy.Subscriber('snake/score', Int32, self.score_cb)
         rospy.Subscriber('snake/active', Bool, self.alive_cb)
 
         # Sim time
@@ -131,16 +130,10 @@ class SnakeDQNROS(object):
 
         # update state
         self.time = rospy.Time.now()
-        state = self.get_state()
+        state, __, done, __ = self.get_state()
 
         # check for end of game
-        if state[3]:
-            rospy.loginfo(
-                "End of game; final score is %d; final time is %0.1f\n",
-                self.score, (self.time - self.start_time).to_sec())
-            self._reset()
-        else:
-            # take action
+        if not done:
             self.action_pub.publish(
                 self.get_action_msg(
                     self.agent.get_action(state)))
@@ -200,8 +193,7 @@ class SnakeDQNROS(object):
         # format pose and goal into state column vector
         pose = np.asarray(self.pose, dtype=np.float32)
         goal = np.asarray(self.goal, dtype=np.float32)
-        state = np.concatenate(pose, goal)
-        state.reshape((state.size, 1))
+        state = np.concatenate((pose, goal))
 
         # Determine reward and if done
         reward = 0
@@ -238,7 +230,7 @@ class SnakeDQNROS(object):
     def pose_cb(self, pose_msg):
         """Callback for poses of each segment of snake."""
         assert len(pose_msg.poses) == self.NUM_SEGMENTS
-        __, __, yaw = euler_from_quaternion((
+        yaw, __, __ = euler_from_quaternion((
             pose_msg.poses[0].orientation.x,
             pose_msg.poses[0].orientation.y,
             pose_msg.poses[0].orientation.z,
