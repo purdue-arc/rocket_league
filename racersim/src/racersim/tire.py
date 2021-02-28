@@ -32,16 +32,20 @@ import Box2D
 class TireDef(object):
     """Holds relevent data for a tire instance"""
     def __init__(self, width=0.0125, length=0.037, density=0.0125,
-                    maxLateralImpulse=0.03, maxDriveForce=0.0001,
-                    dragForceCoeff=-0.00002, angularImpulseCoeff=0.02):
+                 maxLateralImpulse=0.03, maxDriveForce=0.0001, maxBrakeForce=0.0002,
+                 dragForceCoeff=-0.00002, angularImpulseCoeff=0.02,
+                 car_weight=1, friction=1):
         
         self.width = width
         self.length = length
         self.density = density
         self.maxLateralImpulse = maxLateralImpulse
         self.maxDriveForce = maxDriveForce
+        self.maxBrakeForce = maxBrakeForce
         self.dragForceCoeff = dragForceCoeff
         self.angularImpulseCoeff = angularImpulseCoeff
+        self.car_weight = car_weight
+        self.friction = friction
 
 class Tire(object):
     """Simulates a single tire of a vehicle"""
@@ -57,9 +61,12 @@ class Tire(object):
         self.maxForwardSpeed = maxForwardSpeed
         self.maxBackwardSpeed = maxBackwardSpeed
         self.maxDriveForce = tireDef.maxDriveForce
+        self.maxBrakeForce = tireDef.maxBrakeForce
         self.maxLateralImpulse = tireDef.maxLateralImpulse
         self.dragForceCoeff = tireDef.dragForceCoeff
         self.angularImpulseCoeff = tireDef.angularImpulseCoeff
+        self.car_weight = tireDef.car_weight
+        self.friction = tireDef.friction
 
     def getForwardVelocity(self):
         normal = self.body.GetWorldVector((0,1))
@@ -80,17 +87,12 @@ class Tire(object):
 
         currForwardNormal = self.getForwardVelocity()
         currForwardSpeed = currForwardNormal.Normalize()
-        dragForce = self.dragForceCoeff * currForwardSpeed
+        dragForce = self.dragForceCoeff * currForwardSpeed**2
         self.body.ApplyForce(dragForce * currForwardNormal, \
                              self.body.worldCenter, wake=True)
 
     def updateDrive(self, linearVelocity, dt):
-        if linearVelocity.y > self.maxForwardSpeed:
-            desiredSpeed = self.maxForwardSpeed
-        elif linearVelocity.y < self.maxBackwardSpeed:
-            desiredSpeed = self.maxBackwardSpeed
-        else:
-            desiredSpeed = linearVelocity.y
+        desiredSpeed = linearVelocity.y
 
         currForwardNormal = self.body.GetWorldVector((0,1))
         currSpeed = Box2D.b2Dot(self.getForwardVelocity(), currForwardNormal)
@@ -99,7 +101,7 @@ class Tire(object):
         if desiredSpeed > currSpeed:
             force = self.maxDriveForce
         elif desiredSpeed < currSpeed:
-            force = -self.maxDriveForce
+            force = -self.maxBrakeForce #Brakes are more powerful than the engine
         else:
             return
 

@@ -44,7 +44,7 @@ class Renderer(object):
     COLOR_PNT = (245, 173, 66)          # Orange
     COLOR_LOOKAHEAD = (255, 255, 255)   # White
 
-    SIZE_PNT = 0.2
+    SIZE_PNT = 0.11/2
 
     class ShutdownError(Exception):
         """Exception for when pygame is shut down"""
@@ -89,7 +89,7 @@ class Renderer(object):
             y = int(self.windowWidth - coord[0] * self.scaling)
             pygame.draw.circle(self._screen, color, [x, y], size)
 
-    def render(self, car, ball, goal, world, lookahead, path_points, path=None):
+    def render(self, car, ball, goal, world, lookahead, path=None):
         """Render the current state of the sim."""
 
         if self._thread is not None and self._thread.is_alive():
@@ -131,8 +131,6 @@ class Renderer(object):
         #Renders the lookahead point
         self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], 10)
 
-	#Renders the path points
-	self._visualize_point(self.COLOR_PNT, path_points, 10)
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()

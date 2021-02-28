@@ -49,7 +49,10 @@ class RacerSimROS(object):
             renderEnabled=rospy.get_param('~render/enabled', True),
             map_height=rospy.get_param('~MAP_HEIGHT'),
             map_width=rospy.get_param('~MAP_WIDTH'),
-            goal0_pos=rospy.get_param('~GOAL0_POSE')
+            goal0_pos=rospy.get_param('~GOAL0_POSE'),
+            car_weight=rospy.get_param('~CAR_WEIGHT'),
+            car_power=rospy.get_param('~CAR_POWER'),
+            friction=rospy.get_param('~FRICTIONAL_CONSTANT')
         )
 
         self.lock = Lock()

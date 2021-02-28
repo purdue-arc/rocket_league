@@ -42,9 +42,8 @@ import random
 class Sim(object):
     """Oversees components of racersim"""
 
-    def __init__(self, renderEnabled=True, velIters=6, posIters=2,
-                 carDef=None, tireDef=None, map_height=10, map_width=100,
-                 goal0_pos=[0, 0, 0]):
+    def __init__(self, renderEnabled=True, map_height=10, map_width=100, goal0_pos=[0, 0, 0],
+                 velIters=6, posIters=2, car_weight=1, car_power=1, friction=1):
 
         initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
         initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
@@ -55,20 +54,16 @@ class Sim(object):
         self.velIters = velIters
         self.posIters = posIters
 
-        self.carDef = carDef
-        self.tireDef = tireDef
-        if self.carDef == None:
-            if self.tireDef != None:
-                self.carDef = CarDef(tireDef, initPos=initPosCar)
-            else:
-                self.carDef = CarDef(initPos=initPosCar)
+        #self.tireDef = TireDef(car_weight=car_weight, maxDriveForce=car_power,
+        #                       friction=friction)
+        #self.carDef = CarDef(self.tireDef, initPos=initPosCar)
+        self.carDef = CarDef()
 
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world, initPos=initPosBall)
         self.goal = Goal(self.world, initPos = goal0_pos)
         self.path = None
         self.lookahead = [0, 0]
-	self.path_points = [[0, 0]]
 
         if renderEnabled:
             self.renderer = Renderer(map_height, map_width)
@@ -114,6 +109,6 @@ class Sim(object):
         """Render the current state of the sim."""
         try:
             self.renderer.render(self.car, self.ball, self.goal, \
-                                 self.world, self.lookahead, self.path_points, path=self.path)
+                                 self.world, self.lookahead, path=self.path)
         except Renderer.ShutdownError:
             self.renderEnabled = False
