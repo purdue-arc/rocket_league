@@ -28,7 +28,6 @@ License:
 
 import numpy as np
 import torch
-import torch.cuda.nn as nn
 
 from collections import deque
 import random
@@ -36,7 +35,7 @@ import random
 class Agent(object):
     """High level DQN controller for snake tutorial."""
     def __init__(self, state_size, action_size, training=False):
-        # self.device = torch.device("cuda" if args.cuda else "cpu")
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         self.state_size = state_size
         self.action_size = action_size
@@ -48,15 +47,17 @@ class Agent(object):
         self.epsilon_min = 0.01
         self.learning_rate = 0.001
 
-        self.model = nn.Sequential(
-            nn.Linear(state_size, 64),
-            nn.ReLu(),
-            nn.Linear(64, 32),
-            nn.ReLu(),
-            nn.Linear(32, action_size))
+        self.model = torch.nn.Sequential(
+            torch.nn.Linear(state_size, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 32),
+            torch.nn.ReLU(),
+            torch.nn.Linear(32, action_size))
+        self.model.to(self.device)
 
-        self.loss = nn.MSELoss()
-        self.optimizer = nn.Adam(
+        self.loss = torch.nn.MSELoss()
+
+        self.optimizer = torch.optim.Adam(
             params=self.model.parameters(),
             lr=self.learning_rate)
 

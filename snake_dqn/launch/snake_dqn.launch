@@ -13,7 +13,7 @@
     <param name="rate"                    value="$(arg rate)"/>
   </node>
 
-  <node type="snake_dqn" pkg="snake_dqn" name="snake_dwn" output="screen">
+  <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen">
     <param name="num_segments"  value="$(arg size)"/>
     <param name="training"      value="$(arg training)"/>
     <param name="rate"          value="$(arg rate)"/>

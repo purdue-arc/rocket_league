@@ -5,7 +5,7 @@ project(snake_dqn)
 find_package(catkin REQUIRED)
 
 # install python module(s)
-# catkin_python_setup()
+catkin_python_setup()
 
 # generates cmake config files and set variables for installation
 catkin_package()
@@ -16,7 +16,7 @@ catkin_package()
 
 # Mark executable python scripts and nodes for installation
 catkin_install_python(PROGRAMS
-#   nodes/TODO
+  nodes/snake_dqn
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
