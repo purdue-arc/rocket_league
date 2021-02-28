@@ -36,38 +36,42 @@ from racersim.goal import Goal
 from racersim.renderer import Renderer
 from racersim.tire import Tire, TireDef
 from racersim.world import World
+import random
+
 
 class Sim(object):
     """Oversees components of racersim"""
 
     def __init__(self, renderEnabled=True, velIters=6, posIters=2,
-                 scaling=500, carDef=None, tireDef=None, map_height=100, map_width=100,
-                 goal0_pos=[50, 50, 0]):
+                 carDef=None, tireDef=None, map_height=10, map_width=100,
+                 goal0_pos=[0, 0, 0]):
+
+        initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
+        initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
 
         self.world = World(map_height, map_width)
 
         self.renderEnabled = renderEnabled
         self.velIters = velIters
         self.posIters = posIters
-        self.scaling = scaling
 
         self.carDef = carDef
         self.tireDef = tireDef
         if self.carDef == None:
             if self.tireDef != None:
-                self.carDef = CarDef(tireDef)
+                self.carDef = CarDef(tireDef, initPos=initPosCar)
             else:
-                self.carDef = CarDef()
-        
+                self.carDef = CarDef(initPos=initPosCar)
+
         self.car = Car(self.world, self.carDef)
-        self.ball = Ball(self.world)
+        self.ball = Ball(self.world, initPos=initPosBall)
         self.goal = Goal(self.world, initPos = goal0_pos)
         self.path = None
         self.lookahead = [0, 0]
 	self.path_points = [[0, 0]]
 
         if renderEnabled:
-            self.renderer = Renderer(map_height, map_width, scaling=scaling)
+            self.renderer = Renderer(map_height, map_width)
             self._render()
         
         self.running = True

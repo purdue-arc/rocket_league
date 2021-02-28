@@ -30,6 +30,7 @@ License:
 from threading import Thread
 import pygame
 import Box2D
+import math
 
 class Renderer(object):
     """Render field elements of racer sim"""
@@ -43,32 +44,36 @@ class Renderer(object):
     COLOR_PNT = (245, 173, 66)          # Orange
     COLOR_LOOKAHEAD = (255, 255, 255)   # White
 
-    SIZE_PNT = 20
+    SIZE_PNT = 0.2
 
     class ShutdownError(Exception):
         """Exception for when pygame is shut down"""
         pass
 
-    def __init__(self, map_height, map_width, scaling=500):
-        self.scaling = scaling
-        self.windowSize = int(scaling * max(map_height, map_width))
+    def __init__(self, map_height, map_width):
+
+        #Most people will have a 1080p monitor
+        self.scaling = 1080 * 0.9 / map_height
+
+        self.windowHeight = int(map_height * self.scaling)
+        self.windowWidth = int(map_width * self.scaling)
+
         pygame.display.init()
-        self._screen = pygame.display.set_mode((self.windowSize,
-                                                self.windowSize))
+        self._screen = pygame.display.set_mode((self.windowWidth, self.windowHeight))
         self._thread = None
 
     def _draw_polygon(self, body, fixture, color):
         """Draws polygons to the screen."""
         vertices = [(body.transform * v) * self.scaling \
                     for v in fixture.shape.vertices]
-        vertices = [(v[0], self.windowSize - v[1]) \
+        vertices = [(v[0], self.windowHeight - v[1]) \
                     for v in vertices]
         pygame.draw.polygon(self._screen, color, vertices)
 
     def _draw_circle(self, body, fixture, color):
         """Draws circles to the screen."""
         position = body.transform * fixture.shape.pos * self.scaling
-        position = (position[0], self.windowSize - position[1])
+        position = (position[0], self.windowHeight - position[1])
         #print position
         pygame.draw.circle(self._screen, color, 
             [int(x) for x in position],
@@ -81,7 +86,7 @@ class Renderer(object):
     def _visualize_point(self, color, coords, size):
         for coord in coords:
             x = int(-coord[1] * self.scaling)
-            y = int(self.windowSize - coord[0] * self.scaling)
+            y = int(self.windowWidth - coord[0] * self.scaling)
             pygame.draw.circle(self._screen, color, [x, y], size)
 
     def render(self, car, ball, goal, world, lookahead, path_points, path=None):
@@ -119,9 +124,9 @@ class Renderer(object):
             for posed in path:
                 pose = posed.pose
                 pnt = (int(pose.position.x * self.scaling), \
-                       int(self.windowSize - (pose.position.y * self.scaling)))
+                       int(self.windowWidth - (pose.position.y * self.scaling)))
                 #print(pnt)
-                self._draw_pnt(pnt, self.SIZE_PNT, self.COLOR_PNT)
+                self._draw_pnt(pnt, int(self.SIZE_PNT * self.scaling), self.COLOR_PNT)
 
         #Renders the lookahead point
         self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], 10)

@@ -37,15 +37,15 @@ from tire import Tire, TireDef
 class CarDef(object):
     """Holds relevent data for a car instance"""
 
-    DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.155),
-                        (-0.0225, 0.155), (-0.0225, 0)]
+    DEFAULT_VERTICES = [(0.08541666666, 0), (0.08541666666, 0.0390625),
+                        (-0.08541666666, 0.0390625), (-0.08541666666, 0)]
 
-    DEFAULT_ANCHORS = [(-0.03525, 0.135), (0.03525, 0.135),
-                        (-0.03525, 0.0185), (0.03525, 0.0185)]
+    DEFAULT_ANCHORS = [(0.05338541666, 0), (0.05338541666, 0.0390625),
+                        (-0.05552083333, 0.0390625), (-0.05552083333, 0)]
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(0.75, 1.25), vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(1.0,1.0), vertices=DEFAULT_VERTICES,
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
                     maxAngle=30, turnSpeed=320):
@@ -59,6 +59,7 @@ class CarDef(object):
         self.maxBackwardSpeed = maxBackwardSpeed
         self.maxAngle = math.radians(maxAngle)
         self.turnSpeed = math.radians(turnSpeed)
+
 
 class Car(object):
     """Simulates an ackerman-steering vehicle"""

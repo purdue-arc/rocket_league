@@ -47,12 +47,9 @@ class RacerSimROS(object):
 
         self.sim = racersim.Sim(
             renderEnabled=rospy.get_param('~render/enabled', True),
-            velIters=rospy.get_param('~render/velIters', 6),
-            posIters=rospy.get_param('~render/posIters', 2),
-            scaling=rospy.get_param('~render/scaling', 500),
-            map_height=rospy.get_param('~MAP_HEIGHT', 100),
-            map_width=rospy.get_param('~MAP_WIDTH', 100),
-            goal0_pos=rospy.get_param('~GOAL0_POSE', [50, 50, 0])
+            map_height=rospy.get_param('~MAP_HEIGHT'),
+            map_width=rospy.get_param('~MAP_WIDTH'),
+            goal0_pos=rospy.get_param('~GOAL0_POSE')
         )
 
         self.lock = Lock()
