@@ -41,7 +41,6 @@ from transformations import euler_from_quaternion
 # System
 import time
 import numpy as np
-import pdb
 
 class SnakeDQNROS(object):
     """ROS wrapper for the snake game DQN."""
@@ -91,9 +90,12 @@ class SnakeDQNROS(object):
         # Main loop
         try:
             if self.TRAINING:
-                # kickstart sim time
-                self.time += self.DELTA_T / 2.0
-                self.clock_pub.publish(self.time)
+                # wait for snake to initialize
+                while(not self.has_state()):
+                    # kickstart sim time
+                    self.time += self.DELTA_T
+                    self.clock_pub.publish(self.time)
+                    self.spin_once()
 
                 # initialize variables
                 self._reset()
@@ -136,7 +138,8 @@ class SnakeDQNROS(object):
         if not done:
             self.action_pub.publish(
                 self.get_action_msg(
-                    self.agent.get_action(state)))
+                    self.agent.get_action(
+                        self.agent.tranform_state(state))))
 
     def step(self, action):
         """Step simulation one time step and return new state."""
@@ -150,8 +153,15 @@ class SnakeDQNROS(object):
         self.clock_pub.publish(self.time)
 
         # Wait for sim process actions
+        spins = 0
         while(not self.has_state()):
             self.spin_once()
+            spins += 1
+
+            if spins > 15:
+                rospy.logwarn("Too many spins, advancing time")
+                self.time += self.DELTA_T
+                self.clock_pub.publish(self.time)
 
         # return state
         return self.get_state()
@@ -229,7 +239,10 @@ class SnakeDQNROS(object):
 
     def pose_cb(self, pose_msg):
         """Callback for poses of each segment of snake."""
-        assert len(pose_msg.poses) == self.NUM_SEGMENTS
+        if len(pose_msg.poses) != self.NUM_SEGMENTS:
+            rospy.logwarn("Ignoring bad pose callback")
+            return
+
         yaw, __, __ = euler_from_quaternion((
             pose_msg.poses[0].orientation.x,
             pose_msg.poses[0].orientation.y,
@@ -241,10 +254,7 @@ class SnakeDQNROS(object):
             [func(pose_msg.poses[i]) for i in range(self.NUM_SEGMENTS)
                 for func in (
                     lambda pose: pose.position.x,
-                    lambda pose: pose.position.y
-                )
-            ]
-        )
+                    lambda pose: pose.position.y)])
 
     def goal_cb(self, goal_msg):
         """Callback for location of goal."""
