@@ -41,15 +41,15 @@ class Sim(object):
     """Oversees components of racersim"""
 
     def __init__(self, renderEnabled=True, velIters=6, posIters=2,
-                 bounds=1.5, scaling=500, carDef=None, tireDef=None):
+                 scaling=500, carDef=None, tireDef=None, map_height=100, map_width=100,
+                 goal0_pos=[50, 50, 0]):
 
-        self.world = World(bounds, bounds)
+        self.world = World(map_height, map_width)
 
         self.renderEnabled = renderEnabled
         self.velIters = velIters
         self.posIters = posIters
         self.scaling = scaling
-        self.bounds = bounds
 
         self.carDef = carDef
         self.tireDef = tireDef
@@ -61,13 +61,13 @@ class Sim(object):
         
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world)
-        self.goal = Goal(self.world)
+        self.goal = Goal(self.world, initPos = goal0_pos)
         self.path = None
         self.lookahead = [0, 0]
 	self.path_points = [[0, 0]]
 
         if renderEnabled:
-            self.renderer = Renderer(bounds, scaling=scaling)
+            self.renderer = Renderer(map_height, map_width, scaling=scaling)
             self._render()
         
         self.running = True

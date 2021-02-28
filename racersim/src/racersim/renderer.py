@@ -49,10 +49,9 @@ class Renderer(object):
         """Exception for when pygame is shut down"""
         pass
 
-    def __init__(self, bounds, scaling=500):
-        self.bounds = bounds
+    def __init__(self, map_height, map_width, scaling=500):
         self.scaling = scaling
-        self.windowSize = int(scaling * bounds)
+        self.windowSize = int(scaling * max(map_height, map_width))
         pygame.display.init()
         self._screen = pygame.display.set_mode((self.windowSize,
                                                 self.windowSize))
@@ -121,7 +120,7 @@ class Renderer(object):
                 pose = posed.pose
                 pnt = (int(pose.position.x * self.scaling), \
                        int(self.windowSize - (pose.position.y * self.scaling)))
-                print(pnt)
+                #print(pnt)
                 self._draw_pnt(pnt, self.SIZE_PNT, self.COLOR_PNT)
 
         #Renders the lookahead point

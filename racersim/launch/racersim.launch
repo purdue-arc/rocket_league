@@ -15,5 +15,6 @@
     <param name="~render/posIters" value="2"/>
     <param name="~render/scaling" value="$(arg scaling)"/>
     <param name="~world/bounds" value="$(arg bounds)"/>
+    <rosparam command="load" file="$(find rocket_league_highlevel)/YAML_files/high_level_info.yaml" />
   </node>
 </launch>

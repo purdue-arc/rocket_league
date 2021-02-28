@@ -34,10 +34,11 @@ from tf.transformations import quaternion_from_euler
 class Goal(object):
     """Simulates goal position"""
 
-    def __init__(self, world, initPos=(0.55,0.1), width=0.1, height=0.1):
+    def __init__(self, world, initPos=[50, 50, 0], width=0.1, height=0.1):
+        print(initPos)
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_staticBody
-        bodyDef.position = initPos
+        bodyDef.position = (initPos[0], initPos[1])
         self.body = world.CreateBody(bodyDef)
 
         shape = Box2D.b2PolygonShape(box=(width,height))

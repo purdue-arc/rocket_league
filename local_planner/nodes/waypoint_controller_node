@@ -160,10 +160,13 @@ class WaypointControllerROS(object):
             is_last_pose = (self.last_pose_idx == len(self.path) - 2)
             d_angle = pursuit.calculate_angle(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
-            if abs(d_angle) > math.pi/2:
-                self.bot_velocity_cmd.publish(Twist())
-                rospy.logwarn("Car facing opposite direction of intersection.")
-                return
+
+            print(d_angle / math.pi * 180)
+
+            #if abs(d_angle) > math.pi/2:
+            #    self.bot_velocity_cmd.publish(Twist())
+            #    rospy.logwarn("Car facing opposite direction of intersection.")
+            #    return
 
             arc_dist = pursuit.calculate_dist(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
