@@ -136,7 +136,6 @@ class Car(object):
             # self._flJoint.SetLimits(angle, angle)
             # self._frJoint.SetLimits(angle, angle)
 
-
             desiredAngle = math.atan((angularVelocity.z * .1165) / linearVelocity.y)
 
             if abs(desiredAngle) > self.maxAngle:

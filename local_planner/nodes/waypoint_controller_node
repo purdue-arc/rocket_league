@@ -32,7 +32,7 @@ License:
 import rospy
 import numpy
 import math
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32, Float64
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 
@@ -179,13 +179,12 @@ class WaypointControllerROS(object):
 
             # publish error data. TODO: replace zeros with actual values
             error = PathError()
-            error.time = 0
-            error.position = 0
-            error.orientation = 0
-            error.linear_velocity = 0
-            error.angular_velocity = 0
+            error.time = Float32()
+            error.position = Float32()
+            error.orientation = Float32()
+            error.linear_velocity = Float32()
+            error.angular_velocity = Float32()
             self.path_error_pub.publish(error)
-
 
 if __name__ == "__main__":
     WaypointControllerROS()
