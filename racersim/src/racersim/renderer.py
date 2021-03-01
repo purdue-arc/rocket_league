@@ -70,7 +70,7 @@ class Renderer(object):
         """Draws circles to the screen."""
         position = body.transform * fixture.shape.pos * self.scaling
         position = (position[0], self.windowSize - position[1])
-        #print position
+
         pygame.draw.circle(self._screen, color, 
             [int(x) for x in position],
              int(fixture.shape.radius * self.scaling))

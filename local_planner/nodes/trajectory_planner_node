@@ -71,7 +71,7 @@ class TrajectoryPlannerROS(object):
 
         # Publishers   TODO: fix these
         self.path_pub = rospy.Publisher("car0/path", Path, queue_size=1)
-        self.feasibility_pub = rospy.Publisher("car0/target_feasibility",Float32, queue_size=1)
+        self.feasibility_pub = rospy.Publisher("car0/target_feasibility", Float32, queue_size=1)
 
         # Subscribers
         rospy.Subscriber("car0/target", Target, self.target_cb)
