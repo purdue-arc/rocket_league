@@ -43,9 +43,9 @@ class Agent(object):
         self.DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.STATE_SIZE = state_size
         self.ACTION_SIZE = action_size
-        self.GAMMA = 0.9
-        self.EPSILON_DECAY = 0.99
-        self.EPSILON_MIN = 0.01
+        self.GAMMA = gamma
+        self.EPSILON_DECAY = epsilon_decay
+        self.EPSILON_MIN = epsilon_min
 
         # variables
         self.epsilon = 1.0
