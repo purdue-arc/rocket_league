@@ -34,50 +34,47 @@ import random
 
 class Agent(object):
     """High level DQN controller for snake tutorial."""
-    def __init__(self, state_size, action_size, training=False):
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    def __init__(self, state_size, action_size,
+            memory_len=2000, gamma=0.9,
+            epsilon_decay=0.99, epsilon_min=0.01,
+            learning_rate=0.01):
 
-        self.state_size = state_size
-        self.action_size = action_size
+        # constants
+        self.DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.STATE_SIZE = state_size
+        self.ACTION_SIZE = action_size
+        self.GAMMA = 0.9
+        self.EPSILON_DECAY = 0.99
+        self.EPSILON_MIN = 0.01
 
-        self.memory = deque(maxlen=2000)
-        self.gamma = 0.9
+        # variables
         self.epsilon = 1.0
-        self.epsilon_decay = 0.99
-        self.epsilon_min = 0.01
-        self.learning_rate = 0.001
-
+        self.memory = deque(maxlen=2000)
         self.model = torch.nn.Sequential(
-            torch.nn.Linear(state_size, 64),
+            torch.nn.Linear(self.STATE_SIZE, 32),
             torch.nn.ReLU(),
-            torch.nn.Linear(64, 32),
+            torch.nn.Linear(32, 32),
             torch.nn.ReLU(),
-            torch.nn.Linear(32, action_size))
-        self.model.to(self.device)
-
+            torch.nn.Linear(32, self.ACTION_SIZE)).to(self.DEVICE)
         self.loss = torch.nn.MSELoss()
-
-        self.optimizer = torch.optim.Adam(
-            params=self.model.parameters(),
-            lr=self.learning_rate)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
 
     def remember(self, state, action, reward, next_state, done):
         """Add experience to memory dequeue for retraining later."""
         self.memory.append((state, action, reward, next_state, done))
 
-    def _train(self, minibatch_size=100):
+    def replay(self, minibatch_size=64):
         """Update the model weights with past experiences from memory."""
         self.model.train()
 
         # Check for sufficient data
         if minibatch_size > len(self.memory):
-            print("Skipping training due to too few data")
             return
 
         minibatch = random.sample(self.memory, minibatch_size)
         for state, action, reward, next_state, done in minibatch:
             if not done:
-                reward += self.gamma * torch.max(self.model(next_state)).item()
+                reward += self.GAMMA * torch.max(self.model(next_state)).item()
 
             self.optimizer.zero_grad()
 
@@ -91,29 +88,9 @@ class Agent(object):
 
             self.optimizer.step()
 
-    def train(self, step, reset, episodes=1000):
-        """Train the agent using provided step and reset functions."""
-        for episode in range(episodes):
-            if episode % 25 == 0:
-                print(f"Beginning episode {episode} out of {episodes}")
-
-            state, __, __, __ = reset()
-            state = self.transform_state(state)
-            done = False
-            while not done:
-                action = random.randint(0, self.action_size-1)
-                if random.random() > self.epsilon:
-                    action = self.get_action(state)
-                next_state, reward, done, __ = step(action)
-                next_state = self.transform_state(next_state)
-                self.remember(state, action, reward, next_state, done)
-                state = next_state
-                if self.epsilon > self.epsilon_min:
-                    self.epsilon *= self.epsilon_decay
-            self._train()
-
     def transform_state(self, state):
         """Transform state from numpy to torch type."""
+        assert np.numel(state) == self.STATE_SIZE
         return torch.from_numpy(state).to(self.device).float()
 
     def get_action(self, state):
@@ -121,7 +98,41 @@ class Agent(object):
         self.model.eval()
         reward = self.model(state)
         return torch.argmax(reward).item()
-     
+
+    def train(self, step, reset, log, episodes=1000):
+        """Train the agent using provided step and reset functions."""
+        for episode in range(episodes):
+            # reset episode and get initial state
+            state, __, __, __ = reset()
+            state = self.transform_state(state)
+
+            done = False
+            net_reward = 0
+            steps = 0
+            while not done:
+                # compute action
+                action = random.randint(0, self.action_size-1)
+                if random.random() > self.epsilon:
+                    action = self.get_action(state)
+
+                # take action
+                next_state, reward, done, __ = step(action)
+                next_state = self.transform_state(next_state)
+
+                # add to memory and learn
+                self.remember(state, action, reward, next_state, done)
+                self.replay()
+
+                # clean up for next run
+                state = next_state
+                net_reward += reward
+                steps += 1
+                if self.epsilon > self.EPSILON_MIN:
+                    self.epsilon *= self.EPSILON_DECAY
+
+            # log
+            log(episode, net_reward, steps, self.epsilon)
+
     def save(self, name):
         """Save weights to file."""
         torch.save(self.model.state_dict(), name)
