@@ -165,11 +165,11 @@ class WaypointControllerROS(object):
                 rospy.logwarn("Car facing opposite direction of intersection.")
                 return
 
-            arc_dist = pursuit.calculate_dist(intersect, bot_pos, \
+            arc_dist = pursuit.calculate_arc_dist(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
             angular_vel = pursuit.get_angular_speed(self.final_speed, \
                                                     d_angle, arc_dist)
-            angular_vel -= odom_msg.twist.twist.angular.z
+            #angular_vel -= odom_msg.twist.twist.angular.z
 
             # Publish command data
             twist = Twist()
