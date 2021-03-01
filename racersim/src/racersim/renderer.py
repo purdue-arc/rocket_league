@@ -70,7 +70,7 @@ class Renderer(object):
         """Draws circles to the screen."""
         position = body.transform * fixture.shape.pos * self.scaling
         position = (position[0], self.windowSize - position[1])
-        #print position
+
         pygame.draw.circle(self._screen, color, 
             [int(x) for x in position],
              int(fixture.shape.radius * self.scaling))
@@ -121,10 +121,10 @@ class Renderer(object):
                 self._draw_polygon(wallBody, fixture, self.COLOR_WALL)
 
         if path is not None:
-            for pose in path:
+            for posed in path:
+                pose = posed.pose
                 pnt = (int(pose.position.x * self.scaling), \
                        int(self.windowSize - (pose.position.y * self.scaling)))
-                print(pnt)
                 self._draw_pnt(pnt, self.SIZE_PNT, self.COLOR_PNT)
 
         #Renders the lookahead point

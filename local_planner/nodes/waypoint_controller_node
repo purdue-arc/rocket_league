@@ -32,13 +32,15 @@ License:
 import rospy
 import numpy
 import math
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32, Float64
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 
 # Local modules
 import local_planner.convert as convert
 import local_planner.pure_pursuit as pursuit
+from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
+
 
 class WaypointControllerROS(object):
     """A node to ensure the car follows a given trajectory."""
@@ -66,30 +68,33 @@ class WaypointControllerROS(object):
         self.is_debug = rospy.get_param('~is_debug', True)
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('bot_velocity_command',
+        self.bot_velocity_cmd = rospy.Publisher('car0/velocity',\
                                                 Twist, queue_size=1)
 
+        self.path_error_pub = rospy.Publisher('car0/path_error', PathError, queue_size=1)
+
         if self.is_debug:
-            self.lookahead_pnt_pub = rospy.Publisher('lookahead_pnt',
+            self.lookahead_pnt_pub = rospy.Publisher('car0/lookahead_pnt',
                                                      PoseWithCovarianceStamped,
                                                      queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('bot_path', PoseArray, self.path_cb)
-        rospy.Subscriber('bot_final_speed', Float64, self.final_speed_cb)
-        rospy.Subscriber('bot_odom', Odometry, self.odom_cb)
+        rospy.Subscriber('car0/path', Path, self.path_cb)
+        #rospy.Subscriber('bot_final_speed', Float64, self.final_speed_cb)
+        rospy.Subscriber('car0/odom', Odometry, self.odom_cb)
 
         rospy.spin()
 
-    def path_cb(self, pose_arr_msg):
-        """Creates path using pose array."""
-        self.path_start_time = pose_arr_msg.header.stamp
-        self.path = pose_arr_msg.poses
+    def path_cb(self, path_arr_msg):
+        """Creates path using waypoints in Path message."""
+        self.path_start_time = path_arr_msg.stamp
+        self.path = path_arr_msg.waypoint
         self.last_pnt_idx = 0
 
-    def final_speed_cb(self, float64_msg):
-        """Sets final path speed with a float64 message."""
-        self.final_speed = float64_msg.data
+        last_waypoint = path_arr_msg.waypoint[len(path_arr_msg.waypoint) - 1]
+        final_vel = last_waypoint.twist.linear
+        final_vel = numpy.array([final_vel.x,final_vel.y,final_vel.z])
+        self.final_speed = numpy.sqrt(numpy.dot(final_vel,final_vel))
 
     def odom_cb(self, odom_msg):
         """Updates car odometry and follows current path."""
@@ -120,8 +125,8 @@ class WaypointControllerROS(object):
                 if i == len(self.path) - 1:
                     i = 0
 
-                start_pos, _ = convert.pose_to_array(self.path[i])
-                end_pos, _ = convert.pose_to_array(self.path[i + 1])
+                start_pos, _ = convert.pose_to_array(self.path[i].pose)
+                end_pos, _ = convert.pose_to_array(self.path[i + 1].pose)
 
                 path_seg = end_pos - start_pos
                 bot_path = start_pos - bot_pos
@@ -160,17 +165,26 @@ class WaypointControllerROS(object):
                 rospy.logwarn("Car facing opposite direction of intersection.")
                 return
 
-            arc_dist = pursuit.calculate_dist(intersect, bot_pos, \
+            arc_dist = pursuit.calculate_arc_dist(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
             angular_vel = pursuit.get_angular_speed(self.final_speed, \
                                                     d_angle, arc_dist)
-            angular_vel -= odom_msg.twist.twist.angular.z
+            #angular_vel -= odom_msg.twist.twist.angular.z
 
             # Publish command data
             twist = Twist()
-            twist.linear.y = self.final_speed
+            twist.linear.x = self.final_speed
             twist.angular.z = angular_vel
             self.bot_velocity_cmd.publish(twist)
+
+            # publish error data. TODO: replace zeros with actual values
+            error = PathError()
+            error.time = Float32()
+            error.position = Float32()
+            error.orientation = Float32()
+            error.linear_velocity = Float32()
+            error.angular_velocity = Float32()
+            self.path_error_pub.publish(error)
 
 if __name__ == "__main__":
     WaypointControllerROS()
