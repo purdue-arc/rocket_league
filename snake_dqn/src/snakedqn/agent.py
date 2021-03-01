@@ -37,7 +37,7 @@ class Agent(object):
     def __init__(self, state_size, action_size,
             memory_len=2000, gamma=0.9,
             epsilon_decay=0.99, epsilon_min=0.01,
-            learning_rate=0.01):
+            learning_rate=0.01, batch_size=64):
 
         # constants
         self.DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -46,10 +46,11 @@ class Agent(object):
         self.GAMMA = gamma
         self.EPSILON_DECAY = epsilon_decay
         self.EPSILON_MIN = epsilon_min
+        self.BATCH_SIZE = batch_size
 
         # variables
         self.epsilon = 1.0
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=memory_len)
         self.model = torch.nn.Sequential(
             torch.nn.Linear(self.STATE_SIZE, 32),
             torch.nn.ReLU(),
@@ -63,15 +64,15 @@ class Agent(object):
         """Add experience to memory dequeue for retraining later."""
         self.memory.append((state, action, reward, next_state, done))
 
-    def replay(self, minibatch_size=64):
+    def replay(self):
         """Update the model weights with past experiences from memory."""
         self.model.train()
 
         # Check for sufficient data
-        if minibatch_size > len(self.memory):
+        if self.BATCH_SIZE > len(self.memory):
             return
 
-        minibatch = random.sample(self.memory, minibatch_size)
+        minibatch = random.sample(self.memory, self.BATCH_SIZE)
         for state, action, reward, next_state, done in minibatch:
             if not done:
                 reward += self.GAMMA * torch.max(self.model(next_state)).item()
