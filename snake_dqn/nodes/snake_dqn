@@ -33,31 +33,37 @@ from snakedqn import Agent
 # ROS
 import rospy
 from geometry_msgs.msg import Twist, PoseArray, PointStamped
-from std_msgs.msg import Int32, Bool
+from std_msgs.msg import Int32, Bool, String
 from rosgraph_msgs.msg import Clock
 from std_srvs.srv import Empty
-from transformations import euler_from_quaternion
 
 # System
 import time
 import numpy as np
+import sys
+from transformations import euler_from_quaternion
+from enum import IntEnum, unique
 
-class SnakeDQNROS(object):
+@unique
+class Actions(IntEnum):
+    """Possible actions for deep learner."""
+    FORWARD = 0
+    LEFT    = auto()
+    RIGHT   = auto()
+    SIZE    = auto()
+
+class SnakeDQN(object):
     """ROS wrapper for the snake game DQN."""
     def __init__(self):
         rospy.init_node('snake_dqn')
 
         # Constants
-        self.ANGULAR_VELOCITY = rospy.get_param('~angular_velocity', 6.28)
-        self.LINEAR_VELOCITY  = rospy.get_param('~linear_velocity', 2.0)
-        self.NUM_SEGMENTS     = rospy.get_param('~num_segments', 7)
-        self.DEATH_PENALTY    = rospy.get_param('~death_penalty', 50)
-        self.EPISODE_TIME     = rospy.Duration.from_sec(rospy.get_param('~episode_time', 30))
-        self.GOAL_REWARD      = rospy.get_param('~goal_reward', 10)
-        self.TRAINING         = rospy.get_param('~training', False)
-
-        # Services
-        self.reset_srv = rospy.ServiceProxy('snake/reset', Empty)
+        self.ANGULAR_VELOCITY = rospy.get_param('~angular_velocity', 2.0)
+        self.LINEAR_VELOCITY = rospy.get_param('~linear_velocity', 2.0)
+        self.NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
+        self.TIME_REWARD = rospy.get_param('~reward/per_second', -1.0)
+        self.DEATH_REWARD = rospy.get_param('~reward/death', -50.0)
+        self.GOAL_REWARD = rospy.get_param('~reward/goal', 10.0)
 
         # Publishers
         self.action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
@@ -68,52 +74,22 @@ class SnakeDQNROS(object):
         rospy.Subscriber('snake/score', Int32, self.score_cb)
         rospy.Subscriber('snake/active', Bool, self.alive_cb)
 
-        # Sim time
-        if self.TRAINING:
-            self.time = rospy.Time.from_sec(time.time())
-            self.DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
-            self.clock_pub = rospy.Publisher('/clock', Clock, queue_size=1)
+        # Services
+        # TODO make a service (requires custom messages)
+        rospy.Service('snake/dqn/load_weights', String, self.load_cb)
+        rospy.Service('snake/dqn/save_weights', String, self.save_cb)
 
         # State variables
-        self.alive = None
-        self.score = None
         self.pose = None
         self.goal = None
+        self.score = None
+        self.alive = None
 
-        # Tracking variables
-        self.last_score = None
-        self.start_time = None
+        self.prev_score = None
+        self.prev_time = None
 
         # DQN Agent
-        self.agent = Agent(3 + 2*self.NUM_SEGMENTS, 3)
-
-        # Main loop
-        try:
-            if self.TRAINING:
-                # wait for snake to initialize
-                while(not self.has_state()):
-                    # kickstart sim time
-                    self.time += self.DELTA_T
-                    self.clock_pub.publish(self.time)
-                    self.spin_once()
-
-                # initialize variables
-                self._reset()
-
-                # begin agent's training routine
-                self.agent.train(self.step, self.reset)
-            else:
-                # initialize to wall time
-                self.time = rospy.Time.now()
-
-                # initialize variables
-                self._reset()
-
-                # begin reaction routine
-                while not rospy.is_shutdown():
-                    self.loop_once()
-        except rospy.ROSInterruptException:
-            pass
+        self.agent = Agent(3 + 2*self.NUM_SEGMENTS, Actions.SIZE)
 
     def spin_once(self):
         """Simple wait to allow other threads to handle callbacks."""
@@ -122,82 +98,36 @@ class SnakeDQNROS(object):
         else:
             time.sleep(0.001)
 
-    def loop_once(self):
-        """Handle one step of inference."""
-        assert not self.TRAINING
-
-        # Wait for state
-        while(not self.has_state()):
-            self.spin_once()
-
-        # update state
-        self.time = rospy.Time.now()
-        state, __, done, __ = self.get_state()
-
-        # check for end of game
-        if not done:
-            self.action_pub.publish(
-                self.get_action_msg(
-                    self.agent.get_action(
-                        self.agent.tranform_state(state))))
-
-    def step(self, action):
-        """Step simulation one time step and return new state."""
-        assert self.TRAINING
-
-        # Publish action
-        self.action_pub.publish(self.get_action_msg(action))
-
-        # Advance sim time
-        self.time += self.DELTA_T
-        self.clock_pub.publish(self.time)
-
-        # Wait for sim process actions
-        spins = 0
-        while(not self.has_state()):
-            self.spin_once()
-            spins += 1
-
-            if spins > 15:
-                rospy.logwarn("Too many spins, advancing time")
-                self.time += self.DELTA_T
-                self.clock_pub.publish(self.time)
-
-        # return state
-        return self.get_state()
-
     def get_action_msg(self, action):
         """Take the raw action from the deep learner and turn into message."""
-        assert action is None or (action >= 0 and action <= 3)
+        assert action >= 0 and action < Actions.SIZE
 
         action_msg = Twist()
-        if action is not None:
-            action_msg.linear.x = self.LINEAR_VELOCITY
-            if action == 1:
-                action_msg.angular.z = self.ANGULAR_VELOCITY
-            if action == 2:
-                action_msg.angular.z = -self.ANGULAR_VELOCITY
+        action_msg.linear.x = self.LINEAR_VELOCITY
+        if action == Actions.LEFT:
+            action_msg.angular.z = self.ANGULAR_VELOCITY
+        if action == Actions.RIGHT:
+            action_msg.angular.z = -self.ANGULAR_VELOCITY
         return action_msg
 
     def has_state(self):
         """Check if all required data is available to form state."""
         return (
-            self.alive is not None and
-            self.score is not None and
             self.pose is not None and
-            self.goal is not None
-        )
+            self.goal is not None and
+            self.score is not None and
+            self.alive is not None)
 
     def clear_state(self):
         """Clear state variables to wait for next callbacks."""
-        self.alive = None
-        self.score = None
         self.pose = None
         self.goal = None
+        self.score = None
+        self.alive = None
         assert not self.has_state()
 
-    def get_state(self):
-        """Format the game state to pass to the deep learning algorithm."""
+    def get_env(self, time):
+        """Format the environment state to pass to the deep learning algorithm."""
         assert self.has_state()
 
         # format pose and goal into state column vector
@@ -210,37 +140,30 @@ class SnakeDQNROS(object):
         done = False
 
         if self.last_score is not None:
-            reward = self.GOAL_REWARD * (self.score - self.last_score)
+            reward += self.GOAL_REWARD * (self.score - self.prev_score)
         self.last_score = self.score
 
-        if not self.alive:
-            reward = -self.DEATH_PENALTY
-            done = True
+        if self.prev_time is not None:
+            reward += self.TIME_REWARD * (time - self.prev_time).to_sec()
+        self.prev_time = time
 
-        if (self.time - self.start_time) >= self.EPISODE_TIME:
+        if not self.alive:
+            reward += self.DEATH_REWARD
             done = True
 
         # match Gym's env.step() API
         return (state, reward, done, {})
 
-    def _reset(self):
-        """reset internal state for new episode."""
-        self.clear_state()
-        self.last_score = None
-        self.start_time = rospy.Time.from_sec(self.time.to_sec())
-
     def reset(self):
-        """reset for environment new episode."""
-        assert self.TRAINING
-
-        self._reset()
-        self.reset_srv.call()
-        return self.step(None)
+        """reset for new episode."""
+        self.clear_state()
+        self.prev_score = None
+        self.prev_time = None
 
     def pose_cb(self, pose_msg):
         """Callback for poses of each segment of snake."""
         if len(pose_msg.poses) != self.NUM_SEGMENTS:
-            rospy.logwarn("Ignoring bad pose callback")
+            rospy.logerr("Bad pose callback")
             return
 
         yaw, __, __ = euler_from_quaternion((
@@ -268,5 +191,119 @@ class SnakeDQNROS(object):
         """Callback for active state of snake."""
         self.alive = alive_msg.data
 
+    def load_cb(self, load_msg):
+        """Callback to load model weights."""
+        self.agent.load(load_msg.data)
+
+    def save_cb(self, save_msg):
+        """Callback to save model weights."""
+        self.agent.save(save_msg.data)
+
+class Trainer(SnakeDQN):
+    """Class for training the agent."""
+    def __init__(self):
+        super().__init__()
+
+        self.DEATH_PENALTY    = rospy.get_param('~death_penalty', 50)
+        self.GOAL_REWARD      = rospy.get_param('~goal_reward', 10)
+
+        # Services
+        self.reset_srv = rospy.ServiceProxy('snake/reset', Empty)
+
+                # Tracking variables
+        self.prev_score = None
+
+         self.time = rospy.Time.from_sec(time.time())
+            self.DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
+            self.clock_pub = rospy.Publisher('/clock', Clock, queue_size=1)
+
+            # Main loop
+        try:
+            # wait for snake to initialize
+            while(not self.has_state()):
+                # kickstart sim time
+                self.time += self.DELTA_T
+                self.clock_pub.publish(self.time)
+                self.spin_once()
+
+            # initialize variables
+            self._reset()
+
+            # begin agent's training routine
+            self.agent.train(self.step, self.reset)
+        except rospy.ROSInterruptException:
+            pass
+
+    def step(self, action):
+        """Step simulation one time step and return new state."""
+        assert self.TRAINING
+
+        # Publish action
+        self.action_pub.publish(self.get_action_msg(action))
+
+        # Advance sim time
+        self.time += self.DELTA_T
+        self.clock_pub.publish(self.time)
+
+        # Wait for sim process actions
+        spins = 0
+        while(not self.has_state()):
+            self.spin_once()
+            spins += 1
+
+            if spins > 15:
+                rospy.logwarn("Too many spins, advancing time")
+                self.time += self.DELTA_T
+                self.clock_pub.publish(self.time)
+
+        # return state
+        return self.get_state()
+
+        self.reset_srv.call()
+        return self.step(None)
+
+class Evaluator(SnakeDQN):
+    """Class for running the agent live."""
+    def __init__(self):
+        super().__init__()
+
+        try:
+            # initialize to wall time
+            self.time = rospy.Time.now()
+
+            # initialize variables
+            self._reset()
+
+            # begin reaction routine
+            while not rospy.is_shutdown():
+                self.loop_once()
+        except rospy.ROSInterruptException:
+            pass
+
+
+    def loop_once(self):
+        """Handle one step of inference."""
+        assert not self.TRAINING
+
+        # Wait for state
+        while(not self.has_state()):
+            self.spin_once()
+
+        # update state
+        self.time = rospy.Time.now()
+        state, __, done, __ = self.get_state()
+
+        # check for end of game
+        if not done:
+            self.action_pub.publish(
+                self.get_action_msg(
+                    self.agent.get_action(
+                        self.agent.tranform_state(state))))
+
 if __name__ == "__main__":
-    SnakeDQNROS()
+    if len(sys.argv) > 1 and sys.argv[1] == "--training":
+        print("Starting DQN node for training")
+        Trainer()
+    else:
+        print("Starting DQN node for evaluation")
+        Evaluator()

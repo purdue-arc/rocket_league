@@ -136,8 +136,10 @@ class Agent(object):
 
     def save(self, name):
         """Save weights to file."""
+        print(f"Saving weights to {name}")
         torch.save(self.model.state_dict(), name)
 
     def load(self, name):
         """Load weights from file."""
+        print(f"Loading weights fron {name}")
         self.model.load_state_dict(torch.load(name))
