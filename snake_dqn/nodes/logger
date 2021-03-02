@@ -55,7 +55,11 @@ class Logger(object):
             if kv.key == "episode":
                 episode = int(kv.value)
 
-        if episode > 0 and episode % self.FREQUENCY == 0:
+        if episode is None:
+            rospy.logerr("Bad progress message.")
+            return
+
+        if (episode+1) % self.FREQUENCY == 0:
             self.log_pub.publish(self.LOG_DIR + f"episode_{episode}_weights.pt")
 
 if __name__ == "__main__":
