@@ -35,7 +35,7 @@ class TireDef(object):
                  maxLateralImpulse=0.03, maxDriveForce=0.0001, maxBrakeForce=0.0002,
                  dragForceCoeff=-0.00002, angularImpulseCoeff=0.02,
                  car_weight=1, friction=1):
-        
+
         self.width = width
         self.length = length
         self.density = density

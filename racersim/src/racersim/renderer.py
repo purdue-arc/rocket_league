@@ -73,8 +73,9 @@ class Renderer(object):
     def _draw_circle(self, body, fixture, color):
         """Draws circles to the screen."""
         position = body.transform * fixture.shape.pos * self.scaling
+
         position = (position[0], self.windowHeight - position[1])
-        #print position
+
         pygame.draw.circle(self._screen, color, 
             [int(x) for x in position],
              int(fixture.shape.radius * self.scaling))
@@ -87,6 +88,10 @@ class Renderer(object):
         for coord in coords:
             x = int(-coord[1] * self.scaling)
             y = int(self.windowWidth - coord[0] * self.scaling)
+
+            #Gradually darkens the points
+            color = (max(color[0] - 15, 0), max(color[1] - 15, 0), max(color[2] - 15, 0))
+
             pygame.draw.circle(self._screen, color, [x, y], size)
 
     def render(self, car, ball, goal, world, lookahead, path=None):
@@ -124,8 +129,8 @@ class Renderer(object):
             for posed in path:
                 pose = posed.pose
                 pnt = (int(pose.position.x * self.scaling), \
+
                        int(self.windowWidth - (pose.position.y * self.scaling)))
-                #print(pnt)
                 self._draw_pnt(pnt, int(self.SIZE_PNT * self.scaling), self.COLOR_PNT)
 
         #Renders the lookahead point

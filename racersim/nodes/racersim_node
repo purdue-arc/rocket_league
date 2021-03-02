@@ -76,7 +76,7 @@ class RacerSimROS(object):
         # Subscribers
         rospy.Subscriber('car0/velocity', Twist, self.command_cb)
         rospy.Subscriber('car0/path', Path, self.path_arr_cb)
-        rospy.Subscriber('lookahead_pnt', PoseWithCovarianceStamped, self.lookahead_cb)
+        rospy.Subscriber('car0/lookahead_pnt', PoseWithCovarianceStamped, self.lookahead_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -174,7 +174,6 @@ class RacerSimROS(object):
             angular = self.sim.car.body.angularVelocity
             bot_msg.twist.twist.angular.z = angular
             self.bot_pub.publish(bot_msg)
-
 
             #Update the lookahead point
             self.sim.lookahead = self.lookahead

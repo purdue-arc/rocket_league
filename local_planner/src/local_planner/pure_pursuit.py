@@ -55,13 +55,14 @@ def find_intersection(path_seg, bot_path, lookahead_dist):
             return path_seg * t2
     return None
 
-def calculate_dist(pos, bot_pos, bot_orient, lookahead_dist):
+def calculate_arc_dist(pos, bot_pos, bot_orient, lookahead_dist):
     """Determines arc distance to reach intersection point."""
+
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
     a = -math.tan(bot_yaw)
-    c = math.tan(bot_yaw) * bot_pos[0] - bot_pos[1]
+    c = (math.tan(bot_yaw) * bot_pos[0]) - bot_pos[1]
     dist = math.sqrt(math.pow(a,2) + 1)
-    x = abs(((a * pos[0]) + pos[1] + c) / dist)
+    x = abs((a * pos[0]) + pos[1] + c) / dist
     radius = (lookahead_dist * lookahead_dist)/(2 * x)
 
     dist = abs(np.linalg.norm(pos - bot_pos))
@@ -75,8 +76,8 @@ def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist):
     """
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
 
-    bot_line_x = bot_pos[0] + math.cos(bot_yaw) * lookahead_dist
-    bot_line_y = bot_pos[1] + math.sin(bot_yaw) * lookahead_dist
+    bot_line_x = bot_pos[0] + (math.cos(bot_yaw) * lookahead_dist)
+    bot_line_y = bot_pos[1] + (math.sin(bot_yaw) * lookahead_dist)
     bot_line = np.array([bot_line_x, bot_line_y, 0])
 
     tang_line = intersect_pos - bot_line
