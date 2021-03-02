@@ -35,7 +35,7 @@ import rospy
 from geometry_msgs.msg import Twist, PoseArray, PointStamped
 from std_msgs.msg import Int32, Bool, String
 from rosgraph_msgs.msg import Clock
-from std_srvs.srv import Empty
+from std_srvs.srv import Empty, EmptyResponse
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 # System
@@ -283,7 +283,7 @@ class Evaluator(SnakeDQN):
         super().__init__()
 
         # Services
-        self.reset_srv = rospy.Service('snake/dqn/reset', Empty, self.reset_cb)
+        self.reset_srv = rospy.Service('snake_dqn/reset', Empty, self.reset_cb)
 
         self.lock = Lock()
 
@@ -313,11 +313,12 @@ class Evaluator(SnakeDQN):
         except rospy.ROSInterruptException:
             pass
 
-    def reset_cb(self):
+    def reset_cb(self, reset_srv):
         """Thread safe reset."""
         self.lock.acquire()
         self.reset()
         self.lock.release()
+        return EmptyResponse()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--training":
