@@ -220,11 +220,13 @@ class Trainer(SnakeDQN):
         # Main loop
         try:
             # wait for snake to initialize
+            rospy.loginfo("Waiting for snake to initialize.")
             while(not self.has_state()):
                 # kickstart sim time
                 self.time += self.DELTA_T
                 self.clock_pub.publish(self.time)
                 self.spin_once()
+            rospy.loginfo("Done.")
 
             # initialize variables
             self.reset()
@@ -237,6 +239,7 @@ class Trainer(SnakeDQN):
     def step(self, action):
         """Step simulation one time step and return new state."""
         # Publish action
+        self.clear_state()
         self.action_pub.publish(self.get_action_msg(action))
 
         # Advance time and wait for sim
@@ -253,11 +256,13 @@ class Trainer(SnakeDQN):
         self.reset_srv.call()
         self.reset()
 
-        # wait for snake to initialize
+        rospy.loginfo("Waiting for snake to re-initialize.")
         while(not self.has_state()):
+            # kickstart sim time
             self.time += self.DELTA_T
             self.clock_pub.publish(self.time)
             self.spin_once()
+        rospy.loginfo("Done.")
 
         # return initial state
         return self.get_env(self.time)
@@ -266,11 +271,11 @@ class Trainer(SnakeDQN):
         """Log training metrics."""
         log_msg = DiagnosticStatus()
         log_msg.name = "DQN training"
-        log_msg.values.push(KeyValue(key="episode", value=f"{episode}"))
-        log_msg.values.push(KeyValue(key="net_reward", value=f"{net_reward}"))
-        log_msg.values.push(KeyValue(key="steps", value=f"{steps}"))
-        log_msg.values.push(KeyValue(key="epsilon", value=f"{epsilon}"))
-        self.log_pub(log_msg)
+        log_msg.values.append(KeyValue(key="episode", value=f"{episode}"))
+        log_msg.values.append(KeyValue(key="net_reward", value=f"{net_reward}"))
+        log_msg.values.append(KeyValue(key="steps", value=f"{steps}"))
+        log_msg.values.append(KeyValue(key="epsilon", value=f"{epsilon}"))
+        self.log_pub.publish(log_msg)
 
 class Evaluator(SnakeDQN):
     """Class for running the agent live."""
@@ -298,6 +303,7 @@ class Evaluator(SnakeDQN):
 
                 # check for end of game and react
                 if not done:
+                    self.clear_state()
                     self.action_pub.publish(
                         self.get_action_msg(
                             self.agent.get_action(

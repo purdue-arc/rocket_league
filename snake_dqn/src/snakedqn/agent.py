@@ -112,7 +112,7 @@ class Agent(object):
             steps = 0
             while not done:
                 # compute action
-                action = random.randint(0, self.action_size-1)
+                action = random.randint(0, self.ACTION_SIZE-1)
                 if random.random() > self.epsilon:
                     action = self.get_action(state)
 
@@ -128,11 +128,13 @@ class Agent(object):
                 state = next_state
                 net_reward += reward
                 steps += 1
-                if self.epsilon > self.EPSILON_MIN:
-                    self.epsilon *= self.EPSILON_DECAY
 
             # log
             log(episode, net_reward, steps, self.epsilon)
+
+            # increase exploitation vs exploration
+            if self.epsilon > self.EPSILON_MIN:
+                    self.epsilon *= self.EPSILON_DECAY
 
     def save(self, name):
         """Save weights to file."""
