@@ -159,7 +159,7 @@ class TrajectoryPlannerROS(object):
         self.final_normalized_heading = normalize(self.final_heading)
 
 
-    def waypoints_from_points(self,points):   # TODO: add varying speeds and nonzero angular velocities
+    def waypoints_from_points(self,points,times=None,velocities=None):   # TODO: add varying speeds and nonzero angular velocities
         """Converts points from list or numpy array to pose array and sets twists as well"""
         points = np.vstack([points,self.follow_through_path()])
         waypoint_array_msg = Path()
@@ -264,7 +264,16 @@ class TrajectoryPlannerROS(object):
         point = self.final_normalized_heading * self.FOLLOW_THROUGH_DISTANCE + ball_position
         return np.array(point)
         
-    
+
+
+
+
+
+
+
+############################### Path generating methods #######################################################################
+
+
     def four_point_path(self):
         """
         Publish the main points.
