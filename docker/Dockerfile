@@ -24,7 +24,7 @@ RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main"
 RUN apt install -y --no-install-recommends \
     libcudnn8 libnvinfer7 && \
     pip3 install --upgrade pip && \
-    pip3 install rospkg \
+    pip3 install rospkg transformations \
     scipy numpy \
     matplotlib pandas \
     tensorflow torch \
