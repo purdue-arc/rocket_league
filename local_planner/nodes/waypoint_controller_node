@@ -119,6 +119,7 @@ class WaypointControllerROS(object):
 
             # Find next valid intersection along path
             intersect = None
+            d_angle = None
             i = self.last_pose_idx
             pnts_checked = 0
             while pnts_checked < lookahead_pnts:
@@ -138,14 +139,13 @@ class WaypointControllerROS(object):
                     self.last_pose_idx = i
                     intersect += start_pos
 
-                    if self.is_debug:
-                        pose = PoseWithCovarianceStamped()
-                        pose.header.frame_id = self.frame_id
-                        pose.pose.pose.position.x = intersect[0]
-                        pose.pose.pose.position.y = intersect[1]
-                        self.lookahead_pnt_pub.publish(pose)
-
-                    break
+                    # Check if intersection is behind vehicle
+                    d_angle = pursuit.calculate_angle(intersect, bot_pos, \
+                                              bot_orient, lookahead_dist)
+                    if abs(d_angle) > math.pi/2:
+                        intersect = None
+                    else:
+                        break
 
                 i += 1
                 pnts_checked += 1
@@ -156,20 +156,19 @@ class WaypointControllerROS(object):
                 rospy.logwarn("No intersection could be found.")
                 return
 
-            # Calculate angular velocity
-            is_last_pose = (self.last_pose_idx == len(self.path) - 2)
-            d_angle = pursuit.calculate_angle(intersect, bot_pos, \
-                                              bot_orient, lookahead_dist)
-            if abs(d_angle) > math.pi/2:
-                self.bot_velocity_cmd.publish(Twist())
-                rospy.logwarn("Car facing opposite direction of intersection.")
-                return
+            if self.is_debug:
+                pose = PoseWithCovarianceStamped()
+                pose.header.frame_id = self.frame_id
+                pose.pose.pose.position.x = intersect[0]
+                pose.pose.pose.position.y = intersect[1]
+                self.lookahead_pnt_pub.publish(pose)
 
+            # Calculate angular velocity
             arc_dist = pursuit.calculate_arc_dist(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
             angular_vel = pursuit.get_angular_speed(self.final_speed, \
                                                     d_angle, arc_dist)
-            #angular_vel -= odom_msg.twist.twist.angular.z
+            # angular_vel -= odom_msg.twist.twist.angular.z
 
             # Publish command data
             twist = Twist()
