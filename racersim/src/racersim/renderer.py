@@ -128,9 +128,7 @@ class Renderer(object):
         if path is not None:
             for posed in path:
                 pose = posed.pose
-                pnt = (int(pose.position.x * self.scaling), \
-
-                       int(self.windowWidth - (pose.position.y * self.scaling)))
+                pnt = (int(pose.position.x * self.scaling), int(self.windowWidth - (pose.position.y * self.scaling)))
                 self._draw_pnt(pnt, int(self.SIZE_PNT * self.scaling), self.COLOR_PNT)
 
         #Renders the lookahead point

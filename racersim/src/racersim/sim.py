@@ -54,10 +54,7 @@ class Sim(object):
         self.velIters = velIters
         self.posIters = posIters
 
-        #self.tireDef = TireDef(car_weight=car_weight, maxDriveForce=car_power,
-        #                       friction=friction)
-        #self.carDef = CarDef(self.tireDef, initPos=initPosCar)
-        self.carDef = CarDef()
+        self.carDef = CarDef(initPos=initPosCar)
 
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world, initPos=initPosBall)

@@ -47,16 +47,13 @@ class CarDef(object):
 
     def __init__(self, initPos=(0.85, 1.25), vertices=DEFAULT_VERTICES, 
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
-                    density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
-                    maxAngle=90, turnSpeed=320):
+                    density=0.0124, maxAngle=90, turnSpeed=320):
 
         self.initPos = initPos
         self.vertices = vertices
         self.tireAnchors = tireAnchors
         self.tireDef = tireDef
         self.density = density
-        self.maxForwardSpeed = maxForwardSpeed
-        self.maxBackwardSpeed = maxBackwardSpeed
         self.maxAngle = math.radians(maxAngle)
         self.turnSpeed = math.radians(turnSpeed)
 
@@ -83,9 +80,7 @@ class Car(object):
         self.tires = []
         for i in range(len(carDef.tireAnchors)):
 
-            tire = Tire(world, carDef.tireDef, 
-                        maxForwardSpeed=carDef.maxForwardSpeed,
-                        maxBackwardSpeed=carDef.maxBackwardSpeed)
+            tire = Tire(world, carDef.tireDef)
             jointDef.bodyB = tire.body
             jointDef.localAnchorA.Set(carDef.tireAnchors[i][0],
                                       carDef.tireAnchors[i][1])
@@ -124,19 +119,6 @@ class Car(object):
             tire.updateDrive(linearVelocity, dt)
 
         if linearVelocity.y != 0:
-            # desiredAngleDt = angularVelocity.z * dt
-            # angleNow = self._flJoint.angle
-            # if abs(desiredAngleDt) > self.turnSpeed:
-            #     desiredAngleDt = math.copysign(self.turnSpeed, desiredAngleDt)
-            
-            # if abs(angleNow + desiredAngleDt) > self.maxAngle:
-            #     angle = math.copysign(self.maxAngle, desiredAngleDt)
-            # else:
-            #     angle = angleNow + desiredAngleDt
-
-            # self._flJoint.SetLimits(angle, angle)
-            # self._frJoint.SetLimits(angle, angle)
-
             desiredAngle = math.atan((angularVelocity.z * .1165) / linearVelocity.y)
 
             if abs(desiredAngle) > self.maxAngle:

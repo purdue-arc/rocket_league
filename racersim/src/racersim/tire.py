@@ -32,7 +32,7 @@ import Box2D
 class TireDef(object):
     """Holds relevent data for a tire instance"""
     def __init__(self, width=0.0125, length=0.037, density=0.0125,
-                 maxLateralImpulse=0.03, maxDriveForce=0.0001, maxBrakeForce=0.0002,
+                 maxLateralImpulse=0.03, maxDriveForce=0.001, maxBrakeForce=0.002,
                  dragForceCoeff=-0.00002, angularImpulseCoeff=0.02,
                  car_weight=1, friction=1):
 
@@ -92,7 +92,12 @@ class Tire(object):
                              self.body.worldCenter, wake=True)
 
     def updateDrive(self, linearVelocity, dt):
-        desiredSpeed = linearVelocity.y
+        desiredSpeed = linearVelocity.x
+
+        print('Linear.x: ' + str(linearVelocity.x))
+        print('Linear.y: ' + str(linearVelocity.y))
+
+        #Does the linear velocity get updated?
 
         currForwardNormal = self.body.GetWorldVector((0,1))
         currSpeed = Box2D.b2Dot(self.getForwardVelocity(), currForwardNormal)
@@ -100,8 +105,10 @@ class Tire(object):
         force = 0
         if desiredSpeed > currSpeed:
             force = self.maxDriveForce
+            #print("Accelerating")
         elif desiredSpeed < currSpeed:
             force = -self.maxBrakeForce #Brakes are more powerful than the engine
+            #print("Braking")
         else:
             return
 
