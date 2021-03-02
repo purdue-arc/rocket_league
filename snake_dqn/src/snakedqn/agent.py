@@ -91,8 +91,8 @@ class Agent(object):
 
     def transform_state(self, state):
         """Transform state from numpy to torch type."""
-        assert np.numel(state) == self.STATE_SIZE
-        return torch.from_numpy(state).to(self.device).float()
+        assert np.size(state) == self.STATE_SIZE
+        return torch.from_numpy(state).to(self.DEVICE).float()
 
     def get_action(self, state):
         """Use forward propagation to get the predicted action from the model."""
