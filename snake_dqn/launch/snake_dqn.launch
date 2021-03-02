@@ -13,9 +13,8 @@
     <param name="rate"                    value="$(arg rate)"/>
   </node>
 
-  <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen">
+  <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen" args="$(eval '--training' if training else '')">
     <param name="num_segments"  value="$(arg size)"/>
-    <param name="training"      value="$(arg training)"/>
-    <param name="rate"          value="$(arg rate)"/>
+    <param name="rate"          value="$(eval 2*rate)"/>
   </node>
 </launch>
