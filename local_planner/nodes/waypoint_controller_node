@@ -32,7 +32,7 @@ License:
 import rospy
 import numpy
 import math
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32, Float64
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 
@@ -74,7 +74,7 @@ class WaypointControllerROS(object):
         self.path_error_pub = rospy.Publisher('car0/path_error', PathError, queue_size=1)
 
         if self.is_debug:
-            self.lookahead_pnt_pub = rospy.Publisher('lookahead_pnt',
+            self.lookahead_pnt_pub = rospy.Publisher('car0/lookahead_pnt',
                                                      PoseWithCovarianceStamped,
                                                      queue_size=1)
 
@@ -165,27 +165,26 @@ class WaypointControllerROS(object):
                 rospy.logwarn("Car facing opposite direction of intersection.")
                 return
 
-            arc_dist = pursuit.calculate_dist(intersect, bot_pos, \
+            arc_dist = pursuit.calculate_arc_dist(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
             angular_vel = pursuit.get_angular_speed(self.final_speed, \
                                                     d_angle, arc_dist)
-            angular_vel -= odom_msg.twist.twist.angular.z
+            #angular_vel -= odom_msg.twist.twist.angular.z
 
             # Publish command data
             twist = Twist()
-            twist.linear.y = self.final_speed
+            twist.linear.x = self.final_speed
             twist.angular.z = angular_vel
             self.bot_velocity_cmd.publish(twist)
 
             # publish error data. TODO: replace zeros with actual values
             error = PathError()
-            error.time = 0
-            error.position = 0
-            error.orientation = 0
-            error.linear_velocity = 0
-            error.angular_velocity = 0
+            error.time = Float32()
+            error.position = Float32()
+            error.orientation = Float32()
+            error.linear_velocity = Float32()
+            error.angular_velocity = Float32()
             self.path_error_pub.publish(error)
-
 
 if __name__ == "__main__":
     WaypointControllerROS()

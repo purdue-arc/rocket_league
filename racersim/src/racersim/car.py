@@ -37,18 +37,18 @@ from tire import Tire, TireDef
 class CarDef(object):
     """Holds relevent data for a car instance"""
 
-    DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.155),
-                        (-0.0225, 0.155), (-0.0225, 0)]
+    DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.125),
+                        (-0.0225, 0.125), (-0.0225, 0)]
 
-    DEFAULT_ANCHORS = [(-0.03525, 0.135), (0.03525, 0.135),
+    DEFAULT_ANCHORS = [(-0.03525, 0.115), (0.03525, 0.115),
                         (-0.03525, 0.0185), (0.03525, 0.0185)]
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(0.75, 1.25), vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(0.85, 1.25), vertices=DEFAULT_VERTICES, 
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
-                    maxAngle=30, turnSpeed=320):
+                    maxAngle=90, turnSpeed=320):
 
         self.initPos = initPos
         self.vertices = vertices
@@ -122,15 +122,26 @@ class Car(object):
         for tire in self.tires:
             tire.updateDrive(linearVelocity, dt)
 
-        desiredAngleDt = angularVelocity.z * dt
-        angleNow = self._flJoint.angle
-        if abs(desiredAngleDt) > self.turnSpeed:
-            desiredAngleDt = math.copysign(self.turnSpeed, desiredAngleDt)
-        
-        if abs(angleNow + desiredAngleDt) > self.maxAngle:
-            angle = math.copysign(self.maxAngle, desiredAngleDt)
-        else:
-            angle = angleNow + desiredAngleDt
+        if linearVelocity.y != 0:
+            # desiredAngleDt = angularVelocity.z * dt
+            # angleNow = self._flJoint.angle
+            # if abs(desiredAngleDt) > self.turnSpeed:
+            #     desiredAngleDt = math.copysign(self.turnSpeed, desiredAngleDt)
+            
+            # if abs(angleNow + desiredAngleDt) > self.maxAngle:
+            #     angle = math.copysign(self.maxAngle, desiredAngleDt)
+            # else:
+            #     angle = angleNow + desiredAngleDt
 
-        self._flJoint.SetLimits(angle, angle)
-        self._frJoint.SetLimits(angle, angle)
+            # self._flJoint.SetLimits(angle, angle)
+            # self._frJoint.SetLimits(angle, angle)
+
+            desiredAngle = math.atan((angularVelocity.z * .1165) / linearVelocity.y)
+
+            if abs(desiredAngle) > self.maxAngle:
+                angle = math.copysign(self.maxAngle, desiredAngle)
+            else:
+                angle = desiredAngle
+
+            self._flJoint.SetLimits(angle, angle)
+            self._frJoint.SetLimits(angle, angle)
