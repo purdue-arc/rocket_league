@@ -1,8 +1,17 @@
 <launch>
-  <arg name="render"    default="false"/>
-  <arg name="size"      default="7"/>
-  <arg name="rate"      default="30.0"/>
   <arg name="training"  default="false"/>
+  <arg name="render"    default="false"/>
+
+  <arg name="size"  default="7"/>
+  <arg name="rate"  default="30.0"/>
+
+  <arg name="log_weights" default="false"/>
+  <arg name="log_dir"     default=""/>
+  <arg name="log_freq"    default="50"/>
+
+  <arg name="gamma"         default="0.9"/>
+  <arg name="epsilon_decay" default="0.99"/>
+  <arg name="learning_rate" default="0.01"/>
 
   <param name="/use_sim_time" value="$(arg training)"/>
 
@@ -16,5 +25,15 @@
   <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen" args="$(eval '--training' if training else '')">
     <param name="num_segments"  value="$(arg size)"/>
     <param name="rate"          value="$(arg rate)"/>
+
+    <param name="dqn/gamma"         value="$(arg gamma)"/>
+    <param name="dqn/epsilon_decay" value="$(arg epsilon_decay)"/>
+    <param name="dqn/learning_rate" value="$(arg learning_rate)"/>
+  </node>
+
+  <node if="$(arg log_weights)" type="logger" pkg="snake_dqn" name="logger" output="screen">
+    <param name="log_weights" value="$(arg log_weights)"/>
+    <param name="log_dir"     value="$(arg log_dir)"/>
+    <param name="log_freq"    value="$(arg log_freq)"/>
   </node>
 </launch>

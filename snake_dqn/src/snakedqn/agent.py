@@ -130,7 +130,7 @@ class Agent(object):
                 steps += 1
 
             # log
-            log(episode, net_reward, steps, self.epsilon)
+            log(episode+1, net_reward, steps, self.epsilon)
 
             # increase exploitation vs exploration
             if self.epsilon > self.EPSILON_MIN:

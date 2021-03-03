@@ -92,7 +92,13 @@ class SnakeDQN(object):
         self.cond = Condition()
 
         # DQN Agent
-        self.agent = Agent(3 + 2*self.NUM_SEGMENTS, Actions.SIZE)
+        self.agent = Agent(3 + 2*self.NUM_SEGMENTS, Actions.SIZE,
+            memory_len=rospy.get_param('~dqn/memory_len', 2000),
+            gamma=rospy.get_param('~dqn/gamma', 0.9),
+            epsilon_decay=rospy.get_param('~dqn/epsilon_decay', 0.99),
+            epsilon_min=rospy.get_param('~dqn/epsilon_min', 0.01),
+            learning_rate=rospy.get_param('~dqn/learning_rate', 0.01),
+            batch_size=rospy.get_param('~dqn/batch_size', 64))
 
     def wait_for_state(self):
         """Allow other threads to handle callbacks."""
