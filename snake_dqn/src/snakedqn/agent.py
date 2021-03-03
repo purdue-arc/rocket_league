@@ -120,14 +120,16 @@ class Agent(object):
                 next_state, reward, done, __ = step(action)
                 next_state = self.transform_state(next_state)
 
-                # add to memory and learn
+                # add to memory
                 self.remember(state, action, reward, next_state, done)
-                self.replay()
 
                 # clean up for next run
                 state = next_state
                 net_reward += reward
                 steps += 1
+
+            # learn
+            self.replay()
 
             # log
             log(episode+1, net_reward, steps, self.epsilon)

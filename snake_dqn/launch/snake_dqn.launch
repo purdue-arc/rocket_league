@@ -9,9 +9,9 @@
   <arg name="log_dir"     default=""/>
   <arg name="log_freq"    default="50"/>
 
-  <arg name="gamma"         default="0.9"/>
-  <arg name="epsilon_decay" default="0.99"/>
-  <arg name="learning_rate" default="0.01"/>
+  <arg name="gamma"         default="0.95"/>
+  <arg name="epsilon_decay" default="0.995"/>
+  <arg name="learning_rate" default="0.001"/>
 
   <param name="/use_sim_time" value="$(arg training)"/>
 
