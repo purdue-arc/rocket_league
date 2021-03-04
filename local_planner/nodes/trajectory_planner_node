@@ -90,10 +90,10 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        # self.four_point_path()
+        self.four_point_path()
         # self.bezier_curves_path(smoothness=2)
         # self.lagrange_functions_path()
-        self.hermite_splines_path()
+        #self.hermite_splines_path()
         # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
         self.feasibility_publisher()
 

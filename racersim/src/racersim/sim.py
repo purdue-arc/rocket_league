@@ -58,7 +58,7 @@ class Sim(object):
 
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world, initPos=initPosBall)
-        self.goal = Goal(self.world, initPos = goal0_pos)
+        self.goal = Goal(self.world, initPos=goal0_pos)
         self.path = None
         self.lookahead = [0, 0]
 

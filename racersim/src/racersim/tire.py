@@ -94,9 +94,6 @@ class Tire(object):
     def updateDrive(self, linearVelocity, dt):
         desiredSpeed = linearVelocity.x
 
-        print('Linear.x: ' + str(linearVelocity.x))
-        print('Linear.y: ' + str(linearVelocity.y))
-
         #Does the linear velocity get updated?
 
         currForwardNormal = self.body.GetWorldVector((0,1))
