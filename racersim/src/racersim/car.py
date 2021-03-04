@@ -119,7 +119,20 @@ class Car(object):
             tire.updateDrive(linearVelocity, dt)
 
         if linearVelocity.y != 0:
-            desiredAngle = math.atan((angularVelocity.z * .1165) / linearVelocity.y)
+            # desiredAngleDt = angularVelocity.z * dt
+            # angleNow = self._flJoint.angle
+            # if abs(desiredAngleDt) > self.turnSpeed:
+            #     desiredAngleDt = math.copysign(self.turnSpeed, desiredAngleDt)
+
+            # if abs(angleNow + desiredAngleDt) > self.maxAngle:
+            #     angle = math.copysign(self.maxAngle, desiredAngleDt)
+            # else:
+            #     angle = angleNow + desiredAngleDt
+
+            # self._flJoint.SetLimits(angle, angle)
+            # self._frJoint.SetLimits(angle, angle)
+
+            desiredAngle = math.atan((angularVelocity.z * .1165) / linearVelocity.x)
 
             if abs(desiredAngle) > self.maxAngle:
                 angle = math.copysign(self.maxAngle, desiredAngle)
