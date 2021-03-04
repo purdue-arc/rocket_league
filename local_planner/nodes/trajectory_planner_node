@@ -116,7 +116,12 @@ class TrajectoryPlannerROS(object):
 
         if not rospy.is_shutdown():
             if self.check_if_GO():
-                    self.loop_once()
+                # check for barckwards stuff
+                target_spot = np.array((self.target_pose.position.x, self.target_pose.position.y))
+                bot_spot = np.array((self.bot_pose.position.x, self.bot_pose.position.y))
+                if np.dot(self.bot_init_heading, (target_spot - bot_spot)) < 0:
+                    self.backwards = True
+                self.loop_once()
         
         
 
