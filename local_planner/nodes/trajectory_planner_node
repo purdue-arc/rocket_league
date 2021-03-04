@@ -69,7 +69,6 @@ class TrajectoryPlannerROS(object):
 
         # This variable determines the number of points published to the waypoint controller
         self.RESOLUTION = rospy.get_param('~RESOLUTION', 5)
-        self.RESOLUTION = 20 
 
         self.backwards = False
 
@@ -204,7 +203,7 @@ class TrajectoryPlannerROS(object):
                 tangents[i] = normalize(tangents[i])
                 vec_1 = points[i] - points[i-1]
                 vec_2 = points[i] - points[i+1]
-                vel = (np.linalg.norm(vec_1) + np.linalg.norm(vec_2))/(times[i+1] - times[i-1])
+                vel = (np.linalg.norm(vec_1) + np.linalg.norm(vec_2))/(times[i+1] - times[i-1]) # TODO: find actual distance 
 
                 new_twist.linear.x = tangents[i][0] * vel
                 new_twist.linear.y =  tangents[i][1] * vel
@@ -224,6 +223,11 @@ class TrajectoryPlannerROS(object):
             # if backwards
             if self.backwards:
                 new_twist = - new_twist
+                if i == 0:
+                    new_twist.linear.x = 0
+                    new_twist.linear.y = 0
+                    new_twist.linear.z = 0
+                    new_twist.angular.z = 0
 
 
             # create a new waypoint and add it to the array of them
@@ -396,7 +400,7 @@ class TrajectoryPlannerROS(object):
         #try:
         # Create an array of points to work with
         points = self.main_points
-        plt.plot(self.main_points[:,0],self.main_points[:,1],'bo')
+        #plt.plot(self.main_points[:,0],self.main_points[:,1],'bo')
         #TODO;points = np.vstack([np.array([self.bot_pose.position.x, self.bot_pose.position.y]),points])
 
         # Create parameter for our function to operate over, and divide the resolution
@@ -461,8 +465,8 @@ class TrajectoryPlannerROS(object):
         # Create path to use in waypoints_from_points,.
         path = np.column_stack([path_x,path_y])
 
-        plt.plot(path_x, path_y)
-        plt.show()
+        #plt.plot(path_x, path_y)
+        #plt.show()
 
         # Convert points to poses and publish
         print("hermite spline")
