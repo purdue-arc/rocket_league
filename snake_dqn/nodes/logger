@@ -60,7 +60,7 @@ class Logger(object):
             return
 
         if (episode) % self.FREQUENCY == 0:
-            self.log_pub.publish(self.LOG_DIR + f"episode_{episode}_weights.pt")
+            self.log_pub.publish(self.LOG_DIR + f"episode_{episode:04d}_weights.pt")
 
 if __name__ == "__main__":
     Logger()

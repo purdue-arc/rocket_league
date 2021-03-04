@@ -102,6 +102,7 @@ class Agent(object):
 
     def train(self, step, reset, log, episodes=1000):
         """Train the agent using provided step and reset functions."""
+        print(f"Beginning training on {episodes} episodes")
         for episode in range(episodes):
             # reset episode and get initial state
             state, __, __, __ = reset()

@@ -225,6 +225,7 @@ class Trainer(SnakeDQN):
 
         # Constants
         self.DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
+        self.MAX_T   = rospy.Duration.from_sec(rospy.get_param('~max_episode_time', 60.0))
 
         # Publishers
         self.clock_pub = rospy.Publisher('/clock', Clock, queue_size=1)
@@ -234,6 +235,7 @@ class Trainer(SnakeDQN):
         self.reset_srv = rospy.ServiceProxy('snake/reset', Empty)
 
         self.time = rospy.Time.from_sec(time.time())
+        self.start_time = rospy.Time.from_sec(self.time.to_sec())
 
         # Main loop
         try:
@@ -248,7 +250,12 @@ class Trainer(SnakeDQN):
             self.reset()
 
             # begin agent's training routine
-            self.agent.train(self.step, self.reset_env, self.log)
+            self.agent.train(self.step, self.reset_env, self.log,
+                rospy.get_param('~num_episodes', 1000))
+            rospy.loginfo("Done Training.")
+
+            # idle wait to allow saving weights, etc
+            rospy.spin()
         except rospy.ROSInterruptException:
             pass
 
@@ -264,15 +271,23 @@ class Trainer(SnakeDQN):
 
         # Wait for snake
         if not self.wait_for_state():
-            rospy.logwarn("Possible timing error.")
-            self.time += self.DELTA_T * 0.1
+            rospy.logwarn("Timeout waiting to get state from sim; Attempting small time advance.")
+            self.time += 0.25*self.DELTA_T
             self.clock_pub.publish(self.time)
             if not self.wait_for_state():
-                rospy.logerr("Failed to get state from sim.")
-                sys.exit()
+                rospy.logwarn("Small time advance failed; Attempting large time advance.")
+                self.time += self.DELTA_T
+                self.clock_pub.publish(self.time)
+                if not self.wait_for_state():
+                    rospy.logerr("Failed to get state from sim. Exiting")
+                    sys.exit(1)
 
         # return state
-        return self.get_env(self.time)
+        state, reward, done, dict = self.get_env(self.time)
+        if self.time - self.start_time >= self.MAX_T:
+          done = True
+
+        return (state, reward, done, dict)
 
     def reset_env(self):
         """Reset the environment for new episode."""
@@ -291,28 +306,40 @@ class Trainer(SnakeDQN):
 
         # Wait for snake
         if not self.wait_for_state():
-            rospy.logwarn("Possible timing error after reset.")
-            self.time += self.DELTA_T * 0.1
+            rospy.logwarn("Timeout waiting to get state from sim after reset; Attempting small time advance.")
+            self.time += 0.25*self.DELTA_T
             self.clock_pub.publish(self.time)
             if not self.wait_for_state():
-                rospy.logerr("Failed to get state from sim after reset.")
+                rospy.logwarn("Small time advance failed; Attempting large time advance.")
+                self.time += self.DELTA_T
+                self.clock_pub.publish(self.time)
+                if not self.wait_for_state():
+                    rospy.logerr("Failed to get state from sim after reset. Exiting")
+                    sys.exit(1)
+
+        self.start_time = rospy.Time.from_sec(self.time.to_sec())
 
         # return initial state
         return self.get_env(self.time)
 
     def log(self, episode, net_reward, steps, epsilon):
         """Log training metrics."""
+        elapsed_time = (self.time - self.start_time).to_sec()
+
         log_msg = DiagnosticStatus()
         log_msg.name = "DQN training"
         log_msg.values.append(KeyValue(key="episode", value=f"{episode}"))
         log_msg.values.append(KeyValue(key="net reward", value=f"{net_reward}"))
         log_msg.values.append(KeyValue(key="steps", value=f"{steps}"))
         log_msg.values.append(KeyValue(key="epsilon", value=f"{epsilon}"))
+        log_msg.values.append(KeyValue(key="score", value=f"{self.score}"))
+        log_msg.values.append(KeyValue(key="elapsed time", value=f"{elapsed_time}"))
         self.log_pub.publish(log_msg)
 
+
         if episode % 25 == 0:
-            rospy.loginfo(f"Training progress: episode: {episode}, "
-            f"net reward: {net_reward}, steps: {steps}, epsilon: {epsilon}")
+            rospy.loginfo(f"Training progress: episode: {episode:4d}, time: {elapsed_time:2.2f} sec, "
+                f"score: {self.score:3d}, e: {100*epsilon:2.1f}%")
 
 class Evaluator(SnakeDQN):
     """Class for running the agent live."""

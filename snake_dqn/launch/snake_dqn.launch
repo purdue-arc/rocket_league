@@ -8,10 +8,12 @@
   <arg name="alive_reward"  default="-1.0"/>
   <arg name="death_reward"  default="-50.0"/>
   <arg name="goal_reward"   default="10.0"/>
+  <arg name="max_time"      default="30.0"/>
 
   <arg name="gamma"         default="0.95"/>
   <arg name="epsilon_decay" default="0.995"/>
   <arg name="learning_rate" default="0.001"/>
+  <arg name="num_episodes"  default="1000"/>
 
   <arg name="log_weights" default="false"/>
   <arg name="log_dir"     default=""/>
@@ -26,13 +28,19 @@
     <param name="rate"                    value="$(arg rate)"/>
   </node>
 
-  <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen" args="$(eval '--training' if training else '')">
+  <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen" respawn="true" args="$(eval '--training' if training else '')">
     <param name="num_segments"  value="$(arg size)"/>
     <param name="rate"          value="$(arg rate)"/>
 
     <param name="reward/per_second" value="$(arg alive_reward)"/>
     <param name="reward/death"      value="$(arg death_reward)"/>
     <param name="reward/goal"       value="$(arg goal_reward)"/>
+    <param name="max_episode_time"  value="$(arg max_time)"/>
+
+    <param name="dqn/gamma"         value="$(arg gamma)"/>
+    <param name="dqn/epsilon_decay" value="$(arg epsilon_decay)"/>
+    <param name="dqn/learning_rate" value="$(arg learning_rate)"/>
+    <param name="num_episodes"      value="$(arg num_episodes)"/>
   </node>
 
   <node if="$(arg log_weights)" type="logger" pkg="snake_dqn" name="logger" output="screen">
