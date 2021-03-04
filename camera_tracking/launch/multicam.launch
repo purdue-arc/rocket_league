@@ -8,4 +8,9 @@
     <arg name="load_manager" value="false"/>
     <arg name="camera_name" value="gerblick_laptop"/>
   </include>
-</launch> 
+
+  <node pkg="camera_tracking" type="tf_parser" name="tf_parser" output="screen">
+    <rosparam param="camera_names">[gerblick_logitech, gerblick_laptop]</rosparam>
+    <rosparam param="tag_names">[tag_0, tag_1, tag_69]</rosparam>
+  </node>
+</launch>

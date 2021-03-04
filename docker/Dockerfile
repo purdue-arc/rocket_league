@@ -10,7 +10,8 @@ RUN apt update && apt upgrade -y && \
     x11-apps mesa-utils \
     python-dev python3-dev \
     python-pip python3-pip \
-    pylint software-properties-common
+    pylint software-properties-common \
+    clang-format jq
 
 # install ROS
 RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \

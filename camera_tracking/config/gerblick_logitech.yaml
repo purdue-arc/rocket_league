@@ -1,4 +1,4 @@
-video_device: /dev/video0
+video_device: /dev/video4
 image_width: 1920
 image_height: 1080
 pixel_format: mjpeg
