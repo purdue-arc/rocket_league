@@ -62,9 +62,10 @@ class SnakeDQN(object):
         self.ANGULAR_VELOCITY = rospy.get_param('~angular_velocity', 2.0)
         self.LINEAR_VELOCITY = rospy.get_param('~linear_velocity', 2.0)
         self.NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
-        self.TIME_REWARD = rospy.get_param('~reward/per_second', 1.0)
-        self.DEATH_REWARD = rospy.get_param('~reward/death', -50.0)
-        self.GOAL_REWARD = rospy.get_param('~reward/goal', 10.0)
+        self.TIME_REWARD = rospy.get_param('~reward/per_second', 30.0)
+        self.DEATH_REWARD = rospy.get_param('~reward/death', -100.0)
+        self.GOAL_REWARD = rospy.get_param('~reward/goal', 50.0)
+        self.NEAR_REWARD = rospy.get_param('~reward/per_unit_from_goal', -0.1)
 
         # Publishers
         self.action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
@@ -149,6 +150,9 @@ class SnakeDQN(object):
         # Determine reward and if done
         reward = 0
         done = False
+
+        dist_from_goal = np.sqrt(np.sum(np.square(pose[1:2] - goal)))
+        reward += self.NEAR_REWARD * dist_from_goal
 
         if self.prev_score is not None:
             reward += self.GOAL_REWARD * (self.score - self.prev_score)
