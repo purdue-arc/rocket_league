@@ -7,10 +7,10 @@
   <arg name="vx"    default="2.0"/>
   <arg name="rate"  default="30.0"/>
 
-  <arg name="alive_reward"  default="30.0"/>
   <arg name="death_reward"  default="-100.0"/>
   <arg name="goal_reward"   default="50.0"/>
-  <arg name="near_reward"   default="-0.1"/>
+  <arg name="base_reward"   default="1.0"/>
+  <arg name="exp_reward"    default="1.0"/>
   <arg name="max_time"      default="30.0"/>
 
   <arg name="gamma"         default="0.95"/>
@@ -37,10 +37,10 @@
     <param name="linear_velocity"  value="$(arg vx)"/>
     <param name="rate"             value="$(arg rate)"/>
 
-    <param name="reward/per_second"         value="$(arg alive_reward)"/>
-    <param name="reward/death"              value="$(arg death_reward)"/>
-    <param name="reward/goal"               value="$(arg goal_reward)"/>
-    <param name="reward/per_unit_from_goal" value="$(arg near_reward)"/>
+    <param name="reward/death"      value="$(arg death_reward)"/>
+    <param name="reward/goal"       value="$(arg goal_reward)"/>
+    <param name="reward/dist/base"  value="$(arg base_reward)"/>
+    <param name="reward/dist/exp"   value="$(arg exp_reward)"/>
     <param name="max_episode_time"  value="$(arg max_time)"/>
 
     <param name="dqn/gamma"         value="$(arg gamma)"/>

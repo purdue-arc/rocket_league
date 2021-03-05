@@ -44,6 +44,7 @@ import numpy as np
 from transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
 from threading import Lock, Condition
+from math import exp
 
 @unique
 class Actions(IntEnum):
@@ -64,9 +65,8 @@ class SnakeDQN(object):
         self.NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
         self.DEATH_REWARD = rospy.get_param('~reward/death', -100.0)
         self.GOAL_REWARD = rospy.get_param('~reward/goal', 50.0)
-        self.CONST_REWARD = rospy.get_param('~reward/constant', 0.0)
-        self.LINEAR_REWARD = rospy.get_param('~reward/linear', 0.0)
-        self.QUAD_REWARD = rospy.get_param('~reward/quadratic', 0.0)
+        self.BASE_REWARD = rospy.get_param('~reward/distance/base', 0.0)
+        self.EXP_REWARD = rospy.get_param('~reward/distance/exp', 0.0)
 
         # Publishers
         self.action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
@@ -159,10 +159,7 @@ class SnakeDQN(object):
         if self.prev_time is not None:
             dist = np.sqrt(np.sum(np.square(pose[1:3] - goal)))
             dt = (time - self.prev_time).to_sec()
-            reward += dt*(
-                self.QUAD_REWARD * dist**2 +
-                self.LINEAR_REWARD * dist +
-                self.CONST_REWARD)
+            reward += dt*(self.BASE_REWARD*exp(-self.EXP_REWARD*dist))
         self.prev_time = time
 
         if not self.alive:
