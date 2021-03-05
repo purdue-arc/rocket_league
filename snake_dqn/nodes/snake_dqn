@@ -62,24 +62,14 @@ class SnakeDQN(object):
         self.ANGULAR_VELOCITY = rospy.get_param('~angular_velocity', 2.0)
         self.LINEAR_VELOCITY = rospy.get_param('~linear_velocity', 2.0)
         self.NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
-        self.TIME_REWARD = rospy.get_param('~reward/per_second', 30.0)
         self.DEATH_REWARD = rospy.get_param('~reward/death', -100.0)
         self.GOAL_REWARD = rospy.get_param('~reward/goal', 50.0)
-        self.NEAR_REWARD = rospy.get_param('~reward/per_unit_from_goal', -0.1)
+        self.CONST_REWARD = rospy.get_param('~reward/constant', 0.0)
+        self.LINEAR_REWARD = rospy.get_param('~reward/linear', 0.0)
+        self.QUAD_REWARD = rospy.get_param('~reward/quadratic', 0.0)
 
         # Publishers
         self.action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
-
-        # Subscribers
-        rospy.Subscriber('snake/pose', PoseArray, self.pose_cb)
-        rospy.Subscriber('snake/goal', PointStamped, self.goal_cb)
-        rospy.Subscriber('snake/score', Int32, self.score_cb)
-        rospy.Subscriber('snake/active', Bool, self.alive_cb)
-
-        # Services
-        # TODO make a service (requires custom messages)
-        rospy.Subscriber('snake/dqn/load_weights', String, self.load_cb)
-        rospy.Subscriber('snake/dqn/save_weights', String, self.save_cb)
 
         # State variables
         self.pose = None
@@ -100,6 +90,17 @@ class SnakeDQN(object):
             epsilon_min=rospy.get_param('~dqn/epsilon_min', 0.01),
             learning_rate=rospy.get_param('~dqn/learning_rate', 0.01),
             batch_size=rospy.get_param('~dqn/batch_size', 64))
+
+        # Subscribers
+        rospy.Subscriber('snake/pose', PoseArray, self.pose_cb)
+        rospy.Subscriber('snake/goal', PointStamped, self.goal_cb)
+        rospy.Subscriber('snake/score', Int32, self.score_cb)
+        rospy.Subscriber('snake/active', Bool, self.alive_cb)
+
+        # Services
+        # TODO make a service (requires custom messages)
+        rospy.Subscriber('snake/dqn/load_weights', String, self.load_cb)
+        rospy.Subscriber('snake/dqn/save_weights', String, self.save_cb)
 
     def wait_for_state(self):
         """Allow other threads to handle callbacks."""
@@ -151,15 +152,17 @@ class SnakeDQN(object):
         reward = 0
         done = False
 
-        dist_from_goal = np.sqrt(np.sum(np.square(pose[1:2] - goal)))
-        reward += self.NEAR_REWARD * dist_from_goal
-
         if self.prev_score is not None:
             reward += self.GOAL_REWARD * (self.score - self.prev_score)
         self.prev_score = self.score
 
         if self.prev_time is not None:
-            reward += self.TIME_REWARD * (time - self.prev_time).to_sec()
+            dist = np.sqrt(np.sum(np.square(pose[1:3] - goal)))
+            dt = (time - self.prev_time).to_sec()
+            reward += dt*(
+                self.QUAD_REWARD * dist**2 +
+                self.LINEAR_REWARD * dist +
+                self.CONST_REWARD)
         self.prev_time = time
 
         if not self.alive:
