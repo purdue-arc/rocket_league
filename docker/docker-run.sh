@@ -9,7 +9,7 @@ docker run --rm -it \
     -v $XAUTHORITY:/home/$USER/.Xauthority \
     -v $WS_DIR:/home/$USER/catkin_ws \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    --hostname arc-rocket-league-dev \
+    --net=host \
     --name arc-rocket-league-dev \
     --privileged \
     arc-rocket-league-dev \

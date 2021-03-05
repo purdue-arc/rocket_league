@@ -1,6 +1,6 @@
 # Input/Output parameters
 
-guid: PointGrey-00EA99A2
+guid: PointGrey-00EA5196
 publish_tf: false
 tf_publish_rate: 30
 
@@ -9,11 +9,11 @@ tf_publish_rate: 30
 #PixelFormat: BGR8
 #Width: 640
 #Height: 480
-#AcquisitionFrameRate: 20
+AcquisitionFrameRate: 20
 #Gamma: 0.41
 #Gain: 0.0
 #AutoFunctionsROIPreset: AutoFunctionsROIPreset_Full
-ExposureAuto: Continuous
+# ExposureAuto: Continuous
 #GainAuto: Continuous
 #BalanceWhiteAuto: Continuous
 
