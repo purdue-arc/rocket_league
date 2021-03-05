@@ -13,6 +13,13 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   tf2
   tf2_geometry_msgs
+  image_transport
+  cv_bridge
+)
+
+find_package(OpenCV REQUIRED
+  core
+  highgui
 )
 
 ###################################
@@ -37,6 +44,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 # Declare a C++ executable
@@ -55,6 +63,22 @@ target_link_libraries(detection_to_pose
   ${catkin_LIBRARIES}
 )
 
+add_executable(ball_detection
+  src/ball_detection.cpp
+)
+
+add_dependencies(ball_detection
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  ${OpenCV_EXPORTED_TARGETS}
+)
+
+# Specify libraries to link a library or executable target against
+target_link_libraries(ball_detection
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
 #############
 ## Install ##
 #############
@@ -66,7 +90,9 @@ catkin_install_python(PROGRAMS
 )
 
 # Mark cpp executables for installation
-install(TARGETS detection_to_pose
+install(TARGETS
+  detection_to_pose
+  ball_detection
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
