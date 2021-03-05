@@ -3,6 +3,8 @@
   <arg name="render"    default="false"/>
 
   <arg name="size"  default="7"/>
+  <arg name="vw"    default="2.0"/>
+  <arg name="vx"    default="2.0"/>
   <arg name="rate"  default="30.0"/>
 
   <arg name="alive_reward"  default="30.0"/>
@@ -30,8 +32,10 @@
   </node>
 
   <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen" respawn="true" args="$(eval '--training' if training else '')">
-    <param name="num_segments"  value="$(arg size)"/>
-    <param name="rate"          value="$(arg rate)"/>
+    <param name="num_segments"     value="$(arg size)"/>
+    <param name="angular_velocity" value="$(arg vw)"/>
+    <param name="linear_velocity"  value="$(arg vx)"/>
+    <param name="rate"             value="$(arg rate)"/>
 
     <param name="reward/per_second"         value="$(arg alive_reward)"/>
     <param name="reward/death"              value="$(arg death_reward)"/>
