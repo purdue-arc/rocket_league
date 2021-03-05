@@ -37,11 +37,11 @@
     <param name="linear_velocity"  value="$(arg vx)"/>
     <param name="rate"             value="$(arg rate)"/>
 
-    <param name="reward/death"      value="$(arg death_reward)"/>
-    <param name="reward/goal"       value="$(arg goal_reward)"/>
-    <param name="reward/dist/base"  value="$(arg base_reward)"/>
-    <param name="reward/dist/exp"   value="$(arg exp_reward)"/>
-    <param name="max_episode_time"  value="$(arg max_time)"/>
+    <param name="reward/death"          value="$(arg death_reward)"/>
+    <param name="reward/goal"           value="$(arg goal_reward)"/>
+    <param name="reward/distance/base"  value="$(arg base_reward)"/>
+    <param name="reward/distance/exp"   value="$(arg exp_reward)"/>
+    <param name="max_episode_time"      value="$(arg max_time)"/>
 
     <param name="dqn/gamma"         value="$(arg gamma)"/>
     <param name="dqn/epsilon_decay" value="$(arg epsilon_decay)"/>
