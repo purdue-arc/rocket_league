@@ -18,9 +18,6 @@ int main(int argc, char* argv[]) {
   ros::param::get("~camera_names", cameraNames);
   ros::param::get("~tag_names", tagNames);
 
-  for (auto& name : cameraNames)
-    ROS_ERROR("camera name: %s", name.c_str());
-
   ros::Timer timer = nh.createTimer(
       ros::Duration(updateRate), [&](const ros::TimerEvent& e) -> void {
         geometry_msgs::TransformStamped transform;

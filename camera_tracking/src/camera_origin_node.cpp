@@ -18,8 +18,8 @@ int main(int argc, char* argv[]) {
   ros::param::param<std::string>("~origin_id", originID, "origin");
   ros::param::param<double>("~update_rate", updateRate, 0.1);
 
-  ros::Timer timer =
-      nh.createTimer(ros::Duration(updateRate), [&](const ros::TimerEvent& e) {
+  ros::Timer timer = nh.createTimer(
+      ros::Duration(updateRate), [&](const ros::TimerEvent& e) -> void {
         geometry_msgs::TransformStamped transform;
         try {
           transform = tfBuffer.lookupTransform(cameraName + "_" + originID,
