@@ -194,10 +194,13 @@ class TrajectoryPlannerROS(object):
             new_twist = Twist()
 
             # Generate quaternion for orientation (they just point at the next point in the path)
-            if i + 1 < len(points):
-                yaw = np.arctan2(points[i + 1][1]  - points[i][1], points[i + 1][0] - points[i][0])
-            else:
+            if i + 1 < len(points) and i > 0:
+                yaw = np.arctan2(points[i + 1][1]  - points[i-1][1], points[i + 1][0] - points[i-1][0])
+            elif i == len(points) - 1:
                 yaw = np.arctan2(self.final_heading[1],self.final_heading[0])
+
+            elif i == 0:
+                yaw = np.arctan2(self.bot_init_heading[1],self.bot_init_heading[0])
             (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
                 new_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
             
