@@ -115,7 +115,6 @@ class RacerSimROS(object):
         x = pose_msg.pose.pose.position.x
         y = pose_msg.pose.pose.position.y
         self.lookahead = [x, y]
-        #Convert x, y to whatever the sim uses
 
     def command_cb(self, command_msg):
         """Callback for command messages."""
@@ -146,8 +145,8 @@ class RacerSimROS(object):
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id
             ball_point = self.sim.ball.getPoint()
-            ball_msg.pose.pose.position.x = ball_point[1]
-            ball_msg.pose.pose.position.y = -ball_point[0]
+            ball_msg.pose.pose.position.x = ball_point[0]
+            ball_msg.pose.pose.position.y = ball_point[1]
             ball_quat = self.sim.ball.getQuaternion()
             ball_msg.pose.pose.orientation.z = ball_quat[2]
             ball_msg.pose.pose.orientation.w = ball_quat[3]
@@ -163,8 +162,8 @@ class RacerSimROS(object):
             bot_msg.header.stamp = now
             bot_msg.header.frame_id = self.frame_id
             bot_point = self.sim.car.getPoint()
-            bot_msg.pose.pose.position.x = bot_point[1]
-            bot_msg.pose.pose.position.y = -bot_point[0]
+            bot_msg.pose.pose.position.x = bot_point[0]
+            bot_msg.pose.pose.position.y = bot_point[1]
             bot_quat = self.sim.car.getQuaternion()
             bot_msg.pose.pose.orientation.z = bot_quat[2]
             bot_msg.pose.pose.orientation.w = bot_quat[3]

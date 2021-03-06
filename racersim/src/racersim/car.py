@@ -43,7 +43,7 @@ class CarDef(object):
     # DEFAULT_ANCHORS = [(0.05338541666, 0), (0.05338541666, 0.0390625),
     #                     (-0.05552083333, 0.0390625), (-0.05552083333, 0)]
 
-    DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.125),
+    DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.125), (0, 0.2),
                         (-0.0225, 0.125), (-0.0225, 0)]
 
     DEFAULT_ANCHORS = [(-0.03525, 0.115), (0.03525, 0.115),
@@ -111,7 +111,8 @@ class Car(object):
         return (self.body.position[0], self.body.position[1], 0)
 
     def getQuaternion(self):
-        angle = self.body.angle % (2.0 * math.pi)
+        angle = (self.body.angle - math.pi / 2)  % (2.0 * math.pi)
+        print('angle of car (degree): ' + str(angle))
         return quaternion_from_euler(0, 0, angle)
 
     def set_angle(self, angle):

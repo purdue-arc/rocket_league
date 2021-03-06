@@ -34,7 +34,7 @@ class TireDef(object):
     def __init__(self, width=0.0125, length=0.037, density=0.0125,
                  maxLateralImpulse=0.03, maxDriveForce=0.001, maxBrakeForce=0.002,
                  dragForceCoeff=-0.00002, angularImpulseCoeff=0.02,
-                 car_weight=1, friction=1):
+                 car_weight=1, friction=100):
 
         self.width = width
         self.length = length

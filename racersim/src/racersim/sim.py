@@ -45,8 +45,11 @@ class Sim(object):
     def __init__(self, renderEnabled=True, map_height=10, map_width=100, goal0_pos=[0, 0, 0],
                  velIters=6, posIters=2, car_weight=1, car_power=1, friction=1):
 
-        initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
-        initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
+        #initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
+        #initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
+
+        initPosBall = (2, 4)
+        initPosCar = (2, 2)
 
         self.world = World(map_height, map_width)
 
