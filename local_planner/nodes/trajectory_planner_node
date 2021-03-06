@@ -55,10 +55,11 @@ class TrajectoryPlannerROS(object):
         self.final_time = None   #The final time requested by the HLP
 
         # Info about the paths we're using
-        self.MOVE_SPEED = rospy.get_param('~MOVE_SPEED', 0.08)
+        self.MAX_SPEED = rospy.get_param('~MAX_SPEED', 1)
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
+        self.MAX_CURVATURE = rospy.get_param('~MAX_CURVATURE', 1)
 
         # These variables act as parameters to generate a path
         self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.25)    # Multiplier for distance of 1st main point in front of the car
@@ -70,7 +71,10 @@ class TrajectoryPlannerROS(object):
         # This variable determines the number of points published to the waypoint controller
         self.RESOLUTION = rospy.get_param('~RESOLUTION', 5)
 
-        self.backwards = False
+        # booleans
+        self.backwards = False   # true if the car will drive backwards
+        self.possible = True   # false if not possible
+        self.extra_time = 0   # the number of additional seconds required by the path 
 
         # Publishers   TODO: fix these
         self.path_pub = rospy.Publisher("car0/path", Path, queue_size=1)
@@ -150,7 +154,9 @@ class TrajectoryPlannerROS(object):
         """publishes feasibility score where higher numbers are bad, 0 is ideal, and negative is impossibl
         TODO: calculate feasibility instead of just setting it to zero"""
         possible = Float32()
-        possible = Float32(0.0)
+        if not self.possible:
+            self.extra_time = -1
+        possible = Float32(self.extra_time)
         print(type(possible))
 
         self.feasibility_pub.publish(possible)
@@ -174,11 +180,60 @@ class TrajectoryPlannerROS(object):
         # Final vector is simply the final linear velocity
         self.final_heading = np.array([self.final_linear_vel.x,self.final_linear_vel.y])
         # Normalize the vector for future calculations
-        self.final_normalized_heading = normalize(self.final_heading)
+        self.final_normalized_heading = normalize(self.final_heading)\
+
+    def check_curvature(self,points):
+        """
+        checks if the estimated curvature is less than the maximum allowed at all points.
+        TODO: add stuff so that curvature is taken into account when finding speeds at different points
+        """
+        # create tangents
+        norm_tangents = np.zeros((len(points),2))
+        for i in range(1,len(points) -1 ):
+            norm_tangents[i] = points[i + 1] - points[i + 1]
+            norm_tangents[i] = np.linalg.norm(norm_tangents[i])
+        norm_tangents[0] = np.linalg.norm(self.bot_init_heading)
+        norm_tangents[len(points) - 1] = self.final_normalized_heading
+
+        for i in range(1, len(points) - 1):
+            k = norm_tangents[i-1] - norm_tangents[i + 1]
+            vec_1 = points[i] - points[i-1]
+            vec_2 = points[i] - points[i+1]
+            distance = (np.linalg.norm(vec_1) + np.linalg.norm(vec_2)) # TODO: find actual distance
+
+            k = k/distance
+            k = np.linalg.norm(k)
+
+            # check if allowed
+            if k > self.MAX_CURVATURE:
+                self.possible = False
+            
+
+    def find_actual_time(self,points):
+        """
+        Calculates the actual time it will take to follow the path at max speed
+        """
+        # compute total distance
+        total_distance = 0
+        for i in range(1,len(points)):
+            vec_1 = points[i] - points[i-1]
+            distance = np.linalg.norm(vec_1) # TODO: find actual distance
+            total_distance = distance + total_distance
+
+        # if can't go that fast then 
+        if total_distance/self.final_time > self.MAX_SPEED:
+            # give extra time
+            self.extra_time = total_distance/self.MAX_SPEED - self.final_time
+
+            # set final time to the actual final time for further use
+            self.final_time = self.final_time + self.extra_time
+
 
 
     def waypoints_from_points(self,points):   # TODO: add varying speeds and nonzero angular velocities
         """Converts points from list or numpy array to pose array and sets twists as well"""
+        self.check_curvature(points)
+        self.find_actual_time(points)
         times = self.final_time * np.linspace(0,1,len(points))
 
         points = np.vstack([points,self.follow_through_path()])
@@ -212,6 +267,7 @@ class TrajectoryPlannerROS(object):
                 vec_1 = points[i] - points[i-1]
                 vec_2 = points[i] - points[i+1]
                 vel = (np.linalg.norm(vec_1) + np.linalg.norm(vec_2))/(times[i+1] - times[i-1]) # TODO: find actual distance 
+                
 
                 new_twist.linear.x = tangents[i][0] * vel
                 new_twist.linear.y =  tangents[i][1] * vel
@@ -231,6 +287,8 @@ class TrajectoryPlannerROS(object):
             # if backwards
             if self.backwards:
                 new_twist = - new_twist
+
+                # allow small amount of forward motion
                 if i == 0:
                     new_twist.linear.x = 0
                     new_twist.linear.y = 0
@@ -248,6 +306,12 @@ class TrajectoryPlannerROS(object):
 
         print("ready to publish")
         return waypoint_array_msg
+
+
+
+
+
+################## create main points ####################################################################
 
     def create_spline(self, init_position, init_heading, final_position, final_heading, second_point_distance):
         """
@@ -284,14 +348,15 @@ class TrajectoryPlannerROS(object):
         bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
         bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
 
+        # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
+        first_point = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * np.linalg.norm(bot_linear_vel)
+
+        # change stuff if backwards... wait until first point is defined to allow small amount of forward decelerating motion
         if self.backwards:
             self.bot_init_heading = -self.bot_init_heading 
             bot_linear_vel = -bot_linear_vel
             self.final_normalized_heading = -self.final_normalized_heading
             self.final_heading = -self.final_heading
-
-        # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
-        first_point = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * np.linalg.norm(bot_linear_vel)
 
         # Third point is a certain distance behind the ball
         third_point = ball_position - self.final_normalized_heading * self.DISTANCE_FROM_BALL
