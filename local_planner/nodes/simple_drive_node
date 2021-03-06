@@ -36,7 +36,7 @@ from std_msgs.msg import Float32, Float64
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 
-class SimpleDrivROS(object):
+class SimpleDriveROS(object):
     """A node to drive the car in a simple fashion."""
 
     def __init__(self):
