@@ -66,7 +66,8 @@ def calculate_arc_dist(pos, bot_pos, bot_orient, lookahead_dist):
     # return (2 * 0.1) / (lookahead_dist * lookahead_dist * x)
     # radius = (lookahead_dist * lookahead_dist)/(2 * x)
 
-    return math.atan2((2 * x * .0705), lookahead_dist * lookahead_dist)
+    return x
+    # return math.atan2((2 * x * .0705), lookahead_dist * lookahead_dist)
 
     # dist = abs(np.linalg.norm(pos - bot_pos))
     # arc_angle = 2 * math.asin((dist / 2) / radius)
