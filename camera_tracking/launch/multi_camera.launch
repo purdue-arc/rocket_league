@@ -6,7 +6,7 @@
   <arg name="launch_dynamic_reconfigure" default="false"/>
 
   <!-- Nodelet Manager -->
-  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager_args" output="log">
+  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="$(arg manager_args)" output="log">
     <param name="num_worker_threads" value="$(arg manager_threads)" />
   </node>
 
@@ -35,4 +35,8 @@
     <arg name="launch_dynamic_reconfigure"  value="$(arg launch_dynamic_reconfigure)"/>
   </include>
 
+  <node pkg="camera_tracking" type="tf_parser" name="tf_parser" output="screen">
+    <rosparam param="camera_names">[cam0, cam1, cam2, cam3]</rosparam>
+    <rosparam param="tag_names">[tag_0, tag_1, tag_69]</rosparam>
+  </node>
 </launch>

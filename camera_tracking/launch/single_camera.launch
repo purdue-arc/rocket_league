@@ -11,7 +11,7 @@
   <remap from="/tf" to="$(arg camera_name)/tf" />
 
   <!-- Nodelet Manager -->
-  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager_args" output="log">
+  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="$(arg manager_args)" output="log">
     <param name="num_worker_threads" value="$(arg manager_threads)" />
   </node>
 
