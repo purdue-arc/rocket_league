@@ -45,7 +45,7 @@ class CarDef(object):
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(0.85, 1.25), vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(1.5, 0.7), vertices=DEFAULT_VERTICES, 
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
                     maxAngle=90, turnSpeed=320):
@@ -122,7 +122,7 @@ class Car(object):
         for tire in self.tires:
             tire.updateDrive(linearVelocity, dt)
 
-        if linearVelocity.y != 0:
+        if linearVelocity.x != 0:
             # desiredAngleDt = angularVelocity.z * dt
             # angleNow = self._flJoint.angle
             # if abs(desiredAngleDt) > self.turnSpeed:
@@ -135,13 +135,14 @@ class Car(object):
 
             # self._flJoint.SetLimits(angle, angle)
             # self._frJoint.SetLimits(angle, angle)
+            # print(angularVelocity.z)
+            # desiredAngle = math.atan((angularVelocity.z * .0965) / linearVelocity.x)
 
-            desiredAngle = math.atan((angularVelocity.z * .1165) / linearVelocity.x)
-
-            if abs(desiredAngle) > self.maxAngle:
-                angle = math.copysign(self.maxAngle, desiredAngle)
-            else:
-                angle = desiredAngle
+            # if abs(desiredAngle) > self.maxAngle:
+            #     angle = math.copysign(self.maxAngle, desiredAngle)
+            # else:
+            #     angle = desiredAngle
+            angle = angularVelocity.z
 
             self._flJoint.SetLimits(angle, angle)
             self._frJoint.SetLimits(angle, angle)

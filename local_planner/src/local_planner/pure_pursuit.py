@@ -63,11 +63,14 @@ def calculate_arc_dist(pos, bot_pos, bot_orient, lookahead_dist):
     c = (math.tan(bot_yaw) * bot_pos[0]) - bot_pos[1]
     dist = math.sqrt(math.pow(a,2) + 1)
     x = abs((a * pos[0]) + pos[1] + c) / dist
-    radius = (lookahead_dist * lookahead_dist)/(2 * x)
+    # return (2 * 0.1) / (lookahead_dist * lookahead_dist * x)
+    # radius = (lookahead_dist * lookahead_dist)/(2 * x)
 
-    dist = abs(np.linalg.norm(pos - bot_pos))
-    arc_angle = 2 * math.asin((dist / 2) / radius)
-    return arc_angle * radius
+    return math.atan2((2 * x * .0705), lookahead_dist * lookahead_dist)
+
+    # dist = abs(np.linalg.norm(pos - bot_pos))
+    # arc_angle = 2 * math.asin((dist / 2) / radius)
+    # return arc_angle * radius
 
 def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist):
     """
