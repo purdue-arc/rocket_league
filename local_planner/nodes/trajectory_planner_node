@@ -186,32 +186,31 @@ class TrajectoryPlannerROS(object):
     def check_curvature(self,points):
         """
         checks if the estimated curvature is less than the maximum allowed at all points.
+        Uses Menger Curvature calculation technique.
         TODO: add stuff so that curvature is taken into account when finding speeds at different points
         """
-        # create tangents
-        norm_tangents = np.zeros((len(points),2))
-        for i in range(1,len(points) -1 ):
-            norm_tangents[i] = points[i + 1] - points[i + 1]
-            norm_tangents[i] = np.linalg.norm(norm_tangents[i])
-        norm_tangents[0] = np.linalg.norm(self.bot_init_heading)
-        norm_tangents[len(points) - 1] = self.final_normalized_heading
 
         for i in range(1, len(points) - 1):
-            k = norm_tangents[i-1] - norm_tangents[i + 1]
-            vec_1 = points[i] - points[i-1]
-            vec_2 = points[i+1] - points[i]
-            distance = (np.abs(np.linalg.norm(vec_1)) + np.abs(np.linalg.norm(vec_2))) # TODO: find actual distance
+            vec_1 = points[i+1] - points[i]
+            vec_2 = points[i-1] - points[i]
+            vec_3 = points[i+1] + points[i-1]
 
-            k = k/distance
-            k = np.linalg.norm(k)
+            area = 0.5 * np.cross(vec_1,vec_2)
+
+            dist_1 = np.linalg.norm(vec_1)
+            dist_2 = np.linalg.norm(vec_2)
+            dist_3 = np.linalg.norm(vec_3)
+
+            k = 4 * area/ (dist_1 * dist_2 * dist_3)
+            k = np.abs(k)
 
             # check if allowed
             #TODO: if k > self.MAX_CURVATURE:
-            if k > 100:
+            if k > self.MAX_CURVATURE:
                 print("too curved")
                 self.possible = False
 
-            print(k)
+            #rint("k is" + str(k))
             
 
     def find_actual_time(self,points):
