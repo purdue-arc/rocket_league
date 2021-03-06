@@ -1,6 +1,6 @@
 image_width: 1288
 image_height: 964
-camera_name: aravis_cam
+camera_name: cam0
 camera_matrix:
   rows: 3
   cols: 3

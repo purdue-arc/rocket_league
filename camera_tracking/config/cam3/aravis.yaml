@@ -1,0 +1,4 @@
+guid: Basler-23647868
+publish_tf: false
+tf_publish_rate: 30
+ExposureAuto: Continuous
