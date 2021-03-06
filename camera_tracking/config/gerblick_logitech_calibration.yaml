@@ -1,0 +1,20 @@
+image_width: 1920
+image_height: 1080
+camera_name: gerblick_logitech
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [1461.113882661499, 0, 970.8855373510113, 0, 1464.234954004925, 538.6513333267421, 0, 0, 1]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.0275651139086466, -0.09298186671263632, 0.000798060914697394, 0.001732892131979825, 0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [1452.5830078125, 0, 974.9053698446369, 0, 0, 1468.005126953125, 539.1537074485386, 0, 0, 0, 1, 0]
