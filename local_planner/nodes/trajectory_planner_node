@@ -268,6 +268,9 @@ class TrajectoryPlannerROS(object):
             elif i == 0:
                 yaw = np.arctan2(self.bot_init_heading[1],self.bot_init_heading[0])
 
+            if self.backwards and i == 1:
+                yaw = np.arctan2(-(points[2][1] - points[1][1]), -(points[2][0] - points[0][0]))
+
             (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
                 new_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
             
@@ -287,6 +290,10 @@ class TrajectoryPlannerROS(object):
                 new_twist.angular.x = 0
                 new_twist.angular.y = 0
                 new_twist.angular.z = 0
+
+                if self.backwards:
+                    new_twist.linear.x = -vel
+
             elif i == len(points) - 1:
                 new_twist.linear = self.final_linear_vel
                 new_twist.angular = self.final_angular_vel
@@ -296,12 +303,8 @@ class TrajectoryPlannerROS(object):
             elif i == 0:
                 new_twist = self.bot_vel
 
-            # if backwards
-            if self.backwards:
-                new_twist = - new_twist
-
                 # allow small amount of forward motion
-                if i == 0:
+                if self.backwards:
                     new_twist.linear.x = 0
                     new_twist.linear.y = 0
                     new_twist.linear.z = 0

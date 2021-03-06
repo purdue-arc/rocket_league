@@ -52,6 +52,9 @@ class HighLevelPlannerROS(object):
       self.car0_pose = None
       self.target_orientation = None
 
+      # for backwards testing TODO: set false otherwise
+      self.backwards = False
+
       # Subscribers
       rospy.Subscriber("car0/odom", Odometry, self.car0_odom_cb)
       rospy.Subscriber("ball/odom", Odometry, self.ball_odom_cb)
@@ -109,6 +112,8 @@ class HighLevelPlannerROS(object):
       # Note: Velocity is in reference to the frame of the car
       twist = Twist()
       twist.linear.x = self.linear_vel
+      if self.backwards:
+         twist.linear.x = -self.linear_vel
       twist.linear.y = 0
       twist.linear.z = 0
       twist.angular.x = angular_x
@@ -146,6 +151,8 @@ class HighLevelPlannerROS(object):
 
       # add orientation to target pose
       yaw = np.arctan2(self.target_orientation[1],self.target_orientation[0])
+      if self.backwards:
+         yaw = -yaw
       (self.target_pose.orientation.x,self.target_pose.orientation.y,self.target_pose.orientation.z,\
                 self.target_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
 
