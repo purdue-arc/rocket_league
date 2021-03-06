@@ -29,15 +29,15 @@ RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main"
     python-catkin-tools
 
 # install deep learning software
-RUN apt install -y --no-install-recommends \
-    libcudnn8 libnvinfer7 && \
-    pip3 install --upgrade pip && \
-    pip3 install rospkg transformations \
-    scipy numpy \
-    matplotlib pandas \
-    tensorflow torch \
-    jupyterlab \
-    gym[box2d]
+#RUN apt install -y --no-install-recommends \
+#    libcudnn8 libnvinfer7 && \
+#    pip3 install --upgrade pip && \
+#    pip3 install rospkg transformations \
+#    scipy numpy \
+#    matplotlib pandas \
+#    tensorflow torch \
+#    jupyterlab \
+#    gym[box2d]
 
 # install aravis
 WORKDIR /aravis
