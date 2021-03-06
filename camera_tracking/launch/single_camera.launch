@@ -1,7 +1,7 @@
 <launch>
   <arg name="load_manager" default="true"/>
   <arg name="manager_name" default="camera_manager"/>
-  <arg name="manager_args" value="/$(arg manager_name)"/>
+  <arg name="manager" value="/$(arg manager)"/>
   <arg name="manager_threads" default="4"/>
   <arg name="launch_dynamic_reconfigure" default="false"/>
 
@@ -11,7 +11,7 @@
   <remap from="/tf" to="$(arg camera_name)/tf" />
 
   <!-- Nodelet Manager -->
-  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="$(arg manager_args)" output="log">
+  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
     <param name="num_worker_threads" value="$(arg manager_threads)" />
   </node>
 
