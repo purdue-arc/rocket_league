@@ -1,4 +1,4 @@
-FROM purduearc/rocket-league
+FROM purduearc/rocket-league:arm64
 
 USER root
 
