@@ -1,0 +1,14 @@
+video_device: /dev/video0
+image_width: 1280
+image_height: 720
+pixel_format: mjpeg
+#io_method: userptr
+camera_frame_id: gerblick_laptop
+framerate: 30
+#contrast: 32
+#brightness: 32
+#saturation: 32
+#sharpness: 22
+autofocus: true
+#focus: 0
+camera_name: gerblick_laptop

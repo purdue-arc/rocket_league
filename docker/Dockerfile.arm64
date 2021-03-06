@@ -1,5 +1,13 @@
-FROM nvidia/cudagl:11.0-runtime-ubuntu18.04
+FROM nvidia/cuda-arm64:11.0-runtime-ubuntu18.04
 ENV ROS_DISTRO melodic
+
+# glvnd stuff https://gitlab.com/nvidia/container-images/opengl/blob/ubuntu18.04/glvnd/runtime/Dockerfile
+RUN apt update && apt-get install -y --no-install-recommends \
+        libglvnd0 libglvnd0:arm64 \
+        libgl1 libgl1:arm64 \
+        libglx0 libglx0:arm64 \
+        libegl1 libegl1:arm64 \
+        libgles2 libgles2:arm64
 
 # update, upgrade, and install basics
 RUN apt update && apt upgrade -y && \
@@ -10,8 +18,7 @@ RUN apt update && apt upgrade -y && \
     x11-apps mesa-utils \
     python-dev python3-dev \
     python-pip python3-pip \
-    pylint software-properties-common \
-    clang-format jq
+    pylint software-properties-common
 
 # install ROS
 RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
@@ -22,15 +29,15 @@ RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main"
     python-catkin-tools
 
 # install deep learning software
-RUN apt install -y --no-install-recommends \
-    libcudnn8 libnvinfer7 && \
-    pip3 install --upgrade pip && \
-    pip3 install rospkg \
-    scipy numpy \
-    matplotlib pandas \
-    tensorflow torch \
-    jupyterlab \
-    gym[box2d]
+#RUN apt install -y --no-install-recommends \
+#    libcudnn8 libnvinfer7 && \
+#    pip3 install --upgrade pip && \
+#    pip3 install rospkg transformations \
+#    scipy numpy \
+#    matplotlib pandas \
+#    tensorflow torch \
+#    jupyterlab \
+#    gym[box2d]
 
 # install aravis
 WORKDIR /aravis

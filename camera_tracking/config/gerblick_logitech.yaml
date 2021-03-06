@@ -1,0 +1,14 @@
+video_device: /dev/video4
+image_width: 1920
+image_height: 1080
+pixel_format: mjpeg
+#io_method: userptr
+camera_frame_id: gerblick_logitech
+framerate: 30
+#contrast: 32
+#brightness: 32
+#saturation: 32
+#sharpness: 22
+autofocus: true
+#focus: 0
+camera_name: gerblick_logitech
