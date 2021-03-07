@@ -65,6 +65,7 @@ target_link_libraries(detection_to_pose
 
 add_executable(ball_detection
   src/ball_detection.cpp
+  src/BallDetection.cpp
 )
 
 add_dependencies(ball_detection
