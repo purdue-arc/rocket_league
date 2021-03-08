@@ -110,6 +110,7 @@ class Plotter(object):
         plt.title("Training Log")
         plt.xlabel("Episodes")
         plt.legend()
+        rospy.loginfo(f"Saving training progress to {self.LOG_DIR}plot.png")
         plt.savefig(self.LOG_DIR + "plot.png")
         plt.close(fig)
 

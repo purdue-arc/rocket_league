@@ -52,13 +52,11 @@ class Agent(object):
         self.epsilon = 1.0
         self.memory = deque(maxlen=memory_len)
         self.model = torch.nn.Sequential(
-            torch.nn.Linear(self.STATE_SIZE, 64),
+            torch.nn.Linear(self.STATE_SIZE, 256),
             torch.nn.ReLU(),
-            torch.nn.Linear(64, 64),
+            torch.nn.Linear(256, 256),
             torch.nn.ReLU(),
-            torch.nn.Linear(64, 64),
-            torch.nn.ReLU(),
-            torch.nn.Linear(64, self.ACTION_SIZE)).to(self.DEVICE)
+            torch.nn.Linear(256, self.ACTION_SIZE)).to(self.DEVICE)
         self.loss = torch.nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
 
