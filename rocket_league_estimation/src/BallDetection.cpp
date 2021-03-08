@@ -49,7 +49,7 @@ BallDetection::BallDetection() :
     posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
         "ball_pose", 1)},
     detectionSub{nh.subscribe(
-        "aravis_cam/image_rect_color", 1, &BallDetection::BallCallback, this)}
+        "image_rect_color", 1, &BallDetection::BallCallback, this)}
 
     {    if(false)
        /* if (!m_pnh.getParam("parent/tag_id", m_parentTagId) ||
