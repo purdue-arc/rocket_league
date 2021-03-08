@@ -40,7 +40,12 @@ class Agent(object):
             learning_rate=0.01, batch_size=64):
 
         # constants
-        self.DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            print("Using CUDA GPU")
+            self.DEVICE = torch.device("cuda")
+        else:
+            print("Using CPU")
+            self.DEVICE = torch.device("cpu")
         self.STATE_SIZE = state_size
         self.ACTION_SIZE = action_size
         self.GAMMA = gamma
@@ -66,9 +71,7 @@ class Agent(object):
 
     def replay(self):
         """Update the model weights with past experiences from memory."""
-        # Check for sufficient data
-        if self.BATCH_SIZE > len(self.memory):
-            return
+        assert len(self.memory) >= self.BATCH_SIZE
 
         # get random sample
         minibatch = random.sample(self.memory, self.BATCH_SIZE)
@@ -139,16 +142,18 @@ class Agent(object):
                 net_reward += reward
                 steps += 1
 
-            # learn
-            loss = self.replay()
+            # Check for sufficient data
+            if len(self.memory) >= self.BATCH_SIZE:
+                # learn
+                loss = self.replay()
 
-            # log
-            log({
-                "episode": episode+1,
-                "net_reward": net_reward,
-                "steps": steps,
-                "epsilon": self.epsilon,
-                "loss": loss})
+                # log
+                log({
+                    "episode": episode+1,
+                    "net_reward": net_reward,
+                    "steps": steps,
+                    "epsilon": self.epsilon,
+                    "loss": loss})
 
             # increase exploitation vs exploration
             if self.epsilon > self.EPSILON_MIN:
