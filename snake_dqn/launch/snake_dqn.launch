@@ -23,6 +23,7 @@
   <arg name="batch_size"    default="64"/>
 
   <arg name="log_weights"       default="false"/>
+  <arg name="log_progress"      default="false"/>
   <arg name="log_dir"           default=""/>
   <arg name="log_freq"          default="250"/>
   <arg name="plot_buffer_size"  default="25"/>
