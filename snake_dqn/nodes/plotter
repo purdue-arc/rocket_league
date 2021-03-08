@@ -28,23 +28,22 @@ License:
 """
 
 import rospy
-from std_msgs.msg import String
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
+import matplotlib.pyplot as plt
 
-class Logger(object):
+class Plotter(object):
     """Log model weights during training."""
     def __init__(self):
-        rospy.init_node('model_weight_logger')
+        rospy.init_node('model_progress_plotter')
 
         # Constants
         self.LOG_DIR = rospy.get_param('~log_dir')
         self.FREQUENCY = rospy.get_param('~log_freq', 100)
 
+        self.history = None
+
         # Subscribers
         rospy.Subscriber('snake/dqn/training', DiagnosticStatus, self.progress_cb)
-
-        # Services (TODO make service when snake_dqn updates)
-        self.log_pub = rospy.Publisher('snake/dqn/save_weights', String, queue_size=1)
 
         rospy.spin()
 
@@ -55,12 +54,44 @@ class Logger(object):
             if kv.key == "episode":
                 episode = int(kv.value)
 
-        if episode is None:
-            rospy.logerr("Bad progress message.")
-            return
+        if episode is not None:
+            if self.history is None:
+                self.history = [progress_msg.values]
+            else:
+                self.history.append(progress_msg.values)
 
-        if episode % self.FREQUENCY == 0:
-            self.log_pub.publish(self.LOG_DIR + f"episode_{episode:04d}_weights.pt")
+            if episode % self.FREQUENCY == 0:
+                self.plot()
+        else:
+            rospy.logerr("Bad progress message.")
+
+    def plot(self):
+        """Create plot and save"""
+        x = []
+        measurements = []
+        for msg in self.history:
+            for kv in msg:
+                if kv.key == "episode":
+                    x.append(int(kv.value))
+                else:
+                    measurements.append(kv.key)
+
+        for key in measurements:
+            y = []
+            for msg in self.history:
+                for kv in msg:
+                    if kv.key == key:
+                        y.append(float(kv.value))
+
+            fig = plt.figure()
+            fig.set_figheight(8.5)
+            fig.set_figwidth(11)
+            plt.plot(x, y)
+            plt.title("Training Log")
+            plt.xlabel("Episodes")
+            plt.ylabel(key)
+            plt.savefig(self.LOG_DIR + f"plots/{key}.png")
+            plt.close(fig)
 
 if __name__ == "__main__":
-    Logger()
+    Plotter()

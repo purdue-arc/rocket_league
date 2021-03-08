@@ -147,9 +147,9 @@ class Agent(object):
             # log
             log({
                 "episode": episode+1,
-                "net reward": net_reward,
+                "net_reward": net_reward,
                 "steps": steps,
-                "epsilone": self.epsilon,
+                "epsilon": self.epsilon,
                 "loss": loss})
 
             # increase exploitation vs exploration
