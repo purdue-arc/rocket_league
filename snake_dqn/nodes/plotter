@@ -67,31 +67,42 @@ class Plotter(object):
 
     def plot(self):
         """Create plot and save"""
-        x = []
+        fig = plt.figure(figsize=(11,8.5))
+
         measurements = []
+        for kv in self.history[0]:
+            if kv.key != "episode":
+                measurements.append(kv.key)
+
+        x = []
         for msg in self.history:
             for kv in msg:
                 if kv.key == "episode":
                     x.append(int(kv.value))
-                else:
-                    measurements.append(kv.key)
 
         for key in measurements:
             y = []
+            y_max = None
+            y_min = None
             for msg in self.history:
                 for kv in msg:
                     if kv.key == key:
-                        y.append(float(kv.value))
+                        val = float(kv.value)
+                        y.append(val)
+                        if y_max is None or val > y_max:
+                            y_max = val
+                        if y_min is None or val < y_min:
+                            y_min = val
 
-            fig = plt.figure()
-            fig.set_figheight(8.5)
-            fig.set_figwidth(11)
-            plt.plot(x, y)
-            plt.title("Training Log")
-            plt.xlabel("Episodes")
-            plt.ylabel(key)
-            plt.savefig(self.LOG_DIR + f"plots/{key}.png")
-            plt.close(fig)
+            y_range = y_max - y_min
+            if y_range > 0:
+                plt.plot(x, [(i-y_min)/y_range for i in y], label=f"{key} => [{y_min :0.2e}, {y_max :0.2e}]")
+
+        plt.title("Training Log")
+        plt.xlabel("Episodes")
+        plt.legend()
+        plt.savefig(self.LOG_DIR + "plot.png")
+        plt.close(fig)
 
 if __name__ == "__main__":
     Plotter()
