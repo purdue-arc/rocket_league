@@ -3,20 +3,20 @@
   <arg name="render"    default="false"/>
 
   <arg name="size"  default="7"/>
-  <arg name="vw"    default="2.0"/>
-  <arg name="vx"    default="2.0"/>
-  <arg name="rate"  default="30.0"/>
+  <arg name="vw"    default="3.0"/>
+  <arg name="vx"    default="3.0"/>
+  <arg name="rate"  default="10.0"/>
 
   <arg name="death_reward"  default="-100.0"/>
   <arg name="goal_reward"   default="50.0"/>
-  <arg name="base_reward"   default="1.0"/>
-  <arg name="exp_reward"    default="1.0"/>
+  <arg name="base_reward"   default="10.0"/>
+  <arg name="exp_reward"    default="-0.5"/>
   <arg name="max_time"      default="30.0"/>
 
   <arg name="gamma"         default="0.95"/>
   <arg name="epsilon_decay" default="0.995"/>
-  <arg name="learning_rate" default="0.001"/>
-  <arg name="num_episodes"  default="1000"/>
+  <arg name="learning_rate" default="0.01"/>
+  <arg name="num_episodes"  default="5000"/>
 
   <arg name="log_weights" default="false"/>
   <arg name="log_dir"     default=""/>

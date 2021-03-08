@@ -68,37 +68,47 @@ class Agent(object):
 
     def replay(self):
         """Update the model weights with past experiences from memory."""
-        self.model.train()
-
         # Check for sufficient data
         if self.BATCH_SIZE > len(self.memory):
             return
 
+        # get random sample
         minibatch = random.sample(self.memory, self.BATCH_SIZE)
-        for state, action, reward, next_state, done in minibatch:
-            if not done:
-                reward += self.GAMMA * torch.max(self.model(next_state)).item()
 
-            self.optimizer.zero_grad()
+        # extract data
+        minibatch = tuple(zip(*minibatch))
+        state = torch.cat(minibatch[0])
+        action = torch.tensor(minibatch[1], dtype=torch.long, device=self.DEVICE)
+        reward = torch.tensor(minibatch[2], dtype=torch.float, device=self.DEVICE)
+        next_state = torch.cat(minibatch[3])
+        done = torch.tensor(minibatch[4], dtype=torch.bool, device=self.DEVICE)
 
-            out = self.model(state)
+        # increase reward for incomplete states
+        with torch.no_grad():
+            reward = reward + self.GAMMA * ~done * torch.max(self.model(state), dim=1, keepdim=True).values.resize(self.BATCH_SIZE)
 
-            target = out.detach().clone()
-            target[action] = reward
+        # get output
+        self.optimizer.zero_grad()
+        output = self.model(state)
 
-            loss = self.loss(out, target)
-            loss.backward()
+        # get target
+        target = output.detach().clone()
+        target[range(self.BATCH_SIZE), action] = reward
 
-            self.optimizer.step()
+        # train
+        loss = self.loss(output, target)
+        loss.backward()
+        self.optimizer.step()
+
+        return loss.item()
 
     def transform_state(self, state):
         """Transform state from numpy to torch type."""
         assert np.size(state) == self.STATE_SIZE
-        return torch.from_numpy(state).to(self.DEVICE).float()
+        return torch.from_numpy(state).float().to(self.DEVICE)
 
     def get_action(self, state):
         """Use forward propagation to get the predicted action from the model."""
-        self.model.eval()
         reward = self.model(state)
         return torch.argmax(reward).item()
 
@@ -132,10 +142,15 @@ class Agent(object):
                 steps += 1
 
             # learn
-            self.replay()
+            loss = self.replay()
 
             # log
-            log(episode+1, net_reward, steps, self.epsilon)
+            log({
+                "episode": episode+1,
+                "net reward": net_reward,
+                "steps": steps,
+                "epsilone": self.epsilon,
+                "loss": loss})
 
             # increase exploitation vs exploration
             if self.epsilon > self.EPSILON_MIN:

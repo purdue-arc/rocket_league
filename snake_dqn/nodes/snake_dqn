@@ -147,6 +147,7 @@ class SnakeDQN(object):
         pose = np.asarray(self.pose, dtype=np.float32)
         goal = np.asarray(self.goal, dtype=np.float32)
         state = np.concatenate((pose, goal))
+        state = np.resize(state, (1, np.size(state)))
 
         # Determine reward and if done
         reward = 0
@@ -326,24 +327,17 @@ class Trainer(SnakeDQN):
         # return initial state
         return self.get_env(self.time)
 
-    def log(self, episode, net_reward, steps, epsilon):
+    def log(self, dict):
         """Log training metrics."""
         elapsed_time = (self.time - self.start_time).to_sec()
 
         log_msg = DiagnosticStatus()
         log_msg.name = "DQN training"
-        log_msg.values.append(KeyValue(key="episode", value=f"{episode}"))
-        log_msg.values.append(KeyValue(key="net reward", value=f"{net_reward}"))
-        log_msg.values.append(KeyValue(key="steps", value=f"{steps}"))
-        log_msg.values.append(KeyValue(key="epsilon", value=f"{epsilon}"))
-        log_msg.values.append(KeyValue(key="score", value=f"{self.score}"))
-        log_msg.values.append(KeyValue(key="elapsed time", value=f"{elapsed_time}"))
+        for key, value in dict.items():
+            log_msg.values.append(KeyValue(key=key, value=str(value)))
+        log_msg.values.append(KeyValue(key="score", value=str(self.score)))
+        log_msg.values.append(KeyValue(key="elapsed time", value=str(elapsed_time)))
         self.log_pub.publish(log_msg)
-
-
-        if episode % 25 == 0:
-            rospy.loginfo(f"Training progress: episode: {episode:4d}, time: {elapsed_time:2.2f} sec, "
-                f"score: {self.score:3d}, e: {100*epsilon:2.1f}%")
 
 class Evaluator(SnakeDQN):
     """Class for running the agent live."""
