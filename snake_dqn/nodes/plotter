@@ -39,6 +39,7 @@ class Plotter(object):
         # Constants
         self.LOG_DIR = rospy.get_param('~log_dir')
         self.FREQUENCY = rospy.get_param('~log_freq', 100)
+        self.BUFF_SIZE = rospy.get_param('~buffer_size', 10)
 
         self.history = None
 
@@ -82,13 +83,21 @@ class Plotter(object):
 
         for key in measurements:
             y = []
+            buffer = []
             y_max = None
             y_min = None
             for msg in self.history:
                 for kv in msg:
                     if kv.key == key:
                         val = float(kv.value)
-                        y.append(val)
+                        buffer.append(val)
+                        if len(buffer) > self.BUFF_SIZE:
+                            buffer.pop(0)
+                        avg = 0
+                        for i in buffer:
+                            avg += i
+                        avg /= float(len(buffer))
+                        y.append(avg)
                         if y_max is None or val > y_max:
                             y_max = val
                         if y_min is None or val < y_min:
