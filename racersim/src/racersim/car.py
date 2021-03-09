@@ -45,12 +45,13 @@ class CarDef(object):
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(1.5, 0.7), vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(1.25, 1.25), initAngle=3.0, vertices=DEFAULT_VERTICES, 
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
-                    maxAngle=90, turnSpeed=320):
+                    maxAngle=45, pgain=0.1):
 
         self.initPos = initPos
+        self.initAngle = initAngle
         self.vertices = vertices
         self.tireAnchors = tireAnchors
         self.tireDef = tireDef
@@ -58,7 +59,7 @@ class CarDef(object):
         self.maxForwardSpeed = maxForwardSpeed
         self.maxBackwardSpeed = maxBackwardSpeed
         self.maxAngle = math.radians(maxAngle)
-        self.turnSpeed = math.radians(turnSpeed)
+        self.pgain = pgain
 
 class Car(object):
     """Simulates an ackerman-steering vehicle"""
@@ -81,8 +82,10 @@ class Car(object):
 
         self.tires = []
         for i in range(len(carDef.tireAnchors)):
+            tirePos = (carDef.tireAnchors[i][0] + carDef.initPos[0],
+                       carDef.tireAnchors[i][1] + carDef.initPos[1])
 
-            tire = Tire(world, carDef.tireDef, 
+            tire = Tire(world, carDef.tireDef, tirePos,
                         maxForwardSpeed=carDef.maxForwardSpeed,
                         maxBackwardSpeed=carDef.maxBackwardSpeed)
             jointDef.bodyB = tire.body
@@ -101,8 +104,9 @@ class Car(object):
             
             self.tires.append(tire)
         
+        self.body.angle = carDef.initAngle
         self.maxAngle = carDef.maxAngle
-        self.turnSpeed = carDef.turnSpeed
+        self.pgain = carDef.pgain
 
     def getPoint(self):
         return (self.body.position[0], self.body.position[1], 0)
@@ -123,26 +127,18 @@ class Car(object):
             tire.updateDrive(linearVelocity, dt)
 
         if linearVelocity.x != 0:
-            # desiredAngleDt = angularVelocity.z * dt
-            # angleNow = self._flJoint.angle
-            # if abs(desiredAngleDt) > self.turnSpeed:
-            #     desiredAngleDt = math.copysign(self.turnSpeed, desiredAngleDt)
-            
-            # if abs(angleNow + desiredAngleDt) > self.maxAngle:
-            #     angle = math.copysign(self.maxAngle, desiredAngleDt)
-            # else:
-            #     angle = angleNow + desiredAngleDt
+            # Steering-Angle Approach
+            # angle = angularVelocity.z
 
-            # self._flJoint.SetLimits(angle, angle)
-            # self._frJoint.SetLimits(angle, angle)
-            # print(angularVelocity.z)
-            # desiredAngle = math.atan((angularVelocity.z * .0965) / linearVelocity.x)
+            # Angular / PID Approach
+            angle = self._flJoint.angle
+            angle += (self.body.angularVelocity - angularVelocity.z) \
+                      * -self.pgain
 
-            # if abs(desiredAngle) > self.maxAngle:
-            #     angle = math.copysign(self.maxAngle, desiredAngle)
-            # else:
-            #     angle = desiredAngle
-            angle = angularVelocity.z
+            if angle > self.maxAngle:
+                angle = self.maxAngle
+            elif angle < -self.maxAngle:
+                angle = -self.maxAngle
 
             self._flJoint.SetLimits(angle, angle)
             self._frJoint.SetLimits(angle, angle)

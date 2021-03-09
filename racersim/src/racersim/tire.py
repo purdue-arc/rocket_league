@@ -45,10 +45,11 @@ class TireDef(object):
 
 class Tire(object):
     """Simulates a single tire of a vehicle"""
-    def __init__(self, world, tireDef, maxForwardSpeed=1.0, 
+    def __init__(self, world, tireDef, position, maxForwardSpeed=1.0, 
                     maxBackwardSpeed=-1.0):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
+        bodyDef.position = position
         self.body = world.CreateBody(bodyDef)
 
         shape = Box2D.b2PolygonShape(box=(tireDef.width/2, tireDef.length/2))

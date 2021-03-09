@@ -56,10 +56,10 @@ class WaypointControllerROS(object):
         self.frame_id = rospy.get_param('~frame_id', 'map')
 
         # Radius to search for intersections
-        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.025)
+        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.35)
 
         # Coeffient to adjust lookahead distance by speed
-        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.025)
+        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.035)
 
         # Number of waypoints to search per pass (-1 is full path)
         self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
@@ -164,12 +164,16 @@ class WaypointControllerROS(object):
                 self.lookahead_pnt_pub.publish(pose)
 
             # Calculate angular velocity
+            lat_error = pursuit.calculate_lat_error(intersect, bot_pos, \
+                                                    bot_orient, lookahead_dist)
             arc_dist = pursuit.calculate_arc_dist(intersect, bot_pos, \
                                               bot_orient, lookahead_dist)
             angular_vel = pursuit.get_angular_speed(self.final_speed, \
                                                     d_angle, arc_dist)
-            # angular_vel -= odom_msg.twist.twist.angular.z
-            angular_vel = arc_dist
+
+            # Steering-Angle Approach
+            # angular_vel = math.atan2(2 * lat_error * .125,
+            #                          lookahead_dist * lookahead_dist)
 
             # Publish command data
             twist = Twist()
