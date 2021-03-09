@@ -170,10 +170,16 @@ class WaypointControllerROS(object):
                                               bot_orient, lookahead_dist)
             angular_vel = pursuit.get_angular_speed(self.final_speed, \
                                                     d_angle, arc_dist)
+<<<<<<< HEAD
 
             # Steering-Angle Approach
             # angular_vel = math.atan2(2 * lat_error * .125,
             #                          lookahead_dist * lookahead_dist)
+=======
+            # angular_vel -= odom_msg.twist.twist.angular.z
+            angular_vel = (2 * odom_msg.twist.twist.linear.x)
+            angular_vel /= ((lookahead_dist**2) * arc_dist)
+>>>>>>> 5b4ac4cd34ad8f889e660620b1d577ba8d1aacfc
 
             # Publish command data
             twist = Twist()
