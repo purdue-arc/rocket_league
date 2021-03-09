@@ -32,10 +32,9 @@ import Box2D
 class TireDef(object):
     """Holds relevent data for a tire instance"""
     def __init__(self, width=0.0125, length=0.037, density=0.0125,
-                 maxLateralImpulse=0.03, maxDriveForce=0.001, maxBrakeForce=0.002,
+                 maxLateralImpulse=0.015, maxDriveForce=0.0001, maxBrakeForce=0.0002,
                  dragForceCoeff=-0.00002, angularImpulseCoeff=0.02,
                  car_weight=1, friction=100):
-
         self.width = width
         self.length = length
         self.density = density
@@ -49,10 +48,11 @@ class TireDef(object):
 
 class Tire(object):
     """Simulates a single tire of a vehicle"""
-    def __init__(self, world, tireDef, maxForwardSpeed=1.0, 
+    def __init__(self, world, tireDef, position, maxForwardSpeed=1.0, 
                     maxBackwardSpeed=-1.0):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
+        bodyDef.position = position
         self.body = world.CreateBody(bodyDef)
 
         shape = Box2D.b2PolygonShape(box=(tireDef.width/2, tireDef.length/2))
@@ -87,7 +87,7 @@ class Tire(object):
 
         currForwardNormal = self.getForwardVelocity()
         currForwardSpeed = currForwardNormal.Normalize()
-        dragForce = self.dragForceCoeff * currForwardSpeed**2
+        dragForce = self.dragForceCoeff * currForwardSpeed
         self.body.ApplyForce(dragForce * currForwardNormal, \
                              self.body.worldCenter, wake=True)
 

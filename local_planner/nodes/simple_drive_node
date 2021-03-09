@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 """Contains the SimpleDriveROS Node.
-
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -63,8 +62,9 @@ class SimpleDriveROS(object):
 
         # Publish command data
         twist = Twist()
-        twist.linear.x = 0.5
-        twist.angular.z = 0.21
+
+        twist.linear.x = 0.05
+        twist.angular.z = 0.20
         self.bot_velocity_cmd.publish(twist)
 
 if __name__ == "__main__":
