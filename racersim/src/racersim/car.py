@@ -90,9 +90,7 @@ class Car(object):
             tirePos = (carDef.tireAnchors[i][0] + carDef.initPos[0],
                        carDef.tireAnchors[i][1] + carDef.initPos[1])
 
-            tire = Tire(world, carDef.tireDef, tirePos,
-                        maxForwardSpeed=carDef.maxForwardSpeed,
-                        maxBackwardSpeed=carDef.maxBackwardSpeed)
+            tire = Tire(world, carDef.tireDef, tirePos)
             jointDef.bodyB = tire.body
             jointDef.localAnchorA.Set(carDef.tireAnchors[i][0],
                                       carDef.tireAnchors[i][1])

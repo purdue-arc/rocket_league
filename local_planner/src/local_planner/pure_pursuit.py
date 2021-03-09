@@ -80,20 +80,16 @@ def calculate_arc_dist(intersect_pos, bot_pos, bot_orient, lookahead_dist):
     dist = math.sqrt(math.pow(a,2) + 1)
     x = abs((a * intersect_pos[0]) + intersect_pos[1] + c) / dist
 
-<<<<<<< HEAD
     bot_line_x = bot_pos[0] + (math.cos(bot_yaw) * lookahead_dist)
     bot_line_y = bot_pos[1] + (math.sin(bot_yaw) * lookahead_dist)
     bot_line = np.array([bot_line_x, bot_line_y, 0])
     tang_line = intersect_pos - bot_line
     sign = np.sign(np.cross(tang_line, bot_line))[2]
     radius = (lookahead_dist * lookahead_dist)/(2 * x)
-=======
-    return x
-    # return math.atan2((2 * x * .0705), lookahead_dist * lookahead_dist)
->>>>>>> 5b4ac4cd34ad8f889e660620b1d577ba8d1aacfc
 
     dist = abs(np.linalg.norm(intersect_pos - bot_pos))
     arc_angle = 2 * math.asin((dist / 2) / radius)
+
     return arc_angle * radius
 
 def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist):
