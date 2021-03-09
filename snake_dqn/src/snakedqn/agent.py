@@ -167,4 +167,5 @@ class Agent(object):
     def load(self, name):
         """Load weights from file."""
         print(f"Loading weights from {name}")
-        self.model.load_state_dict(torch.load(name))
+        self.model.load_state_dict(torch.load(name, map_location=self.DEVICE))
+        self.model = self.model.to(self.DEVICE)
