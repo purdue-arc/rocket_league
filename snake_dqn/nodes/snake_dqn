@@ -89,7 +89,8 @@ class SnakeDQN(object):
             epsilon_decay=rospy.get_param('~dqn/epsilon_decay', 0.99),
             epsilon_min=rospy.get_param('~dqn/epsilon_min', 0.01),
             learning_rate=rospy.get_param('~dqn/learning_rate', 0.01),
-            batch_size=rospy.get_param('~dqn/batch_size', 64))
+            batch_size=rospy.get_param('~dqn/batch_size', 64),
+            epochs=rospy.get_param('~dqn/epochs', 1))
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self.pose_cb)

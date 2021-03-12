@@ -37,7 +37,7 @@ class Agent(object):
     def __init__(self, state_size, action_size,
             memory_len=2000, gamma=0.9,
             epsilon_decay=0.99, epsilon_min=0.01,
-            learning_rate=0.01, batch_size=64):
+            learning_rate=0.01, batch_size=64, epochs=1):
 
         # constants
         if torch.cuda.is_available():
@@ -52,16 +52,19 @@ class Agent(object):
         self.EPSILON_DECAY = epsilon_decay
         self.EPSILON_MIN = epsilon_min
         self.BATCH_SIZE = batch_size
+        self.EPOCHS = epochs
 
         # variables
         self.epsilon = 1.0
         self.memory = deque(maxlen=memory_len)
         self.model = torch.nn.Sequential(
-            torch.nn.Linear(self.STATE_SIZE, 256),
+            torch.nn.Linear(self.STATE_SIZE, 512),
             torch.nn.ReLU(),
-            torch.nn.Linear(256, 256),
+            torch.nn.Linear(512, 512),
             torch.nn.ReLU(),
-            torch.nn.Linear(256, self.ACTION_SIZE)).to(self.DEVICE)
+            torch.nn.Linear(512, 512),
+            torch.nn.ReLU(),
+            torch.nn.Linear(512, self.ACTION_SIZE)).to(self.DEVICE)
         self.loss = torch.nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
 
@@ -145,7 +148,8 @@ class Agent(object):
             # Check for sufficient data
             if len(self.memory) >= self.BATCH_SIZE:
                 # learn
-                loss = self.replay()
+                for i in range(self.EPOCHS):
+                    loss = self.replay()
 
                 # log
                 log({
@@ -168,4 +172,4 @@ class Agent(object):
         """Load weights from file."""
         print(f"Loading weights from {name}")
         self.model.load_state_dict(torch.load(name, map_location=self.DEVICE))
-        self.model = self.model.to(self.DEVICE)
+        self.model.to(self.DEVICE)
