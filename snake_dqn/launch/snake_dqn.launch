@@ -21,6 +21,7 @@
   <arg name="epsilon_min"   default="0.05"/>
   <arg name="learning_rate" default="0.01"/>
   <arg name="batch_size"    default="64"/>
+  <arg name="epochs"        default="1"/>
 
   <arg name="log_weights"       default="false"/>
   <arg name="log_progress"      default="false"/>
@@ -37,7 +38,7 @@
     <param name="rate"                    value="$(arg rate)"/>
   </node>
 
-  <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen" respawn="true" args="$(eval '--training' if training else '')">
+  <node type="snake_dqn" pkg="snake_dqn" name="snake_dqn" output="screen" args="$(eval '--training' if training else '')">
     <param name="num_segments"     value="$(arg size)"/>
     <param name="angular_velocity" value="$(arg vw)"/>
     <param name="linear_velocity"  value="$(arg vx)"/>
@@ -57,6 +58,7 @@
     <param name="dqn/epsilon_min"   value="$(arg epsilon_min)"/>
     <param name="dqn/learning_rate" value="$(arg learning_rate)"/>
     <param name="dqn/batch_size"    value="$(arg batch_size)"/>
+    <param name="dqn/epochs"        value="$(arg epochs)"/>
   </node>
 
   <node if="$(arg log_weights)" type="logger" pkg="snake_dqn" name="logger" output="screen">
