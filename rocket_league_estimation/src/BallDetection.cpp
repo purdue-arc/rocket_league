@@ -49,15 +49,21 @@ BallDetection::BallDetection() :
     posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
         "ball_pose", 1)},
     detectionSub{nh.subscribe(
-        "image_rect_color", 1, &BallDetection::BallCallback, this)}
+        "image_rect_color", 1, &BallDetection::BallCallback, this)},
+    minHue{pnh.param<int>("min_hue", 60)},
+    minSat{pnh.param<int>("min_sat", 135)},
+    minVib{pnh.param<int>("min_vib", 50)},
+    maxHue{pnh.param<int>("max_hue", 150)},
+    maxSat{pnh.param<int>("max_sat", 255)},
+    maxVib{pnh.param<int>("max_vib", 255)}
 
-    {    if(false)
-       /* if (!m_pnh.getParam("parent/tag_id", m_parentTagId) ||
-                !m_pnh.getParam("parent/tag_name", m_parentTagName) ||
-                !m_pnh.getParam("parent/body_name", m_parentBodyName) ||
-                !m_pnh.getParam("child/tag_id", m_childTagId) ||
-                !m_pnh.getParam("child/tag_name", m_childTagName) ||
-                !m_pnh.getParam("child/body_name", m_childBodyName)) */{
+    {    
+       if (!pnh.getParam("min_hue", minHue) ||
+                !pnh.getParam("min_sat", minSat) ||
+                !pnh.getParam("min_vib", minVib) ||
+                !pnh.getParam("max_hue", maxHue) ||
+                !pnh.getParam("max_sat", maxSat) ||
+                !pnh.getParam("max_vib", maxVib)) {
             throw std::runtime_error("Parameters not specified");
             }
     }
@@ -78,7 +84,7 @@ void BallDetection::BallCallback(
                 // Convert from BGR to HSV colorspace
                 cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
                 // Detect the object based on HSV Range Values
-                inRange(frame_HSV, cv::Scalar(60, 135, 50), cv::Scalar(150, 255, 255), frame_threshold);
+                inRange(frame_HSV, cv::Scalar(minHue, minSat, minVib), cv::Scalar(maxHue, maxSat, maxVib), frame_threshold);
                 erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
                 dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
                 //find the centers

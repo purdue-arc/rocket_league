@@ -1,3 +1,12 @@
 <launch>
-  <node type="ball_detection" pkg="rocket_league_estimation" name="ball_detection"/>
+
+  <node type="ball_detection" pkg="rocket_league_estimation" name="ball_detection">
+    <param name="min_hue" value="60"/>
+    <param name="min_sat" value="135"/>
+    <param name="min_vib" value="50"/>
+    <param name="max_hue" value="150"/>
+    <param name="max_sat" value="255"/>
+    <param name="max_vob" value="255"/>
+  </node>
+
 </launch>
