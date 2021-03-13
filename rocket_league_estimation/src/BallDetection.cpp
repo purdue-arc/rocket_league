@@ -56,21 +56,15 @@ BallDetection::BallDetection() :
     maxHue{pnh.param<int>("max_hue", 150)},
     maxSat{pnh.param<int>("max_sat", 255)},
     maxVib{pnh.param<int>("max_vib", 255)}
-
     {    
-       if (!pnh.getParam("min_hue", minHue) ||
-                !pnh.getParam("min_sat", minSat) ||
-                !pnh.getParam("min_vib", minVib) ||
-                !pnh.getParam("max_hue", maxHue) ||
-                !pnh.getParam("max_sat", maxSat) ||
-                !pnh.getParam("max_vib", maxVib)) {
+       if (false) {
             throw std::runtime_error("Parameters not specified");
             }
     }
 
 void BallDetection::BallCallback(
         const sensor_msgs::ImageConstPtr& msg) {
-
+            std::cout << maxVib;
             cv_bridge::CvImagePtr cv_ptr;
 
             try {
