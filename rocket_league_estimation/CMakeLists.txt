@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_geometry_msgs
   image_transport
   cv_bridge
+  image_geometry
 )
 
 find_package(OpenCV REQUIRED

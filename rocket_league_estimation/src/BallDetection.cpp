@@ -34,6 +34,7 @@
 //open cv stuff
 #include <opencv2/opencv.hpp> //open cv core
 #include <opencv2/highgui/highgui.hpp> //opencv window stuff
+#include <opencv2/core/types.hpp> //convert pixel to irl cords
 #include <cv_bridge/cv_bridge.h> //convert ros to open cv
 
 //cpp includes
@@ -50,6 +51,7 @@ BallDetection::BallDetection() :
         "ball_pose", 1)},
     detectionSub{nh.subscribe(
         "image_rect_color", 1, &BallDetection::BallCallback, this)},
+    height{pnh.param<int>("cam_height", 1220)},
     minHue{pnh.param<int>("min_hue", 60)},
     minSat{pnh.param<int>("min_sat", 135)},
     minVib{pnh.param<int>("min_vib", 50)},
@@ -66,7 +68,6 @@ void BallDetection::BallCallback(
         const sensor_msgs::ImageConstPtr& msg) {
             std::cout << maxVib;
             cv_bridge::CvImagePtr cv_ptr;
-
             try {
                 // Convert the ROS message  
                 cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
@@ -90,7 +91,13 @@ void BallDetection::BallCallback(
                 //calculates the center
                 double centerX = moment.m10 / moment.m00;
                 double centerY = moment.m01 / moment.m00;
-                //publishing This is the part that i get super unsure of.
+                /*//creating camera model
+                image::geometry::PinholeCameraModel camera;
+                camera.fromCameraInfo(cam_info);
+                //convert to 3d ray
+                cv::Point2d = pixelCords(centerX, centerY);
+                cv::Point3d 3dRay = camera.projectPixelTo3dRay(pixelCords);*/
+                //publishing
                 geometry_msgs::PoseWithCovarianceStamped pose;
                 pose.header = msg->header;
                 // set x,y coord

@@ -44,5 +44,5 @@ private:
 
     ros::Publisher posePub;
     ros::Subscriber detectionSub;
-    int minHue, minSat, minVib, maxHue, maxSat, maxVib;
+    int height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
 };
