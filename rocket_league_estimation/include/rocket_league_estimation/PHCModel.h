@@ -27,24 +27,23 @@
 #pragma once
 
 #include <ros/ros.h>
-#include <image_transport/image_transport.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/CameraInfo.h>
-#include <opencv2/opencv.hpp>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <image_geometry/pinhole_camera_model.h>
 
-class BallDetection {
+class PHCModel {
 public:
-    BallDetection();
-    ~BallDetection() = default;
+    PHCModel();
+    ~PHCModel() = default;
+
+    image_geometry::PinholeCameraModel camera;
 
 private:
-    void BallCallback(
-        const sensor_msgs::ImageConstPtr& msg);
+    void PinHoleCallback(
+        const sensor_msgs::CameraInfo& info);
 
-    ros::NodeHandle nh;
-    ros::NodeHandle pnh;
+    ros::NodeHandle model_nh;
 
-    ros::Publisher posePub;
-    ros::Subscriber detectionSub;
-    int height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
+    ros::Subscriber cameraInfoSub;
+    
 };

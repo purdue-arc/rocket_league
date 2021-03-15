@@ -25,6 +25,8 @@
 *******************************************************************************/
 
 #include "rocket_league_estimation/BallDetection.h"
+#include "rocket_league_estimation/PHCModel.h"
+
 
 //ros stuff
 //#include <ros/ros.h>
@@ -36,7 +38,7 @@
 #include <opencv2/highgui/highgui.hpp> //opencv window stuff
 #include <opencv2/core/types.hpp> //convert pixel to irl cords
 #include <cv_bridge/cv_bridge.h> //convert ros to open cv
-
+#include <image_geometry/pinhole_camera_model.h>
 //cpp includes
 #include <iostream>
 #include <string> 
@@ -52,74 +54,68 @@ BallDetection::BallDetection() :
     detectionSub{nh.subscribe(
         "image_rect_color", 1, &BallDetection::BallCallback, this)},
     height{pnh.param<int>("cam_height", 1220)},
-    minHue{pnh.param<int>("min_hue", 60)},
+    minHue{pnh.param<int>("min_hue", 060)},
     minSat{pnh.param<int>("min_sat", 135)},
-    minVib{pnh.param<int>("min_vib", 50)},
+    minVib{pnh.param<int>("min_vib", 050)},
     maxHue{pnh.param<int>("max_hue", 150)},
     maxSat{pnh.param<int>("max_sat", 255)},
     maxVib{pnh.param<int>("max_vib", 255)}
     {    
        if (false) {
             throw std::runtime_error("Parameters not specified");
-            }
+        }
     }
 
-void BallDetection::BallCallback(
-        const sensor_msgs::ImageConstPtr& msg) {
-            std::cout << maxVib;
-            cv_bridge::CvImagePtr cv_ptr;
-            try {
-                // Convert the ROS message  
-                cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
-                // Store the values of the OpenCV-compatible image
-                // into the current_frame variable
-                cv::Mat current_frame = cv_ptr->image;
-                //cv::resize(current_frame, current_frame, cv::Size(), 0.25, 0.25);
-                cv::Mat frame_HSV, frame_threshold;
-                // Convert from BGR to HSV colorspace
-                cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
-                // Detect the object based on HSV Range Values
-                inRange(frame_HSV, cv::Scalar(minHue, minSat, minVib), cv::Scalar(maxHue, maxSat, maxVib), frame_threshold);
-                erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
-                dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
-                //find the centers
-                std::vector<std::vector<cv::Point> > contours;
-                std::vector<cv::Vec4i> hierarchy;
-                findContours(frame_threshold, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
-                //find largest contour
-                cv::Moments moment = cv::moments(contours.at(getMaxAreaContourId(contours)));
-                //calculates the center
-                double centerX = moment.m10 / moment.m00;
-                double centerY = moment.m01 / moment.m00;
-                /*//creating camera model
-                image::geometry::PinholeCameraModel camera;
-                camera.fromCameraInfo(cam_info);
-                //convert to 3d ray
-                cv::Point2d = pixelCords(centerX, centerY);
-                cv::Point3d 3dRay = camera.projectPixelTo3dRay(pixelCords);*/
-                //publishing
-                geometry_msgs::PoseWithCovarianceStamped pose;
-                pose.header = msg->header;
-                // set x,y coord
-                pose.pose.pose.position.x = centerX;
-                pose.pose.pose.position.y = centerY;
-                pose.pose.pose.position.z = 0.0;
-                pose.pose.pose.orientation.x = 0.0;
-                pose.pose.pose.orientation.y = 0.0;
-                pose.pose.pose.orientation.z = 0.0;
-                pose.pose.pose.orientation.w = 1.0;
-                ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
-                posePub.publish(pose);
-                // Display frame for 30 milliseconds
-                //cv::imshow("view", frame_threshold);
-                //cv::waitKey(30);
-            }
-            catch (cv_bridge::Exception& e) {
-                ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
-            }
-    // publish as ROS message
+void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg) {
+    std::cout << maxVib;
+    cv_bridge::CvImagePtr cv_ptr;
+    try {
+        // Convert the ROS message  
+        cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
+        // Store the values of the OpenCV-compatible image
+        // into the current_frame variable
+        cv::Mat current_frame = cv_ptr->image;
+        //cv::resize(current_frame, current_frame, cv::Size(), 0.25, 0.25);
+        cv::Mat frame_HSV, frame_threshold;
+        // Convert from BGR to HSV colorspace
+        cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
+        // Detect the object based on HSV Range Values
+        inRange(frame_HSV, cv::Scalar(minHue, minSat, minVib), cv::Scalar(maxHue, maxSat, maxVib), frame_threshold);
+        erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
+        dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
+        //find the centers
+        std::vector<std::vector<cv::Point> > contours;
+        std::vector<cv::Vec4i> hierarchy;
+        findContours(frame_threshold, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+        //find largest contour
+        cv::Moments moment = cv::moments(contours.at(getMaxAreaContourId(contours)));
+        //calculates the center
+        double centerX = moment.m10 / moment.m00;
+        double centerY = moment.m01 / moment.m00;
+        //convert to 3d ray
+        PHCModel model;
+        model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
+        //publishing
+        geometry_msgs::PoseWithCovarianceStamped pose;
+        pose.header = msg->header;
+        // set x,y coord
+        pose.pose.pose.position.x = centerX;
+        pose.pose.pose.position.y = centerY;
+        pose.pose.pose.position.z = 0.0;
+        pose.pose.pose.orientation.x = 0.0;
+        pose.pose.pose.orientation.y = 0.0;
+        pose.pose.pose.orientation.z = 0.0;
+        pose.pose.pose.orientation.w = 1.0;
+        ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
+        posePub.publish(pose);
+        // Display frame for 30 milliseconds
+        //cv::imshow("view", frame_threshold);
+        //cv::waitKey(30);
+    }
+    catch (cv_bridge::Exception& e) {
+        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+    }
 }
-
 int getMaxAreaContourId(std::vector <std::vector<cv::Point>> contours) {
     double maxArea = 0;
     //calculates the area of each contour and then returns the largest one.
