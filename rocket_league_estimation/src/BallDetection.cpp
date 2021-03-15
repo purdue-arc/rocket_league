@@ -94,20 +94,25 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg) {
         double centerY = moment.m01 / moment.m00;
         //convert to 3d ray
         PHCModel model;
-        model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
-        //publishing
-        geometry_msgs::PoseWithCovarianceStamped pose;
-        pose.header = msg->header;
-        // set x,y coord
-        pose.pose.pose.position.x = centerX;
-        pose.pose.pose.position.y = centerY;
-        pose.pose.pose.position.z = 0.0;
-        pose.pose.pose.orientation.x = 0.0;
-        pose.pose.pose.orientation.y = 0.0;
-        pose.pose.pose.orientation.z = 0.0;
-        pose.pose.pose.orientation.w = 1.0;
-        ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
-        posePub.publish(pose);
+        try {
+            model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
+            //publishing
+            geometry_msgs::PoseWithCovarianceStamped pose;
+            pose.header = msg->header;
+            // set x,y coord
+            pose.pose.pose.position.x = centerX;
+            pose.pose.pose.position.y = centerY;
+            pose.pose.pose.position.z = 0.0;
+            pose.pose.pose.orientation.x = 0.0;
+            pose.pose.pose.orientation.y = 0.0;
+            pose.pose.pose.orientation.z = 0.0;
+            pose.pose.pose.orientation.w = 1.0;
+            posePub.publish(pose);
+            ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
+        }
+        catch (cv::Exception& e) {
+            ROS_INFO("No camera info provided");
+        }
         // Display frame for 30 milliseconds
         //cv::imshow("view", frame_threshold);
         //cv::waitKey(30);

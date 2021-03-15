@@ -30,6 +30,7 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+#include "rocket_league_estimation/PHCModel.h"
 #include <opencv2/opencv.hpp>
 
 class BallDetection {
