@@ -108,7 +108,10 @@ def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist):
     sign = np.sign(np.cross(tang_line, bot_line))[2]
     return angle * sign
 
-def get_angular_speed(target_vel, angle, dist):
+def get_angular_speed(linear_vel, angle, dist):
     """Relates path to the angular velocity."""
-    dt = dist / target_vel
-    return angle / dt
+    if linear_vel != 0:
+        dt = dist / linear_vel
+        return angle / dt
+    else:
+        return 0
