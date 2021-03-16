@@ -93,8 +93,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg) {
         double centerX = moment.m10 / moment.m00;
         double centerY = moment.m01 / moment.m00;
         //convert to 3d ray
-        PHCModel model;
         try {
+            PHCModel model;
             model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
             //publishing
             geometry_msgs::PoseWithCovarianceStamped pose;
