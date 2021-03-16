@@ -29,7 +29,8 @@ RUN apt install -y --no-install-recommends \
     matplotlib pandas \
     tensorflow torch \
     jupyterlab \
-    gym[box2d]
+    gym[box2d] \
+    autonomous-learning-library
 
 # install aravis
 WORKDIR /aravis

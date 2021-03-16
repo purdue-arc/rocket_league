@@ -28,15 +28,15 @@ License:
 
 import numpy as np
 import torch
+import all
 
-from collections import deque
 import random
 
-class Agent(object):
+class Agent(all.agents.DQN):
     """High level DQN controller for snake tutorial."""
     def __init__(self, state_size, action_size,
-            memory_len=2000, gamma=0.9,
-            epsilon_decay=0.99, epsilon_min=0.01,
+            memory_len=2000, gamma=0.9, epsilon_max=1.0,
+            epsilon_min_episode=1000, epsilon_min=0.01,
             learning_rate=0.01, batch_size=64, epochs=1):
 
         # constants
@@ -47,129 +47,55 @@ class Agent(object):
             print("Using CPU")
             self.DEVICE = torch.device("cpu")
         self.STATE_SIZE = state_size
-        self.ACTION_SIZE = action_size
-        self.GAMMA = gamma
-        self.EPSILON_DECAY = epsilon_decay
+        self.EPSILON_DELTA = (epsilon_max - epsilon_min) / float(epsilon_min_episode)
         self.EPSILON_MIN = epsilon_min
-        self.BATCH_SIZE = batch_size
-        self.EPOCHS = epochs
 
         # variables
-        self.epsilon = 1.0
-        self.memory = deque(maxlen=memory_len)
-        self.model = torch.nn.Sequential(
+        model = torch.nn.Sequential(
             torch.nn.Linear(self.STATE_SIZE, 512),
             torch.nn.ReLU(),
             torch.nn.Linear(512, 512),
             torch.nn.ReLU(),
             torch.nn.Linear(512, 512),
             torch.nn.ReLU(),
-            torch.nn.Linear(512, self.ACTION_SIZE)).to(self.DEVICE)
-        self.loss = torch.nn.MSELoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
+            torch.nn.Linear(512, action_size)).to(self.DEVICE)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
+        net = all.approximation.QNetwork(model, optimizer)
+        policy = all.policies.GreedyPolicy(net, action_size, self.epsilon)
+        buffer = all.memory.ExperienceReplayBuffer(memory_len, self.DEVICE)
+        super.__init__(
+            q=net,
+            policy=policy,
+            replay_buffer=buffer,
+            discount_factor=gamma,
+            loss=torch.nn.functional.mse_loss,
+            minibatch_size=batch_size,
+            replay_start_size=batch_size,
+            update_frequency=batch_size/2)
 
-    def remember(self, state, action, reward, next_state, done):
-        """Add experience to memory dequeue for retraining later."""
-        self.memory.append((state, action, reward, next_state, done))
-
-    def replay(self):
-        """Update the model weights with past experiences from memory."""
-        assert len(self.memory) >= self.BATCH_SIZE
-
-        # get random sample
-        minibatch = random.sample(self.memory, self.BATCH_SIZE)
-
-        # extract data
-        minibatch = tuple(zip(*minibatch))
-        state = torch.cat(minibatch[0])
-        action = torch.tensor(minibatch[1], dtype=torch.long, device=self.DEVICE)
-        reward = torch.tensor(minibatch[2], dtype=torch.float, device=self.DEVICE)
-        next_state = torch.cat(minibatch[3])
-        done = torch.tensor(minibatch[4], dtype=torch.bool, device=self.DEVICE)
-
-        # increase reward for incomplete states
-        with torch.no_grad():
-            reward = reward + self.GAMMA * ~done * torch.max(self.model(state), dim=1, keepdim=True).values.resize(self.BATCH_SIZE)
-
-        # get output
-        self.optimizer.zero_grad()
-        output = self.model(state)
-
-        # get target
-        target = output.detach().clone()
-        target[range(self.BATCH_SIZE), action] = reward
-
-        # train
-        loss = self.loss(output, target)
-        loss.backward()
-        self.optimizer.step()
-
-        return loss.item()
-
-    def transform_state(self, state):
-        """Transform state from numpy to torch type."""
+    def _convert_input(self, state):
+        """Convert state from numpy to torch type."""
         assert np.size(state) == self.STATE_SIZE
         return torch.from_numpy(state).float().to(self.DEVICE)
 
-    def get_action(self, state):
-        """Use forward propagation to get the predicted action from the model."""
-        reward = self.model(state)
-        return torch.argmax(reward).item()
+    def act(self, state):
+        """Take action during training."""
+        action = super.act(self._convert_input(state))
+        if self.policy.epsilon >= (self.EPSILON_MIN + self.EPSILON_DELTA):
+            self.policy.epsilon -= self.EPSILON_DELTA
+        return action
 
-    def train(self, step, reset, log, episodes=1000):
-        """Train the agent using provided step and reset functions."""
-        print(f"Beginning training on {episodes} episodes")
-        for episode in range(episodes):
-            # reset episode and get initial state
-            state, __, __, __ = reset()
-            state = self.transform_state(state)
-
-            done = False
-            net_reward = 0
-            steps = 0
-            while not done:
-                # compute action
-                action = random.randint(0, self.ACTION_SIZE-1)
-                if random.random() > self.epsilon:
-                    action = self.get_action(state)
-
-                # take action
-                next_state, reward, done, __ = step(action)
-                next_state = self.transform_state(next_state)
-
-                # add to memory
-                self.remember(state, action, reward, next_state, done)
-
-                # clean up for next run
-                state = next_state
-                net_reward += reward
-                steps += 1
-
-            # Check for sufficient data
-            if len(self.memory) >= self.BATCH_SIZE:
-                # learn
-                for i in range(self.EPOCHS):
-                    loss = self.replay()
-
-                # log
-                log({
-                    "episode": episode+1,
-                    "net_reward": net_reward,
-                    "steps": steps,
-                    "epsilon": self.epsilon,
-                    "loss": loss})
-
-            # increase exploitation vs exploration
-            if self.epsilon > self.EPSILON_MIN:
-                    self.epsilon *= self.EPSILON_DECAY
+    def eval(self, state):
+        """Take action during evaluation."""
+        return super.eval(self._convert_input(state))
 
     def save(self, name):
         """Save weights to file."""
         print(f"Saving weights to {name}")
-        torch.save(self.model.state_dict(), name)
+        torch.save(self.q.model.model.state_dict(), name)
 
     def load(self, name):
         """Load weights from file."""
         print(f"Loading weights from {name}")
-        self.model.load_state_dict(torch.load(name, map_location=self.DEVICE))
-        self.model.to(self.DEVICE)
+        self.q.model.model.load_state_dict(torch.load(name, map_location=self.DEVICE))
+        self.q.model.model.to(self.DEVICE)
