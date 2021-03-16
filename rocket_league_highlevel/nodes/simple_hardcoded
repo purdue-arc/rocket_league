@@ -50,6 +50,10 @@ class HighLevelPlannerROS(object):
       self.goal0_pose = np.array(rospy.get_param('~GOAL0_POSE',[0.0 , 0.0, 0.0]), dtype='float64')
       self.final_speed = np.array(rospy.get_param('~FINAL_SPEED', 0.1))
       self.car0_pose = None
+      self.target_orientation = None
+
+      # for backwards testing TODO: set false otherwise
+      self.backwards = False
 
       # Subscribers
       rospy.Subscriber("car0/odom", Odometry, self.car0_odom_cb)
@@ -103,13 +107,15 @@ class HighLevelPlannerROS(object):
       angular_y = Float64()
       angular_z = Float64()
 
-      linear_x, linear_y, linear_z = self.linear_vel
       angular_x, angular_y, angular_z = [0.0 , 0.0, 0.0]
 
+      # Note: Velocity is in reference to the frame of the car
       twist = Twist()
-      twist.linear.x = linear_x
-      twist.linear.y = linear_y
-      twist.linear.z = linear_z
+      twist.linear.x = self.linear_vel
+      if self.backwards:
+         twist.linear.x = -self.linear_vel
+      twist.linear.y = 0
+      twist.linear.z = 0
       twist.angular.x = angular_x
       twist.angular.y = angular_y
       twist.angular.z = angular_z
@@ -141,10 +147,17 @@ class HighLevelPlannerROS(object):
       pose = np.array([self.target_pose.position.x, self.target_pose.position.y, self.target_pose.position.z], dtype='float64')
 
       # find orientation
-      target_orientation = self.goal0_pose - pose
+      self.target_orientation = self.goal0_pose - pose
+
+      # add orientation to target pose
+      yaw = np.arctan2(self.target_orientation[1],self.target_orientation[0])
+      if self.backwards:
+         yaw = -yaw
+      (self.target_pose.orientation.x,self.target_pose.orientation.y,self.target_pose.orientation.z,\
+                self.target_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
 
       # calculate target linear velocity
-      self.linear_vel = self.final_speed * normalize(target_orientation)
+      self.linear_vel = self.final_speed 
 
    def path_error_cb(self, path_error_message):
       pass
