@@ -2,7 +2,7 @@
 The launch file is <code>ball_detection_to_pose.launch</code>. This should launch the code. 
 
 
-Inside this, you will find the paramaters for the color, as well as the value for the height above the field (currently not implimented).
+Inside this, you will find the paramaters for the color, as well as the value for the height above the field (currently not implemented).
 
 You should not need to mess with the min/max colors, but if you do, they are not on the same scale as a normal HSV color scale. 
 
