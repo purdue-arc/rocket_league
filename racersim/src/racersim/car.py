@@ -116,33 +116,35 @@ class Car(object):
 
     def getQuaternion(self):
         angle = (self.body.angle - math.pi / 2)  % (2.0 * math.pi)
-        print('angle of car (degree): ' + str(angle))
+        #print('angle of car (degree): ' + str(angle))
         return quaternion_from_euler(0, 0, angle)
 
     def set_angle(self, angle):
         self._flJoint.SetLimits(angle, angle)
         self._frJoint.SetLimits(angle, angle)
 
-    def step(self, linearVelocity, angularVelocity, dt):
+    def step(self, linear_cmd, angular_cmd, dt):
+
         for tire in self.tires:
             tire.updateFriction()
 
         for tire in self.tires:
-            tire.updateDrive(linearVelocity, dt)
+            tire.updateDrive(linear_cmd, dt)
 
-        if linearVelocity.y != 0:
+        if linear_cmd.y != 0:
             # Steering-Angle Approach
             # angle = angularVelocity.z
 
             # Angular / PID Approach
-            angle = self._flJoint.angle
-            angle += (self.body.angularVelocity - angularVelocity.z) \
-                      * -self.pgain
+            curr_angle = self._flJoint.angle
+            turn = (self.body.angularVelocity - angular_cmd.z) * -self.pgain
+            new_angle = curr_angle + turn
 
-            if angle > self.maxAngle:
-                angle = self.maxAngle
-            elif angle < -self.maxAngle:
-                angle = -self.maxAngle
 
-            self._flJoint.SetLimits(angle, angle)
-            self._frJoint.SetLimits(angle, angle)
+            if new_angle > self.maxAngle:
+                new_angle = self.maxAngle
+            elif new_angle < -self.maxAngle:
+                new_angle = -self.maxAngle
+
+            self._flJoint.SetLimits(new_angle, new_angle)
+            self._frJoint.SetLimits(new_angle, new_angle)

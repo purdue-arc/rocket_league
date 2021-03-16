@@ -63,8 +63,8 @@ class SimpleDriveROS(object):
         # Publish command data
         twist = Twist()
 
-        twist.linear.x = 0.05
-        twist.angular.z = 0.20
+        twist.linear.y = 0.5
+        twist.angular.z = 2.0
         self.bot_velocity_cmd.publish(twist)
 
 if __name__ == "__main__":

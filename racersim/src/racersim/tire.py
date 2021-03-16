@@ -32,7 +32,7 @@ import Box2D
 class TireDef(object):
     """Holds relevent data for a tire instance"""
     def __init__(self, width=0.0125, length=0.037, density=0.0125,
-                 maxLateralImpulse=0.015, maxDriveForce=0.001, maxBrakeForce=0.002,
+                 maxLateralImpulse=0.015, maxDriveForce=0.01, maxBrakeForce=0.02,
                  dragForceCoeff=-0.00002, angularImpulseCoeff=0.02,
                  car_weight=1, friction=100):
         self.width = width
@@ -67,6 +67,7 @@ class Tire(object):
         self.angularImpulseCoeff = tireDef.angularImpulseCoeff
         self.car_weight = tireDef.car_weight
         self.friction = tireDef.friction
+        # self.past_force = 0
 
     def getForwardVelocity(self):
         normal = self.body.GetWorldVector((0,1))
@@ -91,23 +92,35 @@ class Tire(object):
         self.body.ApplyForce(dragForce * currForwardNormal, \
                              self.body.worldCenter, wake=True)
 
-    def updateDrive(self, linearVelocity, dt):
-        desiredSpeed = linearVelocity.x
-
-        #Does the linear velocity get updated?
-
+    def updateDrive(self, linear_cmd, dt):
         currForwardNormal = self.body.GetWorldVector((0,1))
         currSpeed = Box2D.b2Dot(self.getForwardVelocity(), currForwardNormal)
 
-        force = 0
-        if desiredSpeed > currSpeed:
-            force = self.maxDriveForce
-            #print("Accelerating")
-        elif desiredSpeed < currSpeed:
-            force = -self.maxBrakeForce #Brakes are more powerful than the engine
-            #print("Braking")
-        else:
-            return
+        # Each tire should power itself and 1/4th of the car
+        mass = self.body.mass + self.car_weight / 4
+        delta_v = linear_cmd.y - currSpeed
+
+        # The required force to accelerate to linear_cmd.y in one timestep (assuming no friction)
+        desired_force = mass * delta_v / dt
+
+        # Accounts for friction
+        desired_force += self.dragForceCoeff * linear_cmd.y
+
+        # Ensures that the engine/brakes are powerful enough
+        if desired_force > self.maxDriveForce:
+            desired_force = self.maxDriveForce
+        elif desired_force < -self.maxBrakeForce:
+            desired_force = -self.maxBrakeForce
+
+        force = desired_force
+
+        # print('')
+        # print('currSpeed: ' + str(currSpeed))
+        # print('linear_cmd.y: ' + str(linear_cmd.y))
+        # print('delta_v: ' + str(delta_v))
+        # print('dt: ' + str(dt))
+        # print('mass: ' + str(mass))
+        # print('force: ' + str(force))
 
         self.body.ApplyForce(force * currForwardNormal, \
                              self.body.worldCenter, wake=True)

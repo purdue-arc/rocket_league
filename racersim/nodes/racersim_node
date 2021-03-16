@@ -131,13 +131,13 @@ class RacerSimROS(object):
             delta_t = (now - self.last_time).to_sec()
 
             if self.last_command != None:
-                linear, angular = self.last_command
+                linear_cmd, angular_cmd = self.last_command
             else:
                 empty = Twist()
-                linear = empty.linear
-                angular = empty.angular
+                linear_cmd = empty.linear
+                angular_cmd = empty.angular
 
-            self.sim.step(linear, angular, delta_t)
+            self.sim.step(linear_cmd, angular_cmd, delta_t)
             self.sim.render_path(self.path)
 
             # Publish ball odometry
