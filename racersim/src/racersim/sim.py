@@ -43,11 +43,12 @@ class Sim(object):
     """Oversees components of racersim"""
 
     def __init__(self, renderEnabled=True, map_height=10, map_width=100, goal0_pos=[0, 0, 0],
-                 velIters=6, posIters=2, car_weight=1, car_power=1, friction=1):
+                 velIters=6, posIters=2, goal1_pos=[0, 2, 0], goal_width=0.125000, goal_height=0.083333):
 
-        #initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
-        #initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
 
+        # TODO: Randomnize starting position (car must be able to drive backwards)
+        # initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
+        # initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
         initPosBall = (2, 4)
         initPosCar = (2, 2)
 
@@ -61,7 +62,9 @@ class Sim(object):
 
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world, initPos=initPosBall)
-        self.goal = Goal(self.world, initPos=goal0_pos)
+        self.goal0 = Goal(self.world, initPos=goal0_pos, width=goal_width, height=goal_height)
+        self.goal1 = Goal(self.world, initPos=goal1_pos, width=goal_width, height=goal_height)
+
         self.path = None
         self.lookahead = [0, 0]
 
@@ -98,7 +101,8 @@ class Sim(object):
         
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world)
-        self.goal = Goal(self.world)
+        self.goal0 = Goal(self.world)
+        self.goal1 = Goal(self.world)
 
         if self.renderEnabled:
             self._render()
@@ -108,7 +112,7 @@ class Sim(object):
     def _render(self):
         """Render the current state of the sim."""
         try:
-            self.renderer.render(self.car, self.ball, self.goal, \
+            self.renderer.render(self.car, self.ball, self.goal0, self.goal1,
                                  self.world, self.lookahead, path=self.path)
         except Renderer.ShutdownError:
             self.renderEnabled = False

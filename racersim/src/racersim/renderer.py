@@ -94,7 +94,7 @@ class Renderer(object):
 
             pygame.draw.circle(self._screen, color, [x, y], size)
 
-    def render(self, car, ball, goal, world, lookahead, path=None):
+    def render(self, car, ball, goal0, goal1, world, lookahead, path=None):
         """Render the current state of the sim."""
 
         if self._thread is not None and self._thread.is_alive():
@@ -108,8 +108,11 @@ class Renderer(object):
 
         self._screen.fill(self.COLOR_BACKGROUND)
 
-        for fixture in goal.body.fixtures:
-            self._draw_polygon(goal.body, fixture, self.COLOR_GOAL)
+        for fixture in goal0.body.fixtures:
+            self._draw_polygon(goal0.body, fixture, self.COLOR_GOAL)
+
+        for fixture in goal1.body.fixtures:
+           self._draw_polygon(goal1.body, fixture, self.COLOR_GOAL)
 
         if path is not None:
             poses = []

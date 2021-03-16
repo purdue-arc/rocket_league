@@ -37,12 +37,6 @@ from tire import Tire, TireDef
 class CarDef(object):
     """Holds relevent data for a car instance"""
 
-    # DEFAULT_VERTICES = [(0.08541666666, 0), (0.08541666666, 0.0390625),
-    #                     (-0.08541666666, 0.0390625), (-0.08541666666, 0)]
-    #
-    # DEFAULT_ANCHORS = [(0.05338541666, 0), (0.05338541666, 0.0390625),
-    #                     (-0.05552083333, 0.0390625), (-0.05552083333, 0)]
-
     DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.125), (0, 0.2),
                         (-0.0225, 0.125), (-0.0225, 0)]
 
@@ -52,7 +46,7 @@ class CarDef(object):
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(1.25, 1.25), initAngle=3.0, vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(1.25, 1.25), initAngle=6.0, vertices=DEFAULT_VERTICES,
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxAngle=45, pgain=0.1):
 
@@ -64,7 +58,6 @@ class CarDef(object):
         self.density = density
         self.maxAngle = math.radians(maxAngle)
         self.pgain = pgain
-
 
 class Car(object):
     """Simulates an ackerman-steering vehicle"""
@@ -116,7 +109,6 @@ class Car(object):
 
     def getQuaternion(self):
         angle = (self.body.angle - math.pi / 2)  % (2.0 * math.pi)
-        #print('angle of car (degree): ' + str(angle))
         return quaternion_from_euler(0, 0, angle)
 
     def set_angle(self, angle):
@@ -139,7 +131,6 @@ class Car(object):
             curr_angle = self._flJoint.angle
             turn = (self.body.angularVelocity - angular_cmd.z) * -self.pgain
             new_angle = curr_angle + turn
-
 
             if new_angle > self.maxAngle:
                 new_angle = self.maxAngle
