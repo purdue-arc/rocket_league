@@ -110,7 +110,7 @@ def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist):
 
 def get_angular_speed(linear_vel, angle, dist):
     """Relates path to the angular velocity."""
-    if linear_vel != 0 and dist != 0:
+    if linear_vel != 0 and dist != 0 and dist is not None and linear_vel is not None:
         dt = dist / linear_vel
         return angle / dt
     else:
