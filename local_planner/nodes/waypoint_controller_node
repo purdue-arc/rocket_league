@@ -187,9 +187,6 @@ class WaypointControllerROS(object):
                 # TODO:
                 # If vel_error > allowable margin then report unfeasible path
 
-
-            print('linear_vel' + str(linear_vel))
-
             # Calculate angular velocity
             angular_vel = pursuit.get_angular_speed(linear_vel, \
                                                     d_angle, arc_dist)
@@ -204,7 +201,6 @@ class WaypointControllerROS(object):
             twist = Twist()
             twist.linear.x = linear_vel
             twist.angular.z = angular_vel
-            print('angular_vel: ' + str(angular_vel))
             self.bot_velocity_cmd.publish(twist)
 
             # publish error data. TODO: replace zeros with actual values
