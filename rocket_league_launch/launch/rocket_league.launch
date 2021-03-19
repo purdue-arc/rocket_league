@@ -4,6 +4,5 @@
   <include file="$(find local_planner)/launch/local_planner.launch"/>
   <include file="$(find rocket_league_control)/launch/velocity_controller.launch"/>
   <include file="$(find rocket_league_highlevel)/launch/high_level.launch"/>
-  <include file="$(find rocket_league_highlevel)/launch/high_level.launch"/>
   <!-- <node name="arduino_control_node" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyUSB0" output="screen" /> -->
 </launch>

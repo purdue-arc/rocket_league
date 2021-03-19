@@ -30,9 +30,8 @@ License:
 
 # 3rd party modules
 import rospy
-import numpy as np
+import numpy
 import math
-import time
 from std_msgs.msg import Float32, Float64
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
@@ -52,19 +51,15 @@ class WaypointControllerROS(object):
         self.path_start_time = None
         self.path = None
         self.last_pose_idx = None
-        self.start_time = None
-        self.max_speed = None
+        self.final_speed = None
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
 
-        # Max speed to travel path
-        self.max_speed = rospy.get_param('~max_speed', 0.1)
-
         # Radius to search for intersections
-        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.35)
+        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.025)
 
         # Coeffient to adjust lookahead distance by speed
-        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.035)
+        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.025)
 
         # Number of waypoints to search per pass (-1 is full path)
         self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
@@ -95,7 +90,11 @@ class WaypointControllerROS(object):
         self.path_start_time = path_arr_msg.stamp
         self.path = path_arr_msg.waypoint
         self.last_pnt_idx = 0
-        self.start_time = time.time()
+
+        last_waypoint = path_arr_msg.waypoint[len(path_arr_msg.waypoint) - 1]
+        final_vel = last_waypoint.twist.linear
+        final_vel = numpy.array([final_vel.x,final_vel.y,final_vel.z])
+        self.final_speed = numpy.sqrt(numpy.dot(final_vel,final_vel))
 
     def odom_cb(self, odom_msg):
         """Updates car odometry and follows current path."""
@@ -108,7 +107,7 @@ class WaypointControllerROS(object):
             bot_linear, bot_angular, _ = convert.twist_covar_to_array(odom_msg.twist)
 
             # Set lookahead dist by lookahead gain and current speed
-            lookahead_boost = np.linalg.norm(bot_linear) \
+            lookahead_boost = numpy.linalg.norm(bot_linear) \
                                 * self.lookahead_gain
             lookahead_dist = self.lookahead_dist + lookahead_boost
 
@@ -120,13 +119,11 @@ class WaypointControllerROS(object):
 
             # Find next valid intersection along path
             intersect = None
-            # end_pos = None
-            goal_vel = None
-            goal_time = None
             d_angle = None
             i = self.last_pose_idx
             pnts_checked = 0
             while pnts_checked < lookahead_pnts:
+                print('len(self.path): ' + str(len(self.path)))
                 if i == len(self.path) - 1:
                     i = 0
 
@@ -141,6 +138,7 @@ class WaypointControllerROS(object):
 
                 if intersect is not None:
                     self.last_pose_idx = i
+                    print('intersect is not None')
                     intersect += start_pos
 
                     # Check if intersection is behind vehicle
@@ -149,10 +147,10 @@ class WaypointControllerROS(object):
                     if abs(d_angle) > math.pi/2:
                         intersect = None
                     else:
-                        goal_vel = self.path[i + 1].twist.linear.x
-                        goal_time = self.path[i + 1].delta_t
                         break
 
+
+                print('i is: ' + str(i))
                 i += 1
                 pnts_checked += 1
 
@@ -169,36 +167,16 @@ class WaypointControllerROS(object):
                 pose.pose.pose.position.y = intersect[1]
                 self.lookahead_pnt_pub.publish(pose)
 
-            # Calculate ETA
-            arc_dist = pursuit.calculate_arc_dist(intersect, bot_pos, \
-                                                  bot_orient, lookahead_dist)
-            dist = np.linalg.norm(end_pos - intersect) + arc_dist
-            delta_time = time.time() - self.start_time
-            time_error = goal_time.data - delta_time
-            if time_error <= 0 :
-                # Report unfeasible path
-                linear_vel = 0
-            else: 
-                linear_vel = dist / (time_error)
-                vel_error = goal_vel - linear_vel
-
-                # TODO:
-                # If vel_error > allowable margin then report unfeasible path
-
-
             # Calculate angular velocity
-            angular_vel = pursuit.get_angular_speed(linear_vel, \
+            arc_dist = pursuit.calculate_arc_dist(intersect, bot_pos, \
+                                              bot_orient, lookahead_dist)
+            angular_vel = pursuit.get_angular_speed(self.final_speed, \
                                                     d_angle, arc_dist)
-
-            # Steering-Angle Approach
-            # lat_error = pursuit.calculate_lat_error(intersect, bot_pos, \
-            #                                         bot_orient, lookahead_dist)
-            # angular_vel = math.atan2(2 * lat_error * .125,
-            #                          lookahead_dist * lookahead_dist)
+            # angular_vel -= odom_msg.twist.twist.angular.z
 
             # Publish command data
             twist = Twist()
-            twist.linear.x = linear_vel
+            twist.linear.x = self.final_speed
             twist.angular.z = angular_vel
             self.bot_velocity_cmd.publish(twist)
 
