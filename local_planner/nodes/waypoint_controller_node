@@ -144,8 +144,8 @@ class WaypointControllerROS(object):
                     intersect += start_pos
 
                     # Check if intersection is behind vehicle
-                    # d_angle = pursuit.calculate_angle(intersect, bot_pos, \
-                    #                           bot_orient, lookahead_dist)
+                    d_angle = pursuit.calculate_angle(intersect, bot_pos, \
+                                              bot_orient, lookahead_dist)
                     # if abs(d_angle) > math.pi/2:
                     #     intersect = None
                     # else:
