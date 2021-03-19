@@ -43,6 +43,7 @@
 #include <iostream>
 #include <string> 
 #include <vector>
+#include <math.h>
 
 int getMaxAreaContourId(std::vector <std::vector<cv::Point>> contours);
 
@@ -92,23 +93,33 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg) {
         //calculates the center
         double centerX = moment.m10 / moment.m00;
         double centerY = moment.m01 / moment.m00;
-        //convert to 3d ray
         try {
+            //create camera model
             PHCModel model;
-            model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
+            cv::Point3d cam = model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
+            //calculating polar coordinates with camera at (0,0)
+            cv::Point3d down = cv::Point3d(0, 0, 1);
+            double theta_1 = (down.dot(cam))/(sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z));
+            double r = height * tan(theta_1);
+            cv::Point3d zeroTheta = cv::Point3d(1, 0, 0);
+            cv::Point3d camZeroZ = cv::Point3d(cam.x, cam.y, 0);
+            double theta = (zeroTheta.dot(camZeroZ))/(sqrt(camZeroZ.x*camZeroZ.x + camZeroZ.y*camZeroZ.y));
+            //convert from polar to cartesian
+            double cartesianX = r * cos(theta);
+            double cartesianY = r * sin(theta);
             //publishing
             geometry_msgs::PoseWithCovarianceStamped pose;
             pose.header = msg->header;
             // set x,y coord
-            pose.pose.pose.position.x = centerX;
-            pose.pose.pose.position.y = centerY;
+            pose.pose.pose.position.x = cartesianX;
+            pose.pose.pose.position.y = cartesianY;
             pose.pose.pose.position.z = 0.0;
             pose.pose.pose.orientation.x = 0.0;
             pose.pose.pose.orientation.y = 0.0;
             pose.pose.pose.orientation.z = 0.0;
             pose.pose.pose.orientation.w = 1.0;
             posePub.publish(pose);
-            ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
+            ROS_INFO("x: %f, y: %f, z: 0.0", cartesianX, cartesianY);
         }
         catch (cv::Exception& e) {
             ROS_INFO("No camera info provided");
