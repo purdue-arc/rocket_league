@@ -97,14 +97,14 @@ class Tire(object):
 
         # Each tire should power itself and 1/4th of the car
         mass = self.body.mass + self.car_weight / 4
-        delta_v = linear_cmd.y - currSpeed
+        delta_v = linear_cmd.x - currSpeed
 
-        # The required force to accelerate to linear_cmd.y
+        # The required force to accelerate to linear_cmd.x
         # in one time step (assuming no friction)
         force = mass * delta_v / dt
 
         # Accounts for friction
-        force += self.dragForceCoeff * linear_cmd.y
+        force += self.dragForceCoeff * linear_cmd.x
 
         # Ensures that the engine/brakes are powerful enough
         if force > self.maxDriveForce:
