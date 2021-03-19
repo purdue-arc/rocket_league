@@ -37,43 +37,60 @@
 const byte PPM_OUT_PIN = 23;
 
 // channels
-const int THROTTLE_CHANNEL = 1;
-const int STEERING_CHANNEL = 2;
+const byte THROTTLE_CHANNEL = 1;
+const byte STEERING_CHANNEL = 2;
 
 
 ros::NodeHandle nh;
 PulsePositionOutput outputPPM(RISING);
 
+//Setting Parameters
+nh.setParam("THROTTLE_MAX_FORWARD", 2000);
+nh.setParam("THROTTLE_ZERO", 1500);
+nh.setParam("THROTTLE_MAX_BACKWARD", 1000);
+nh.setParam("STEERING_MAX_RIGHT", 2000);
+nh.setParam("STEERING_ZERO", 1500);
+nh.setParam("STEERING_TRIM", 0);
+nh.setParam("STEERING_MAX_LEFT", 1000);
+
+//Getting Parameters
+const int THROTTLE_MAX_FORWARD;
+const int THROTTLE_ZERO;
+const int THROTTLE_MAX_BACKWARD;
+const int STEERING_MAX_RIGHT;
+const int STEERING_ZERO;
+const int STEERING_TRIM;
+const int STEERING_MAX_LEFT;
+nh.param("THROTTLE_MAX_FORWARD", THROTTLE_MAX_FORWARD, 2000);
+nh.param("THROTTLE_ZERO", THROTTLE_ZERO, 1500);
+nh.param("THROTTLE_MAX_BACKWARD", THROTTLE_MAX_BACKWARD, 1000);
+nh.param("STEERING_MAX_RIGHT", STEERING_MAX_RIGHT, 2000);
+nh.param("STEERING_ZERO", STEERING_ZERO, 1500);
+nh.param("STEERING_TRIM", 0);
+nh.param("STEERING_MAX_LEFT", STEERING_MAX_LEFT, 1000);
+
 
 // Timing Parameters for PulsePosition Library
 // *********************DEFAULT VALUES******************
 // Minimum Time between Rising Edges: 300.0 microseconds
-// Maximum Time between Rising Edges: 3500.0 microseconds
+// Maximum Time between Rising Edges: 2500.0 microseconds
 // *****************************************************
-const float effort_to_ppm_duration(const float effort)
+const float effort_to_ppm_throttle(const float effort)
 {
-  return effort;
+  return THROTTLE_ZERO + effort * 500;
 }
-const byte effort_to_pwm(const float effort, const byte MIN_PWN, const byte MID_PWM, const byte MAX_PWM)
+const float effort_to_ppm_steering(const float effort)
 {
-  if(effort >= 0)
-  {
-    return (byte)(MID_PWM + effort * (MAX_PWM - MID_PWM));
-  }
-  else
-  {
-    return (byte)(MID_PWM + effort * (MID_PWM - MIN_PWN));
-  }
+  return THROTTLE_ZERO + (effort + STEERING_TRIM) * 500;
 }
-
 void throttle_callback(const std_msgs::Float32& throttle)
 {
-  outputPPM.write(THROTTLE_CHANNEL, effort_to_ppm_duration(throttle.data));
+  outputPPM.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(throttle.data));
 }
 
 void steering_callback(const std_msgs::Float32& steering)
 {
-  outputPPM.write(STEERING_CHANNEL, effort_to_ppm_duration(steering.data));
+  outputPPM.write(STEERING_CHANNEL, effort_to_ppm_steering(steering.data));
 }
 
 ros::Subscriber<std_msgs::Float32> throttle_sub("control_effort/throttle", throttle_callback);
