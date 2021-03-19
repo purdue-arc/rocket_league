@@ -145,13 +145,14 @@ class WaypointControllerROS(object):
 
                     # Check if intersection is behind vehicle
                     d_angle = pursuit.calculate_angle(intersect, bot_pos, \
-                                              bot_orient, lookahead_dist)
-                    # if abs(d_angle) > math.pi/2:
-                    #     intersect = None
-                    # else:
+                                                      bot_orient, lookahead_dist)  
                     goal_vel = self.path[i + 1].twist.linear.x
                     goal_time = self.path[i + 1].delta_t
-                    break
+                    if (abs(d_angle) > math.pi/2 and goal_vel > 0) or
+                        (abs(d_angle) < math.pi/2 and goal_vel < 0):
+                        intersect = None
+                    else:
+                        break
 
                 i += 1
                 pnts_checked += 1
