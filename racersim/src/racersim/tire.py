@@ -32,7 +32,7 @@ import Box2D
 class TireDef(object):
     """Holds relevent data for a tire instance"""
     def __init__(self, width=0.0125, length=0.037, density=0.0125,
-                 maxLateralImpulse=0.015, maxDriveForce=0.0001, maxBrakeForce=0.0002,
+                 maxLateralImpulse=0.15, maxDriveForce=0.0001, maxBrakeForce=0.0002,
                  dragForceCoeff=-0.00002, angularImpulseCoeff=0.02,
                  car_weight=1.19, friction=100):
         self.width = width
