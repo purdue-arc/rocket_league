@@ -48,5 +48,4 @@ private:
     ros::Publisher posePub;
     ros::Subscriber detectionSub;
     int height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
-    std::String cam;
 };
