@@ -30,6 +30,7 @@ License:
 import Box2D
 import math
 from tf.transformations import quaternion_from_euler
+import numpy
 
 # Local classes
 from tire import Tire, TireDef
@@ -48,7 +49,7 @@ class CarDef(object):
 
     def __init__(self, initPos=(1.25, 1.25), initAngle=6.0, vertices=DEFAULT_VERTICES,
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
-                    density=0.0124, maxAngle=45, pgain=0.001):
+                    density=20, maxAngle=45, pgain=0.1):
 
         self.initPos = initPos
         self.initAngle = initAngle
@@ -83,7 +84,7 @@ class Car(object):
             tirePos = (carDef.tireAnchors[i][0] + carDef.initPos[0],
                        carDef.tireAnchors[i][1] + carDef.initPos[1])
 
-            tire = Tire(world, carDef.tireDef, tirePos)
+            tire = Tire(world, carDef.tireDef, tirePos, car_weight=self.body.mass)
             jointDef.bodyB = tire.body
             jointDef.localAnchorA.Set(carDef.tireAnchors[i][0],
                                       carDef.tireAnchors[i][1])
@@ -129,7 +130,7 @@ class Car(object):
 
             # Angular / PID Approach
             curr_angle = self._flJoint.angle
-            turn = (self.body.angularVelocity - angular_cmd.z) * self.pgain
+            turn = (self.body.angularVelocity + angular_cmd.z) * -self.pgain
             new_angle = curr_angle + turn
 
             if new_angle > self.maxAngle:
