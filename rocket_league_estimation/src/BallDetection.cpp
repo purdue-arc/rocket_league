@@ -71,7 +71,6 @@ BallDetection::BallDetection() :
     }
 
 void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info) {
-    std::cout << maxVib;
     cv_bridge::CvImagePtr cv_ptr;
     try {
         // Convert the ROS message  
@@ -98,16 +97,13 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             double centerX = moment.m10 / moment.m00;
             double centerY = moment.m01 / moment.m00;
             //create camera model
-            //PHCModel model;
             camera.fromCameraInfo(info);
             cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
             //calculating polar coordinates with camera at (0,0)
             cv::Point3d down = cv::Point3d(0, 0, 1);
             double theta_1 = acos((down.dot(cam))/(sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z)));
             double r = height * tan(theta_1);
-            cv::Point3d zeroTheta = cv::Point3d(1, 0, 0);
-            cv::Point3d camZeroZ = cv::Point3d(cam.x, cam.y, 0);
-            double theta = (zeroTheta.dot(camZeroZ))/(sqrt(camZeroZ.x*camZeroZ.x + camZeroZ.y*camZeroZ.y));
+            double theta = atan(cam.y/cam.x);
             //convert from polar to cartesian
             double cartesianX = r * cos(theta);
             double cartesianY = r * sin(theta);
