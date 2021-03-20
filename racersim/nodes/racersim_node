@@ -29,12 +29,15 @@ License:
 # 3rd party modules
 from threading import Lock
 import rospy
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty, EmptyResponse
 
+
 # Local library
 import racersim
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
+from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
+
 
 class RacerSimROS(object):
     """ROS wrapper for the racer sim."""
@@ -55,23 +58,23 @@ class RacerSimROS(object):
         self.last_time = None
         self.path = None
         self.lookahead = [0, 0]
-	self.path_points = [[0,0]]
+        self.path_points = [[0,0]]
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
-        rate = rospy.Rate(rospy.get_param('~rate', 45)) # Hz
+        rate = rospy.Rate(rospy.get_param('~rate', 30)) # Hz
 
         # Publishers
-        self.ball_pub = rospy.Publisher('ball_pose', \
-             PoseWithCovarianceStamped, queue_size=1)
-        self.bot_pub = rospy.Publisher('bot_odom', Odometry, queue_size=1)
-        self.goal_pub = rospy.Publisher('goal_pose', \
-             PoseWithCovarianceStamped, queue_size=1)
+        self.ball_pub = rospy.Publisher('ball/odom', \
+             Odometry, queue_size=1)
+        self.bot_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
+        #self.goal_pub = rospy.Publisher('goal_pose', \
+         #    PoseWithCovarianceStamped, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('bot_velocity_command', Twist, self.command_cb)
-        rospy.Subscriber('bot_path', PoseArray, self.pose_arr_cb)
-        rospy.Subscriber('lookahead_pnt', PoseWithCovarianceStamped, self.lookahead_cb)
+        rospy.Subscriber('car0/velocity', Twist, self.command_cb)
+        rospy.Subscriber('car0/path', Path, self.path_arr_cb)
+        rospy.Subscriber('car0/lookahead_pnt', PoseWithCovarianceStamped, self.lookahead_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -92,14 +95,14 @@ class RacerSimROS(object):
         self.lock.release()
         return EmptyResponse()
 
-    def pose_arr_cb(self, pose_arr_msg):
-        """Callback for pose array messages."""
-        self.path = pose_arr_msg.poses
-	self.path_points = []
+    def path_arr_cb(self, path_arr_msg):
+        """Callback for path array messages."""
+        self.path = path_arr_msg.waypoint
+        self.path_points = []
 
-	for point in pose_arr_msg.poses:
-		x = point.position.x
-		y = point.position.y
+	for point in self.path:
+		x = point.pose.position.x
+		y = point.pose.position.y
 		self.path_points.append([x, y])
 
 	if self.path_points is None:
@@ -136,16 +139,21 @@ class RacerSimROS(object):
             self.sim.step(linear, angular, delta_t)
             self.sim.render_path(self.path)
 
-            # Publish ball pose with covariance and stamp
-            ball_msg = PoseWithCovarianceStamped()
+            # Publish ball odometry
+            ball_msg = Odometry()
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id
             ball_point = self.sim.ball.getPoint()
             ball_msg.pose.pose.position.x = ball_point[1]
             ball_msg.pose.pose.position.y = -ball_point[0]
             ball_quat = self.sim.ball.getQuaternion()
-            ball_msg.pose.pose.orientation.w = ball_quat[0]
-            ball_msg.pose.pose.orientation.z = ball_quat[3]
+            ball_msg.pose.pose.orientation.z = ball_quat[2]
+            ball_msg.pose.pose.orientation.w = ball_quat[3]
+            ball_linear = self.sim.ball.body.linearVelocity
+            ball_msg.twist.twist.linear.x = ball_linear[0]
+            ball_msg.twist.twist.linear.y = ball_linear[1]
+            ball_angular = self.sim.ball.body.angularVelocity
+            ball_msg.twist.twist.angular.z = ball_angular
             self.ball_pub.publish(ball_msg)
 
             # Publish bot odometry
@@ -164,18 +172,6 @@ class RacerSimROS(object):
             angular = self.sim.car.body.angularVelocity
             bot_msg.twist.twist.angular.z = angular
             self.bot_pub.publish(bot_msg)
-
-            # Publish goal pose with covariance and stamp
-            goal_msg = PoseWithCovarianceStamped()
-            goal_msg.header.stamp = now
-            goal_msg.header.frame_id = self.frame_id
-            goal_point = self.sim.goal.getPoint()
-            goal_msg.pose.pose.position.x = goal_point[1]
-            goal_msg.pose.pose.position.y = -goal_point[0]
-            goal_quat = self.sim.goal.getQuaternion()
-            goal_msg.pose.pose.orientation.w = goal_quat[0]
-            goal_msg.pose.pose.orientation.z = goal_quat[3]
-            self.goal_pub.publish(goal_msg)
 
             #Update the lookahead point
             self.sim.lookahead = self.lookahead
