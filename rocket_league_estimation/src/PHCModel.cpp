@@ -21,7 +21,7 @@ PHCModel::PHCModel() :
 
     model_nh{},
     cameraInfoSub{model_nh.subscribe(
-        "CameraInfo", 1, &PHCModel::PinHoleCallback, this)}
+        "cam0/camera_info", 1, &PHCModel::PinHoleCallback, this)}
     {    
        if (false) {
             throw std::runtime_error("Parameters not specified");
