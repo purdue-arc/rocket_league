@@ -25,13 +25,14 @@
 *******************************************************************************/
 
 #include "rocket_league_estimation/BallDetection.h"
-#include "rocket_league_estimation/PHCModel.h"
+//#include "rocket_league_estimation/PHCModel.h"
 
 
 //ros stuff
 //#include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <image_transport/camera_subscriber.h>
 
 //open cv stuff
 #include <opencv2/opencv.hpp> //open cv core
@@ -50,10 +51,11 @@ int getMaxAreaContourId(std::vector <std::vector<cv::Point>> contours);
 BallDetection::BallDetection() :
     nh{},
     pnh{"~"},
+    image_transport{nh},
     //cam{pnh.param<std::String>("cam", cam0)},
     posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
         "ball_pose", 1)},
-    detectionSub{nh.subscribe(
+    camera_subscriber{image_transport.subscribeCamera(
         "image_rect_color", 1, &BallDetection::BallCallback, this)},
     height{pnh.param<int>("cam_height", 1220)},
     minHue{pnh.param<int>("min_hue", 060)},
@@ -68,7 +70,7 @@ BallDetection::BallDetection() :
         }
     }
 
-void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg) {
+void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info) {
     std::cout << maxVib;
     cv_bridge::CvImagePtr cv_ptr;
     try {
@@ -96,8 +98,9 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg) {
             double centerX = moment.m10 / moment.m00;
             double centerY = moment.m01 / moment.m00;
             //create camera model
-            /*PHCModel model;
-            cv::Point3d cam = model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
+            //PHCModel model;
+            camera.fromCameraInfo(info);
+            cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
             //calculating polar coordinates with camera at (0,0)
             cv::Point3d down = cv::Point3d(0, 0, 1);
             double theta_1 = acos((down.dot(cam))/(sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z)));
@@ -107,13 +110,13 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg) {
             double theta = (zeroTheta.dot(camZeroZ))/(sqrt(camZeroZ.x*camZeroZ.x + camZeroZ.y*camZeroZ.y));
             //convert from polar to cartesian
             double cartesianX = r * cos(theta);
-            double cartesianY = r * sin(theta);*/
+            double cartesianY = r * sin(theta);
             //publishing
             geometry_msgs::PoseWithCovarianceStamped pose;
             pose.header = msg->header;
             // set x,y coord
-            pose.pose.pose.position.x = centerX;
-            pose.pose.pose.position.y = centerY;
+            pose.pose.pose.position.x = cartesianX;
+            pose.pose.pose.position.y = cartesianY;
             pose.pose.pose.position.z = 0.0;
             pose.pose.pose.orientation.x = 0.0;
             pose.pose.pose.orientation.y = 0.0;

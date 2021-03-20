@@ -25,7 +25,6 @@
 *******************************************************************************/
 
 #include "rocket_league_estimation/BallDetection.h"
-#include "rocket_league_estimation/PHCModel.h"
 
 
 int main(int argc, char *argv[])
