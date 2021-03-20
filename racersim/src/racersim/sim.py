@@ -46,11 +46,17 @@ class Sim(object):
                  velIters=6, posIters=2, goal1_pos=[0, 2, 0], goal_width=0.125000, goal_height=0.083333):
 
 
-        # TODO: Randomnize starting position (car must be able to drive backwards)
+        # These positions are fully randomized
         # initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
         # initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
-        initPosBall = (2, 4)
-        initPosCar = (2, 2)
+
+        # These positions are semi-randomized (the car doesn't need to reverse)
+        initPosBall = (random.uniform(0,map_width), 4)
+        initPosCar = (random.uniform(0,map_width), 2)
+
+        # These positions are static
+        # initPosBall = (2, 4)
+        # initPosCar = (2, 2)
 
         self.world = World(map_height, map_width)
 
