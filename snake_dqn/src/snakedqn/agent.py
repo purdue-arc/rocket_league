@@ -28,16 +28,21 @@ License:
 
 import numpy as np
 import torch
-import all
+from torch.nn.functional import mse_loss
+from all.agents import DQN
+from all.approximation import QNetwork
+from all.policies import GreedyPolicy
+from all.memory import ExperienceReplayBuffer
 
 import random
 
-class Agent(all.agents.DQN):
+class Agent(DQN):
     """High level DQN controller for snake tutorial."""
     def __init__(self, state_size, action_size,
-            memory_len=2000, gamma=0.9, epsilon_max=1.0,
-            epsilon_min_episode=1000, epsilon_min=0.01,
-            learning_rate=0.01, batch_size=64, epochs=1):
+            memory_len=2000, gamma=0.9,
+            epsilon_max=1.0, epsilon_min=0.01,
+            epsilon_min_episode=1000,
+            learning_rate=0.01, batch_size=64):
 
         # constants
         if torch.cuda.is_available():
@@ -59,16 +64,16 @@ class Agent(all.agents.DQN):
             torch.nn.Linear(512, 512),
             torch.nn.ReLU(),
             torch.nn.Linear(512, action_size)).to(self.DEVICE)
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
-        net = all.approximation.QNetwork(model, optimizer)
-        policy = all.policies.GreedyPolicy(net, action_size, self.epsilon)
-        buffer = all.memory.ExperienceReplayBuffer(memory_len, self.DEVICE)
-        super.__init__(
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+        net = QNetwork(model, optimizer)
+        policy = GreedyPolicy(net, action_size, epsilon_max)
+        buffer = ExperienceReplayBuffer(memory_len, self.DEVICE)
+        super().__init__(
             q=net,
             policy=policy,
             replay_buffer=buffer,
             discount_factor=gamma,
-            loss=torch.nn.functional.mse_loss,
+            loss=mse_loss,
             minibatch_size=batch_size,
             replay_start_size=batch_size,
             update_frequency=batch_size/2)
@@ -80,14 +85,14 @@ class Agent(all.agents.DQN):
 
     def act(self, state):
         """Take action during training."""
-        action = super.act(self._convert_input(state))
+        action = super().act(self._convert_input(state))
         if self.policy.epsilon >= (self.EPSILON_MIN + self.EPSILON_DELTA):
             self.policy.epsilon -= self.EPSILON_DELTA
         return action
 
     def eval(self, state):
         """Take action during evaluation."""
-        return super.eval(self._convert_input(state))
+        return super().eval(self._convert_input(state))
 
     def save(self, name):
         """Save weights to file."""

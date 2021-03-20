@@ -86,11 +86,11 @@ class SnakeDQN(object):
         self.agent = Agent(3 + 2*self.NUM_SEGMENTS, Actions.SIZE,
             memory_len=rospy.get_param('~dqn/memory_len', 2000),
             gamma=rospy.get_param('~dqn/gamma', 0.9),
-            epsilon_decay=rospy.get_param('~dqn/epsilon_decay', 0.99),
-            epsilon_min=rospy.get_param('~dqn/epsilon_min', 0.01),
+            epsilon_max=rospy.get_param('~dqn/epsilon/max', 1.0),
+            epsilon_min=rospy.get_param('~dqn/epsilon/min', 0.01),
+            epsilon_min_episode=rospy.get_param('~dqn/epsilon/min_episode', 1000),
             learning_rate=rospy.get_param('~dqn/learning_rate', 0.01),
-            batch_size=rospy.get_param('~dqn/batch_size', 64),
-            epochs=rospy.get_param('~dqn/epochs', 1))
+            batch_size=rospy.get_param('~dqn/batch_size', 64))
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self.pose_cb)
@@ -369,8 +369,7 @@ class Evaluator(SnakeDQN):
                     self.clear_state()
                     self.action_pub.publish(
                         self.get_action_msg(
-                            self.agent.get_action(
-                                self.agent.transform_state(state))))
+                            self.agent.eval(state)))
 
                 self.lock.release()
 
