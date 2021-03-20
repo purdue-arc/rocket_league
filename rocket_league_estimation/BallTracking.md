@@ -24,10 +24,10 @@ My understanding is that this would be run once inside each camera namespace, an
 52    posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
 53        "ball_pose", 1)},(
 54    detectionSub{nh.subscribe((
-55        "image_rect_color", 1, &BallDetection::BallCallback, this)},
+55        "cam0/image_rect_color", 1, &BallDetection::BallCallback, this)},
 ```
 <code>PHCMode.cpp</code><br>
 ```cpp
 23    cameraInfoSub{model_nh.subscribe(
-24        "CameraInfo", 1, &PHCModel::PinHoleCallback, this)}
+24        "cam0/camera_info", 1, &PHCModel::PinHoleCallback, this)}
 ```
