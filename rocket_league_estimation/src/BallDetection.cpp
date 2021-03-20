@@ -50,10 +50,11 @@ int getMaxAreaContourId(std::vector <std::vector<cv::Point>> contours);
 BallDetection::BallDetection() :
     nh{},
     pnh{"~"},
+    cam{pnh.param<std::String>("cam", cam0)},
     posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
         "ball_pose", 1)},
     detectionSub{nh.subscribe(
-        "cam0/image_rect_color", 1, &BallDetection::BallCallback, this)},
+        cam + "/image_rect_color", 1, &BallDetection::BallCallback, this)},
     height{pnh.param<int>("cam_height", 1220)},
     minHue{pnh.param<int>("min_hue", 060)},
     minSat{pnh.param<int>("min_sat", 135)},
@@ -93,37 +94,32 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg) {
         //calculates the center
         double centerX = moment.m10 / moment.m00;
         double centerY = moment.m01 / moment.m00;
-        try {
-            //create camera model
-            PHCModel model;
-            cv::Point3d cam = model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
-            //calculating polar coordinates with camera at (0,0)
-            cv::Point3d down = cv::Point3d(0, 0, 1);
-            double theta_1 = acos((down.dot(cam))/(sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z)));
-            double r = height * tan(theta_1);
-            cv::Point3d zeroTheta = cv::Point3d(1, 0, 0);
-            cv::Point3d camZeroZ = cv::Point3d(cam.x, cam.y, 0);
-            double theta = (zeroTheta.dot(camZeroZ))/(sqrt(camZeroZ.x*camZeroZ.x + camZeroZ.y*camZeroZ.y));
-            //convert from polar to cartesian
-            double cartesianX = r * cos(theta);
-            double cartesianY = r * sin(theta);
-            //publishing
-            geometry_msgs::PoseWithCovarianceStamped pose;
-            pose.header = msg->header;
-            // set x,y coord
-            pose.pose.pose.position.x = cartesianX;
-            pose.pose.pose.position.y = cartesianY;
-            pose.pose.pose.position.z = 0.0;
-            pose.pose.pose.orientation.x = 0.0;
-            pose.pose.pose.orientation.y = 0.0;
-            pose.pose.pose.orientation.z = 0.0;
-            pose.pose.pose.orientation.w = 1.0;
-            posePub.publish(pose);
-            ROS_INFO("x: %f, y: %f, z: 0.0", cartesianX, cartesianY);
-        }
-        catch (cv::Exception& e) {
-            ROS_INFO("No camera info provided");
-        }
+        //create camera model
+        /*PHCModel model;
+        cv::Point3d cam = model.camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
+        //calculating polar coordinates with camera at (0,0)
+        cv::Point3d down = cv::Point3d(0, 0, 1);
+        double theta_1 = acos((down.dot(cam))/(sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z)));
+        double r = height * tan(theta_1);
+        cv::Point3d zeroTheta = cv::Point3d(1, 0, 0);
+        cv::Point3d camZeroZ = cv::Point3d(cam.x, cam.y, 0);
+        double theta = (zeroTheta.dot(camZeroZ))/(sqrt(camZeroZ.x*camZeroZ.x + camZeroZ.y*camZeroZ.y));
+        //convert from polar to cartesian
+        double cartesianX = r * cos(theta);
+        double cartesianY = r * sin(theta);*/
+        //publishing
+        geometry_msgs::PoseWithCovarianceStamped pose;
+        pose.header = msg->header;
+        // set x,y coord
+        pose.pose.pose.position.x = centerX;
+        pose.pose.pose.position.y = centerY;
+        pose.pose.pose.position.z = 0.0;
+        pose.pose.pose.orientation.x = 0.0;
+        pose.pose.pose.orientation.y = 0.0;
+        pose.pose.pose.orientation.z = 0.0;
+        pose.pose.pose.orientation.w = 1.0;
+        posePub.publish(pose);
+        ROS_INFO("x: %f, y: %f, z: 0.0", cartesianX, cartesianY);
         // Display frame for 30 milliseconds
         //cv::imshow("view", frame_threshold);
         //cv::waitKey(30);
