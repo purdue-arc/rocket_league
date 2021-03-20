@@ -1,14 +1,14 @@
 <launch>
   <arg name="load_manager" default="true"/>
   <arg name="manager_name" default="camera_manager"/>
-  <arg name="manager" value="/$(arg manager)"/>
+  <arg name="manager" value="$(arg manager_name)"/>
   <arg name="manager_threads" default="4"/>
   <arg name="launch_dynamic_reconfigure" default="false"/>
 
   <arg name="camera_name" default="cam0"/>
 
   <!-- Remap /tf topic to private /tf topic -->
-  <remap from="/tf" to="$(arg camera_name)/tf" />
+  <remap from="/tf" to="tf" />
 
   <!-- Nodelet Manager -->
   <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
@@ -23,19 +23,19 @@
   </node>
 
   <!-- tf Remapping -->
-  <node pkg="camera_tracking" type="tf_rebroadcaster" name="tf_rebroadcaster" output="screen">
+  <node pkg="camera_tracking" type="tf_rebroadcaster" ns="$(arg camera_name)" name="tf_rebroadcaster" output="screen">
     <param name="prefix" value="$(arg camera_name)" />
   </node>
-  <node pkg="camera_tracking" type="camera_origin" name="camera_origin" output="screen">
+  <node pkg="camera_tracking" type="camera_origin" ns="$(arg camera_name)" name="camera_origin" output="screen">
     <param name="camera_name" value="$(arg camera_name)" />
     <param name="origin_id" value="tag_0" />
   </node>
 
   <!-- De-Bayer / rectify -->
-  <node pkg="image_proc" type="image_proc" name="image_proc" respawn="false" output="log"/>
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="log"/>
 
   <!-- Apriltag detection -->
-  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">
+  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg camera_name)" name="apriltag" output="screen">
     <param name="camera_frame" type="str" value="$(arg camera_name)" />
     <param name="publish_tag_detections_image" type="bool" value="true" />
 
