@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_geometry_msgs
   image_transport
   cv_bridge
+  image_geometry
 )
 
 find_package(OpenCV REQUIRED
@@ -65,6 +66,8 @@ target_link_libraries(detection_to_pose
 
 add_executable(ball_detection
   src/ball_detection.cpp
+  src/BallDetection.cpp
+  src/PHCModel.cpp
 )
 
 add_dependencies(ball_detection

@@ -24,14 +24,26 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#include "rocket_league_estimation/BallDetection.h"
-#include "rocket_league_estimation/PHCModel.h"
+#pragma once
 
+#include <ros/ros.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <image_geometry/pinhole_camera_model.h>
 
-int main(int argc, char *argv[])
-{
-    ros::init(argc, argv, "ball_detection");
-    BallDetection detector;
-    ros::spin();
-    return 0;
-}
+class PHCModel {
+public:
+    PHCModel();
+    ~PHCModel() = default;
+
+    image_geometry::PinholeCameraModel camera;
+
+private:
+    void PinHoleCallback(
+        const sensor_msgs::CameraInfo& info);
+
+    ros::NodeHandle model_nh;
+
+    ros::Subscriber cameraInfoSub;
+    
+};

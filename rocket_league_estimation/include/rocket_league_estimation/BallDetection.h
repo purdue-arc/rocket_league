@@ -24,14 +24,28 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#include "rocket_league_estimation/BallDetection.h"
+#pragma once
+
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/CameraInfo.h>
 #include "rocket_league_estimation/PHCModel.h"
+#include <opencv2/opencv.hpp>
 
+class BallDetection {
+public:
+    BallDetection();
+    ~BallDetection() = default;
 
-int main(int argc, char *argv[])
-{
-    ros::init(argc, argv, "ball_detection");
-    BallDetection detector;
-    ros::spin();
-    return 0;
-}
+private:
+    void BallCallback(
+        const sensor_msgs::ImageConstPtr& msg);
+
+    ros::NodeHandle nh;
+    ros::NodeHandle pnh;
+
+    ros::Publisher posePub;
+    ros::Subscriber detectionSub;
+    int height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
+};
