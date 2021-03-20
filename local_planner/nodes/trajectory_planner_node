@@ -64,7 +64,7 @@ class TrajectoryPlannerROS(object):
         # These variables act as parameters to generate a path
         self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.1)    # Multiplier for distance of 1st main point in front of the car
         self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
-        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.5)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
         self.FOLLOW_THROUGH_DISTANCE = rospy.get_param('~FOLLOW_THROUGH_DISTANCE',0.08)
 

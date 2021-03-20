@@ -61,7 +61,7 @@ class WaypointControllerROS(object):
         self.max_speed = rospy.get_param('~max_speed', 0.1)
 
         # Radius to search for intersections
-        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.35)
+        self.lookahead_dist = rospy.get_param('~lookahead_dist', 1)
 
         # Coeffient to adjust lookahead distance by speed
         self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.035)
