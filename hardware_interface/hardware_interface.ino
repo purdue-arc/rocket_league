@@ -40,34 +40,17 @@ const byte PPM_OUT_PIN = 23;
 const byte THROTTLE_CHANNEL = 1;
 const byte STEERING_CHANNEL = 2;
 
-
 ros::NodeHandle nh;
 PulsePositionOutput outputPPM(RISING);
 
-//Setting Parameters
-nh.setParam("THROTTLE_MAX_FORWARD", 2000);
-nh.setParam("THROTTLE_ZERO", 1500);
-nh.setParam("THROTTLE_MAX_BACKWARD", 1000);
-nh.setParam("STEERING_MAX_RIGHT", 2000);
-nh.setParam("STEERING_ZERO", 1500);
-nh.setParam("STEERING_TRIM", 0);
-nh.setParam("STEERING_MAX_LEFT", 1000);
-
 //Getting Parameters
-const int THROTTLE_MAX_FORWARD;
-const int THROTTLE_ZERO;
-const int THROTTLE_MAX_BACKWARD;
-const int STEERING_MAX_RIGHT;
-const int STEERING_ZERO;
-const int STEERING_TRIM;
-const int STEERING_MAX_LEFT;
-nh.param("THROTTLE_MAX_FORWARD", THROTTLE_MAX_FORWARD, 2000);
-nh.param("THROTTLE_ZERO", THROTTLE_ZERO, 1500);
-nh.param("THROTTLE_MAX_BACKWARD", THROTTLE_MAX_BACKWARD, 1000);
-nh.param("STEERING_MAX_RIGHT", STEERING_MAX_RIGHT, 2000);
-nh.param("STEERING_ZERO", STEERING_ZERO, 1500);
-nh.param("STEERING_TRIM", 0);
-nh.param("STEERING_MAX_LEFT", STEERING_MAX_LEFT, 1000);
+int THROTTLE_MAX_FORWARD = 2000;
+int THROTTLE_ZERO = 1500;
+int THROTTLE_MAX_BACKWARD = 1000;
+int STEERING_MAX_RIGHT = 2000;
+int STEERING_ZERO = 1500;
+int STEERING_TRIM = 0;
+int STEERING_MAX_LEFT = 1000;
 
 
 // Timing Parameters for PulsePosition Library
@@ -104,6 +87,13 @@ void setup()
   
   // ros
   nh.initNode();
+  nh.getParam("THROTTLE_MAX_FORWARD", &THROTTLE_MAX_FORWARD, 2000);
+  nh.getParam("THROTTLE_ZERO", &THROTTLE_ZERO, 1500);
+  nh.getParam("THROTTLE_MAX_BACKWARD", &THROTTLE_MAX_BACKWARD, 1000);
+  nh.getParam("STEERING_MAX_RIGHT", &STEERING_MAX_RIGHT, 2000);
+  nh.getParam("STEERING_ZERO", &STEERING_ZERO, 1500);
+  nh.getParam("STEERING_TRIM", &STEERING_TRIM, 0);
+  nh.getParam("STEERING_MAX_LEFT", &STEERING_MAX_LEFT, 1000);
   nh.subscribe(throttle_sub);
   nh.subscribe(steering_sub);
 
@@ -114,5 +104,4 @@ void setup()
 void loop()
 {
   nh.spinOnce();
-  delay(1);
 }
