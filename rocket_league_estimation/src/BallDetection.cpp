@@ -82,6 +82,9 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
         cv::Mat frame_HSV, frame_threshold;
         // Convert from BGR to HSV colorspace
         cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
+        //get image size
+        int h = current_frame.size().height;
+        int w = current_frame.size().width;
         // Detect the object based on HSV Range Values
         inRange(frame_HSV, cv::Scalar(minHue, minSat, minVib), cv::Scalar(maxHue, maxSat, maxVib), frame_threshold);
         erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
@@ -96,9 +99,13 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             //calculates the center
             double centerX = moment.m10 / moment.m00;
             double centerY = moment.m01 / moment.m00;
+
+            double centerdX = centerX - h/2;
+            double centerdY = centerY - w/2;
+
             //create camera model
             camera.fromCameraInfo(info);
-            cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
+            cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerdX, centerdY));
             //calculating polar coordinates with camera at (0,0)
             cv::Point3d down = cv::Point3d(0, 0, 1);
             double theta_1 = acos((down.dot(cam))/(sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z)));
