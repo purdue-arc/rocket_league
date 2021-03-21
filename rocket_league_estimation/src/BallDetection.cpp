@@ -36,6 +36,7 @@
 
 //open cv stuff
 #include <opencv2/opencv.hpp> //open cv core
+#include <opencv2/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp> //opencv window stuff
 #include <opencv2/core/types.hpp> //convert pixel to irl cords
 #include <cv_bridge/cv_bridge.h> //convert ros to open cv
@@ -52,11 +53,10 @@ BallDetection::BallDetection() :
     nh{},
     pnh{"~"},
     image_transport{nh},
-    //cam{pnh.param<std::String>("cam", cam0)},
     posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
         "ball_pose", 1)},
     camera_subscriber{image_transport.subscribeCamera(
-        "image_rect_color", 1, &BallDetection::BallCallback, this)},
+        "image_color", 1, &BallDetection::BallCallback, this)},
     height{pnh.param<int>("cam_height", 1220)},
     minHue{pnh.param<int>("min_hue", 060)},
     minSat{pnh.param<int>("min_sat", 135)},
@@ -78,7 +78,7 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
         // Store the values of the OpenCV-compatible image
         // into the current_frame variable
         cv::Mat current_frame = cv_ptr->image;
-        //cv::resize(current_frame, current_frame, cv::Size(), 0.25, 0.25);
+        //cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
         cv::Mat frame_HSV, frame_threshold;
         // Convert from BGR to HSV colorspace
         cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
@@ -120,10 +120,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             pose.pose.pose.orientation.w = 1.0;
             posePub.publish(pose);
             ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
+            circle( current_frame, cv::Point2d(centerX, centerY), 15, cv::Scalar( 0, 0, 255 ) );
         }
-        // Display frame for 30 milliseconds
-        //cv::imshow("view", frame_threshold);
-        //cv::waitKey(30);
     }
     catch (cv_bridge::Exception& e) {
         ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
