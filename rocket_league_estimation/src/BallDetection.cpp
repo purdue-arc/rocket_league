@@ -73,12 +73,14 @@ BallDetection::BallDetection() :
 void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info) {
     cv_bridge::CvImagePtr cv_ptr;
     try {
+        cv::namedWindow("image");
+        cv::namedWindow("threshold");
         // Convert the ROS message  
         cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
         // Store the values of the OpenCV-compatible image
         // into the current_frame variable
         cv::Mat current_frame = cv_ptr->image;
-        //cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
+        cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
         cv::Mat frame_HSV, frame_threshold;
         // Convert from BGR to HSV colorspace
         cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
@@ -103,7 +105,13 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             cv::Point3d down = cv::Point3d(0, 0, 1);
             double theta_1 = acos((down.dot(cam))/(sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z)));
             double r = height * tan(theta_1);
-            double theta = atan(cam.y/cam.x);
+            double theta = 0;
+            if (abs(cam.y) == cam.y) {
+                theta = atan(cam.y/cam.x);
+            } 
+            else {
+                theta = -atan(cam.y/cam.x);
+            }
             //convert from polar to cartesian
             double cartesianX = r * cos(theta);
             double cartesianY = r * sin(theta);
@@ -121,6 +129,9 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             posePub.publish(pose);
             ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
             circle( current_frame, cv::Point2d(centerX, centerY), 15, cv::Scalar( 0, 0, 255 ) );
+            cv::imshow("image", current_frame);
+            cv::imshow("threshold", frame_threshold);
+            cv::waitKey(30);
         }
     }
     catch (cv_bridge::Exception& e) {
