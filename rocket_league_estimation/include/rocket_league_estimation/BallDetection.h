@@ -49,7 +49,7 @@ private:
     ros::Publisher posePub;
     ros::Subscriber detectionSub;
     int height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
-
+    bool showImage;
     image_geometry::PinholeCameraModel camera;
 
 };
