@@ -131,7 +131,7 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             if (showImage) {
                 cv::namedWindow("image");
                 cv::namedWindow("threshold");
-                cv::circle(current_frame, cv::Point2d(centerX, centerY), 15, cv::Scalar(0, 0, 255));
+                cv::circle(current_frame, cv::Point2d(centerX, centerY), 15, cv::Scalar(0, 0, 255), cv::FILLED);
                 cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
                 cv::resize(frame_threshold, frame_threshold, cv::Size(), 0.5, 0.5);
                 cv::imshow("image", current_frame);
