@@ -74,6 +74,8 @@ BallDetection::BallDetection() :
 void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info) {
     cv_bridge::CvImagePtr cv_ptr;
     try {
+        //define publisher
+        geometry_msgs::PoseWithCovarianceStamped pose;
         // Convert the ROS message  
         cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
         // Store the values of the OpenCV-compatible image
@@ -122,18 +124,9 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             if (cam.y >= 0) {
                 cartesianY *= -1;
             } 
-            //publishing
-            geometry_msgs::PoseWithCovarianceStamped pose;
-            pose.header = msg->header;
             // set x,y coord
             pose.pose.pose.position.x = cartesianX;
             pose.pose.pose.position.y = cartesianY;
-            pose.pose.pose.position.z = 0.0;
-            pose.pose.pose.orientation.x = 0.0;
-            pose.pose.pose.orientation.y = 0.0;
-            pose.pose.pose.orientation.z = 0.0;
-            pose.pose.pose.orientation.w = 1.0;
-            posePub.publish(pose);
             ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
             if (showImage) {
                 cv::namedWindow("image");
@@ -146,6 +139,17 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
                 cv::waitKey(30);
             }
         }
+        else {
+            pose.pose.pose.position.x = std::nan("1");
+            pose.pose.pose.position.y = std::nan("1");
+        }
+        pose.pose.pose.position.z = 0.0;
+        pose.pose.pose.orientation.x = 0.0;
+        pose.pose.pose.orientation.y = 0.0;
+        pose.pose.pose.orientation.z = 0.0;
+        pose.pose.pose.orientation.w = 1.0;
+        pose.header = msg->header;
+        posePub.publish(pose);
     }
     catch (cv_bridge::Exception& e) {
         ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
