@@ -1,8 +1,8 @@
 <launch>
 
-  <node ns="cam0" type="ball_detection" pkg="rocket_league_estimation" name="ball_detection">
+  <node ns="web_cam" type="ball_detection" pkg="rocket_league_estimation" name="ball_detection">
     <param name="showImage" value="true"/>
-    <param name="cam_height" value="1220"/>
+    <param name="cam_height" value="533"/>
     <param name="min_hue" value="60"/>
     <param name="min_sat" value="135"/>
     <param name="min_vib" value="50"/>
