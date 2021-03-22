@@ -10,24 +10,21 @@ Normally, hue is a number out of 360, specifically the degree on the color wheel
 
 For OpenCV, these numbers are all represented on a scale of 0-255, so when adjusting this that will need to be kept in mind.
 
-<code>ball_detection.cpp</code> is the main file that runs the node, and it has a <code>BallDetection</code> class and a <code>PHCModel</code> class.
+<code>ball_detection.cpp</code> is the main file that runs the node, and it has a <code>BallDetection</code> class, along with a header file.
 
 This node publishes a PoseWithConvarianceStamped. It subscribes to the camera info as well as the picture. 
-
-Currently, only publishing pixel coordinates. Working on getting the real coords sorted.
-
-My understanding is that this would be run once inside each camera namespace, and that should work, but this may be figidity, we may also need to update the camera launch files. There may also be another, better method. If you need to, these lines are those which may need to be modified:
-
-<code>BallDetection.cpp</code>
-
-```cpp
-52    posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
-53        "ball_pose", 1)},(
-54    detectionSub{nh.subscribe((
-55        "cam0/image_rect_color", 1, &BallDetection::BallCallback, this)},
-```
-<code>PHCMode.cpp</code><br>
-```cpp
-23    cameraInfoSub{model_nh.subscribe(
-24        "cam0/camera_info", 1, &PHCModel::PinHoleCallback, this)}
-```
+<br><br>
+Inside the launch file, there are a varity of paramaters, as listed below, along with their use:
+<ul>
+    <li>showImage, this boolean is whether or not you want OpenCV to display the camera image in a frame. Useful for debugging. </li>
+    <li>cam_height, this is the height from the center of the ball to the camera sensor. The units of this number will be the units that the coordinate plane is in.</li>
+    <li>The range of these are specified above, they control the color of the object we are looking for.</li>
+    <ul>
+        <li>min_hue</li>
+        <li>min_sat</li>
+        <li>min_vib</li>
+        <li>max_hue</li>
+        <li>max_sat</li>
+        <li>max_vib</li>
+    </ul>
+</ul>
