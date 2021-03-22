@@ -100,39 +100,28 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             double centerX = moment.m10 / moment.m00;
             double centerY = moment.m01 / moment.m00;
 
-            double centerdX = (h/2) - centerX;
-            double centerdY = (w/2) - centerY;
+            double centerdX = (w/2) - centerX;
+            double centerdY = (h/2) - centerY;
 
             //create camera model
             camera.fromCameraInfo(info);
-            cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerdX, centerdY));
+            cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
             
             //calculating polar coordinates with camera at (0,0)
             cv::Point3d down = cv::Point3d(0, 0, 1);         
-            double theta_1 = acos((down.dot(cam))/(sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z)));
+            double theta_1 = acos(1 / sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z));
             double r = height * tan(theta_1);
-            double theta = 0;
-            if (cam.y >= 0) {
-                theta = atan(cam.y/cam.x);
-            } 
-            else {
-                theta = -atan(cam.y/cam.x);
-            }
+            double theta = atan(cam.y/cam.x);
             //convert from polar to cartesian
-            double cartesianX = r * sin(theta);
-            double cartesianY = r * sin(theta);
-            if (cam.x => 0) {
-                cartesianX = r * cos(theta);
-            } 
-            else {
-                cartesianX = -r * cos(theta);
+            double cartesianX = r * abs(cos(theta));
+            double cartesianY = r * abs(sin(theta));
+            //setting the sign
+            if (cam.x <= 0) {
+                cartesianX *= -1;
             }
-            if (cam.y => 0) {
-                cartesianY = -r * sin(theta);
+            if (cam.y >= 0) {
+                cartesianY *= -1;
             } 
-            else {
-                cartesianY = r * sin(theta);
-            }
             //publishing
             geometry_msgs::PoseWithCovarianceStamped pose;
             pose.header = msg->header;
@@ -140,8 +129,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             pose.pose.pose.position.x = cartesianX;
             pose.pose.pose.position.y = cartesianY;
             pose.pose.pose.position.z = 0.0;
-            pose.pose.pose.orientation.x = centerdX;
-            pose.pose.pose.orientation.y = centerdY;
+            pose.pose.pose.orientation.x = 0.0;
+            pose.pose.pose.orientation.y = 0.0;
             pose.pose.pose.orientation.z = 0.0;
             pose.pose.pose.orientation.w = 1.0;
             posePub.publish(pose);
