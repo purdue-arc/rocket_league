@@ -144,11 +144,10 @@ class SnakeDQN(object):
         """Format the environment state to pass to the deep learning algorithm."""
         assert self.has_state()
 
-        # format pose and goal into state column vector
+        # combine pose and goal
         pose = np.asarray(self.pose, dtype=np.float32)
         goal = np.asarray(self.goal, dtype=np.float32)
         state = np.concatenate((pose, goal))
-        state = np.resize(state, (1, np.size(state)))
 
         # Determine reward and if done
         reward = 0
@@ -255,15 +254,36 @@ class Trainer(SnakeDQN):
             # initialize variables
             self.reset()
 
-            # begin agent's training routine
-            self.agent.train(self.step, self.reset_env, self.log,
-                rospy.get_param('~num_episodes', 1000))
-            rospy.loginfo("Done Training.")
+            # train
+            self.train(rospy.get_param('~num_episodes', 1000))
 
             # idle wait to allow saving weights, etc
+            rospy.loginfo("Done Training.")
             rospy.spin()
         except rospy.ROSInterruptException:
             pass
+
+    def train(self, num_episodes):
+        for episode in range(num_episodes):
+            # reset episode and get initial state
+            obs, reward, done, __ = self.reset_env()
+
+            net_reward = reward
+            steps = 0
+            while not done:
+                action = self.agent.act((obs, reward, done, {}))
+                state, reward, done, __ = self.step(action)
+
+                net_reward += reward
+                steps += 1
+
+        log_msg = DiagnosticStatus()
+        log_msg.name = "DQN training"
+        log_msg.values.append(KeyValue(key="episode", value=str(episode+1)))
+        log_msg.values.append(KeyValue(key="score", value=str(self.score)))
+        log_msg.values.append(KeyValue(key="net_reward", value=str(net_reward)))
+        log_msg.values.append(KeyValue(key="steps", value=str(steps)))
+        self.log_pub.publish(log_msg)
 
     def step(self, action):
         """Step simulation one time step and return new state."""
@@ -328,18 +348,6 @@ class Trainer(SnakeDQN):
         # return initial state
         return self.get_env(self.time)
 
-    def log(self, dict):
-        """Log training metrics."""
-        elapsed_time = (self.time - self.start_time).to_sec()
-
-        log_msg = DiagnosticStatus()
-        log_msg.name = "DQN training"
-        for key, value in dict.items():
-            log_msg.values.append(KeyValue(key=key, value=str(value)))
-        log_msg.values.append(KeyValue(key="score", value=str(self.score)))
-        log_msg.values.append(KeyValue(key="elapsed time", value=str(elapsed_time)))
-        self.log_pub.publish(log_msg)
-
 class Evaluator(SnakeDQN):
     """Class for running the agent live."""
     def __init__(self):
@@ -369,7 +377,7 @@ class Evaluator(SnakeDQN):
                     self.clear_state()
                     self.action_pub.publish(
                         self.get_action_msg(
-                            self.agent.eval(state)))
+                            self.agent.eval((state, 0.0, done, {}))))
 
                 self.lock.release()
 

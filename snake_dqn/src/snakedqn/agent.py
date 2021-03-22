@@ -33,6 +33,7 @@ from all.agents import DQN
 from all.approximation import QNetwork
 from all.policies import GreedyPolicy
 from all.memory import ExperienceReplayBuffer
+from all.core import State
 
 import random
 
@@ -51,13 +52,13 @@ class Agent(DQN):
         else:
             print("Using CPU")
             self.DEVICE = torch.device("cpu")
-        self.STATE_SIZE = state_size
+        self.OBSERVATION_SIZE = state_size
         self.EPSILON_DELTA = (epsilon_max - epsilon_min) / float(epsilon_min_episode)
         self.EPSILON_MIN = epsilon_min
 
         # variables
         model = torch.nn.Sequential(
-            torch.nn.Linear(self.STATE_SIZE, 512),
+            torch.nn.Linear(self.OBSERVATION_SIZE, 512),
             torch.nn.ReLU(),
             torch.nn.Linear(512, 512),
             torch.nn.ReLU(),
@@ -78,10 +79,20 @@ class Agent(DQN):
             replay_start_size=batch_size,
             update_frequency=batch_size/2)
 
-    def _convert_input(self, state):
+    def _convert_input(self, input):
         """Convert state from numpy to torch type."""
-        assert np.size(state) == self.STATE_SIZE
-        return torch.from_numpy(state).float().to(self.DEVICE)
+        observation, reward, done, __ = input
+
+        assert np.size(observation) == self.OBSERVATION_SIZE
+        observation = torch.from_numpy(observation).float().to(self.DEVICE)
+
+        data = {
+            "observation" : observation,
+            "reward": reward,
+            "done" : done
+        }
+
+        return State(data, self.DEVICE)
 
     def act(self, state):
         """Take action during training."""
