@@ -31,6 +31,7 @@ import torch
 from torch.nn.functional import mse_loss
 from all.agents import DQN
 from all.approximation import QNetwork
+from all.approximation import DummyCheckpointer
 from all.policies import GreedyPolicy
 from all.memory import ExperienceReplayBuffer
 from all.core import State
@@ -42,7 +43,7 @@ class Agent(DQN):
     def __init__(self, state_size, action_size,
             memory_len=2000, gamma=0.9,
             epsilon_max=1.0, epsilon_min=0.01,
-            epsilon_min_episode=1000,
+            epsilon_steps=30000,
             learning_rate=0.01, batch_size=64):
 
         # constants
@@ -53,7 +54,7 @@ class Agent(DQN):
             print("Using CPU")
             self.DEVICE = torch.device("cpu")
         self.OBSERVATION_SIZE = state_size
-        self.EPSILON_DELTA = (epsilon_max - epsilon_min) / float(epsilon_min_episode)
+        self.EPSILON_DELTA = (epsilon_max - epsilon_min) / float(epsilon_steps)
         self.EPSILON_MIN = epsilon_min
 
         # variables
@@ -66,7 +67,7 @@ class Agent(DQN):
             torch.nn.ReLU(),
             torch.nn.Linear(512, action_size)).to(self.DEVICE)
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-        net = QNetwork(model, optimizer)
+        net = QNetwork(model, optimizer, checkpointer=DummyCheckpointer())
         policy = GreedyPolicy(net, action_size, epsilon_max)
         buffer = ExperienceReplayBuffer(memory_len, self.DEVICE)
         super().__init__(
