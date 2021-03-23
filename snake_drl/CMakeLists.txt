@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(snake_dqn)
+project(snake_drl)
 
 # Find catkin macros
 find_package(catkin REQUIRED)
@@ -16,7 +16,7 @@ catkin_package()
 
 # Mark executable python scripts and nodes for installation
 catkin_install_python(PROGRAMS
-  nodes/snake_dqn
+  nodes/snake_drl
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

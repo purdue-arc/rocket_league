@@ -26,4 +26,5 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from snakedqn.agent import Agent
+from snakedrl.dqn_agent import DQN_Agent
+from snakedrl.vac_agent import VAC_Agent

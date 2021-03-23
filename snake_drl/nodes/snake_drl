@@ -28,7 +28,7 @@ License:
 """
 
 # package
-from snakedqn import Agent
+from snakedrl import DQN_Agent, VAC_Agent
 
 # ROS
 import rospy
@@ -57,13 +57,13 @@ class Actions(IntEnum):
 class SnakeDQN(object):
     """ROS wrapper for the snake game DQN."""
     def __init__(self):
-        rospy.init_node('snake_dqn')
+        rospy.init_node('snake_drl')
 
         # Constants
-        self.ANGULAR_VELOCITY = rospy.get_param('~angular_velocity', 2.0)
-        self.LINEAR_VELOCITY = rospy.get_param('~linear_velocity', 2.0)
         self.NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
-        self.DEATH_REWARD = rospy.get_param('~reward/death', -100.0)
+        self.ANGULAR_VELOCITY = rospy.get_param('~control/max_angular_velocity', 3.0)
+        self.LINEAR_VELOCITY = rospy.get_param('~control/max_linear_velocity', 3.0)
+        self.DEATH_REWARD = rospy.get_param('~reward/death', 0.0)
         self.GOAL_REWARD = rospy.get_param('~reward/goal', 50.0)
         self.BASE_REWARD = rospy.get_param('~reward/distance/base', 0.0)
         self.EXP_REWARD = rospy.get_param('~reward/distance/exp', 0.0)
@@ -83,14 +83,23 @@ class SnakeDQN(object):
         self.cond = Condition()
 
         # DQN Agent
-        self.agent = Agent(3 + 2*self.NUM_SEGMENTS, Actions.SIZE,
-            memory_len=rospy.get_param('~dqn/memory_len', 2000),
-            gamma=rospy.get_param('~dqn/gamma', 0.9),
-            epsilon_max=rospy.get_param('~dqn/epsilon/max', 1.0),
-            epsilon_min=rospy.get_param('~dqn/epsilon/min', 0.01),
-            epsilon_steps=rospy.get_param('~dqn/epsilon/steps', 30000),
-            learning_rate=rospy.get_param('~dqn/learning_rate', 0.01),
-            batch_size=rospy.get_param('~dqn/batch_size', 64))
+        agent_type = rospy.get_param('~agent_type', "dqn")
+        if agent_type == "dqn":
+            self.agent = DQN_Agent(3 + 2*self.NUM_SEGMENTS, Actions.SIZE,
+                memory_len=rospy.get_param('~dqn/memory_len', 2000),
+                gamma=rospy.get_param('~dqn/gamma', 0.9),
+                epsilon_max=rospy.get_param('~dqn/epsilon/max', 1.0),
+                epsilon_min=rospy.get_param('~dqn/epsilon/min', 0.01),
+                epsilon_steps=rospy.get_param('~dqn/epsilon/steps', 30000),
+                learning_rate=rospy.get_param('~dqn/learning_rate', 0.01),
+                batch_size=rospy.get_param('~dqn/batch_size', 64))
+        elif agent_type == "vac":
+            self.agent = VAC_Agent(3 + 2*self.NUM_SEGMENTS, Actions.SIZE,
+            gamma=rospy.get_param('~vac/gamma', 0.9),
+            learning_rate=rospy.get_param('~vac/learning_rate', 0.01))
+        else:
+            rospy.logerr("Unrecognized agent type")
+            exit(1)
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self.pose_cb)
@@ -234,7 +243,7 @@ class Trainer(SnakeDQN):
 
         # Publishers
         self.clock_pub = rospy.Publisher('/clock', Clock, queue_size=1)
-        self.log_pub = rospy.Publisher('snake/dqn/training', DiagnosticStatus, queue_size=1)
+        self.log_pub = rospy.Publisher('snake_drl/training', DiagnosticStatus, queue_size=1)
 
         # Services
         self.reset_srv = rospy.ServiceProxy('snake/reset', Empty)
@@ -283,7 +292,6 @@ class Trainer(SnakeDQN):
             log_msg.values.append(KeyValue(key="score", value=str(self.score)))
             log_msg.values.append(KeyValue(key="net_reward", value=str(net_reward)))
             log_msg.values.append(KeyValue(key="steps", value=str(steps)))
-            log_msg.values.append(KeyValue(key="epsilon", value=str(self.agent.policy.epsilon)))
             self.log_pub.publish(log_msg)
 
     def step(self, action):
@@ -355,7 +363,7 @@ class Evaluator(SnakeDQN):
         super().__init__()
 
         # Services
-        self.reset_srv = rospy.Service('snake_dqn/reset', Empty, self.reset_cb)
+        self.reset_srv = rospy.Service('snake_drl/reset', Empty, self.reset_cb)
 
         self.lock = Lock()
 

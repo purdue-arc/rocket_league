@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>snake_dqn</name>
+  <name>snake_drl</name>
   <version>0.0.0</version>
-  <description>Deep Q Network to control the snakesim. Test of deep learning interface to ROS.</description>
+  <description>Deep reinforcement learning to control the snakesim. Test of deep learning interface to ROS.</description>
   <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
   <license>BSD 3 Clause</license>
   <url type="website">http://www.purduearc.com</url>

@@ -27,24 +27,21 @@ License:
 """
 
 import numpy as np
+
 import torch
+from torch.nn import Sequential, Linear, ReLU
 from torch.nn.functional import mse_loss
-from all.agents import DQN
-from all.approximation import QNetwork
-from all.approximation import DummyCheckpointer
-from all.policies import GreedyPolicy
-from all.memory import ExperienceReplayBuffer
+from torch.optim import Adam
+
+from all.agents import VAC
+from all.approximation import VNetwork, FeatureNetwork, DummyCheckpointer
+from all.policies import SoftmaxPolicy
 from all.core import State
 
-import random
-
-class Agent(DQN):
-    """High level DQN controller for snake tutorial."""
+class VAC_Agent(VAC):
+    """High level VAC controller for snake tutorial."""
     def __init__(self, state_size, action_size,
-            memory_len=2000, gamma=0.9,
-            epsilon_max=1.0, epsilon_min=0.01,
-            epsilon_steps=30000,
-            learning_rate=0.01, batch_size=64):
+            gamma=0.9, learning_rate=0.01,):
 
         # constants
         if torch.cuda.is_available():
@@ -53,32 +50,44 @@ class Agent(DQN):
         else:
             print("Using CPU")
             self.DEVICE = torch.device("cpu")
-        self.OBSERVATION_SIZE = state_size
-        self.EPSILON_DELTA = (epsilon_max - epsilon_min) / float(epsilon_steps)
-        self.EPSILON_MIN = epsilon_min
 
-        # variables
-        model = torch.nn.Sequential(
-            torch.nn.Linear(self.OBSERVATION_SIZE, 512),
-            torch.nn.ReLU(),
-            torch.nn.Linear(512, 512),
-            torch.nn.ReLU(),
-            torch.nn.Linear(512, 512),
+        self.OBSERVATION_SIZE = state_size
+        FEATURE_SIZE = 512
+        FEATURE_LEARNING_RATE = learning_rate
+        VALUE_LEARNING_RATE = learning_rate
+        POLICY_LEARNING_RATE = learning_rate
+
+        # feature
+        feature_model = Sequential(
+            Linear(self.OBSERVATION_SIZE, 512),
+            ReLU(),
+            Linear(512, FEATURE_SIZE),
+            ReLU()).to(self.DEVICE)
+        feature_optimizer = Adam(feature_model.parameters(), lr=FEATURE_LEARNING_RATE)
+        feature_net = FeatureNetwork(feature_model, feature_optimizer, checkpointer=DummyCheckpointer())
+
+        # value
+        value_model = torch.nn.Sequential(
+            torch.nn.Linear(FEATURE_SIZE, 512),
             torch.nn.ReLU(),
             torch.nn.Linear(512, action_size)).to(self.DEVICE)
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-        net = QNetwork(model, optimizer, checkpointer=DummyCheckpointer())
+        value_optimizer = torch.optim.Adam(value_model.parameters(), lr=VALUE_LEARNING_RATE)
+        value_net = VNetwork(value_model, value_optimizer, checkpointer=DummyCheckpointer())
+
+        # policy
+        policy_model = Sequential(
+            Linear(FEATURE_SIZE, 512),
+            ReLU(),
+            Linear(512, action_size)).to(self.DEVICE)
+        policy_optimizer = Adam(policy_model.parameters(), lr=POLICY_LEARNING_RATE)
         policy = GreedyPolicy(net, action_size, epsilon_max)
-        buffer = ExperienceReplayBuffer(memory_len, self.DEVICE)
+        policy_net = SoftmaxPolicy(policy_model, policy_optimizer, checkpointer=DummyCheckpointer())
+
         super().__init__(
-            q=net,
-            policy=policy,
-            replay_buffer=buffer,
-            discount_factor=gamma,
-            loss=mse_loss,
-            minibatch_size=batch_size,
-            replay_start_size=batch_size,
-            update_frequency=batch_size/2)
+            features=feature_net,
+            v=value_net,
+            policy=policy_net,
+            discount_factor=gamma)
 
     def _convert_input(self, input):
         """Convert state from numpy to torch type."""
@@ -97,10 +106,7 @@ class Agent(DQN):
 
     def act(self, state):
         """Take action during training."""
-        action = super().act(self._convert_input(state))
-        if self.policy.epsilon >= (self.EPSILON_MIN + self.EPSILON_DELTA):
-            self.policy.epsilon -= self.EPSILON_DELTA
-        return action
+        return super().act(self._convert_input(state))
 
     def eval(self, state):
         """Take action during evaluation."""
@@ -109,10 +115,10 @@ class Agent(DQN):
     def save(self, name):
         """Save weights to file."""
         print(f"Saving weights to {name}")
-        torch.save(self.q.model.model.state_dict(), name)
+        # torch.save(self.q.model.model.state_dict(), name)
 
     def load(self, name):
         """Load weights from file."""
         print(f"Loading weights from {name}")
-        self.q.model.model.load_state_dict(torch.load(name, map_location=self.DEVICE))
-        self.q.model.model.to(self.DEVICE)
+        # self.q.model.model.load_state_dict(torch.load(name, map_location=self.DEVICE))
+        # self.q.model.model.to(self.DEVICE)
