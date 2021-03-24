@@ -148,7 +148,7 @@ class WaypointControllerROS(object):
                                                       bot_orient, lookahead_dist)  
                     goal_vel = self.path[i + 1].twist.linear.x
                     goal_time = self.path[i + 1].delta_t
-                    if (abs(d_angle) > math.pi/2 and goal_vel > 0) or
+                    if (abs(d_angle) > math.pi/2 and goal_vel > 0) or \
                         (abs(d_angle) < math.pi/2 and goal_vel < 0):
                         intersect = None
                     else:

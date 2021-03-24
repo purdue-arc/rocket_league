@@ -62,7 +62,7 @@ class TrajectoryPlannerROS(object):
         self.MAX_CURVATURE = 1/(rospy.get_param('~MIN_RADIUS', 0.4572))
 
         # These variables act as parameters to generate a path
-        self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.1)    # Multiplier for distance of 1st main point in front of the car
+        self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.5)    # Multiplier for distance of 1st main point in front of the car
         self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
         self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.25)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
@@ -94,7 +94,7 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        #self.four_point_path()
+        # self.four_point_path()
         # self.bezier_curves_path(smoothness=2)
         # self.lagrange_functions_path()
         self.hermite_splines_path()
@@ -241,6 +241,16 @@ class TrajectoryPlannerROS(object):
 
     def waypoints_from_points(self,points):   # TODO: add varying speeds and nonzero angular velocities
         """Converts points from list or numpy array to pose array and sets twists as well"""
+
+        # add extra points for stopping
+        if self.backwards:
+            bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
+            bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
+            first_point = bot_position - self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
+            points = np.vstack((first_point,points))
+            print("backwards")
+
+
         self.check_curvature(points)
         self.find_actual_time(points)
         times = self.final_time * np.linspace(0,1,len(points))
@@ -264,7 +274,7 @@ class TrajectoryPlannerROS(object):
                 # make orientation the opposite direction if backwards
                 if self.backwards:
                     yaw = np.arctan2(-(points[i + 1][1]  - points[i-1][1]), -(points[i + 1][0] - points[i-1][0]))
-                    if i == 1:
+                    if i == 0:
                         yaw = np.arctan2(self.bot_init_heading[1],self.bot_init_heading[0])
             elif i == len(points) - 1:
                 yaw = np.arctan2(self.final_heading[1],self.final_heading[0])
@@ -272,7 +282,7 @@ class TrajectoryPlannerROS(object):
             elif i == 0:
                 yaw = np.arctan2(self.bot_init_heading[1],self.bot_init_heading[0])
 
-            if self.backwards and i == 1:
+            if self.backwards and i == 0:
                 yaw = np.arctan2(-(points[2][1] - points[1][1]), -(points[2][0] - points[0][0]))
 
             (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
@@ -309,7 +319,7 @@ class TrajectoryPlannerROS(object):
 
                 # allow small amount of forward motion
                 if self.backwards:
-                    new_twist.linear.x = 0
+                    new_twist.linear.x = -0.1
                     new_twist.linear.y = 0
                     new_twist.linear.z = 0
                     new_twist.angular.z = 0
@@ -361,6 +371,8 @@ class TrajectoryPlannerROS(object):
             perpendicular = np.array([line_between[1], -line_between[0]])
             perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
             perpendicular = normalize(perpendicular)
+            if not self.backwards:
+                perpendicular = - perpendicular
             perpendicular = perpendicular * np.abs(1 - np.dot(init_normalized_heading, final_normalized_heading))\
                  * second_point_distance
             second_point = midpoint + perpendicular
@@ -377,15 +389,18 @@ class TrajectoryPlannerROS(object):
             bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
             bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
 
-            # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
-            first_point = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
-
             # change stuff if backwards... wait until first point is defined to allow small amount of forward decelerating motion
             if self.backwards:
+                bot_position = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
                 self.bot_init_heading = -self.bot_init_heading 
                 bot_linear_vel = -bot_linear_vel
-                self.final_normalized_heading = -self.final_normalized_heading
-                self.final_heading = -self.final_heading
+                # self.final_normalized_heading = -self.final_normalized_heading
+                # self.final_heading = -self.final_heading
+                print("turned stuff backwards")
+
+
+            # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
+            first_point = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
 
             # Third point is a certain distance behind the ball
             third_point = ball_position - self.final_normalized_heading * self.DISTANCE_FROM_BALL
@@ -512,7 +527,7 @@ class TrajectoryPlannerROS(object):
             tangents = np.zeros((len(points), 2))  # Plus 1 is because I'm starting the curve at the bot
 
             # constant or heading multiplier
-            c = 0.1
+            c = 0.3
 
             # Define tangents at midpoints
             for i in range(1, len(points) - 2):
