@@ -71,6 +71,10 @@ class TrajectoryPlannerROS(object):
         # This variable determines the number of points published to the waypoint controller
         self.RESOLUTION = rospy.get_param('~RESOLUTION', 5)
 
+        # These variables determine the published velocity tolerances
+        self.USUAL_VELOCITY_TOLERANCE = rospy.get_param('~USUAL_VELOCITY_TOLERANCE', 0.3)
+        self.FINAL_VELOCITY_TOLERANCE = rospy.get_param('~FINAL_VELOCITY_TOLERANCE', 0.05)
+
         # booleans
         self.backwards = False   # true if the car will drive backwards
         self.possible = True   # false if not possible
@@ -331,8 +335,12 @@ class TrajectoryPlannerROS(object):
             new_waypoint.twist = new_twist
             if i < len(times): new_waypoint.delta_t = Float32(times[i])
             if i == len(times): new_waypoint.delta_t = Float32(times[i-1] + 2)   # this is the follow through point
-            if i != len(points) - 1: new_waypoint.velocity_tolerance = Float32(np.abs(new_twist.linear.x * 0.3))
-            if i == len(points) -1: new_waypoint.velocity_tolerance = Float32(np.abs(new_twist.linear.x * 0.01))
+            
+            if i != len(points) - 1: new_waypoint.velocity_tolerance = Float32(np.abs(new_twist.linear.x \
+                * self.USUAL_VELOCITY_TOLERANCE))
+            if i == len(points) -1: new_waypoint.velocity_tolerance = Float32(np.abs(new_twist.linear.x \
+                * self.FINAL_VELOCITY_TOLERANCE))
+            
             waypoint_array_msg.waypoint.append(new_waypoint)
 
         print("ready to publish")
@@ -516,77 +524,77 @@ class TrajectoryPlannerROS(object):
         Using Hermite Splines.
         Publish these points as an array, resulting in path
         """
-       # try:
-        # Create an array of points to work with
-        points = self.main_points
-        #points = np.vstack([np.array([self.bot_pose.position.x, self.bot_pose.position.y]),points])
+        try:
+            # Create an array of points to work with
+            points = self.main_points
+            #points = np.vstack([np.array([self.bot_pose.position.x, self.bot_pose.position.y]),points])
 
-        # Create parameter for our function to operate over, and divide the resolution
-        # into parts for each splice. We may end up with slightly fewer points than
-        # the resolution calls for... Something to look into.
-        t = np.linspace(0, 1, int(self.RESOLUTION / (len(points) - 1)))
-        # Initialize tangent vectors
-        tangents = np.zeros((len(points), 2))  # Plus 1 is because I'm starting the curve at the bot
+            # Create parameter for our function to operate over, and divide the resolution
+            # into parts for each splice. We may end up with slightly fewer points than
+            # the resolution calls for... Something to look into.
+            t = np.linspace(0, 1, int(self.RESOLUTION / (len(points) - 1)))
+            # Initialize tangent vectors
+            tangents = np.zeros((len(points), 2))  # Plus 1 is because I'm starting the curve at the bot
 
-        # constant or heading multiplier
-        c = 0.3
+            # constant or heading multiplier
+            c = 0.3
 
-        # Define tangents at midpoints
-        for i in range(1, len(points) - 2):
-            tangents[i] = (1 - 0.5) * (points[i + 1] - points[i - 1])
-            # print(tangents[i])
-            tangents[i] = normalize(tangents[i])
-            vec_1 = points[i] - points[i-1]
-            vec_2 = points[i] - points[i+1]
-            # Create multiplier based on the difference on the angle between points
-            head_mul = None
-            if np.sqrt(np.dot(vec_1,vec_1)*np.dot(vec_2,vec_2)) != 0:
-                head_mul = np.arccos(np.dot(vec_1,vec_2)/(np.sqrt(np.dot(vec_1,vec_1)*np.dot(vec_2,vec_2))))
-            else:
-                head_mul = (np.pi - (head_mul))
-            tangents[i] = tangents[i] *np.abs(head_mul)
-
-
-        # Define tangents at endpoints
-        tangents[0] = self.bot_init_heading
-        tangents[len(tangents) - 2] = self.final_normalized_heading
-        tangents[len(tangents) -1] = self.final_normalized_heading
+            # Define tangents at midpoints
+            for i in range(1, len(points) - 2):
+                tangents[i] = (1 - 0.5) * (points[i + 1] - points[i - 1])
+                # print(tangents[i])
+                tangents[i] = normalize(tangents[i])
+                vec_1 = points[i] - points[i-1]
+                vec_2 = points[i] - points[i+1]
+                # Create multiplier based on the difference on the angle between points
+                head_mul = None
+                if np.sqrt(np.dot(vec_1,vec_1)*np.dot(vec_2,vec_2)) != 0:
+                    head_mul = np.arccos(np.dot(vec_1,vec_2)/(np.sqrt(np.dot(vec_1,vec_1)*np.dot(vec_2,vec_2))))
+                else:
+                    head_mul = (np.pi - (head_mul))
+                tangents[i] = tangents[i] *np.abs(head_mul)
 
 
-        # multiply tangents by constant
-        tangents = tangents * c
+            # Define tangents at endpoints
+            tangents[0] = self.bot_init_heading
+            tangents[len(tangents) - 2] = self.final_normalized_heading
+            tangents[len(tangents) -1] = self.final_normalized_heading
 
-        # Creating splines
-        tees = np.vstack([t ** 3, t ** 2, t,np.ones(len(t))]) #, np.ones(len(t))], (len(t), 4))
-        tees = np.transpose(tees)
 
-        constants = np.array(([2, -2, 1, 1], [-3, 3, -2, -1], [0, 0, 1, 0], [1, 0, 0, 0]))
+            # multiply tangents by constant
+            tangents = tangents * c
 
-        # initialize paths
-        path_y = np.array(())
-        path_x = np.array(())
+            # Creating splines
+            tees = np.vstack([t ** 3, t ** 2, t,np.ones(len(t))]) #, np.ones(len(t))], (len(t), 4))
+            tees = np.transpose(tees)
 
-        # final matrix to multiply point information by
-        B = np.matmul(tees, constants)
+            constants = np.array(([2, -2, 1, 1], [-3, 3, -2, -1], [0, 0, 1, 0], [1, 0, 0, 0]))
 
-        # Create paths for off of splines
-        for i in range(0, len(points)-1):
-            x = np.array((points[i], points[i + 1], tangents[i], tangents[i + 1]))
-            #x = np.transpose(x)    
-            F = np.matmul(B, x) 
+            # initialize paths
+            path_y = np.array(())
+            path_x = np.array(())
 
-            path_x = np.append(path_x,F[:,0])
-            path_y = np.append(path_y,F[:,1])
+            # final matrix to multiply point information by
+            B = np.matmul(tees, constants)
 
-        # Create path to use in waypoints_from_points,.
-        path = np.column_stack([path_x,path_y])
+            # Create paths for off of splines
+            for i in range(0, len(points)-1):
+                x = np.array((points[i], points[i + 1], tangents[i], tangents[i + 1]))
+                #x = np.transpose(x)    
+                F = np.matmul(B, x) 
 
-        # Convert points to poses and publish
-        print("hermite spline")
-        self.waypoints_from_points(path)
+                path_x = np.append(path_x,F[:,0])
+                path_y = np.append(path_y,F[:,1])
 
-#        except:
- #           print("path failed")
+            # Create path to use in waypoints_from_points,.
+            path = np.column_stack([path_x,path_y])
+
+            # Convert points to poses and publish
+            print("hermite spline")
+            self.waypoints_from_points(path)
+
+        except:
+            print("path failed")
 
 
     def recursive_splines_path(self, angle_limit, smoothness, distance_reduction):
