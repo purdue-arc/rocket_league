@@ -239,7 +239,7 @@ class TrajectoryPlannerROS(object):
 
 
 
-    def waypoints_from_points(self,points,times=None,velocities=None):   # TODO: add varying speeds and nonzero angular velocities
+    def waypoints_from_points(self,points):   # TODO: add varying speeds and nonzero angular velocities
         """Converts points from list or numpy array to pose array and sets twists as well"""
 
         # add extra points for stopping
