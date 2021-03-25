@@ -71,6 +71,10 @@ class TrajectoryPlannerROS(object):
         # This variable determines the number of points published to the waypoint controller
         self.RESOLUTION = rospy.get_param('~RESOLUTION', 5)
 
+        # These variables determine the published velocity tolerances
+        self.USUAL_VELOCITY_TOLERANCE = rospy.get_param('~USUAL_VELOCITY_TOLERANCE', 0.3)
+        self.FINAL_VELOCITY_TOLERANCE = rospy.get_param('~FINAL_VELOCITY_TOLERANCE', 0.05)
+
         # booleans
         self.backwards = False   # true if the car will drive backwards
         self.possible = True   # false if not possible
@@ -330,7 +334,13 @@ class TrajectoryPlannerROS(object):
             new_waypoint.pose = new_pose
             new_waypoint.twist = new_twist
             if i < len(times): new_waypoint.delta_t = Float32(times[i])
-            if i == len(times): new_waypoint.delta_t = Float32(times[i-1] + 2)
+            if i == len(times): new_waypoint.delta_t = Float32(times[i-1] + 2)   # this is the follow through point
+            
+            if i != len(points) - 1: new_waypoint.velocity_tolerance = Float32(np.abs(new_twist.linear.x \
+                * self.USUAL_VELOCITY_TOLERANCE))
+            if i == len(points) -1: new_waypoint.velocity_tolerance = Float32(np.abs(new_twist.linear.x \
+                * self.FINAL_VELOCITY_TOLERANCE))
+            
             waypoint_array_msg.waypoint.append(new_waypoint)
 
         print("ready to publish")
