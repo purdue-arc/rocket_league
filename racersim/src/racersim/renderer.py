@@ -30,6 +30,7 @@ License:
 from threading import Thread
 import pygame
 import Box2D
+import math
 
 class Renderer(object):
     """Render field elements of racer sim"""
@@ -43,33 +44,37 @@ class Renderer(object):
     COLOR_PNT = (245, 173, 66)          # Orange
     COLOR_LOOKAHEAD = (255, 255, 255)   # White
 
-    SIZE_PNT = 20
+    SIZE_PNT = 0.07
 
     class ShutdownError(Exception):
         """Exception for when pygame is shut down"""
         pass
 
-    def __init__(self, bounds, scaling=500):
-        self.bounds = bounds
-        self.scaling = scaling
-        self.windowSize = int(scaling * bounds)
+    def __init__(self, map_height, map_width):
+
+        #Most people will have a 1080p monitor
+        self.scaling = 1080 * 0.7 / map_height
+
+        self.windowHeight = int(map_height * self.scaling)
+        self.windowWidth = int(map_width * self.scaling)
+
         pygame.display.init()
-        self._screen = pygame.display.set_mode((self.windowSize,
-                                                self.windowSize))
+        self._screen = pygame.display.set_mode((self.windowWidth, self.windowHeight))
         self._thread = None
 
     def _draw_polygon(self, body, fixture, color):
         """Draws polygons to the screen."""
         vertices = [(body.transform * v) * self.scaling \
                     for v in fixture.shape.vertices]
-        vertices = [(v[0], self.windowSize - v[1]) \
+        vertices = [(v[0], v[1]) \
                     for v in vertices]
         pygame.draw.polygon(self._screen, color, vertices)
 
     def _draw_circle(self, body, fixture, color):
         """Draws circles to the screen."""
         position = body.transform * fixture.shape.pos * self.scaling
-        position = (position[0], self.windowSize - position[1])
+
+        position = (position[0], position[1])
 
         pygame.draw.circle(self._screen, color, 
             [int(x) for x in position],
@@ -81,15 +86,15 @@ class Renderer(object):
 
     def _visualize_point(self, color, coords, size):
         for coord in coords:
-            x = int(-coord[1] * self.scaling)
-            y = int(self.windowSize - coord[0] * self.scaling)
+            x = int(coord[0] * self.scaling)
+            y = int(coord[1] * self.scaling)
 
             #Gradually darkens the points
             color = (max(color[0] - 15, 0), max(color[1] - 15, 0), max(color[2] - 15, 0))
-            
+
             pygame.draw.circle(self._screen, color, [x, y], size)
 
-    def render(self, car, ball, goal, world, lookahead, path_points, path=None):
+    def render(self, car, ball, goal0, goal1, world, lookahead, path=None):
         """Render the current state of the sim."""
 
         if self._thread is not None and self._thread.is_alive():
@@ -103,8 +108,17 @@ class Renderer(object):
 
         self._screen.fill(self.COLOR_BACKGROUND)
 
-        for fixture in goal.body.fixtures:
-            self._draw_polygon(goal.body, fixture, self.COLOR_GOAL)
+        for fixture in goal0.body.fixtures:
+            self._draw_polygon(goal0.body, fixture, self.COLOR_GOAL)
+
+        for fixture in goal1.body.fixtures:
+           self._draw_polygon(goal1.body, fixture, self.COLOR_GOAL)
+
+        if path is not None:
+            poses = []
+            for posed in path:
+                poses.append((posed.pose.position.x, posed.pose.position.y))
+            self._visualize_point(self.COLOR_PNT, poses, int(self.SIZE_PNT * self.scaling))
 
         for fixture in car.body.fixtures:
             self._draw_polygon(car.body, fixture, self.COLOR_CAR)
@@ -120,18 +134,8 @@ class Renderer(object):
             for fixture in wallBody.fixtures:
                 self._draw_polygon(wallBody, fixture, self.COLOR_WALL)
 
-        if path is not None:
-            for posed in path:
-                pose = posed.pose
-                pnt = (int(pose.position.x * self.scaling), \
-                       int(self.windowSize - (pose.position.y * self.scaling)))
-                self._draw_pnt(pnt, self.SIZE_PNT, self.COLOR_PNT)
-
         #Renders the lookahead point
-        self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], 10)
-
-	#Renders the path points
-	self._visualize_point(self.COLOR_PNT, path_points, 10)
+        self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], int(self.SIZE_PNT * self.scaling))
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()

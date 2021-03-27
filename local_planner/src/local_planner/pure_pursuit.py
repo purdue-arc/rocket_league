@@ -89,6 +89,7 @@ def calculate_arc_dist(intersect_pos, bot_pos, bot_orient, lookahead_dist):
 
     dist = abs(np.linalg.norm(intersect_pos - bot_pos))
     arc_angle = 2 * math.asin((dist / 2) / radius)
+
     return arc_angle * radius
 
 def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist):

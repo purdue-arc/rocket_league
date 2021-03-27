@@ -30,6 +30,7 @@ License:
 import Box2D
 import math
 from tf.transformations import quaternion_from_euler
+import numpy
 
 # Local classes
 from tire import Tire, TireDef
@@ -37,18 +38,18 @@ from tire import Tire, TireDef
 class CarDef(object):
     """Holds relevent data for a car instance"""
 
-    DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.125),
+    DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.125), (0, 0.2),
                         (-0.0225, 0.125), (-0.0225, 0)]
 
     DEFAULT_ANCHORS = [(-0.03525, 0.115), (0.03525, 0.115),
-                        (-0.03525, 0.0185), (0.03525, 0.0185)]
+                       (-0.03525, 0.0185), (0.03525, 0.0185)]
+
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(1.25, 1.25), initAngle=3.0, vertices=DEFAULT_VERTICES, 
+    def __init__(self, initPos=(1.25, 1.25), initAngle=6.0, vertices=DEFAULT_VERTICES,
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
-                    density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
-                    maxAngle=45, pgain=0.1):
+                    density=20, maxAngle=45, pgain=0.1):
 
         self.initPos = initPos
         self.initAngle = initAngle
@@ -56,8 +57,6 @@ class CarDef(object):
         self.tireAnchors = tireAnchors
         self.tireDef = tireDef
         self.density = density
-        self.maxForwardSpeed = maxForwardSpeed
-        self.maxBackwardSpeed = maxBackwardSpeed
         self.maxAngle = math.radians(maxAngle)
         self.pgain = pgain
 
@@ -85,9 +84,7 @@ class Car(object):
             tirePos = (carDef.tireAnchors[i][0] + carDef.initPos[0],
                        carDef.tireAnchors[i][1] + carDef.initPos[1])
 
-            tire = Tire(world, carDef.tireDef, tirePos,
-                        maxForwardSpeed=carDef.maxForwardSpeed,
-                        maxBackwardSpeed=carDef.maxBackwardSpeed)
+            tire = Tire(world, carDef.tireDef, tirePos, car_weight=self.body.mass)
             jointDef.bodyB = tire.body
             jointDef.localAnchorA.Set(carDef.tireAnchors[i][0],
                                       carDef.tireAnchors[i][1])
@@ -112,33 +109,31 @@ class Car(object):
         return (self.body.position[0], self.body.position[1], 0)
 
     def getQuaternion(self):
-        angle = self.body.angle % (2.0 * math.pi)
+        angle = (self.body.angle + math.pi / 2)  % (2.0 * math.pi)
         return quaternion_from_euler(0, 0, angle)
 
     def set_angle(self, angle):
         self._flJoint.SetLimits(angle, angle)
         self._frJoint.SetLimits(angle, angle)
 
-    def step(self, linearVelocity, angularVelocity, dt):
+    def step(self, linear_cmd, angular_cmd, dt):
+
         for tire in self.tires:
             tire.updateFriction()
 
         for tire in self.tires:
-            tire.updateDrive(linearVelocity, dt)
+            tire.updateDrive(linear_cmd, dt)
 
-        if linearVelocity.x != 0:
-            # Steering-Angle Approach
-            # angle = angularVelocity.z
-
+        if linear_cmd.x != 0:
             # Angular / PID Approach
-            angle = self._flJoint.angle
-            angle += (self.body.angularVelocity - angularVelocity.z) \
-                      * -self.pgain
+            curr_angle = self._flJoint.angle
+            turn = (self.body.angularVelocity + angular_cmd.z) * -self.pgain
+            new_angle = curr_angle + turn
 
-            if angle > self.maxAngle:
-                angle = self.maxAngle
-            elif angle < -self.maxAngle:
-                angle = -self.maxAngle
+            if new_angle > self.maxAngle:
+                new_angle = self.maxAngle
+            elif new_angle < -self.maxAngle:
+                new_angle = -self.maxAngle
 
-            self._flJoint.SetLimits(angle, angle)
-            self._frJoint.SetLimits(angle, angle)
+            self._flJoint.SetLimits(new_angle, new_angle)
+            self._frJoint.SetLimits(new_angle, new_angle)

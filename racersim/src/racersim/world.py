@@ -28,32 +28,36 @@ License:
 
 # 3rd party modules
 import Box2D
+import math
 
 class World(Box2D.b2World):
     """Simulates world for car to exist in"""
 
-    WALL_THICKNESS = 0.02 # meters
+    wall_thickness = 0.02
 
-    def __init__(self, width, height):
+    def __init__(self, map_height, map_width):
         super(World, self).__init__()
         self.gravity = (0,0)
-        
+
+        self.wall_thickness = 0.02 * math.sqrt(map_width**2 + map_height**2)
+
         self.gndBody = self.CreateBody()
-        gndShape = Box2D.b2PolygonShape(box=(width,height))
+        gndShape = Box2D.b2PolygonShape(box=(map_width, map_height))
         gndFixtureDef = Box2D.b2FixtureDef(shape=gndShape)
         gndFixtureDef.isSensor = True
         self.gndBody.CreateFixture(gndFixtureDef)
 
         self.wallBodies = []
-        wallPos = [(0, height), (width, 0), (0,0), (0,0)]
+        wallPos = [(0, map_height), (map_width, 0), (0,0), (0,0)]
+
         for i in range(len(wallPos)):
             wallBody = self.CreateBody(position=wallPos[i])
 
             if (i % 2) == 0:
-                wallShape = Box2D.b2PolygonShape(box=(width, self.WALL_THICKNESS))
+                wallShape = Box2D.b2PolygonShape(box=(map_width, self.wall_thickness))
             else:
-                wallShape = Box2D.b2PolygonShape(box=(self.WALL_THICKNESS, height))
-    
+                wallShape = Box2D.b2PolygonShape(box=(self.wall_thickness, map_height))
+
             wallFixtureDef = Box2D.b2FixtureDef(shape=wallShape, restitution=0.01)
             wallBody.CreateFixture(wallFixtureDef)
 

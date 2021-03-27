@@ -61,7 +61,7 @@ class WaypointControllerROS(object):
         self.max_speed = rospy.get_param('~max_speed', 0.1)
 
         # Radius to search for intersections
-        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.35)
+        self.lookahead_dist = rospy.get_param('~lookahead_dist', 1)
 
         # Coeffient to adjust lookahead distance by speed
         self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.035)
@@ -145,7 +145,7 @@ class WaypointControllerROS(object):
 
                     # Check if intersection is behind vehicle
                     d_angle = pursuit.calculate_angle(intersect, bot_pos, \
-                                                      bot_orient, lookahead_dist)  
+                                                      bot_orient, lookahead_dist)
                     goal_vel = self.path[i + 1].twist.linear.x
                     goal_time = self.path[i + 1].delta_t
                     if (abs(d_angle) > math.pi/2 and goal_vel > 0) or \
@@ -187,7 +187,6 @@ class WaypointControllerROS(object):
 
                 # TODO:
                 # If vel_error > allowable margin then report unfeasible path
-
 
             # Calculate angular velocity
             angular_vel = pursuit.get_angular_speed(linear_vel, \

@@ -32,7 +32,6 @@ import rospy
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty, EmptyResponse
 
-
 # Local library
 import racersim
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
@@ -47,10 +46,12 @@ class RacerSimROS(object):
 
         self.sim = racersim.Sim(
             renderEnabled=rospy.get_param('~render/enabled', True),
-            velIters=rospy.get_param('~render/velIters', 6),
-            posIters=rospy.get_param('~render/posIters', 2),
-            bounds=rospy.get_param('~world/bounds', 1.5),
-            scaling=rospy.get_param('~render/scaling', 500)
+            map_height=rospy.get_param('~MAP_HEIGHT'),
+            map_width=rospy.get_param('~MAP_WIDTH'),
+            goal0_pos=rospy.get_param('~GOAL0_POSE'),
+            goal1_pos=rospy.get_param('~GOAL1_POSE'),
+            goal_width=rospy.get_param('~GOAL_WIDTH'),
+            goal_height=rospy.get_param('~GOAL_HEIGHT')
         )
 
         self.lock = Lock()
@@ -62,14 +63,12 @@ class RacerSimROS(object):
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
-        rate = rospy.Rate(rospy.get_param('~rate', 30)) # Hz
+        rate = rospy.Rate(rospy.get_param('~rate', 64)) # Hz
 
         # Publishers
         self.ball_pub = rospy.Publisher('ball/odom', \
              Odometry, queue_size=1)
         self.bot_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
-        #self.goal_pub = rospy.Publisher('goal_pose', \
-         #    PoseWithCovarianceStamped, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('car0/velocity', Twist, self.command_cb)
@@ -113,7 +112,6 @@ class RacerSimROS(object):
         x = pose_msg.pose.pose.position.x
         y = pose_msg.pose.pose.position.y
         self.lookahead = [x, y]
-        #Convert x, y to whatever the sim uses
 
     def command_cb(self, command_msg):
         """Callback for command messages."""
@@ -130,13 +128,13 @@ class RacerSimROS(object):
             delta_t = (now - self.last_time).to_sec()
 
             if self.last_command != None:
-                linear, angular = self.last_command
+                linear_cmd, angular_cmd = self.last_command
             else:
                 empty = Twist()
-                linear = empty.linear
-                angular = empty.angular
+                linear_cmd = empty.linear
+                angular_cmd = empty.angular
 
-            self.sim.step(linear, angular, delta_t)
+            self.sim.step(linear_cmd, angular_cmd, delta_t)
             self.sim.render_path(self.path)
 
             # Publish ball odometry
@@ -144,8 +142,8 @@ class RacerSimROS(object):
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id
             ball_point = self.sim.ball.getPoint()
-            ball_msg.pose.pose.position.x = ball_point[1]
-            ball_msg.pose.pose.position.y = -ball_point[0]
+            ball_msg.pose.pose.position.x = ball_point[0]
+            ball_msg.pose.pose.position.y = ball_point[1]
             ball_quat = self.sim.ball.getQuaternion()
             ball_msg.pose.pose.orientation.z = ball_quat[2]
             ball_msg.pose.pose.orientation.w = ball_quat[3]
@@ -161,8 +159,8 @@ class RacerSimROS(object):
             bot_msg.header.stamp = now
             bot_msg.header.frame_id = self.frame_id
             bot_point = self.sim.car.getPoint()
-            bot_msg.pose.pose.position.x = bot_point[1]
-            bot_msg.pose.pose.position.y = -bot_point[0]
+            bot_msg.pose.pose.position.x = bot_point[0]
+            bot_msg.pose.pose.position.y = bot_point[1]
             bot_quat = self.sim.car.getQuaternion()
             bot_msg.pose.pose.orientation.z = bot_quat[2]
             bot_msg.pose.pose.orientation.w = bot_quat[3]

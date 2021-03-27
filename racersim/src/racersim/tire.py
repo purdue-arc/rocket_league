@@ -31,10 +31,9 @@ import Box2D
 
 class TireDef(object):
     """Holds relevent data for a tire instance"""
-    def __init__(self, width=0.0125, length=0.037, density=0.04,
-                    maxLateralImpulse=0.015, maxDriveForce=0.0001,
-                    dragForceCoeff=-0.00002, angularImpulseCoeff=0.02):
-        
+    def __init__(self, width=0.0125, length=0.037, density=40,
+                 maxLateralImpulse=0.015, maxDriveForce=0.2, dragForceCoeff=-0.00002,
+                 angularImpulseCoeff=0.02, friction=100):
         self.width = width
         self.length = length
         self.density = density
@@ -42,11 +41,11 @@ class TireDef(object):
         self.maxDriveForce = maxDriveForce
         self.dragForceCoeff = dragForceCoeff
         self.angularImpulseCoeff = angularImpulseCoeff
+        self.friction = friction
 
 class Tire(object):
     """Simulates a single tire of a vehicle"""
-    def __init__(self, world, tireDef, position, maxForwardSpeed=1.0, 
-                    maxBackwardSpeed=-1.0):
+    def __init__(self, world, tireDef, position, car_weight=0.200):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
         bodyDef.position = position
@@ -55,12 +54,13 @@ class Tire(object):
         shape = Box2D.b2PolygonShape(box=(tireDef.width/2, tireDef.length/2))
         self.body.CreateFixture(shape=shape, density=tireDef.density)
 
-        self.maxForwardSpeed = maxForwardSpeed
-        self.maxBackwardSpeed = maxBackwardSpeed
+        self.car_weight = car_weight
         self.maxDriveForce = tireDef.maxDriveForce
         self.maxLateralImpulse = tireDef.maxLateralImpulse
         self.dragForceCoeff = tireDef.dragForceCoeff
         self.angularImpulseCoeff = tireDef.angularImpulseCoeff
+        self.friction = tireDef.friction
+        self.density = tireDef.density
 
     def getForwardVelocity(self):
         normal = self.body.GetWorldVector((0,1))
@@ -79,30 +79,47 @@ class Tire(object):
                                       self.body.inertia * \
                                       -self.body.angularVelocity, wake=True)
 
+        # print('')
+
+        # print('self.body.mass: ' + str(self.body.mass))
+        # print('self.getLateralVelocity: ' + str(self.getLateralVelocity()))
+        # print('impulse.length: ' + str(impulse.length))
+        # print('maxLateralImpulse: ' + str(self.maxLateralImpulse))
+
+        # print('angularImpulseCoeff: ' + str(self.angularImpulseCoeff))
+        # print('body.inertia: ' + str(self.body.inertia))
+        # print('body.angularVelocity: ' + str(self.body.angularVelocity))
+
         currForwardNormal = self.getForwardVelocity()
         currForwardSpeed = currForwardNormal.Normalize()
         dragForce = self.dragForceCoeff * currForwardSpeed
         self.body.ApplyForce(dragForce * currForwardNormal, \
                              self.body.worldCenter, wake=True)
 
-    def updateDrive(self, linearVelocity, dt):
-        if linearVelocity.x > self.maxForwardSpeed:
-            desiredSpeed = self.maxForwardSpeed
-        elif linearVelocity.x < self.maxBackwardSpeed:
-            desiredSpeed = self.maxBackwardSpeed
-        else:
-            desiredSpeed = linearVelocity.x
-
+    def updateDrive(self, linear_cmd, dt):
         currForwardNormal = self.body.GetWorldVector((0,1))
         currSpeed = Box2D.b2Dot(self.getForwardVelocity(), currForwardNormal)
 
-        force = 0
-        if desiredSpeed > currSpeed:
+        # Each tire should power itself and 1/4th of the car
+        mass = self.body.mass + self.car_weight / 4
+
+        delta_v = linear_cmd.x - currSpeed
+
+        # # The required force to accelerate to linear_cmd.x
+        # # in one time step (assuming no friction)
+        # force = mass * delta_v / dt
+
+        # Assume that the time step is 1 (box2d handles the conversion?)
+        force = mass * delta_v
+
+        # Accounts for friction
+        force += self.dragForceCoeff * linear_cmd.x
+
+        # Ensures that the engine/brakes are powerful enough
+        if force > self.maxDriveForce:
             force = self.maxDriveForce
-        elif desiredSpeed < currSpeed:
+        elif force < -self.maxDriveForce:
             force = -self.maxDriveForce
-        else:
-            return
 
         self.body.ApplyForce(force * currForwardNormal, \
                              self.body.worldCenter, wake=True)
