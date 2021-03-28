@@ -7,7 +7,7 @@
 
   <!-- Nodelet Manager -->
   <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
-    <param name="num_worker_threads" value="$(arg manager_threads)" />
+    <param name="num_worker_threads" value="$(arg manager_threads)"/>
   </node>
 
   <include ns="cam0" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch"/>
