@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+import numpy
+
+import rospy
+from geometry_msgs.msg import PoseWithCovarianceStamped, Pose
+import message_filters
+
+def callback(sub0, sub1, sub2, sub3):
+  pub_pose = Pose()
+  pub_pose.pose.pose.position.z = 0.0
+  pub_pose.pose.pose.orientation.z = 0.0
+  pub_pose.pose.pose.orientation.z = 0.0
+  pub_pose.pose.pose.orientation.z = 0.0
+  pub_pose.pose.pose.orientation.w = 1.0
+  #I must apoligize what what I am about to do, please forgive my sins, I also know that I could optimize the conditionals, i'll do that later, maybe...
+  if numpy.isnan(sum0.pose.pose.position.x) and numpy.isnan(sum1.pose.pose.position.x) and numpy.isnan(sum2.pose.pose.position.x) and numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("no cameras")
+  elif not numpy.isnan(sum0.pose.pose.position.x) and not (numpy.isnan(sum1.pose.pose.position.x) or numpy.isnan(sum2.pose.pose.position.x) or numpy.isnan(sum3.pose.pose.position.x)):
+    rospy.loginfo("0")
+    pub_pose.pose.pose.position = sub0.pose.pose.position
+    pub.publish(pub_pose)
+
+  elif not numpy.isnan(sum1.pose.pose.position.x) and not (numpy.isnan(sum0.pose.pose.position.x) or numpy.isnan(sum2.pose.pose.position.x) or numpy.isnan(sum3.pose.pose.position.x)):
+    rospy.loginfo("1")
+    pub_pose.pose.pose.position = sub1.pose.pose.position
+    pub.publish(pub_pose)
+
+  elif not numpy.isnan(sum2.pose.pose.position.x) and not (numpy.isnan(sum0.pose.pose.position.x) or numpy.isnan(sum1.pose.pose.position.x) or numpy.isnan(sum3.pose.pose.position.x)):
+    rospy.loginfo("2")
+    pub_pose.pose.pose.position = sub2.pose.pose.position
+    pub.publish(pub_pose)
+
+  elif not numpy.isnan(sum3.pose.pose.position.x) and not (numpy.isnan(sum0.pose.pose.position.x) or numpy.isnan(sum1.pose.pose.position.x) or numpy.isnan(sum2.pose.pose.position.x)):
+    rospy.loginfo("3")
+    pub_pose.pose.pose.position = sub3.pose.pose.position
+    pub.publish(pub_pose)
+
+  elif not numpy.isnan(sum0.pose.pose.position.x) and not numpy.isnan(sum1.pose.pose.position.x) and numpy.isnan(sum2.pose.pose.position.x) and numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("0,1")
+    pub_pose.pose.pose.position.x = (sub0.pose.pose.position.x + sub1.pose.pose.position.x) / 2
+    pub_pose.pose.pose.position.y = (sub0.pose.pose.position.y + sub1.pose.pose.position.y) / 2
+    pub.publish(pub_pose)
+
+  elif not numpy.isnan(sum0.pose.pose.position.x) and numpy.isnan(sum1.pose.pose.position.x) and not numpy.isnan(sum2.pose.pose.position.x) and numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("0,2")
+    pub_pose.pose.pose.position.x = (sub0.pose.pose.position.x + sub2.pose.pose.position.x) / 2
+    pub_pose.pose.pose.position.y = (sub0.pose.pose.position.y + sub2.pose.pose.position.y) / 2
+    pub.publish(pub_pose)
+
+  elif not numpy.isnan(sum0.pose.pose.position.x) and numpy.isnan(sum1.pose.pose.position.x) and numpy.isnan(sum2.pose.pose.position.x) and not numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("0,3")
+    pub_pose.pose.pose.position.x = (sub0.pose.pose.position.x + sub3.pose.pose.position.x) / 2
+    pub_pose.pose.pose.position.y = (sub0.pose.pose.position.y + sub3.pose.pose.position.y) / 2
+    pub.publish(pub_pose)
+    
+  elif numpy.isnan(sum0.pose.pose.position.x) and not numpy.isnan(sum1.pose.pose.position.x) and not numpy.isnan(sum2.pose.pose.position.x) and numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("1,2")
+    pub_pose.pose.pose.position.x = (sub1.pose.pose.position.x + sub2.pose.pose.position.x) / 2
+    pub_pose.pose.pose.position.y = (sub1.pose.pose.position.y + sub2.pose.pose.position.y) / 2
+    pub.publish(pub_pose)
+    
+  elif numpy.isnan(sum0.pose.pose.position.x) and not numpy.isnan(sum1.pose.pose.position.x) and numpy.isnan(sum2.pose.pose.position.x) and not numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("1,3")
+    pub_pose.pose.pose.position.x = (sub1.pose.pose.position.x + sub3.pose.pose.position.x) / 2
+    pub_pose.pose.pose.position.y = (sub1.pose.pose.position.y + sub3.pose.pose.position.y) / 2
+    pub.publish(pub_pose)
+    
+  elif numpy.isnan(sum0.pose.pose.position.x) and numpy.isnan(sum1.pose.pose.position.x) and not numpy.isnan(sum2.pose.pose.position.x) and not numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("2,3")
+    pub_pose.pose.pose.position.x = (sub2.pose.pose.position.x + sub3.pose.pose.position.x) / 2
+    pub_pose.pose.pose.position.y = (sub2.pose.pose.position.y + sub3.pose.pose.position.y) / 2
+    pub.publish(pub_pose)
+    
+  elif not numpy.isnan(sum0.pose.pose.position.x) and not numpy.isnan(sum1.pose.pose.position.x) and not numpy.isnan(sum2.pose.pose.position.x) and numpy.isnan(sum3.pose.pose.position.x): 
+    rospy.loginfo("0,1,2")
+    pub_pose.pose.pose.position.x = (sub0.pose.pose.position.x + sub1.pose.pose.position.x + sub2.pose.pose.position.x) / 3
+    pub_pose.pose.pose.position.y = (sub0.pose.pose.position.y + sub1.pose.pose.position.y + sub2.pose.pose.position.y) / 3
+    pub.publish(pub_pose)
+
+  elif numpy.isnan(sum0.pose.pose.position.x) and not numpy.isnan(sum1.pose.pose.position.x) and not numpy.isnan(sum2.pose.pose.position.x) and not numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("1,2,3")
+    pub_pose.pose.pose.position.x = (sub1.pose.pose.position.x + sub2.pose.pose.position.x + sub3.pose.pose.position.x) / 3
+    pub_pose.pose.pose.position.y = (sub1.pose.pose.position.y + sub2.pose.pose.position.y + sub3.pose.pose.position.y) / 3
+    pub.publish(pub_pose)
+
+  elif not numpy.isnan(sum0.pose.pose.position.x) and numpy.isnan(sum1.pose.pose.position.x) and not numpy.isnan(sum2.pose.pose.position.x) and not numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("2,3,0")
+    pub_pose.pose.pose.position.x = (sub2.pose.pose.position.x + sub3.pose.pose.position.x + sub0.pose.pose.position.x) / 3
+    pub_pose.pose.pose.position.y = (sub2.pose.pose.position.y + sub3.pose.pose.position.y + sub0.pose.pose.position.y) / 3
+    pub.publish(pub_pose)
+
+  elif not numpy.isnan(sum0.pose.pose.position.x) and not numpy.isnan(sum1.pose.pose.position.x) and numpy.isnan(sum2.pose.pose.position.x) and not numpy.isnan(sum3.pose.pose.position.x):
+    rospy.loginfo("3,0,1")
+    pub_pose.pose.pose.position.x = (sub3.pose.pose.position.x + sub0.pose.pose.position.x + sub1.pose.pose.position.x) / 3
+    pub_pose.pose.pose.position.y = (sub3.pose.pose.position.y + sub0.pose.pose.position.y + sub1.pose.pose.position.y) / 3
+    pub.publish(pub_pose)
+
+  elif not (numpy.isnan(sum0.pose.pose.position.x) or numpy.isnan(sum1.pose.pose.position.x) or numpy.isnan(sum2.pose.pose.position.x) or numpy.isnan(sum3.pose.pose.position.x)):
+    rospy.loginfo("all")
+    pub_pose.pose.pose.position.x = (sub0.pose.pose.position.x + sub2.pose.pose.position.x + sub3.pose.pose.position.x + sub4.pose.pose.position.x) / 4
+    pub_pose.pose.pose.position.y = (sub0.pose.pose.position.y + sub2.pose.pose.position.y + sub3.pose.pose.position.y + sub4.pose.pose.position.y) / 4
+    pub.publish(pub_pose)
+
+
+rospy.init_node('ball_tf')
+
+pub = rospy.Publisher('ball_pose', PoseWithCovarianceStamped, queue_size=1)
+
+sub0 = message_filters.Subscriber('cam0/ball_pose', PoseWithCovarianceStamped)
+sub1 = message_filters.Subscriber('cam1/ball_pose', PoseWithCovarianceStamped)
+sub2 = message_filters.Subscriber('cam2/ball_pose', PoseWithCovarianceStamped)
+sub3 = message_filters.Subscriber('cam3/ball_pose', PoseWithCovarianceStamped)
+ts = message_filters.TimeSynchronizer([sub0, sub1, sub2, sub3], 10)
+ts.registerCallback(callback)
+rospy.spin()

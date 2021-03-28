@@ -1,6 +1,6 @@
 <launch>
 
-  <node ns="cam0" type="ball_detection" pkg="rocket_league_estimation" name="ball_detection">
+  <node type="ball_detection" pkg="rocket_league_estimation" name="ball_detection">
     <param name="showImage" value="true"/>
     <param name="cam_height" value="1220"/>
     <param name="min_hue" value="60"/>
