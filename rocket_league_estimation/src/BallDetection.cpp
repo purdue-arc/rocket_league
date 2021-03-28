@@ -56,7 +56,7 @@ BallDetection::BallDetection() :
     posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
         "ball_pose", 1)},
     camera_subscriber{image_transport.subscribeCamera(
-        "image_color", 1, &BallDetection::BallCallback, this)},
+        "image_rect_color", 1, &BallDetection::BallCallback, this)},
     showImage{pnh.param<bool>("showImage", false)},
     height{pnh.param<int>("cam_height", 1220)},
     minHue{pnh.param<int>("min_hue", 060)},
