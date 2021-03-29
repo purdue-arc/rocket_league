@@ -8,32 +8,22 @@ import message_filters
 
 def callback(sub0, sub1, sub2, sub3):
   pub_pose = PoseWithCovarianceStamped()
-  pub_pose.pose.pose.position.z = 0.0
-  pub_pose.pose.pose.orientation.z = 0.0
-  pub_pose.pose.pose.orientation.z = 0.0
-  pub_pose.pose.pose.orientation.z = 0.0
-  pub_pose.pose.pose.orientation.w = 1.0
-  pub_pose.header = sub0.header
 
   if (sub0.pose.pose.position.z >= sub1.pose.pose.position.z and sub0.pose.pose.position.z >= sub2.pose.pose.position.z and sub0.pose.pose.position.z >= sub3.pose.pose.position.z)
     rospy.loginfo("Using camera 0")
-    pub_pose.pose.pose.position = sub0.pose.pose.position
-    pub_pose.header = sub0.header
+    pub_pose = sub0
 
   elif (sub1.pose.pose.position.z >= sub0.pose.pose.position.z and sub1.pose.pose.position.z >= sub2.pose.pose.position.z and sub1.pose.pose.position.z >= sub3.pose.pose.position.z)
     rospy.loginfo("Using camera 1")
-    pub_pose.pose.pose.position = sub1.pose.pose.position
-    pub_pose.header = sub1.header
+    pub_pose = sub1
    
   elif (sub2.pose.pose.position.z >= sub0.pose.pose.position.z and sub2.pose.pose.position.z >= sub1.pose.pose.position.z and sub2.pose.pose.position.z >= sub3.pose.pose.position.z)
     rospy.loginfo("Using camera 2")
-    pub_pose.pose.pose.position = sub2.pose.pose.position
-    pub_pose.header = sub2.header
+    pub_pose = sub2
    
   elif (sub3.pose.pose.position.z >= sub0.pose.pose.position.z and sub3.pose.pose.position.z >= sub1.pose.pose.position.z and sub3.pose.pose.position.z >= sub2.pose.pose.position.z)
     rospy.loginfo("Using camera 3")
-    pub_pose.pose.pose.position = sub3.pose.pose.position
-    pub_pose.header = sub3.header
+    pub_pose = sub3
   
   pub_pose.pose.pose.position.z = 0.0
   pub.publish(pub_pose)
