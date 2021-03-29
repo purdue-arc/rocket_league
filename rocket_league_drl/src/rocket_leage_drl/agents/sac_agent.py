@@ -71,7 +71,7 @@ class VAC_Agent(VAC):
             torch.nn.Linear(FEATURE_SIZE, 512),
             torch.nn.ReLU(),
             torch.nn.Linear(512, action_size)).to(self.DEVICE)
-        value_optimizer = torch.optim.Adam(value_model.parameters(), lr=VALUE_LEARNING_RATE)
+        value_optimizer = Adam(value_model.parameters(), lr=VALUE_LEARNING_RATE)
         value_net = VNetwork(value_model, value_optimizer, checkpointer=DummyCheckpointer())
 
         # policy
@@ -80,7 +80,7 @@ class VAC_Agent(VAC):
             ReLU(),
             Linear(512, action_size)).to(self.DEVICE)
         policy_optimizer = Adam(policy_model.parameters(), lr=POLICY_LEARNING_RATE)
-        policy = GreedyPolicy(net, action_size, epsilon_max)
+        # policy = GreedyPolicy(net, action_size, epsilon_max)
         policy_net = SoftmaxPolicy(policy_model, policy_optimizer, checkpointer=DummyCheckpointer())
 
         super().__init__(
