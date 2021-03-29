@@ -16,8 +16,9 @@ This node publishes a PoseWithConvarianceStamped. It subscribes to the camera in
 <br><br>
 Inside the launch file, there are a varity of paramaters, as listed below, along with their use:
 <ul>
+    <li>originX and originY, which specify where the origin in in the camera, this needs to be determined before hand.</li>
     <li>showImage, this boolean is whether or not you want OpenCV to display the camera image in a frame. Useful for debugging. </li>
-    <li>cam_height, this is the height from the center of the ball to the camera sensor. The units of this number will be the units that the coordinate plane is in.</li>
+    <li>height, this is the height from the center of the ball to the camera sensor. The units of this number will be the units that the coordinate plane is in.</li>
     <li>The range of these are specified above, they control the color of the object we are looking for.</li>
     <ul>
         <li>min_hue</li>
