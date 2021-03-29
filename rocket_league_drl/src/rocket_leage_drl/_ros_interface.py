@@ -28,9 +28,51 @@ License:
 """
 
 from abc import ABC, abstractmethod
+from threading import Condition
+import rospy
 
 class ROSInterface(ABC):
-    """abstract interface for all wrappers to extend."""
+    """
+    Abstract interface for all wrappers to extend.
+
+    All classes extending this for a particular environment must do the following:
+    - implement all abstract methods and properties:
+        - observation_size
+        - action_size
+        - reset_env()
+        - reset()
+        - has_state()
+        - clear_state()
+        - get_state()
+        - publish_action()
+    - call super().__init__() in __init__()
+    - initialize the ROS node in __init__()
+    - notify _cond when has_state() may have turned true
+    """
+
+    def __init__(self):
+        self._cond = Condition()
+
+    def wait_for_state(self):
+        """Allow other threads to handle callbacks."""
+        with self._cond:
+            has_state = self._cond.wait_for(self.has_state, 0.3)
+        if rospy.is_shutdown():
+            raise rospy.ROSInterruptException()
+        else:
+            return has_state
+
+    @property
+    @abstractmethod
+    def observation_size(self):
+        """The observation size for the network."""
+        pass
+
+    @property
+    @abstractmethod
+    def action_size(self):
+        """The action size for the network."""
+        pass
 
     @abstractmethod
     def reset_env(self):
@@ -60,16 +102,4 @@ class ROSInterface(ABC):
     @abstractmethod
     def publish_action(self, action):
         """Publish an action to the ROS network."""
-        pass
-
-    @abstractmethod
-    @property
-    def action_size(self):
-        """The action size for the network."""
-        pass
-
-    @abstractmethod
-    @property
-    def observation_size(self):
-        """The observation size for the network."""
         pass
