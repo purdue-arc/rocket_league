@@ -166,6 +166,7 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
         else {
             pose.pose.pose.position.x = std::nan("1");
             pose.pose.pose.position.y = std::nan("1");
+            pose.pose.pose.position.z = 0;
         }
         pose.pose.pose.orientation.x = 0.0;
         pose.pose.pose.orientation.y = 0.0;
