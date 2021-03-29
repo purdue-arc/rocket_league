@@ -48,7 +48,7 @@ class CarDef(object):
     def __init__(self, initPos=(1.25, 1.25), initAngle=3.0, vertices=DEFAULT_VERTICES, 
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=0.0124, maxForwardSpeed=1, maxBackwardSpeed=-1,
-                    maxAngle=45, pgain=0.1):
+                    maxAngle=45, pgain=0.15):
 
         self.initPos = initPos
         self.initAngle = initAngle
