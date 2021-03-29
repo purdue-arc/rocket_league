@@ -58,6 +58,8 @@ BallDetection::BallDetection() :
     camera_subscriber{image_transport.subscribeCamera(
         "image_color", 1, &BallDetection::BallCallback, this)},
     quad{pnh.param<int>("quad", 0)},
+    originX{pnh.param<double>("originX", 0)},
+    originY{pnh.param<double>("originY", 0)},
     showImage{pnh.param<bool>("showImage", false)},
     height{pnh.param<int>("cam_height", 1220)},
     minHue{pnh.param<int>("min_hue", 060)},
@@ -124,7 +126,26 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             }
             if (cam.y >= 0) {
                 cartesianY *= -1;
-            } 
+            }
+            //honeslty i'm not sure if this is going to work, but i'll find out soon enough.
+            cartesianX -= originX;
+            cartesianY -= originY;
+            //same story; sets quadrant stuff
+            switch(quad) {
+                case 2:
+                    cam.x *= -1;
+                    break;
+                case 3:
+                    cam.x *= -1;
+                    cam.y *= -1;
+                    break;
+                case 4:
+                    cam.y *= -1;
+                    break;
+                default:
+                    ROS_INFO("other quad (probably 1)");
+                    break;
+            }
             // set x,y coord
             pose.pose.pose.position.x = cartesianX;
             pose.pose.pose.position.y = cartesianY;
