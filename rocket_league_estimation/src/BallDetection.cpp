@@ -56,7 +56,8 @@ BallDetection::BallDetection() :
     posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
         "ball_pose", 1)},
     camera_subscriber{image_transport.subscribeCamera(
-        "image_rect_color", 1, &BallDetection::BallCallback, this)},
+        "image_color", 1, &BallDetection::BallCallback, this)},
+    quad{pnh.param<int>("quad", 0)},
     showImage{pnh.param<bool>("showImage", false)},
     height{pnh.param<int>("cam_height", 1220)},
     minHue{pnh.param<int>("min_hue", 060)},
@@ -127,6 +128,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             // set x,y coord
             pose.pose.pose.position.x = cartesianX;
             pose.pose.pose.position.y = cartesianY;
+            //i'm not sorry.
+            pose.pose.pose.position.z = cv::contourArea(contours.at(getMaxAreaContourId(contours)));
             ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
             if (showImage) {
                 cv::namedWindow("image");
@@ -143,7 +146,6 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             pose.pose.pose.position.x = std::nan("1");
             pose.pose.pose.position.y = std::nan("1");
         }
-        pose.pose.pose.position.z = 0.0;
         pose.pose.pose.orientation.x = 0.0;
         pose.pose.pose.orientation.y = 0.0;
         pose.pose.pose.orientation.z = 0.0;
