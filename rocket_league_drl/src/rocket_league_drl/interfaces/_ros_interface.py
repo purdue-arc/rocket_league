@@ -36,7 +36,6 @@ class ROSInterface(ABC):
 
     All classes extending this for a particular environment must do the following:
     - implement all abstract methods and properties:
-        - _state_cond
         - OBSERVATION_SIZE
         - ACTION_SIZE
         - reset_env()
@@ -45,23 +44,20 @@ class ROSInterface(ABC):
         - clear_state()
         - get_state()
         - publish_action()
+    - implement required attributes
+        - _cond
     - initialize the ROS node in __init__()
-    - notify _state_cond when has_state() may have turned true
+    - notify _cond when has_state() may have turned true
     """
 
     def wait_for_state(self):
         """Allow other threads to handle callbacks."""
-        with self._state_cond:
-            has_state = self._state_cond.wait_for(self.has_state, 0.3)
+        with self._cond:
+            has_state = self._cond.wait_for(self.has_state, 0.3)
         if rospy.is_shutdown():
             raise rospy.ROSInterruptException()
         else:
             return has_state
-
-    @property
-    @abstractmethod
-    def _state_cond(self):
-        """Condition for checking state."""
 
     @property
     @abstractmethod

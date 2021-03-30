@@ -41,8 +41,7 @@ from all.memory import ExperienceReplayBuffer
 class DQNAgent(DQN, AgentInterface):
     """DQN interface."""
     def __init__(self, obs_size, action_size, params):
-        self._OBS_SIZE = obs_size
-        self._DEV = None
+        self._DEVICE = None
         self._init_device()
 
         # parameters
@@ -59,7 +58,7 @@ class DQNAgent(DQN, AgentInterface):
 
         # variables
         model = Sequential(
-            Linear(self._OBSERVATION_SIZE, 512),
+            Linear(obs_size, 512),
             ReLU(),
             Linear(512, 512),
             ReLU(),
@@ -79,18 +78,6 @@ class DQNAgent(DQN, AgentInterface):
             minibatch_size=batch_size,
             replay_start_size=batch_size,
             update_frequency=batch_size/2)
-
-    @property
-    def _DEVICE(self):
-        return self._DEV
-
-    @_DEVICE.setter
-    def _DEVICE(self, value):
-        self._DEV = value
-
-    @property
-    def _OBSERVATION_SIZE(self):
-        return self._OBS_SIZE
 
     def act(self, state):
         """Take action during training."""

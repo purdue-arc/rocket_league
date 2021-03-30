@@ -37,13 +37,13 @@ class AgentInterface(ABC):
     Abstract interface for all agents to extend.
 
     All classes extending this for a particular agent must do the following:
-    - implement all abstract methods and properties
-        - DEVICE
-        - _OBS_SIZE
+    - implement all abstract methods
         - act()
         - eval()
         - save()
         - load()
+    - create required attributes
+        - _DEVICE
     - call _init_device() in __init__()
     """
 
@@ -58,32 +58,13 @@ class AgentInterface(ABC):
     def _convert_state(self, state):
         """Convert state from numpy to torch / ALL type."""
         obs, reward, done, __ = state
-
-        assert np.size(obs) == self._OBSERVATION_SIZE
         obs = torch.from_numpy(obs).float().to(self._DEVICE)
-
         data = {
             "observation" : obs,
             "reward": reward,
             "done" : done
         }
-
         return State(data, self._DEVICE)
-
-    @property
-    @abstractmethod
-    def _DEVICE(self):
-        """The Torch device in use."""
-
-    @_DEVICE.setter
-    @abstractmethod
-    def _DEVICE(self, value):
-        """The Torch device in use."""
-
-    @property
-    @abstractmethod
-    def _OBSERVATION_SIZE(self):
-        """The observation size for the network."""
 
     @abstractmethod
     def act(self, state):

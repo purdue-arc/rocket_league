@@ -85,11 +85,6 @@ class SnakeInterface(ROSInterface):
         rospy.Subscriber('snake/active', Bool, self._alive_cb)
 
     @property
-    def _state_cond(self):
-        """Condition for checking state."""
-        return self._cond
-
-    @property
     def OBSERVATION_SIZE(self):
         """The observation size for the network."""
         return 3 + 2*self._NUM_SEGMENTS
