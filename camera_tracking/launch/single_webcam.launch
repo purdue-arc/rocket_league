@@ -15,7 +15,7 @@
   </node>
 
   <!-- USB Cam -->
-  <node pkg="usb_cam" type="usb_cam_node" name="$(arg camera_name)" args="load camera_aravis/CameraAravisNodelet $(arg manager)" output="screen">
+  <node pkg="usb_cam" type="usb_cam_node" name="$(arg camera_name)" output="screen">
     <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name).yaml" />
     <param name="frame_id" value="$(arg camera_name)" />
     <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name)_calibration.yaml" />
@@ -31,18 +31,8 @@
   </node>
 
   <!-- De-Bayer / rectify -->
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc1" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc2" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc3" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc4" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc5" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc6" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc7" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc8" respawn="false" output="log" />
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc9" respawn="false" output="log">
-    <remap from="image_rect_color" to="benchmark"/>
-  </node>
+  <node pkg="nodelet" type="nodelet" ns="$(arg camera_name)" name="image_proc_debayer" args="load image_proc/debayer $(arg manager)"/>
+  <node pkg="nodelet" type="nodelet" ns="$(arg camera_name)" name="image_proc_rectify" args="load image_proc/rectify $(arg manager)"/>
 
   <!-- Apriltag detection -->
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg camera_name)" name="apriltag" output="screen">
