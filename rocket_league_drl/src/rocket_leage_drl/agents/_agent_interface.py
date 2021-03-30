@@ -1,5 +1,5 @@
 """
-Contains the AgentInterface class.
+Contains the agentInterface class.
 
 License:
   BSD 3-Clause License
@@ -82,9 +82,7 @@ class AgentInterface(ABC):
     @abstractmethod
     def save(self):
         """Save weights to file."""
-        pass
-    
+
     @abstractmethod
     def load(self):
         """Load weights from file."""
-        pass

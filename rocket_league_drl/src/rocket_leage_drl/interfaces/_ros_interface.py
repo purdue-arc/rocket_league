@@ -66,40 +66,32 @@ class ROSInterface(ABC):
     @abstractmethod
     def observation_size(self):
         """The observation size for the network."""
-        pass
 
     @property
     @abstractmethod
     def action_size(self):
         """The action size for the network."""
-        pass
 
     @abstractmethod
     def reset_env(self):
         """Reset environment for a new training episode."""
-        pass
     
     @abstractmethod
     def reset(self):
         """Reset internally for a new episode."""
-        pass
 
     @abstractmethod
     def has_state(self):
         """Determine if the new state is ready."""
-        pass
 
     @abstractmethod
     def clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
-        pass
 
     @abstractmethod
     def get_state(self):
         """Get state tuple (observation, reward, done, info)."""
-        pass
 
     @abstractmethod
     def publish_action(self, action):
         """Publish an action to the ROS network."""
-        pass
