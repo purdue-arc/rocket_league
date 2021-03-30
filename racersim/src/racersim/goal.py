@@ -34,19 +34,19 @@ from tf.transformations import quaternion_from_euler
 class Goal(object):
     """Simulates goal position"""
 
-    def __init__(self, world, initPos=[0,0,0], width=1, height=1):
+    def __init__(self, world, pos, width, height, id):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_staticBody
-        bodyDef.position = (initPos[0], initPos[1])
+        bodyDef.position = pos
         self.body = world.CreateBody(bodyDef)
 
-        shape = Box2D.b2PolygonShape(box=(width,height))
+        shape = Box2D.b2PolygonShape(box=(width/2, height/2))
         fixtureDef = Box2D.b2FixtureDef(shape=shape)
         fixtureDef.isSensor = True
+        fixtureDef.userData = "goal:{}".format(id)
         self.body.CreateFixture(fixtureDef)
 
     def getPoint(self):
-        print(self.body.position[0], self.body.position[1], 0)
         return (self.body.position[0], self.body.position[1], 0)
 
     def getQuaternion(self):

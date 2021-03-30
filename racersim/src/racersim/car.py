@@ -47,7 +47,7 @@ class CarDef(object):
 
     DEFAULT_TIRE_DEF = TireDef()
 
-    def __init__(self, initPos=(1.25, 1.25), initAngle=6.0, vertices=DEFAULT_VERTICES,
+    def __init__(self, initPos=(1.25, 1.25), initAngle=0, vertices=DEFAULT_VERTICES,
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
                     density=20, maxAngle=45, pgain=0.1):
 

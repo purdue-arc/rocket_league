@@ -36,15 +36,17 @@ class Ball(object):
     """Simulates game ball."""
 
     def __init__(self, world, initPos=(1.5,1.5), radius=0.11/2, density=0.00001, restitution=1.0):
-
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
         bodyDef.position = initPos
         self.body = world.CreateBody(bodyDef)
 
         shape = Box2D.b2CircleShape(radius=radius)
-        self.body.CreateFixture(shape=shape, density=density, 
-                                 restitution=restitution)
+        fixtureDef = Box2D.b2FixtureDef(shape=shape)
+        fixtureDef.density = density
+        fixtureDef.restitution = restitution
+        fixtureDef.userData = "ball:0"
+        self.body.CreateFixture(fixtureDef)
 
     def getPoint(self):
         return (self.body.position[0], self.body.position[1], 0)

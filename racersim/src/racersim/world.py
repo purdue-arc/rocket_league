@@ -30,16 +30,15 @@ License:
 import Box2D
 import math
 
+# Local classes
+from racersim.goal import Goal
+
 class World(Box2D.b2World):
     """Simulates world for car to exist in"""
 
-    wall_thickness = 0.02
-
-    def __init__(self, map_height, map_width):
-        super(World, self).__init__()
+    def __init__(self, map_height, map_width, goal_width, goal_height):
+        super(World, self).__init__(contactListener=WorldListener())
         self.gravity = (0,0)
-
-        self.wall_thickness = 0.02 * math.sqrt(map_width**2 + map_height**2)
 
         self.gndBody = self.CreateBody()
         gndShape = Box2D.b2PolygonShape(box=(map_width, map_height))
@@ -48,17 +47,48 @@ class World(Box2D.b2World):
         self.gndBody.CreateFixture(gndFixtureDef)
 
         self.wallBodies = []
-        wallPos = [(0, map_height), (map_width, 0), (0,0), (0,0)]
 
-        for i in range(len(wallPos)):
-            wallBody = self.CreateBody(position=wallPos[i])
+        width = (map_width - goal_width) / 4
+        height = goal_height
 
-            if (i % 2) == 0:
-                wallShape = Box2D.b2PolygonShape(box=(map_width, self.wall_thickness))
-            else:
-                wallShape = Box2D.b2PolygonShape(box=(self.wall_thickness, map_height))
+        self.createWall((width, 0), width, height)
+        self.createWall((map_width - width, 0), width, height)
+        self.createWall((width, map_height), width, height)
+        self.createWall((map_width - width, map_height), width, height)
 
-            wallFixtureDef = Box2D.b2FixtureDef(shape=wallShape, restitution=0.01)
-            wallBody.CreateFixture(wallFixtureDef)
+        width = goal_height
+        height = map_height / 2
 
-            self.wallBodies.append(wallBody)
+        self.createWall((0, height), width, height)
+        self.createWall((map_width, height), width, height)
+
+        self.goalBodies = []
+        self.goalBodies.append(Goal(self, (map_width/2, 0),
+                                    goal_width, goal_height, 0))
+        self.goalBodies.append(Goal(self, (map_width/2, map_height),
+                                    goal_width, goal_height, 1))
+        
+    def createWall(self, pos, width, height):
+        wallBody = self.CreateBody(position=pos)
+        wallShape = Box2D.b2PolygonShape(box=(width, height))
+        wallFixtureDef = Box2D.b2FixtureDef(shape=wallShape, restitution=0.01)
+        wallBody.CreateFixture(wallFixtureDef)
+        self.wallBodies.append(wallBody)
+
+class WorldListener(Box2D.b2ContactListener):
+    """Handles collision and sensor events"""
+
+    def __init__(self):
+        Box2D.b2ContactListener.__init__(self)
+
+    def BeginContact(self, contact):
+        a = contact.fixtureA
+        b = contact.fixtureB
+        if a.userData != None:
+            print(a.userData)
+        if b.userData != None:
+            print(b.userData)
+        pass
+
+    def EndContact(self, contact):
+        pass

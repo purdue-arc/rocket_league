@@ -48,8 +48,6 @@ class RacerSimROS(object):
             renderEnabled=rospy.get_param('~render/enabled', True),
             map_height=rospy.get_param('~MAP_HEIGHT'),
             map_width=rospy.get_param('~MAP_WIDTH'),
-            goal0_pos=rospy.get_param('~GOAL0_POSE'),
-            goal1_pos=rospy.get_param('~GOAL1_POSE'),
             goal_width=rospy.get_param('~GOAL_WIDTH'),
             goal_height=rospy.get_param('~GOAL_HEIGHT')
         )
