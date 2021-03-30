@@ -26,7 +26,7 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from rocket_league_drl import AgentInterface
+from rocket_league_drl.agents import AgentInterface
 
 import torch
 from torch.nn import Sequential, Linear, ReLU

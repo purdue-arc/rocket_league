@@ -28,7 +28,7 @@ License:
 """
 
 # package
-from rocket_leage_drl import ROSInterface
+from rocket_leage_drl.interfaces import ROSInterface
 
 # ROS
 import rospy

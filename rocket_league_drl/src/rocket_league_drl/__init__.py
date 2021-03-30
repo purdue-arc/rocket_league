@@ -5,5 +5,4 @@ from .make_trainer import makeTrainer
 __all__ = [
     "makeAgent",
     "makeEvaluator",
-    "makeTrainer"
-]
+    "makeTrainer"]
