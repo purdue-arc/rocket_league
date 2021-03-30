@@ -1,13 +1,16 @@
 <launch>
   <arg name="load_manager" default="true"/>
   <arg name="manager_name" default="camera_manager"/>
-  <arg name="manager" value="/$(arg manager_name)"/>
+  <arg name="manager" value="$(arg manager_name)"/>
   <arg name="manager_threads" default="4"/>
 
   <arg name="camera_name" default="web_cam"/>
 
+  <!-- Remap /tf topic to private /tf topic -->
+  <remap from="/tf" to="tf" />
+
   <!-- Nodelet Manager -->
-  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
+  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
     <param name="num_worker_threads" value="$(arg manager_threads)" />
   </node>
 
@@ -28,14 +31,25 @@
   </node>
 
   <!-- De-Bayer / rectify -->
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="screen"/>
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc1" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc2" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc3" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc4" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc5" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc6" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc7" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc8" respawn="false" output="log" />
+  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc9" respawn="false" output="log">
+    <remap from="image_rect_color" to="benchmark"/>
+  </node>
 
   <!-- Apriltag detection -->
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg camera_name)" name="apriltag" output="screen">
     <param name="camera_frame" type="str" value="$(arg camera_name)" />
     <param name="publish_tag_detections_image" type="bool" value="true" />
 
-    <rosparam command="load" file="$(find camera_tracking)/config/settings.yaml" />
+    <rosparam command="load" file="$(find camera_tracking)/config/apriltag_settings.yaml" />
     <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml" />
 
     <remap from="/tf" to="tf" />
