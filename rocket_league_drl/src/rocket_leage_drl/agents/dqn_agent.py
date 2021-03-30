@@ -26,7 +26,7 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import numpy as np
+from rocket_league_drl import AgentInterface
 
 import torch
 from torch.nn import Sequential, Linear, ReLU
@@ -37,20 +37,23 @@ from all.agents import DQN
 from all.approximation import QNetwork, DummyCheckpointer, PolyakTarget
 from all.policies import GreedyPolicy
 from all.memory import ExperienceReplayBuffer
-from all.core import State
 
-class DQNAgent(DQN):
-    """High level DQN controller for snake tutorial."""
-    def __init__(self, state_size, action_size,
-            memory_len=2000, gamma=0.9,
-            epsilon_max=1.0, epsilon_min=0.01,
-            epsilon_steps=30000,
-            learning_rate=0.01, batch_size=64,
-            target_update_rate=0.25):
+class DQNAgent(DQN, AgentInterface):
+    """DQN interface."""
+    def __init__(self, obs_size, action_size, params):
+        AgentInterface().__init__(self, obs_size)
 
-        self.OBSERVATION_SIZE = state_size
-        self.EPSILON_DELTA = (epsilon_max - epsilon_min) / float(epsilon_steps)
-        self.EPSILON_MIN = epsilon_min
+        # parameters
+        learning_rate = params.get('learning_rate', 0.01)
+        memory_len = params.get('memory_len', 10000)
+        gamma = params.get('gamma', 0.9)
+        batch_size = params.get('batch_size', 64)
+        target_update_rate = params.get('target_update_rate', 0.25)
+
+        self.EPSILON_MIN = params.get('epsilon/min', 0.01)
+        epsilon_max = params.get('epsilon/max', 1.0)
+        epsilon_steps = params.get('epsilon/steps', 3000)
+        self.EPSILON_DELTA = (epsilon_max - self.EPSILON_MIN) / float(epsilon_steps)
 
         # variables
         model = Sequential(
@@ -60,11 +63,11 @@ class DQNAgent(DQN):
             ReLU(),
             Linear(512, 512),
             ReLU(),
-            Linear(512, action_size)).to(self.DEVICE)
+            Linear(512, action_size)).to(self._DEVICE)
         optimizer = Adam(model.parameters(), lr=learning_rate)
         net = QNetwork(model, optimizer, checkpointer=DummyCheckpointer(), target=PolyakTarget(target_update_rate))
         policy = GreedyPolicy(net, action_size, epsilon_max)
-        buffer = ExperienceReplayBuffer(memory_len, self.DEVICE)
+        buffer = ExperienceReplayBuffer(memory_len, self._DEVICE)
         super().__init__(
             q=net,
             policy=policy,
@@ -74,21 +77,6 @@ class DQNAgent(DQN):
             minibatch_size=batch_size,
             replay_start_size=batch_size,
             update_frequency=batch_size/2)
-
-    def _convert_input(self, input):
-        """Convert state from numpy to torch type."""
-        observation, reward, done, __ = input
-
-        assert np.size(observation) == self.OBSERVATION_SIZE
-        observation = torch.from_numpy(observation).float().to(self.DEVICE)
-
-        data = {
-            "observation" : observation,
-            "reward": reward,
-            "done" : done
-        }
-
-        return State(data, self.DEVICE)
 
     def act(self, state):
         """Take action during training."""
@@ -109,5 +97,5 @@ class DQNAgent(DQN):
     def load(self, name):
         """Load weights from file."""
         print(f"Loading weights from {name}")
-        self.q.model.model.load_state_dict(torch.load(name, map_location=self.DEVICE))
-        self.q.model.model.to(self.DEVICE)
+        self.q.model.model.load_state_dict(torch.load(name, map_location=self._DEVICE))
+        self.q.model.model.to(self._DEVICE)

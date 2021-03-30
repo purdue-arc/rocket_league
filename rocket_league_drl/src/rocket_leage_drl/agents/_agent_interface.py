@@ -42,7 +42,7 @@ class AgentInterface(ABC):
         - eval()
         - save()
         - load()
-    - call super().__init__() in __init__()
+    - call AgentInterface().__init__() in __init__()
     """
 
     def __init__(self, obs_size):
