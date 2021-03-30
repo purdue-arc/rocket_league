@@ -64,7 +64,7 @@ class TrajectoryPlannerROS(object):
         # These variables act as parameters to generate a path
         self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.5)    # Multiplier for distance of 1st main point in front of the car
         self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
-        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 0.5)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 1)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
                                           # (adjusts curvature somewhat)
         self.FOLLOW_THROUGH_DISTANCE = rospy.get_param('~FOLLOW_THROUGH_DISTANCE',0.08)
 
@@ -116,7 +116,7 @@ class TrajectoryPlannerROS(object):
 
         # brackwards stuff
         speed = np.array((self.final_linear_vel.x, self.final_linear_vel.y))
-        speed = np.dot(speed,speed)
+        speed = np.sqrt(np.dot(speed,speed))
         if self.final_linear_vel.x < 0:
             self.backwards = True
 
@@ -128,16 +128,13 @@ class TrajectoryPlannerROS(object):
         _,_,yaw = euler_from_quaternion(quat)
         self.final_heading = np.array([np.cos(yaw),np.sin(yaw)])
         # Normalize the vector for future calculations
-        self.final_normalized_heading = normalize(self.final_heading)\
+        self.final_normalized_heading = normalize(self.final_heading)
+        if self.backwards:
+            self.final_normalized_heading = - self.final_normalized_heading
 
 
         if not rospy.is_shutdown():
             if self.check_if_GO():
-                # check for barckwards stuff
-                target_spot = np.array((self.target_pose.position.x, self.target_pose.position.y))
-                bot_spot = np.array((self.bot_pose.position.x, self.bot_pose.position.y))
-                if np.dot(self.bot_init_heading, (target_spot - bot_spot)) < 0:
-                    self.backwards = True
                 self.loop_once()
 
 
@@ -378,6 +375,7 @@ class TrajectoryPlannerROS(object):
 
             # Use line to make a perpendicular, and then calculate second point
             # that is second_point_distance away from the midpoint
+            #TODO: get this working properly
             perpendicular = np.array([line_between[1], -line_between[0]])
             perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
             perpendicular = normalize(perpendicular)
@@ -537,7 +535,7 @@ class TrajectoryPlannerROS(object):
             tangents = np.zeros((len(points), 2))  # Plus 1 is because I'm starting the curve at the bot
 
             # constant or heading multiplier
-            c = 0.3
+            c = 0.5
 
             # Define tangents at midpoints
             for i in range(1, len(points) - 2):
