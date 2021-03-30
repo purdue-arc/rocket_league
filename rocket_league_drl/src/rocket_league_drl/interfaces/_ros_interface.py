@@ -28,7 +28,6 @@ License:
 """
 
 from abc import ABC, abstractmethod
-from threading import Condition
 import rospy
 
 class ROSInterface(ABC):
@@ -37,26 +36,23 @@ class ROSInterface(ABC):
 
     All classes extending this for a particular environment must do the following:
     - implement all abstract methods and properties:
-        - observation_size
-        - action_size
+        - _state_cond
+        - OBSERVATION_SIZE
+        - ACTION_SIZE
         - reset_env()
         - reset()
         - has_state()
         - clear_state()
         - get_state()
         - publish_action()
-    - call super().__init__() in __init__()
     - initialize the ROS node in __init__()
-    - notify _cond when has_state() may have turned true
+    - notify _state_cond when has_state() may have turned true
     """
-
-    def __init__(self):
-        self._cond = Condition()
 
     def wait_for_state(self):
         """Allow other threads to handle callbacks."""
-        with self._cond:
-            has_state = self._cond.wait_for(self.has_state, 0.3)
+        with self._state_cond:
+            has_state = self._state_cond.wait_for(self.has_state, 0.3)
         if rospy.is_shutdown():
             raise rospy.ROSInterruptException()
         else:
@@ -64,12 +60,17 @@ class ROSInterface(ABC):
 
     @property
     @abstractmethod
-    def observation_size(self):
+    def _state_cond(self):
+        """Condition for checking state."""
+
+    @property
+    @abstractmethod
+    def OBSERVATION_SIZE(self):
         """The observation size for the network."""
 
     @property
     @abstractmethod
-    def action_size(self):
+    def ACTION_SIZE(self):
         """The action size for the network."""
 
     @abstractmethod

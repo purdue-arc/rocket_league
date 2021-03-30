@@ -41,7 +41,9 @@ from all.memory import ExperienceReplayBuffer
 class DQNAgent(DQN, AgentInterface):
     """DQN interface."""
     def __init__(self, obs_size, action_size, params):
-        AgentInterface().__init__(self, obs_size)
+        self._OBS_SIZE = obs_size
+        self._DEV = None
+        self._init_device()
 
         # parameters
         learning_rate = params.get('learning_rate', 0.01)
@@ -57,7 +59,7 @@ class DQNAgent(DQN, AgentInterface):
 
         # variables
         model = Sequential(
-            Linear(self.OBSERVATION_SIZE, 512),
+            Linear(self._OBSERVATION_SIZE, 512),
             ReLU(),
             Linear(512, 512),
             ReLU(),
@@ -78,16 +80,28 @@ class DQNAgent(DQN, AgentInterface):
             replay_start_size=batch_size,
             update_frequency=batch_size/2)
 
+    @property
+    def _DEVICE(self):
+        return self._DEV
+
+    @_DEVICE.setter
+    def _DEVICE(self, value):
+        self._DEV = value
+
+    @property
+    def _OBSERVATION_SIZE(self):
+        return self._OBS_SIZE
+
     def act(self, state):
         """Take action during training."""
-        action = super().act(self._convert_input(state))
+        action = super().act(self._convert_state(state))
         if self.policy.epsilon >= (self.EPSILON_MIN + self.EPSILON_DELTA):
             self.policy.epsilon -= self.EPSILON_DELTA
         return action
 
     def eval(self, state):
         """Take action during evaluation."""
-        return super().eval(self._convert_input(state))
+        return super().eval(self._convert_state(state))
 
     def save(self, name):
         """Save weights to file."""

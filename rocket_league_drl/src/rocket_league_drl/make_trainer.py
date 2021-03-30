@@ -43,7 +43,7 @@ def makeTrainer(cls):
     class Trainer(cls):
         """Class capable of training an agent."""
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
             # Constants
             self._DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
@@ -135,4 +135,4 @@ def makeTrainer(cls):
 
             return self.get_state()
 
-    return Trainer()
+    return Trainer

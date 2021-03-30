@@ -37,28 +37,29 @@ class AgentInterface(ABC):
     Abstract interface for all agents to extend.
 
     All classes extending this for a particular agent must do the following:
-    - implement all abstract methods
+    - implement all abstract methods and properties
+        - DEVICE
+        - _OBS_SIZE
         - act()
         - eval()
         - save()
         - load()
-    - call AgentInterface().__init__() in __init__()
+    - call _init_device() in __init__()
     """
 
-    def __init__(self, obs_size):
+    def _init_device(self):
         if torch.cuda.is_available():
             print("Using CUDA GPU")
             self._DEVICE = torch.device("cuda")
         else:
             print("Using CPU")
             self._DEVICE = torch.device("cpu")
-        self._OBS_SIZE = obs_size
 
     def _convert_state(self, state):
         """Convert state from numpy to torch / ALL type."""
         obs, reward, done, __ = state
 
-        assert np.size(obs) == self._OBS_SIZE
+        assert np.size(obs) == self._OBSERVATION_SIZE
         obs = torch.from_numpy(obs).float().to(self._DEVICE)
 
         data = {
@@ -69,15 +70,30 @@ class AgentInterface(ABC):
 
         return State(data, self._DEVICE)
 
+    @property
+    @abstractmethod
+    def _DEVICE(self):
+        """The Torch device in use."""
+
+    @_DEVICE.setter
+    @abstractmethod
+    def _DEVICE(self, value):
+        """The Torch device in use."""
+
+    @property
+    @abstractmethod
+    def _OBSERVATION_SIZE(self):
+        """The observation size for the network."""
+
     @abstractmethod
     def act(self, state):
         """Take action during training."""
-        # return super().act(self._convert_input(state))
+        # return super().act(self._convert_state(state))
 
     @abstractmethod
     def eval(self, state):
         """Take action during evaluation."""
-        # return super().eval(self._convert_input(state))
+        # return super().eval(self._convert_state(state))
 
     @abstractmethod
     def save(self):

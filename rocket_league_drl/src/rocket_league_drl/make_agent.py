@@ -40,7 +40,7 @@ def makeAgent(cls):
     class Agent(cls):
         """Class containing an DRL agent."""
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
             # Services
             # TODO make a service (requires custom messages)
@@ -51,13 +51,13 @@ def makeAgent(cls):
             agent_type = rospy.get_param('~agent_type', "dqn")
             if agent_type == "dqn":
                 self.agent = DQNAgent(
-                    self.observation_size,
-                    self.action_size,
+                    self.OBSERVATION_SIZE,
+                    self.ACTION_SIZE,
                     params=rospy.get_param('~'+agent_type))
             elif agent_type == "vac":
                 self.agent = VACAgent(
-                    self.observation_size,
-                    self.action_size,
+                    self.OBSERVATION_SIZE,
+                    self.ACTION_SIZE,
                     params=rospy.get_param('~'+agent_type))
             else:
                 rospy.logerr("Unknown agent type")
@@ -71,4 +71,4 @@ def makeAgent(cls):
             """Callback to save model weights."""
             self.agent.save(save_msg.data)
 
-    return Agent()
+    return Agent

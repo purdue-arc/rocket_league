@@ -53,7 +53,7 @@ class CartPoleActions(IntEnum):
 class CartPoleInterface(ROSInterface):
     """ROS interface for the snake game."""
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
 
         rospy.init_node('snake_drl')
 

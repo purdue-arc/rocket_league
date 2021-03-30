@@ -41,6 +41,7 @@ import numpy as np
 from transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
 from math import exp
+from threading import Condition
 
 @unique
 class SnakeActions(IntEnum):
@@ -53,8 +54,6 @@ class SnakeActions(IntEnum):
 class SnakeInterface(ROSInterface):
     """ROS interface for the snake game."""
     def __init__(self):
-        super().__init__(self)
-
         rospy.init_node('snake_drl')
 
         # Constants
@@ -77,6 +76,7 @@ class SnakeInterface(ROSInterface):
         self._alive = None
         self._prev_time = None
         self._prev_score = None
+        self._cond = Condition()
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
@@ -85,12 +85,17 @@ class SnakeInterface(ROSInterface):
         rospy.Subscriber('snake/active', Bool, self._alive_cb)
 
     @property
-    def observation_size(self):
+    def _state_cond(self):
+        """Condition for checking state."""
+        return self._cond
+
+    @property
+    def OBSERVATION_SIZE(self):
         """The observation size for the network."""
         return 3 + 2*self._NUM_SEGMENTS
 
     @property
-    def action_size(self):
+    def ACTION_SIZE(self):
         """The action size for the network."""
         return SnakeActions.SIZE
 

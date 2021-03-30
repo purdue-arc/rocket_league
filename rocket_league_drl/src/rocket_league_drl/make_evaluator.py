@@ -39,7 +39,7 @@ def makeEvaluator(cls):
     class Evaluator(cls):
         """Class capable of evaluating an agent against live input."""
         def __init__(self):
-            super().__init__(self)
+            super().__init__()
 
             # initialize variables
             self.reset()
@@ -51,11 +51,11 @@ def makeEvaluator(cls):
                 except rospy.ROSInterruptException:
                     pass
 
-                state = self.get_env()
+                state = self.get_state()
 
                 # check for end of game and react
                 if not state[2]:
                     self.clear_state()
                     self.publish_action(self.agent.eval(state))
 
-    return Evaluator()
+    return Evaluator

@@ -33,23 +33,27 @@ import sys
 from rocket_league_drl import makeAgent, makeTrainer, makeEvaluator
 from rocket_league_drl.interfaces import SnakeInterface, CartPoleInterface
 
+from pdb import set_trace
+
 assert len(sys.argv) >= 2
 env = sys.argv[1]
 mode = sys.argv[2]
 print("Running " + env + " in " + mode + " mode.")
 
 if env == "snake":
-    interface = SnakeInterface()
+    Interface = SnakeInterface
 elif env == "cartPole":
-    interface = CartPoleInterface()
+    Interface = CartPoleInterface
 else:
     print("Unrecognized environment!")
 
-agent = makeAgent(interface)
+Agent = makeAgent(Interface)
 
 if mode == "train":
-    trainer = makeTrainer(agent)
+    Trainer = makeTrainer(Agent)
+    Trainer()
 elif mode == "eval":
-    evaluator = makeEvaluator(agent)
+    Evaluator = makeEvaluator(Agent)
+    Evaluator()
 else:
     print("Unrecognized mode!")
