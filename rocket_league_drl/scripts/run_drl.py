@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Convenience node to log model weights when training.
+Deep learning interface for ROS.
 
 License:
   BSD 3-Clause License
@@ -29,40 +29,27 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import rospy
-from std_msgs.msg import String
-from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
+import sys
+from rocket_league_drl import makeAgent, makeTrainer, makeEvaluator
+from rocket_league_drl.interfaces import SnakeInterface, CartPoleInterface
 
-class Logger(object):
-    """Log model weights during training."""
-    def __init__(self):
-        rospy.init_node('model_weight_logger')
+assert len(sys.argv) >= 2
+env = sys.argv[1]
+mode = sys.argv[2]
+print("Running " + env + " in " + mode + " mode.")
 
-        # Constants
-        self.LOG_DIR = rospy.get_param('~log_dir')
-        self.FREQUENCY = rospy.get_param('~log_freq', 100)
+if env == "snake":
+    interface = SnakeInterface()
+elif env == "cartPole":
+    interface = CartPoleInterface()
+else:
+    print("Unrecognized environment!")
 
-        # Subscribers
-        rospy.Subscriber('snake/dqn/training', DiagnosticStatus, self.progress_cb)
+agent = makeAgent(interface)
 
-        # Services (TODO make service when snake_dqn updates)
-        self.log_pub = rospy.Publisher('snake/dqn/save_weights', String, queue_size=1)
-
-        rospy.spin()
-
-    def progress_cb(self, progress_msg):
-        """Track training progress and save when configured to."""
-        episode = None
-        for kv in progress_msg.values:
-            if kv.key == "episode":
-                episode = int(kv.value)
-
-        if episode is None:
-            rospy.logerr("Bad progress message.")
-            return
-
-        if episode % self.FREQUENCY == 0:
-            self.log_pub.publish(self.LOG_DIR + f"episode_{episode:04d}_weights.pt")
-
-if __name__ == "__main__":
-    Logger()
+if mode == "train":
+    trainer = makeTrainer(agent)
+elif mode == "eval":
+    evaluator = makeEvaluator(agent)
+else:
+    print("Unrecognized mode!")

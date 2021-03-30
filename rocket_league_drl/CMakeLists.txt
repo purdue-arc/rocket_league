@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(snake_drl)
+project(rocket_league_drl)
 
 # Find catkin macros
 find_package(catkin REQUIRED)
@@ -16,7 +16,9 @@ catkin_package()
 
 # Mark executable python scripts and nodes for installation
 catkin_install_python(PROGRAMS
-  nodes/snake_drl
+  nodes/logger
+  nodes/plotter
+  scripts/run_drl
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

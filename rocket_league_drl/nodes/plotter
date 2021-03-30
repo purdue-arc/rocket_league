@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-"""Convenience node to log model weights when training.
+"""
+Convenience node to log model weights when training.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
