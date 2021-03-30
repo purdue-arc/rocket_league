@@ -18,7 +18,7 @@ catkin_package()
 catkin_install_python(PROGRAMS
   nodes/logger
   nodes/plotter
-  scripts/run_drl
+  scripts/run_drl.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
