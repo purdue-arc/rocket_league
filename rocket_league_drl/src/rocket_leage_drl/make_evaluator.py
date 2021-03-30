@@ -27,12 +27,12 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from rocket_league_drl import ROSInterface
+from rocket_league_drl.interfaces import ROSInterface
 
 import rospy
 from std_msgs.msg import String
 
-def make_evaluator(cls):
+def makeEvaluator(cls):
     """Create an evaluator extending the provided agent."""
     assert issubclass(cls, ROSInterface)
 

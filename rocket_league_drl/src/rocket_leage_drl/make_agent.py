@@ -27,12 +27,13 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from rocket_league_drl import ROSInterface, DQNAgent, RainbowDQNAgent, VACAgent, SACAgent
+from rocket_league_drl.interfaces import ROSInterface
+from rocket_league_drl.agents import DQNAgent, VACAgent
 
 import rospy
 from std_msgs.msg import String
 
-def make_agent(cls):
+def makeAgent(cls):
     """Create an agent extending the provided interface."""
     assert issubclass(cls, ROSInterface)
 
@@ -53,18 +54,8 @@ def make_agent(cls):
                     self.observation_size,
                     self.action_size,
                     params=rospy.get_param('~'+agent_type))
-            elif agent_type == "rainbow_dqn":
-                self.agent = RainbowDQNAgent(
-                    self.observation_size,
-                    self.action_size,
-                    params=rospy.get_param('~'+agent_type))
             elif agent_type == "vac":
                 self.agent = VACAgent(
-                    self.observation_size,
-                    self.action_size,
-                    params=rospy.get_param('~'+agent_type))
-            elif agent_type == "sac":
-                self.agent = SACAgent(
                     self.observation_size,
                     self.action_size,
                     params=rospy.get_param('~'+agent_type))

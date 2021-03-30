@@ -27,7 +27,7 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from rocket_league_drl import ROSInterface
+from rocket_league_drl.interfaces import ROSInterface
 
 import rospy
 from std_msgs.msg import String
@@ -36,7 +36,7 @@ from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 import time
 
-def make_trainer(cls):
+def makeTrainer(cls):
     """Create a trainer extending the provided agent."""
     assert issubclass(cls, ROSInterface)
 

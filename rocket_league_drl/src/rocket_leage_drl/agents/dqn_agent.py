@@ -39,7 +39,7 @@ from all.policies import GreedyPolicy
 from all.memory import ExperienceReplayBuffer
 from all.core import State
 
-class DQN_Agent(DQN):
+class DQNAgent(DQN):
     """High level DQN controller for snake tutorial."""
     def __init__(self, state_size, action_size,
             memory_len=2000, gamma=0.9,

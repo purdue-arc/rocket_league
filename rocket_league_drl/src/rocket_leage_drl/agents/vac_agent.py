@@ -38,7 +38,7 @@ from all.approximation import VNetwork, FeatureNetwork, DummyCheckpointer
 from all.policies import SoftmaxPolicy
 from all.core import State
 
-class VAC_Agent(VAC):
+class VACAgent(VAC):
     """High level VAC controller for snake tutorial."""
     def __init__(self, state_size, action_size,
             gamma=0.9, learning_rate=0.01,):
