@@ -33,11 +33,11 @@ import math
 # Local classes
 from racersim.goal import Goal
 
-class World(Box2D.b2World):
+class World(Box2D.b2World, goalPub):
     """Simulates world for car to exist in"""
 
     def __init__(self, map_height, map_width, goal_width, goal_height):
-        super(World, self).__init__(contactListener=WorldListener())
+        super(World, self).__init__(contactListener=WorldListener(self))
         self.gravity = (0,0)
 
         self.gndBody = self.CreateBody()
@@ -46,31 +46,43 @@ class World(Box2D.b2World):
         gndFixtureDef.isSensor = True
         self.gndBody.CreateFixture(gndFixtureDef)
 
+        # Setup walls
         self.wallBodies = []
 
-        width = (map_width - goal_width) / 4
+        # Create top goal-surrounding walls
+        width = (map_width - goal_width) / 2
         height = goal_height
+        x = width/2
+        y = 0
+        self.createWall((x, y), width, height)
+        self.createWall((map_width - x, y), width, height)
 
-        self.createWall((width, 0), width, height)
-        self.createWall((map_width - width, 0), width, height)
-        self.createWall((width, map_height), width, height)
-        self.createWall((map_width - width, map_height), width, height)
+        # Create bottom goal-surrouding walls
+        y = map_height
+        self.createWall((x, y), width, height)
+        self.createWall((map_width - x, y), width, height)
 
+        # Create side walls
         width = goal_height
-        height = map_height / 2
+        height = map_height
+        x = 0
+        y = height/2
+        self.createWall((x, y), width, height)
+        self.createWall((map_width, y), width, height)
 
-        self.createWall((0, height), width, height)
-        self.createWall((map_width, height), width, height)
-
+        # Create goals
         self.goalBodies = []
         self.goalBodies.append(Goal(self, (map_width/2, 0),
                                     goal_width, goal_height, 0))
         self.goalBodies.append(Goal(self, (map_width/2, map_height),
                                     goal_width, goal_height, 1))
+
+        # Setup result flag
+        self.winner = None
         
     def createWall(self, pos, width, height):
         wallBody = self.CreateBody(position=pos)
-        wallShape = Box2D.b2PolygonShape(box=(width, height))
+        wallShape = Box2D.b2PolygonShape(box=(width/2, height/2))
         wallFixtureDef = Box2D.b2FixtureDef(shape=wallShape, restitution=0.01)
         wallBody.CreateFixture(wallFixtureDef)
         self.wallBodies.append(wallBody)
@@ -78,17 +90,30 @@ class World(Box2D.b2World):
 class WorldListener(Box2D.b2ContactListener):
     """Handles collision and sensor events"""
 
-    def __init__(self):
+    def __init__(self, world):
         Box2D.b2ContactListener.__init__(self)
+        self.world = world
 
     def BeginContact(self, contact):
         a = contact.fixtureA
         b = contact.fixtureB
-        if a.userData != None:
-            print(a.userData)
-        if b.userData != None:
-            print(b.userData)
-        pass
+
+        # TODO: Add further checking for full scoring
+        if a.userData != None and b.userData != None:
+            aTag = a.userData.split(':')
+            bTag = b.userData.split(':')
+            if aTag[0] == 'ball':
+                if bTag[0] == 'goal':
+                    if bTag[1] == '0':
+                        self.world.winner = '1'
+                    else:
+                        self.world.winner = '0'
+            elif bTag[0] == 'ball':
+                if aTag[0] == 'goal':
+                    if aTag[1] == '0':
+                        self.world.winner = '1'
+                    else:
+                        self.world.winner = '0'
 
     def EndContact(self, contact):
         pass

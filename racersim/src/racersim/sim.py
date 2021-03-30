@@ -53,7 +53,7 @@ class Sim(object):
         initPosCar = (random.uniform(0,map_width), 2)
 
         # These positions are static
-        initPosBall = (2, 0.5)
+        initPosBall = (map_width/2, 0.05)
         # initPosCar = (2, 2)
 
         self.world = World(map_height, map_width, goal_width, goal_height)

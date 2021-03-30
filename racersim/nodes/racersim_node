@@ -35,7 +35,7 @@ from std_srvs.srv import Empty, EmptyResponse
 # Local library
 import racersim
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
-from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
+from rocket_league_msgs.msg import Target, Path, PathError, Waypoint, MatchStatus
 
 
 class RacerSimROS(object):
@@ -67,6 +67,7 @@ class RacerSimROS(object):
         self.ball_pub = rospy.Publisher('ball/odom', \
              Odometry, queue_size=1)
         self.bot_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
+        self.status_pub = rospy.Publisher('match_status', MatchStatus)
 
         # Subscribers
         rospy.Subscriber('car0/velocity', Twist, self.command_cb)
@@ -124,6 +125,12 @@ class RacerSimROS(object):
         if self.last_time is not None:
             # Iterate sim one step
             delta_t = (now - self.last_time).to_sec()
+
+            if self.sim.world.winner is not None:
+                status = MatchStatus()
+                status.status = self.sim.world.winner
+                self.status_pub.publish(status)
+                self.sim.world.winner = None
 
             if self.last_command != None:
                 linear_cmd, angular_cmd = self.last_command
