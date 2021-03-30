@@ -56,7 +56,7 @@ def makeTrainer(cls):
             self._time = rospy.Time.from_sec(time.time())
 
             num_episodes = rospy.get_param('~num_episodes', 10000)
-            rospy.loginfo("Beginning training on " + num_episodes + " episodes.")
+            rospy.loginfo("Beginning training on " + str(num_episodes) + " episodes.")
             self.train(num_episodes)
 
             # idle wait to allow saving weights, etc
@@ -74,21 +74,20 @@ def makeTrainer(cls):
                 steps = 0
                 while not done:
                     action = self.agent.act((obs, reward, done, {}))
-                    obs, reward, done = self._step(action)
+                    obs, reward, done, __ = self._step(action)
                     net_reward += reward
                     steps += 1
 
-                    if self._time - self.start_time >= self.MAX_T:
+                    if self._time - start_time >= self._MAX_T:
                         done = True
 
                 # log
                 log_msg = DiagnosticStatus()
                 log_msg.name = "Training"
                 log_msg.values.append(KeyValue(key="episode", value=str(episode+1)))
-                log_msg.values.append(KeyValue(key="score", value=str(self.score)))
                 log_msg.values.append(KeyValue(key="net_reward", value=str(net_reward)))
                 log_msg.values.append(KeyValue(key="steps", value=str(steps)))
-                self.log_pub.publish(log_msg)
+                self._log_pub.publish(log_msg)
 
         def _full_reset(self):
             """Reset the agent and environment."""
@@ -97,12 +96,12 @@ def makeTrainer(cls):
 
             # Advance time
             self._time += self._DELTA_T
-            self.clock_pub.publish(self._time)
+            self._clock_pub.publish(self._time)
             try:
                 waits = 0
                 while not self.wait_for_state():
                     self._time += self._DELTA_T
-                    self.clock_pub.publish(self._time)
+                    self._clock_pub.publish(self._time)
                     waits += 1
 
                     if waits > 5:
@@ -119,12 +118,12 @@ def makeTrainer(cls):
 
             # Advance time
             self._time += self._DELTA_T
-            self.clock_pub.publish(self._time)
+            self._clock_pub.publish(self._time)
             try:
                 waits = 0
                 while not self.wait_for_state():
                     self._time += self._DELTA_T
-                    self.clock_pub.publish(self._time)
+                    self._clock_pub.publish(self._time)
                     waits += 1
 
                     if waits > 1:
