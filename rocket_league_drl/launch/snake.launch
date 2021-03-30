@@ -20,7 +20,7 @@
     <param name="rate"                    value="$(arg rate)"/>
   </node>
 
-  <node type="run_drl.py" pkg="rocket_league_drl" name="snake_drl" output="screen" args="snake $(eval 'train' if training else 'eval')">
+  <node type="run_drl.py" pkg="rocket_league_drl" name="snake_drl" output="screen" args="$(eval 'snake train' if training else 'snake eval')">
     <param name="num_segments"    value="$(arg size)"/>
     <param name="rate"            value="$(arg rate)"/>
     <param name="num_episodes"    value="$(arg num_episodes)"/>
