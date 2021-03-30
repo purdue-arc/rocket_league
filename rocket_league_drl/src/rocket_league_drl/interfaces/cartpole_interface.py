@@ -41,21 +41,19 @@ import numpy as np
 from transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
 from math import exp
+from threading import Condition
 
 @unique
 class CartPoleActions(IntEnum):
     """Possible actions for deep learner."""
-    FORWARD = 0
-    LEFT = auto()
+    LEFT = 0
     RIGHT = auto()
     SIZE = auto()
 
 class CartPoleInterface(ROSInterface):
-    """ROS interface for the snake game."""
+    """ROS interface for the cartpole game."""
     def __init__(self):
-        super().__init__()
-
-        rospy.init_node('snake_drl')
+        rospy.init_node('cartpole_drl')
 
         # Constants
         self._NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
@@ -77,6 +75,7 @@ class CartPoleInterface(ROSInterface):
         self._alive = None
         self._prev_time = None
         self._prev_score = None
+        self._cond = Condition()
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
@@ -85,14 +84,14 @@ class CartPoleInterface(ROSInterface):
         rospy.Subscriber('snake/active', Bool, self._alive_cb)
 
     @property
-    def observation_size(self):
+    def OBSERVATION_SIZE(self):
         """The observation size for the network."""
         return 3 + 2*self._NUM_SEGMENTS
 
     @property
-    def action_size(self):
+    def ACTION_SIZE(self):
         """The action size for the network."""
-        return SnakeActions.SIZE
+        return CartPoleActions.SIZE
 
     def reset_env(self):
         """Reset environment for a new training episode."""
@@ -151,13 +150,13 @@ class CartPoleInterface(ROSInterface):
 
     def publish_action(self, action):
         """Publish an action to the ROS network."""
-        assert action >= 0 and action < SnakeActions.SIZE
+        assert action >= 0 and action < CartPoleActions.SIZE
 
         action_msg = Twist()
         action_msg.linear.x = self._LINEAR_VELOCITY
-        if action == SnakeActions.LEFT:
+        if action == CartPoleActions.LEFT:
             action_msg.angular.z = self._ANGULAR_VELOCITY
-        if action == SnakeActions.RIGHT:
+        if action == CartPoleActions.RIGHT:
             action_msg.angular.z = -self._ANGULAR_VELOCITY
 
         self._action_pub.publish(action_msg)
