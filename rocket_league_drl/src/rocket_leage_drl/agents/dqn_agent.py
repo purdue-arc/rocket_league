@@ -48,13 +48,6 @@ class DQNAgent(DQN):
             learning_rate=0.01, batch_size=64,
             target_update_rate=0.25):
 
-        # constants
-        if torch.cuda.is_available():
-            print("Using CUDA GPU")
-            self.DEVICE = torch.device("cuda")
-        else:
-            print("Using CPU")
-            self.DEVICE = torch.device("cpu")
         self.OBSERVATION_SIZE = state_size
         self.EPSILON_DELTA = (epsilon_max - epsilon_min) / float(epsilon_steps)
         self.EPSILON_MIN = epsilon_min

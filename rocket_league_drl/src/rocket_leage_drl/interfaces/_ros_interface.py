@@ -29,7 +29,6 @@ License:
 
 from abc import ABC, abstractmethod
 from threading import Condition
-from collections import namedtuple
 import rospy
 
 class ROSInterface(ABC):
