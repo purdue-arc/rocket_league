@@ -40,7 +40,6 @@ from std_srvs.srv import Empty
 import numpy as np
 from transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
-from threading import Lock
 from math import exp
 
 @unique
@@ -76,6 +75,7 @@ class SnakeInterface(ROSInterface):
         self._goal = None
         self._score = None
         self._alive = None
+        self._prev_time = None
         self._prev_score = None
 
         # Subscribers
@@ -101,6 +101,7 @@ class SnakeInterface(ROSInterface):
     def reset(self):
         """Reset internally for a new episode."""
         self.clear_state()
+        self._prev_time = None
         self._prev_score = None
 
     def has_state(self):
@@ -118,7 +119,7 @@ class SnakeInterface(ROSInterface):
         self._score = None
         self._alive = None
 
-    def get_state(self, time):
+    def get_state(self):
         """Get state tuple (observation, reward, done, info)."""
         assert self.has_state()
 
@@ -131,9 +132,12 @@ class SnakeInterface(ROSInterface):
         reward = 0
         done = False
 
-        dist = np.sqrt(np.sum(np.square(pose[1:3] - goal)))
-        dist_reward = self._BASE_REWARD * exp(-1.0 * self._EXP_REWARD * dist)
-        reward += self.DIST_REWARD_SCALE * dist_reward
+        time = rospy.Time.now()
+        if self._prev_time is not None:
+            dist = np.sqrt(np.sum(np.square(pose[1:3] - goal)))
+            dist_reward_rate = self._BASE_REWARD * exp(-1.0 * self._EXP_REWARD * dist)
+            reward += (time - self._prev_time).to_sec() * dist_reward_rate
+        self._prev_time = time
 
         if self._prev_score is not None:
             reward += self._GOAL_REWARD * (self._score - self._prev_score)
@@ -143,7 +147,7 @@ class SnakeInterface(ROSInterface):
             reward += self._DEATH_REWARD
             done = True
 
-        return ROSInterface.State(observation, reward, done, {})
+        return (observation, reward, done, {})
 
     def publish_action(self, action):
         """Publish an action to the ROS network."""

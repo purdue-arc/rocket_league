@@ -51,8 +51,6 @@ class ROSInterface(ABC):
     - notify _cond when has_state() may have turned true
     """
 
-    State = namedtuple('State', ['observation', 'reward', 'done', 'info'])
-
     def __init__(self):
         self._cond = Condition()
 

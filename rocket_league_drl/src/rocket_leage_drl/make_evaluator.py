@@ -54,7 +54,7 @@ def make_evaluator(cls):
                 state = self.get_env()
 
                 # check for end of game and react
-                if not state.done:
+                if not state[2]:
                     self.clear_state()
                     self.publish_action(self.agent.eval(state))
 
