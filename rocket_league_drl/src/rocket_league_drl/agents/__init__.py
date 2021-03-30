@@ -5,5 +5,4 @@ from .vac_agent import VACAgent
 __all__ = [
     "AgentInterface",
     "DQNAgent",
-    "VACAgent"
-]
+    "VACAgent"]
