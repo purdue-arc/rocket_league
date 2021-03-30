@@ -143,7 +143,7 @@ class SnakeInterface(ROSInterface):
             reward += self._DEATH_REWARD
             done = True
 
-        return (observation, reward, done, {})
+        return ROSInterface.State(observation, reward, done, {})
 
     def publish_action(self, action):
         """Publish an action to the ROS network."""

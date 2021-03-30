@@ -1,41 +1,61 @@
-class Evaluator(SnakeDQN):
-    """Class for running the agent live."""
-    def __init__(self):
-        super().__init__()
+"""
+Contains the make_evaluator factory.
 
-        # Services
-        self.reset_srv = rospy.Service('snake_drl/reset', Empty, self.reset_cb)
+License:
+  BSD 3-Clause License
+  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+  3. Neither the name of the copyright holder nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
 
-        self.lock = Lock()
+from rocket_league_drl import ROSInterface
 
-        try:
+import rospy
+from std_msgs.msg import String
+
+def make_evaluator(cls):
+    """Create an evaluator extending the provided agent."""
+    assert issubclass(cls, ROSInterface)
+
+    class Evaluator(cls):
+        """Class capable of evaluating an agent against live input."""
+        def __init__(self):
+            super().__init__(self)
+
             # initialize variables
             self.reset()
 
             while not rospy.is_shutdown():
-                self.lock.acquire()
-
-                # Wait for state
-                while not self.wait_for_state():
+                try:
+                    while not self.wait_for_state():
+                        pass
+                except rospy.ROSInterruptException:
                     pass
 
-                # update state
-                state, __, done, __ = self.get_env(rospy.Time.now())
+                state = self.get_env()
 
                 # check for end of game and react
-                if not done:
+                if not state.done:
                     self.clear_state()
-                    self.action_pub.publish(
-                        self.get_action_msg(
-                            self.agent.eval((state, 0.0, done, {}))))
+                    self.publish_action(self.agent.eval(state))
 
-                self.lock.release()
-
-        except rospy.ROSInterruptException:
-            pass
-
-    def reset_cb(self, reset_srv):
-        """Thread safe reset."""
-        with self.lock:
-            self.reset()
-        return EmptyResponse()
+    return Evaluator()

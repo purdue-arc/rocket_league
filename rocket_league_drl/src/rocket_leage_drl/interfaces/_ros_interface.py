@@ -29,6 +29,7 @@ License:
 
 from abc import ABC, abstractmethod
 from threading import Condition
+from collections import namedtuple
 import rospy
 
 class ROSInterface(ABC):
@@ -49,6 +50,8 @@ class ROSInterface(ABC):
     - initialize the ROS node in __init__()
     - notify _cond when has_state() may have turned true
     """
+
+    State = namedtuple('State', ['observation', 'reward', 'done', 'info'])
 
     def __init__(self):
         self._cond = Condition()

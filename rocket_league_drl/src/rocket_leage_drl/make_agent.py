@@ -27,14 +27,17 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from rocket_league_drl import DQNAgent, RainbowDQNAgent, VACAgent, SACAgent
+from rocket_league_drl import ROSInterface, DQNAgent, RainbowDQNAgent, VACAgent, SACAgent
 
 import rospy
 from std_msgs.msg import String
 
 def make_agent(cls):
     """Create an agent extending the provided interface."""
+    assert issubclass(cls, ROSInterface)
+
     class Agent(cls):
+        """Class containing an DRL agent."""
         def __init__(self):
             super().__init__(self)
 
@@ -67,7 +70,7 @@ def make_agent(cls):
                     params=rospy.get_param('~'+agent_type))
             else:
                 rospy.logerr("Unknown agent type")
-                exit(1)
+                exit()
 
         def _load_cb(self, load_msg):
             """Callback to load model weights."""
