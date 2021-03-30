@@ -33,7 +33,7 @@ import math
 # Local classes
 from racersim.goal import Goal
 
-class World(Box2D.b2World, goalPub):
+class World(Box2D.b2World):
     """Simulates world for car to exist in"""
 
     def __init__(self, map_height, map_width, goal_width, goal_height):

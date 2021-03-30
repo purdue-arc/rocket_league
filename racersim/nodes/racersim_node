@@ -67,7 +67,7 @@ class RacerSimROS(object):
         self.ball_pub = rospy.Publisher('ball/odom', \
              Odometry, queue_size=1)
         self.bot_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
-        self.status_pub = rospy.Publisher('match_status', MatchStatus)
+        self.status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('car0/velocity', Twist, self.command_cb)

@@ -49,11 +49,11 @@ class Sim(object):
         # initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
 
         # These positions are semi-randomized (the car doesn't need to reverse)
-        # initPosBall = (random.uniform(0,map_width), 4)
+        initPosBall = (random.uniform(0,map_width), 4)
         initPosCar = (random.uniform(0,map_width), 2)
 
         # These positions are static
-        initPosBall = (map_width/2, 0.05)
+        # initPosBall = (map_width/2, 0.05)
         # initPosCar = (2, 2)
 
         self.world = World(map_height, map_width, goal_width, goal_height)
