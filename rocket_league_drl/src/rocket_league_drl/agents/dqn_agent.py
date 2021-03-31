@@ -40,7 +40,7 @@ from all.policies import GreedyPolicy
 from all.memory import ExperienceReplayBuffer
 
 class DQNAgent(DQN, AgentInterface):
-    """DQN interface."""
+    """DQN agent interface."""
     def __init__(self, obs_size, action_size, params):
         self._DEVICE = None
         self._init_device()

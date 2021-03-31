@@ -39,7 +39,7 @@ from all.approximation import VNetwork, FeatureNetwork, DummyCheckpointer
 from all.policies import SoftmaxPolicy
 
 class VACAgent(VAC, AgentInterface):
-    """High level VAC controller for snake tutorial."""
+    """VAC agent interface."""
     def __init__(self, obs_size, action_size, params):
         self._DEVICE = None
         self._init_device()
