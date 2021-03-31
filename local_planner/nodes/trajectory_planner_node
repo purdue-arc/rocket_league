@@ -320,7 +320,7 @@ class TrajectoryPlannerROS(object):
 
                 # allow small amount of forward motion
                 if self.backwards:
-                    new_twist.linear.x = -0.1
+                    new_twist.linear.x = 0
                     new_twist.linear.y = 0
                     new_twist.linear.z = 0
                     new_twist.angular.z = 0
@@ -535,7 +535,7 @@ class TrajectoryPlannerROS(object):
             tangents = np.zeros((len(points), 2))  # Plus 1 is because I'm starting the curve at the bot
 
             # constant or heading multiplier
-            c = 0.5
+            c = 1
 
             # Define tangents at midpoints
             for i in range(1, len(points) - 2):
