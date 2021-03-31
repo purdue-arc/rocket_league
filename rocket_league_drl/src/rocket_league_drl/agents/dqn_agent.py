@@ -1,4 +1,5 @@
-"""High level DQN controller for snake tutorial.
+"""
+Contains the DQNAgent class.
 
 License:
   BSD 3-Clause License
@@ -45,11 +46,11 @@ class DQNAgent(DQN, AgentInterface):
         self._init_device()
 
         # parameters
-        learning_rate = params.get('learning_rate', 0.01)
-        memory_len = params.get('memory_len', 10000)
-        gamma = params.get('gamma', 0.9)
-        batch_size = params.get('batch_size', 64)
-        target_update_rate = params.get('target_update_rate', 0.25)
+        LEARNING_RATE = params.get('learning_rate', 0.01)
+        MEMORY_LEN = params.get('memory_len', 10000)
+        GAMMA = params.get('gamma', 0.9)
+        BATCH_SIZE = params.get('batch_size', 64)
+        UPDATE_RATE = params.get('target_update_rate', 0.25)
 
         self.EPSILON_MIN = params.get('epsilon/min', 0.01)
         epsilon_max = params.get('epsilon/max', 1.0)
@@ -65,19 +66,19 @@ class DQNAgent(DQN, AgentInterface):
             Linear(512, 512),
             ReLU(),
             Linear(512, action_size)).to(self._DEVICE)
-        optimizer = Adam(model.parameters(), lr=learning_rate)
-        net = QNetwork(model, optimizer, checkpointer=DummyCheckpointer(), target=PolyakTarget(target_update_rate))
+        optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
+        net = QNetwork(model, optimizer, checkpointer=DummyCheckpointer(), target=PolyakTarget(UPDATE_RATE))
         policy = GreedyPolicy(net, action_size, epsilon_max)
-        buffer = ExperienceReplayBuffer(memory_len, self._DEVICE)
+        buffer = ExperienceReplayBuffer(MEMORY_LEN, self._DEVICE)
         super().__init__(
             q=net,
             policy=policy,
             replay_buffer=buffer,
-            discount_factor=gamma,
+            discount_factor=GAMMA,
             loss=mse_loss,
-            minibatch_size=batch_size,
-            replay_start_size=batch_size,
-            update_frequency=batch_size/2)
+            minibatch_size=BATCH_SIZE,
+            replay_start_size=BATCH_SIZE,
+            update_frequency=BATCH_SIZE/2)
 
     def act(self, state):
         """Take action during training."""

@@ -1,4 +1,5 @@
-"""High level DQN controller for snake tutorial.
+"""
+Contains the VACAgent class.
 
 License:
   BSD 3-Clause License
@@ -26,7 +27,7 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import numpy as np
+from rocket_league_drl.agents import AgentInterface
 
 import torch
 from torch.nn import Sequential, Linear, ReLU
@@ -36,33 +37,27 @@ from torch.optim import Adam
 from all.agents import VAC
 from all.approximation import VNetwork, FeatureNetwork, DummyCheckpointer
 from all.policies import SoftmaxPolicy
-from all.core import State
 
-class VACAgent(VAC):
+class VACAgent(VAC, AgentInterface):
     """High level VAC controller for snake tutorial."""
-    def __init__(self, state_size, action_size,
-            gamma=0.9, learning_rate=0.01,):
+    def __init__(self, obs_size, action_size, params):
+        self._DEVICE = None
+        self._init_device()
 
-        # constants
-        if torch.cuda.is_available():
-            print("Using CUDA GPU")
-            self.DEVICE = torch.device("cuda")
-        else:
-            print("Using CPU")
-            self.DEVICE = torch.device("cpu")
+        # parameters
+        GAMMA = params.get('gamma', 0.9)
+        FEATURE_LEARNING_RATE = params.get('learning_rate', 0.01)
+        VALUE_LEARNING_RATE = params.get('learning_rate', 0.01)
+        POLICY_LEARNING_RATE = params.get('learning_rate', 0.01)
 
-        self.OBSERVATION_SIZE = state_size
         FEATURE_SIZE = 512
-        FEATURE_LEARNING_RATE = learning_rate
-        VALUE_LEARNING_RATE = learning_rate
-        POLICY_LEARNING_RATE = learning_rate
 
         # feature
         feature_model = Sequential(
-            Linear(self.OBSERVATION_SIZE, 512),
+            Linear(obs_size, 512),
             ReLU(),
             Linear(512, FEATURE_SIZE),
-            ReLU()).to(self.DEVICE)
+            ReLU()).to(self._DEVICE)
         feature_optimizer = Adam(feature_model.parameters(), lr=FEATURE_LEARNING_RATE)
         feature_net = FeatureNetwork(feature_model, feature_optimizer, checkpointer=DummyCheckpointer())
 
@@ -70,7 +65,7 @@ class VACAgent(VAC):
         value_model = torch.nn.Sequential(
             torch.nn.Linear(FEATURE_SIZE, 512),
             torch.nn.ReLU(),
-            torch.nn.Linear(512, action_size)).to(self.DEVICE)
+            torch.nn.Linear(512, action_size)).to(self._DEVICE)
         value_optimizer = Adam(value_model.parameters(), lr=VALUE_LEARNING_RATE)
         value_net = VNetwork(value_model, value_optimizer, checkpointer=DummyCheckpointer())
 
@@ -78,39 +73,23 @@ class VACAgent(VAC):
         policy_model = Sequential(
             Linear(FEATURE_SIZE, 512),
             ReLU(),
-            Linear(512, action_size)).to(self.DEVICE)
+            Linear(512, action_size)).to(self._DEVICE)
         policy_optimizer = Adam(policy_model.parameters(), lr=POLICY_LEARNING_RATE)
-        # policy = GreedyPolicy(net, action_size, epsilon_max)
         policy_net = SoftmaxPolicy(policy_model, policy_optimizer, checkpointer=DummyCheckpointer())
 
         super().__init__(
             features=feature_net,
             v=value_net,
             policy=policy_net,
-            discount_factor=gamma)
-
-    def _convert_input(self, input):
-        """Convert state from numpy to torch type."""
-        observation, reward, done, __ = input
-
-        assert np.size(observation) == self.OBSERVATION_SIZE
-        observation = torch.from_numpy(observation).float().to(self.DEVICE)
-
-        data = {
-            "observation" : observation,
-            "reward": reward,
-            "done" : done
-        }
-
-        return State(data, self.DEVICE)
+            discount_factor=GAMMA)
 
     def act(self, state):
         """Take action during training."""
-        return super().act(self._convert_input(state))
+        return super().eval(self._convert_state(state))
 
     def eval(self, state):
         """Take action during evaluation."""
-        return super().eval(self._convert_input(state))
+        return super().eval(self._convert_state(state))
 
     def save(self, name):
         """Save weights to file."""
@@ -120,5 +99,5 @@ class VACAgent(VAC):
     def load(self, name):
         """Load weights from file."""
         print(f"Loading weights from {name}")
-        # self.q.model.model.load_state_dict(torch.load(name, map_location=self.DEVICE))
-        # self.q.model.model.to(self.DEVICE)
+        # self.q.model.model.load_state_dict(torch.load(name, map_location=self._DEVICE))
+        # self.q.model.model.to(self._DEVICE)
