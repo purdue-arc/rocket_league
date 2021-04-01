@@ -49,8 +49,9 @@ class Sim(object):
         # initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
 
         # These positions are semi-randomized (the car doesn't need to reverse)
-        initPosBall = (random.uniform(0,map_width), 4)
-        initPosCar = (random.uniform(0,map_width), 2)
+        initPosBall = (random.uniform(map_width*0.25,map_width*0.75),random.uniform(map_height*0.5, map_height*0.75))
+        initPosCar = (random.uniform(map_width*0.25,map_width*0.75),random.uniform(map_height*0.25, map_height*0.5))
+        initAngleCar = random.uniform(-math.pi/2, math.pi/2)
 
         # These positions are static
         # initPosBall = (map_width/2, 0.05)
@@ -62,7 +63,7 @@ class Sim(object):
         self.velIters = velIters
         self.posIters = posIters
 
-        self.carDef = CarDef(initPos=initPosCar)
+        self.carDef = CarDef(initPos=initPosCar, initAngle=initAngleCar)
 
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world, initPos=initPosBall)
