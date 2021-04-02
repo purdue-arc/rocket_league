@@ -30,8 +30,8 @@
 #include <image_transport/image_transport.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
-#include "rocket_league_estimation/PHCModel.h"
 #include <opencv2/opencv.hpp>
+#include <image_geometry/pinhole_camera_model.h>
 
 class BallDetection {
 public:
@@ -40,12 +40,17 @@ public:
 
 private:
     void BallCallback(
-        const sensor_msgs::ImageConstPtr& msg);
+        const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info);
 
     ros::NodeHandle nh;
     ros::NodeHandle pnh;
-
+    image_transport::ImageTransport image_transport;
+    image_transport::CameraSubscriber camera_subscriber;
     ros::Publisher posePub;
     ros::Subscriber detectionSub;
-    int height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
+    int quad, height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
+    double originX, originY;
+    bool showImage;
+    image_geometry::PinholeCameraModel camera;
+
 };
