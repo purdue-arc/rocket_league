@@ -32,7 +32,8 @@
   </node>
 
   <!-- De-Bayer / rectify -->
-  <node pkg="image_proc" type="image_proc" ns="$(arg camera_name)" name="image_proc" respawn="false" output="log"/>
+  <node pkg="nodelet" type="nodelet" ns="$(arg camera_name)" name="image_proc_debayer" args="load image_proc/debayer $(arg manager)"/>
+  <node pkg="nodelet" type="nodelet" ns="$(arg camera_name)" name="image_proc_rectify" args="load image_proc/rectify $(arg manager)"/>
 
   <!-- Apriltag detection -->
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg camera_name)" name="apriltag" output="screen">
