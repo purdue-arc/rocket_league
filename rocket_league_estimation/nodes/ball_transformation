@@ -9,19 +9,19 @@ import message_filters
 def callback(sub0, sub1, sub2, sub3):
   pub_pose = PoseWithCovarianceStamped()
 
-  if (sub0.pose.pose.position.z >= sub1.pose.pose.position.z and sub0.pose.pose.position.z >= sub2.pose.pose.position.z and sub0.pose.pose.position.z >= sub3.pose.pose.position.z)
+  if (sub0.pose.pose.position.z >= sub1.pose.pose.position.z and sub0.pose.pose.position.z >= sub2.pose.pose.position.z and sub0.pose.pose.position.z >= sub3.pose.pose.position.z):
     rospy.loginfo("Using camera 0")
     pub_pose = sub0
 
-  elif (sub1.pose.pose.position.z >= sub0.pose.pose.position.z and sub1.pose.pose.position.z >= sub2.pose.pose.position.z and sub1.pose.pose.position.z >= sub3.pose.pose.position.z)
+  elif (sub1.pose.pose.position.z >= sub0.pose.pose.position.z and sub1.pose.pose.position.z >= sub2.pose.pose.position.z and sub1.pose.pose.position.z >= sub3.pose.pose.position.z):
     rospy.loginfo("Using camera 1")
     pub_pose = sub1
    
-  elif (sub2.pose.pose.position.z >= sub0.pose.pose.position.z and sub2.pose.pose.position.z >= sub1.pose.pose.position.z and sub2.pose.pose.position.z >= sub3.pose.pose.position.z)
+  elif (sub2.pose.pose.position.z >= sub0.pose.pose.position.z and sub2.pose.pose.position.z >= sub1.pose.pose.position.z and sub2.pose.pose.position.z >= sub3.pose.pose.position.z):
     rospy.loginfo("Using camera 2")
     pub_pose = sub2
    
-  elif (sub3.pose.pose.position.z >= sub0.pose.pose.position.z and sub3.pose.pose.position.z >= sub1.pose.pose.position.z and sub3.pose.pose.position.z >= sub2.pose.pose.position.z)
+  elif (sub3.pose.pose.position.z >= sub0.pose.pose.position.z and sub3.pose.pose.position.z >= sub1.pose.pose.position.z and sub3.pose.pose.position.z >= sub2.pose.pose.position.z):
     rospy.loginfo("Using camera 3")
     pub_pose = sub3
   
