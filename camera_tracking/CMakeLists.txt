@@ -10,6 +10,7 @@ project(camera_tracking)
 find_package(catkin REQUIRED COMPONENTS
   camera_aravis
   image_proc
+  tf2
 )
 
 ## System dependencies are found with CMake's conventions
@@ -138,6 +139,7 @@ add_executable(${PROJECT_NAME}_tf_rebroadcaster_node
 )
 add_executable(${PROJECT_NAME}_camera_origin_node src/camera_origin_node.cpp)
 add_executable(${PROJECT_NAME}_tf_parser_node src/tf_parser_node.cpp)
+add_executable(${PROJECT_NAME}_pose_extractor_node src/pose_extractor_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -146,12 +148,14 @@ add_executable(${PROJECT_NAME}_tf_parser_node src/tf_parser_node.cpp)
 set_target_properties(${PROJECT_NAME}_tf_rebroadcaster_node PROPERTIES OUTPUT_NAME tf_rebroadcaster PREFIX "")
 set_target_properties(${PROJECT_NAME}_camera_origin_node PROPERTIES OUTPUT_NAME camera_origin PREFIX "")
 set_target_properties(${PROJECT_NAME}_tf_parser_node PROPERTIES OUTPUT_NAME tf_parser PREFIX "")
+set_target_properties(${PROJECT_NAME}_pose_extractor_node PROPERTIES OUTPUT_NAME pose_extractor PREFIX "")
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(${PROJECT_NAME}_tf_rebroadcaster_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}_camera_origin_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(${PROJECT_NAME}_tf_parser_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_pose_extractor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_tf_rebroadcaster_node
@@ -161,6 +165,9 @@ target_link_libraries(${PROJECT_NAME}_camera_origin_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(${PROJECT_NAME}_tf_parser_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(${PROJECT_NAME}_pose_extractor_node
   ${catkin_LIBRARIES}
 )
 
@@ -187,6 +194,9 @@ install(TARGETS ${PROJECT_NAME}_camera_origin_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 install(TARGETS ${PROJECT_NAME}_tf_parser_node
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(TARGETS ${PROJECT_NAME}_pose_extractor_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
