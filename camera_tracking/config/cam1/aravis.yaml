@@ -1,5 +1,5 @@
 guid: PointGrey-00EA99A2
-PixelFormat: BayerGR8
+PixelFormat: BayerGB8
 Width: 1288
 Height: 964
 
