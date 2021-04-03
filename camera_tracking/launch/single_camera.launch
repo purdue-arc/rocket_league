@@ -34,7 +34,7 @@
     </node>
 
     <!-- De-Bayer / rectify -->
-    <include file="$(find image_proc)/image_proc.launch">
+    <include file="$(find image_proc)/launch/image_proc.launch">
       <arg name="manager" value="$(arg manager_name)"/>
     </include>
 
