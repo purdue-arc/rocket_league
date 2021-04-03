@@ -1,10 +1,4 @@
 <launch>
-  <arg name="load_manager" default="false"/>
-  <arg name="manager_name" default="ball_detection_stack"/>
-  <arg name="manager" value="/$(arg manager_name)"/>
-  <arg name="manager_threads" default="4"/>
-  <arg name="launch_dynamic_reconfigure" default="false"/>
-
   <include ns="cam0" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch">
     <arg name="height" value="1.041"/>
     <arg name="quad" value="1"/>
@@ -31,10 +25,7 @@
     <arg name="quad" value="4"/>
     <arg name="originX" value="0"/>
     <arg name="originY" value="0"/>
-    
   </include>
 
-
   <node type="ball_transformation" pkg="rocket_league_estimation" name="ball_transformation"/>
-
 </launch>
