@@ -38,27 +38,29 @@ from tire import Tire, TireDef
 class CarDef(object):
     """Holds relevent data for a car instance"""
 
-    DEFAULT_VERTICES = [(0.0225, 0), (0.0225, 0.125), (0, 0.2),
-                        (-0.0225, 0.125), (-0.0225, 0)]
+    # Car: {length=0.180m, width=0.107m, height=0.064m}
+    DEFAULT_VERTICES = [(0, 0.165), (0.015, 0.18), (0.092, 0.18), (0.107, 0.165), (0.107, 0), (0,0)]
 
-    DEFAULT_ANCHORS = [(-0.03525, 0.115), (0.03525, 0.115),
-                       (-0.03525, 0.0185), (0.03525, 0.0185)]
-
+    # Wheel: {width=0.036m, wheelbase=0.119m}
+    DEFAULT_ANCHORS = [(0, 0.147), (0.107, 0.147), (0.107, 0.023), (0, 0.023)]
 
     DEFAULT_TIRE_DEF = TireDef()
 
     def __init__(self, initPos=(1.25, 1.25), initAngle=0, vertices=DEFAULT_VERTICES,
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
-                    density=20, maxAngle=45, pgain=0.1):
+                    total_weight=0.130, max_angle=45, p_gain=0.1):
 
         self.initPos = initPos
         self.initAngle = initAngle
         self.vertices = vertices
         self.tireAnchors = tireAnchors
         self.tireDef = tireDef
-        self.density = density
-        self.maxAngle = math.radians(maxAngle)
-        self.pgain = pgain
+
+        # The "area" of the entire car (body and tires) is 0.0052087501809
+        self.density = total_weight / 0.0052087501809
+
+        self.maxAngle = math.radians(max_angle)
+        self.pgain = p_gain
 
 class Car(object):
     """Simulates an ackerman-steering vehicle"""
