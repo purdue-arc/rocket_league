@@ -379,11 +379,14 @@ class TrajectoryPlannerROS(object):
         # Use line to make a perpendicular, and then calculate second point
         # that is second_point_distance away from the midpoint
         #TODO: get this working properly
-        perpendicular = np.array([line_between[1], -line_between[0]])
-        perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
+        perpendicular = np.array([line_between[1], -line_between[0]])   # rotates left
+        # perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
         perpendicular = normalize(perpendicular)
-        if not self.backwards:
-            perpendicular = - perpendicular
+
+        perpendicular = - perpendicular * np.sign(np.cross(line_between, init_heading))
+        print("rotate: " + str( np.sign(np.cross(line_between, init_heading))))
+        # if not self.backwards:
+          #  perpendicular = - perpendicular
         perpendicular = perpendicular * np.abs(1 - np.dot(init_normalized_heading, final_normalized_heading))\
                 * second_point_distance # * (np.linalg.norm(2*init_position-final_position))
         second_point = midpoint + perpendicular
@@ -402,6 +405,7 @@ class TrajectoryPlannerROS(object):
 
         # change stuff if backwards... wait until first point is defined to allow small amount of forward decelerating motion
         if self.backwards:
+            print("backwards")
             bot_position = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
             self.bot_init_heading = -self.bot_init_heading 
             bot_linear_vel = -bot_linear_vel
@@ -560,6 +564,8 @@ class TrajectoryPlannerROS(object):
 
         # Define tangents at endpoints
         tangents[0] = self.bot_init_heading
+ 
+        tangents[0] = 4 * tangents[0]
         tangents[len(tangents) - 2] = self.final_normalized_heading
         tangents[len(tangents) -1] = self.final_normalized_heading
 
