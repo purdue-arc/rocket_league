@@ -98,10 +98,10 @@ class TrajectoryPlannerROS(object):
         self.generate_main_points()
 
         # This function is swappable
-        self.four_point_path()
+        # self.four_point_path()
         # self.bezier_curves_path(smoothness=2)
         # self.lagrange_functions_path()
-        # self.hermite_splines_path()
+        self.hermite_splines_path()
         # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
 
 
@@ -383,7 +383,7 @@ class TrajectoryPlannerROS(object):
         # perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
         perpendicular = normalize(perpendicular)
 
-        perpendicular = perpendicular * np.sign(np.cross(line_between, init_heading))
+        perpendicular = - perpendicular * np.sign(np.cross(line_between, init_heading))
         print("rotate: " + str( np.sign(np.cross(line_between, init_heading))))
         # if not self.backwards:
           #  perpendicular = - perpendicular
