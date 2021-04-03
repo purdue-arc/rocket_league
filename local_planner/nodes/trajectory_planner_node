@@ -365,6 +365,8 @@ class TrajectoryPlannerROS(object):
         Generate 3 points using spline generation given parameters
         The 3 points are first position, a calculated second point between, and the final position
         """
+        if self.backwards:
+            final_heading = -final_heading
         #try:
         # Normalize everything before calculating
         init_normalized_heading = normalize(init_heading)
@@ -410,6 +412,8 @@ class TrajectoryPlannerROS(object):
 
         # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
         first_point = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
+        if self.backwards:
+            first_point = bot_position + 2 * self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
 
         # Third point is a certain distance behind the ball
         third_point = ball_position - self.final_normalized_heading * self.DISTANCE_FROM_BALL
