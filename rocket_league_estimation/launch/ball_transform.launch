@@ -4,35 +4,30 @@
   <arg name="manager" value="/$(arg manager_name)"/>
   <arg name="manager_threads" default="4"/>
   <arg name="launch_dynamic_reconfigure" default="false"/>
-  
-  <!-- Nodelet Manager -->
-  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
-    <param name="num_worker_threads" value="$(arg manager_threads)"/>
-  </node>
 
   <include ns="cam0" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch">
-    <arg name="height" value="1220"/>
+    <arg name="height" value="1.041"/>
     <arg name="quad" value="1"/>
     <arg name="originX" value="0"/>
     <arg name="originY" value="0"/>
 
   </include>
   <include ns="cam1" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch">
-    <arg name="height" value="1220"/>
+    <arg name="height" value="1.041"/>
     <arg name="quad" value="2"/>
     <arg name="originX" value="0"/>
     <arg name="originY" value="0"/>
 
   </include>
   <include ns="cam2" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch">
-    <arg name="height" value="1220"/>
+    <arg name="height" value="1.041"/>
     <arg name="quad" value="3"/>
     <arg name="originX" value="0"/>
     <arg name="originY" value="0"/>
 
   </include>
   <include ns="cam3" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch">
-    <arg name="height" value="1220"/>
+    <arg name="height" value="1.041"/>
     <arg name="quad" value="4"/>
     <arg name="originX" value="0"/>
     <arg name="originY" value="0"/>
