@@ -1,13 +1,22 @@
 <launch>
+  <arg name="height" default="1"/>
+  <arg name="quad" default="1"/>
+  <arg name="originX" default="0"/>
+  <arg name="originY" default="0"/>
+
 
   <node type="ball_detection" pkg="rocket_league_estimation" name="ball_detection">
-    <param name="cam_height" value="1220"/>
+    <param name="quad" value="$(arg quad)"/>
+    <param name="originX" value="$(arg originX)"/>
+    <param name="originY" value="$(arg originY)"/>
+    <param name="showImage" value="false"/>
+    <param name="cam_height" value="$(arg height)"/>
     <param name="min_hue" value="60"/>
     <param name="min_sat" value="135"/>
     <param name="min_vib" value="50"/>
-    <param name="max_hue" value="150"/>
+    <param name="max_hue" value="140"/>
     <param name="max_sat" value="255"/>
-    <param name="max_vob" value="255"/>
+    <param name="max_vib" value="255"/>
   </node>
 
 </launch>

@@ -1,7 +1,7 @@
 <launch>
   <arg name="camera_ns" default="aravis_cam"/>
   <include file="$(find rocket_league_estimation)/launch/car_detection_to_pose.launch" pass_all_args="true"/>
-  <include file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch" pass_all_args="true"/>
+  <include file="$(find rocket_league_estimation)/launch/ball_transform.launch" pass_all_args="true"/>
   <include file="$(find rocket_league_estimation)/launch/goal_detection_to_pose.launch" pass_all_args="true"/>
   <include file="$(find rocket_league_estimation)/launch/car_pose_estimator.launch"/>
   <node pkg="tf2_ros" type="static_transform_publisher" name="map_tag_publisher" args="0 0 0 0 0 0 map origin_tag" />
