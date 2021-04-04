@@ -1,3 +1,9 @@
+### Arguments to rosserial_arduino to be passed to serial_node.py
+The serial port that the rosserial_arduino node communicates to the Teensy Board should be defined <br/>
+There is also a default value set <br/>
+arg name: serial_port <br/>
+default value: /dev/tty/ACM1 <br/>
+
 ### Some info on protocols: <br/>
 https://github.com/pascallanger/DIY-Multiprotocol-TX-Module/blob/master/Protocols_Details.md <br/>
 
