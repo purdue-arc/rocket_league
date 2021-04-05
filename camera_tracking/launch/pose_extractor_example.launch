@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="camera_tracking" type="pose_extractor" name="pose_extractor" output="screen">
+    <param name="topic_name" value="map_to_tag_1" />
+    <param name="target_frame" value="tag_1" />
+    <param name="source_frame" value="map" />
+  </node>
+</launch>

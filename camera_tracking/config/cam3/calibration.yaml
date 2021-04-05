@@ -1,5 +1,5 @@
-image_width: 1288
-image_height: 964
+image_width: 1280
+image_height: 960
 camera_name: cam4
 camera_matrix:
   rows: 3

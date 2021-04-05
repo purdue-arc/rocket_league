@@ -1,41 +1,24 @@
 <launch>
-  <arg name="load_manager" default="true"/>
-  <arg name="manager_name" default="camera_manager"/>
-  <arg name="manager" value="/$(arg manager_name)"/>
-  <arg name="manager_threads" default="4"/>
   <arg name="launch_dynamic_reconfigure" default="false"/>
-
-  <!-- Nodelet Manager -->
-  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
-    <param name="num_worker_threads" value="$(arg manager_threads)" />
-  </node>
 
   <!-- Run multiple cameras -->
   <include file="$(find camera_tracking)/launch/single_camera.launch">
     <arg name="camera_name" value="cam0"/>
-    <arg name="load_manager" value="false"/>
-    <arg name="manager_name" value="$(arg manager)"/>
     <arg name="launch_dynamic_reconfigure" value="$(arg launch_dynamic_reconfigure)"/>
   </include>
 
   <include file="$(find camera_tracking)/launch/single_camera.launch">
     <arg name="camera_name" value="cam1"/>
-    <arg name="load_manager" value="false"/>
-    <arg name="manager_name" value="$(arg manager)"/>
     <arg name="launch_dynamic_reconfigure" value="$(arg launch_dynamic_reconfigure)"/>
   </include>
 
   <include file="$(find camera_tracking)/launch/single_camera.launch">
     <arg name="camera_name" value="cam2"/>
-    <arg name="load_manager" value="false"/>
-    <arg name="manager_name" value="$(arg manager)"/>
     <arg name="launch_dynamic_reconfigure" value="$(arg launch_dynamic_reconfigure)"/>
   </include>
 
   <include file="$(find camera_tracking)/launch/single_camera.launch">
     <arg name="camera_name" value="cam3"/>
-    <arg name="load_manager" value="false"/>
-    <arg name="manager_name" value="$(arg manager)"/>
     <arg name="launch_dynamic_reconfigure" value="$(arg launch_dynamic_reconfigure)"/>
   </include>
 

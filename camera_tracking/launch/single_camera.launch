@@ -1,51 +1,52 @@
 <launch>
   <arg name="load_manager" default="true"/>
   <arg name="manager_name" default="camera_manager"/>
-  <arg name="manager" value="$(arg manager_name)"/>
   <arg name="manager_threads" default="4"/>
   <arg name="launch_dynamic_reconfigure" default="false"/>
 
   <arg name="camera_name" default="cam0"/>
 
   <!-- Remap /tf topic to private /tf topic -->
-  <remap from="/tf" to="tf" />
+  <group ns="$(arg camera_name)">
+    <remap from="/tf" to="tf"/>
 
-  <!-- Nodelet Manager -->
-  <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
-    <param name="num_worker_threads" value="$(arg manager_threads)" />
-  </node>
+    <!-- Nodelet Manager -->
+    <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
+      <param name="num_worker_threads" value="$(arg manager_threads)"/>
+    </node>
 
-  <!-- Aravis RGB camera nodelet -->
-  <node pkg="nodelet" type="nodelet" name="$(arg camera_name)" args="load camera_aravis/CameraAravisNodelet $(arg manager_name)" output="log">
-    <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name)/aravis.yaml" />
-    <param name="frame_id" value="$(arg camera_name)" />
-    <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name)/calibration.yaml" />
-  </node>
+    <!-- Aravis RGB camera nodelet -->
+    <node pkg="nodelet" type="nodelet" name="$(arg camera_name)" args="load camera_aravis/CameraAravisNodelet $(arg manager_name)" output="log">
+      <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name)/aravis.yaml"/>
+      <param name="frame_id" value="$(arg camera_name)"/>
+      <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name)/calibration.yaml"/>
+      <remap from="$(arg camera_name)/image_raw" to="image_raw"/>
+      <remap from="$(arg camera_name)/camera_info" to="camera_info"/>
+    </node>
 
-  <!-- tf Remapping -->
-  <node pkg="camera_tracking" type="tf_rebroadcaster" ns="$(arg camera_name)" name="tf_rebroadcaster" output="screen">
-    <param name="prefix" value="$(arg camera_name)" />
-  </node>
-  <node pkg="camera_tracking" type="camera_origin" ns="$(arg camera_name)" name="camera_origin" output="screen">
-    <param name="camera_name" value="$(arg camera_name)" />
-    <param name="origin_id" value="tag_0" />
-  </node>
+    <!-- tf Remapping -->
+    <node pkg="camera_tracking" type="tf_rebroadcaster" name="tf_rebroadcaster" output="screen">
+      <param name="prefix" value="$(arg camera_name)"/>
+    </node>
+    <node pkg="camera_tracking" type="camera_origin" name="camera_origin" output="screen">
+      <param name="camera_name" value="$(arg camera_name)"/>
+      <param name="origin_id" value="tag_0"/>
+    </node>
 
-  <!-- De-Bayer / rectify -->
-  <node pkg="nodelet" type="nodelet" ns="$(arg camera_name)" name="image_proc_debayer" args="load image_proc/debayer $(arg manager)"/>
-  <node pkg="nodelet" type="nodelet" ns="$(arg camera_name)" name="image_proc_rectify" args="load image_proc/rectify $(arg manager)"/>
+    <!-- De-Bayer / rectify -->
+    <include file="$(find image_proc)/launch/image_proc.launch">
+      <arg name="manager" value="$(arg manager_name)"/>
+    </include>
 
-  <!-- Apriltag detection -->
-  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" ns="$(arg camera_name)" name="apriltag" output="screen">
-    <param name="camera_frame" type="str" value="$(arg camera_name)" />
-    <param name="publish_tag_detections_image" type="bool" value="true" />
+    <!-- Apriltag detection -->
+    <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">
+      <param name="camera_frame" type="str" value="$(arg camera_name)"/>
+      <param name="publish_tag_detections_image" type="bool" value="true"/>
+      <rosparam command="load" file="$(find camera_tracking)/config/apriltag_settings.yaml"/>
+      <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml"/>
+    </node>
 
-    <rosparam command="load" file="$(find camera_tracking)/config/apriltag_settings.yaml" />
-    <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml" />
-
-    <remap from="/tf" to="tf" />
-  </node>
-
-  <!-- Dynamic reconfigure -->
-  <node if="$(arg launch_dynamic_reconfigure)" name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="log" />
+    <!-- Dynamic reconfigure -->
+    <node if="$(arg launch_dynamic_reconfigure)" name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="log"/>
+  </group>
 </launch>
