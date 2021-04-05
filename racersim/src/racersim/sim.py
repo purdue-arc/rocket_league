@@ -61,12 +61,8 @@ class Sim(object):
 
         # These positions are static
         initPosBall = (map_width/3, map_height - 1)
-<<<<<<< HEAD
-        initPosCar = (1, 2)
-=======
         initPosCar = (2, 2)
         initAngleCar = 5
->>>>>>> 038dbfea1445803ae75f6cfd9cd2c5d3e6133628
 
         self.world = World(map_height, map_width, goal_width, wall_thickness)
 
