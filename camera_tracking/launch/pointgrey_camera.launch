@@ -12,8 +12,6 @@
       <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name)/pointgrey.yaml"/>
       <param name="frame_id" value="$(arg camera_name)"/>
       <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name)/calibration.yaml"/>
-      <remap from="$(arg camera_name)/image_raw" to="image_raw"/>
-      <remap from="$(arg camera_name)/camera_info" to="camera_info"/>
     </node>
   </group>
 </launch>

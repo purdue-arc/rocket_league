@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
           geometry_msgs::PoseWithCovarianceStamped pose;
           tf2::doTransform(identity, pose, transform);
           pose.header = transform.header;
+          pub.publish(pose);
         } catch (tf2::TransformException e) {
           return;
         }
