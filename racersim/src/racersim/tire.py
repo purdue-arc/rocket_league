@@ -31,17 +31,19 @@ import Box2D
 
 class TireDef(object):
     """Holds relevent data for a tire instance"""
-    def __init__(self, width=0.0125, length=0.037, density=40,
-                 maxLateralImpulse=0.015, maxDriveForce=0.2, dragForceCoeff=-0.00002,
-                 angularImpulseCoeff=0.02, friction=100):
+    def __init__(self, width=0.0125, length=0.036, total_weight=0.130,
+                 max_lateral_impulse=0.015, max_drive_force=0.2, drag_force_coeff=-0.00002,
+                 angular_impulse_coeff=0.02):
         self.width = width
         self.length = length
-        self.density = density
-        self.maxLateralImpulse = maxLateralImpulse
-        self.maxDriveForce = maxDriveForce
-        self.dragForceCoeff = dragForceCoeff
-        self.angularImpulseCoeff = angularImpulseCoeff
-        self.friction = friction
+
+        # The "area" of the entire car (body and tires) is 0.0052087501809
+        self.density = total_weight / 0.0052087501809
+
+        self.maxLateralImpulse = max_lateral_impulse
+        self.maxDriveForce = max_drive_force
+        self.dragForceCoeff = drag_force_coeff
+        self.angularImpulseCoeff = angular_impulse_coeff
 
 class Tire(object):
     """Simulates a single tire of a vehicle"""
@@ -59,7 +61,6 @@ class Tire(object):
         self.maxLateralImpulse = tireDef.maxLateralImpulse
         self.dragForceCoeff = tireDef.dragForceCoeff
         self.angularImpulseCoeff = tireDef.angularImpulseCoeff
-        self.friction = tireDef.friction
         self.density = tireDef.density
 
     def getForwardVelocity(self):
@@ -102,7 +103,6 @@ class Tire(object):
 
         # Each tire should power itself and 1/4th of the car
         mass = self.body.mass + self.car_weight / 4
-
         delta_v = linear_cmd.x - currSpeed
 
         # # The required force to accelerate to linear_cmd.x

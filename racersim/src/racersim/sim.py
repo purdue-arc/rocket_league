@@ -41,29 +41,43 @@ class Sim(object):
     """Oversees components of racersim"""
 
     def __init__(self, renderEnabled=True, map_height=10, map_width=100,
-                 goal_width=0.125000, goal_height=0.083333,
-                 velIters=6, posIters=2):
+                 goal_width=0.125000, wall_thickness=0.083333,
+                 velIters=6, posIters=2, total_weight=0.130, max_angle=45,
+                 p_gain=0.1, max_drive_force=0.2, drag_force_coeff=-0.00002,
+                 angular_impulse_coeff=0.02):
 
         # These positions are fully randomized
         # initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
         # initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
 
         # These positions are semi-randomized (the car doesn't need to reverse)
-        #initPosBall = (random.uniform(map_width*0.25,map_width*0.75),random.uniform(map_height*0.6, map_height*0.75))
-        #initPosCar = (random.uniform(map_width*0.25,map_width*0.75),random.uniform(map_height*0.25, map_height*0.3))
-        initAngleCar = math.pi #random.uniform(-math.pi/2, math.pi/2)
+        # initPosBall = (random.uniform(map_width*0.25,map_width*0.75),random.uniform(map_height*0.6, map_height*0.75))
+        # initPosCar = (random.uniform(map_width*0.25,map_width*0.75),random.uniform(map_height*0.25, map_height*0.3))
+        # initAngleCar = random.uniform(0, 2*math.pi)
+        # point up:
+        # initAngleCar = random.uniform(-math.pi/2, math.pi/2)
+        #point down
+        # initAngleCar = random.uniform(math.pi/2, math.pi * 3/2)
 
         # These positions are static
         initPosBall = (map_width/3, map_height - 1)
+<<<<<<< HEAD
         initPosCar = (1, 2)
+=======
+        initPosCar = (2, 2)
+        initAngleCar = 5
+>>>>>>> 038dbfea1445803ae75f6cfd9cd2c5d3e6133628
 
-        self.world = World(map_height, map_width, goal_width, goal_height)
+        self.world = World(map_height, map_width, goal_width, wall_thickness)
 
         self.renderEnabled = renderEnabled
         self.velIters = velIters
         self.posIters = posIters
 
-        self.carDef = CarDef(initPos=initPosCar, initAngle=initAngleCar)
+        self.tireDef = TireDef(total_weight=total_weight, max_drive_force=max_drive_force,
+                               drag_force_coeff=drag_force_coeff, angular_impulse_coeff=angular_impulse_coeff)
+        self.carDef = CarDef(initPos=initPosCar, initAngle=initAngleCar, total_weight=total_weight,
+                             tireDef=self.tireDef, max_angle=max_angle, p_gain=p_gain)
 
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world, initPos=initPosBall)

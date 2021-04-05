@@ -10,5 +10,6 @@
     <param name="~rate" value="$(arg rate)"/>
     <param name="~render/enabled" value="$(arg use_pygame)"/>
     <rosparam command="load" file="$(find rocket_league_highlevel)/YAML_files/high_level_info.yaml" />
+    <rosparam command="load" file="$(find racersim)/YAML_files/sim_info.yaml" />
   </node>
 </launch>

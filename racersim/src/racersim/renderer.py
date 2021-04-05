@@ -43,6 +43,7 @@ class Renderer(object):
     COLOR_WALL = (112, 48, 65)          # Dark-Red
     COLOR_PNT = (245, 173, 66)          # Orange
     COLOR_LOOKAHEAD = (255, 255, 255)   # White
+    COLOR_HEADLIGHTS = (0, 0, 0)        # Black
 
     SIZE_PNT = 0.07
 
@@ -68,7 +69,19 @@ class Renderer(object):
                     for v in fixture.shape.vertices]
         vertices = [(v[0], v[1]) \
                     for v in vertices]
+
         pygame.draw.polygon(self._screen, color, vertices)
+
+    def _draw_car(self, body, fixture, color):
+        """Draws the car to the screen."""
+        vertices = [(body.transform * v) * self.scaling \
+                    for v in fixture.shape.vertices]
+        vertices = [(v[0], v[1]) \
+                    for v in vertices]
+
+        v = vertices
+        pygame.draw.polygon(self._screen, self.COLOR_HEADLIGHTS, [v[1], v[2], v[3], v[4]])
+        pygame.draw.polygon(self._screen, color, [v[0], v[1], v[4], v[5]])
 
     def _draw_circle(self, body, fixture, color):
         """Draws circles to the screen."""
@@ -115,7 +128,7 @@ class Renderer(object):
             self._visualize_point(self.COLOR_PNT, poses, int(self.SIZE_PNT * self.scaling))
 
         for fixture in car.body.fixtures:
-            self._draw_polygon(car.body, fixture, self.COLOR_CAR)
+            self._draw_car(car.body, fixture, self.COLOR_CAR)
 
         for tire in car.tires:
             for fixture in tire.body.fixtures:
