@@ -61,7 +61,7 @@ class RacerSimROS(object):
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 1.0) # Seconds
-        rate = rospy.Rate(rospy.get_param('~rate', 64)) # Hz
+        rate = rospy.Rate(rospy.get_param('~rate', 644)) # Hz
 
         # Publishers
         self.ball_pub = rospy.Publisher('ball/odom', \

@@ -49,7 +49,7 @@ class CarDef(object):
 
     def __init__(self, initPos=(1.25, 1.25), initAngle=0, vertices=DEFAULT_VERTICES,
                     tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
-                    density=20, maxAngle=45, pgain=0.1):
+                    density=20, maxAngle=45, pgain=0.01):
 
         self.initPos = initPos
         self.initAngle = initAngle
@@ -127,7 +127,12 @@ class Car(object):
         if linear_cmd.x != 0:
             # Angular / PID Approach
             curr_angle = self._flJoint.angle
-            turn = (self.body.angularVelocity + angular_cmd.z) * -self.pgain
+            turn = angular_cmd.z
+            if linear_cmd.x > 0:
+                turn += self.body.angularVelocity
+            else:
+                turn -= self.body.angularVelocity
+            turn *= -self.pgain
             new_angle = curr_angle + turn
 
             if new_angle > self.maxAngle:

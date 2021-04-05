@@ -55,7 +55,7 @@ class Sim(object):
 
         # These positions are static
         initPosBall = (map_width/3, map_height - 1)
-        initPosCar = (2, 2)
+        initPosCar = (1, 2)
 
         self.world = World(map_height, map_width, goal_width, goal_height)
 
@@ -94,7 +94,6 @@ class Sim(object):
         """Reset simulator to original state."""
         self.world.DestroyBody(self.car.body)
         self.world.DestroyBody(self.ball.body)
-        self.world.DestroyBody(self.goal.body)
                 
         if self.carDef == None:
             if self.tireDef != None:
