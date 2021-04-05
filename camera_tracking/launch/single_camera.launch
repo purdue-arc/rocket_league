@@ -2,7 +2,6 @@
   <arg name="load_manager" default="true"/>
   <arg name="manager_name" default="camera_manager"/>
   <arg name="manager_threads" default="4"/>
-  <arg name="launch_dynamic_reconfigure" default="false"/>
 
   <arg name="camera_name" default="cam0"/>
 
@@ -10,18 +9,8 @@
   <group ns="$(arg camera_name)">
     <remap from="/tf" to="tf"/>
 
-    <!-- Nodelet Manager -->
-    <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="log">
+    <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
       <param name="num_worker_threads" value="$(arg manager_threads)"/>
-    </node>
-
-    <!-- Aravis RGB camera nodelet -->
-    <node pkg="nodelet" type="nodelet" name="$(arg camera_name)" args="load camera_aravis/CameraAravisNodelet $(arg manager_name)" output="log">
-      <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name)/aravis.yaml"/>
-      <param name="frame_id" value="$(arg camera_name)"/>
-      <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name)/calibration.yaml"/>
-      <remap from="$(arg camera_name)/image_raw" to="image_raw"/>
-      <remap from="$(arg camera_name)/camera_info" to="camera_info"/>
     </node>
 
     <!-- tf Remapping -->
@@ -46,7 +35,13 @@
       <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml"/>
     </node>
 
-    <!-- Dynamic reconfigure -->
-    <node if="$(arg launch_dynamic_reconfigure)" name="dynamic_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" output="log"/>
+    <!-- Aravis RGB camera nodelet -->
+    <node pkg="nodelet" type="nodelet" name="$(arg camera_name)" args="load camera_aravis/CameraAravisNodelet $(arg manager_name)" output="screen">
+      <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name)/aravis.yaml"/>
+      <param name="frame_id" value="$(arg camera_name)"/>
+      <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name)/calibration.yaml"/>
+      <remap from="$(arg camera_name)/image_raw" to="image_raw"/>
+      <remap from="$(arg camera_name)/camera_info" to="camera_info"/>
+    </node>
   </group>
 </launch>

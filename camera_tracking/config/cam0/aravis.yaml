@@ -4,7 +4,8 @@ Width: 1288
 Height: 964
 
 ExposureAuto: Continuous
-GainAuto: Continuous
+GainAuto: None
+Gain: 0
 BalanceWhiteAuto: Continuous
 
 publish_tf: false
