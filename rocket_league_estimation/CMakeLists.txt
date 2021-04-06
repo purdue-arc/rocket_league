@@ -87,7 +87,7 @@ target_link_libraries(ball_detection
 
 # Mark Python executables for installation
 catkin_install_python(PROGRAMS
-  nodes/pose_estimator
+  nodes/odom_estimator
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

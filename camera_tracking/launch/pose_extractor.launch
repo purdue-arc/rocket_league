@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="camera_tracking" type="pose_extractor" name="car_pose_extractor" output="screen">
+    <param name="topic_name" value="car0/pose" />
+    <param name="target_frame" value="car0" />
+    <param name="source_frame" value="map" />
+  </node>
+</launch>
