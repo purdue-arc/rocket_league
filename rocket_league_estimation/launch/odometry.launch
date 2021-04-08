@@ -1,0 +1,7 @@
+<launch>
+  <arg name="target" default="car0"/>
+
+  <node ns="$(arg target)" type="odom_estimator" pkg="rocket_league_estimation" name="odometry">
+    <param name="base_link" value="$(arg target)"/>
+  </node>
+</launch>
