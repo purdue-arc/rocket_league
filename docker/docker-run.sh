@@ -12,6 +12,7 @@ docker run --rm -it \
     -v $XAUTHORITY:/home/$USER/.Xauthority \
     -v $WS_DIR:/home/$USER/catkin_ws \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v /dev:/dev \
     --name $CONTAINER_NAME \
     $@ \
     $REPO_NAME:local \
