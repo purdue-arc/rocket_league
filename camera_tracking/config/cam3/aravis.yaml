@@ -2,6 +2,7 @@ guid: Basler-23647868
 PixelFormat: BayerGR8
 Width: 1280
 Height: 960
+AcquisitionFrameRate: 30
 
 ExposureAuto: Continuous
 GainAuto: None
