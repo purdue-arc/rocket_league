@@ -100,6 +100,9 @@ class OdomEstimator(object):
 
             # velocities in world frame
             dt = (pose_msg.header.stamp - self.last_time).to_sec()
+            if dt == 0:
+                return
+
             vx = dx / dt
             vy = dy / dt
             v_theta = d_theta / dt
