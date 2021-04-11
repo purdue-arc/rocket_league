@@ -112,9 +112,9 @@ class OdomEstimator(object):
             vy_local = -dx*sin(theta) + dy*cos(theta)
 
             # add to low pass filter
-            vx_local_filtered, self.x_filter_z = signal.lfilter(self.x_filter[0], self.x_filter[1], vx_local, zi=self.x_filter_z)
-            vy_local_filtered, self.y_filter_z = signal.lfilter(self.y_filter[0], self.y_filter[1], vy_local, zi=self.y_filter_z)
-            v_theta_local_filtered, self.theta_filter_z = signal.lfilter(self.theta_filter[0], self.theta_filter[1], v_theta, zi=self.theta_filter_z)
+            vx_local_filtered, self.x_filter_z = signal.lfilter(self.x_filter[0], self.x_filter[1], [vx_local], zi=self.x_filter_z)
+            vy_local_filtered, self.y_filter_z = signal.lfilter(self.y_filter[0], self.y_filter[1], [vy_local], zi=self.y_filter_z)
+            v_theta_local_filtered, self.theta_filter_z = signal.lfilter(self.theta_filter[0], self.theta_filter[1], [v_theta], zi=self.theta_filter_z)
 
             # set odom velocities
             odom_msg.twist.twist.linear.x = vx_local_filtered
