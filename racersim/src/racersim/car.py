@@ -125,7 +125,12 @@ class Car(object):
         if linear_cmd.x != 0:
             # Angular / PID Approach
             curr_angle = self._flJoint.angle
-            turn = (self.body.angularVelocity + angular_cmd.z) * -self.pgain
+            turn = angular_cmd.z
+            if linear_cmd.x > 0:
+                turn += self.body.angularVelocity
+            else:
+                turn -= self.body.angularVelocity
+            turn *= -self.pgain
             new_angle = curr_angle + turn
 
             print('angularVelocity: ' + str(self.body.angularVelocity))
