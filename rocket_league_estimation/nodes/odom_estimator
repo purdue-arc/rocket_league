@@ -27,7 +27,8 @@ License:
 """
 
 # Python
-from math import sin, cos
+from math import sin, cos, pi
+from scipy import signal
 
 # ROS
 import rospy
@@ -44,9 +45,19 @@ class OdomEstimator(object):
         self.last_pose = None
         self.last_time = None
 
-        self.x_buffer = []
-        self.y_buffer = []
-        self.theta_buffer = []
+        self.x_filter = signal.butter(
+            rospy.get_param('~filters/x/order', 1),
+            2*pi*rospy.get_param('~filters/x/cutoff', 5.0))
+        self.y_filter = signal.butter(
+            rospy.get_param('~filters/y/order', 1),
+            2*pi*rospy.get_param('~filters/y/cutoff', 5.0))
+        self.theta_filter = signal.butter(
+            rospy.get_param('~filters/theta/order', 1),
+            2*pi*rospy.get_param('~filters/theta/cutoff', 5.0))
+
+        self.x_filter_z = signal.lfiter_zi(self.x_filter[0], self.x_filter[1])
+        self.y_filter_z = signal.lfiter_zi(self.y_filter[0], self.y_filter[1])
+        self.theta_filter_z = signal.lfiter_zi(self.theta_filter[0], self.theta_filter[1])
 
         # params
         self.BASE_LINK = rospy.get_param('~base_link', 'base_link')
@@ -79,46 +90,30 @@ class OdomEstimator(object):
             odom_msg.child_frame_id = self.BASE_LINK
             odom_msg.pose = pose_msg.pose
 
-            # deltas to calculate twist velocities
+            # deltas in world frame
             dx = x - self.last_pose[0]
             dy = y - self.last_pose[1]
-            dt = (pose_msg.header.stamp - self.last_time).to_sec()
             d_theta = theta - self.last_pose[2]
 
-            # this is gross, but we're gonna do it
-            dx /= dt
-            dy /= dt
-            d_theta /= dt
+            # velocities in world frame
+            dt = (pose_msg.header.stamp - self.last_time).to_sec()
+            vx = dx / dt
+            vy = dy / dt
+            v_theta = d_theta / dt
 
-            # this is also gross
-            # add to buffers
-            self.x_buffer.append(dx*cos(theta) + dy*sin(theta))
-            self.y_buffer.append(-dx*sin(theta) + dy*cos(theta))
-            self.theta_buffer.append(d_theta)
+            # velocites in local frame
+            vx_local =  dx*cos(theta) + dy*sin(theta)
+            vy_local = -dx*sin(theta) + dy*cos(theta)
 
-            # trim buffers
-            if len(self.x_buffer) > self.BUFFER_SIZE:
-                self.x_buffer.pop(0)
-            if len(self.y_buffer) > self.BUFFER_SIZE:
-                self.y_buffer.pop(0)
-            if len(self.theta_buffer) > self.BUFFER_SIZE:
-                self.theta_buffer.pop(0)
-
-            # get averages
-            dx = 0
-            dy = 0
-            d_theta = 0
-            for i in self.x_buffer:
-                dx += i / len(self.x_buffer)
-            for i in self.y_buffer:
-                dy += i / len(self.y_buffer)
-            for i in self.theta_buffer:
-                d_theta += i / len(self.theta_buffer)
+            # add to low pass filter
+            vx_local_filtered, self.x_filter_z = signal.lfilter(self.x_filter[0], self.x_filter[1], zi=self.x_filter_z)
+            vy_local_filtered, self.y_filter_z = signal.lfilter(self.y_filter[0], self.y_filter[1], zi=self.y_filter_z)
+            v_theta_local_filtered, self.theta_filter_z = signal.lfilter(self.theta_filter[0], self.theta_filter[1], zi=self.theta_filter_z)
 
             # set odom velocities
-            odom_msg.twist.twist.linear.x = dx
-            odom_msg.twist.twist.linear.y = dy
-            odom_msg.twist.twist.angular.z = d_theta
+            odom_msg.twist.twist.linear.x = vx_local_filtered
+            odom_msg.twist.twist.linear.y = vy_local_filtered
+            odom_msg.twist.twist.angular.z = v_theta_local_filtered
 
             # publish odom message
             self.odom_pub.publish(odom_msg)
