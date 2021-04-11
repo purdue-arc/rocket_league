@@ -9,7 +9,7 @@
   </include>
 
   <node pkg="camera_tracking" type="tf_parser" name="tf_parser" output="screen">
-    <rosparam param="camera_names">[cam0, cam1, cam2, cam3]</rosparam>
+    <rosparam param="camera_names">[cam0, cam1]</rosparam>
     <rosparam param="tag_names">[tag_0, tag_1, tag_69]</rosparam>
   </node>
 </launch>
