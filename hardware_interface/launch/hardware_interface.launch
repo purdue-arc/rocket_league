@@ -1,4 +1,5 @@
 <launch>
+<arg name="serial_port" default="/dev/tty/ACM1"/>
     <node type="serial_node.py" pkg="rosserial_arduino" name="hardware_interface" args="$(arg serial_port)">
         <param name="THROTTLE_MAX_FORWARD" value="2000"/>
         <param name="THROTTLE_ZERO" value="1500"/>
@@ -7,6 +8,5 @@
         <param name="STEERING_ZERO" value="1500"/>
         <param name="STEERING_TRIM" value="0"/>
         <param name="STEERING_MAX_LEFT" value="1000"/>
-        <arg name="serial_port" default="/dev/tty/ACM1"/>
     </node>
 </launch>
