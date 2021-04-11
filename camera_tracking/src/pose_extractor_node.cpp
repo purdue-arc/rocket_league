@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
           transform =
               tfBuffer.lookupTransform(targetFrame, sourceFrame, ros::Time(0));
           geometry_msgs::PoseWithCovarianceStamped pose;
+          pose.pose.pose.orientation.w = 1.0;
           tf2::doTransform(identity, pose, transform);
           pose.header = transform.header;
           pub.publish(pose);
