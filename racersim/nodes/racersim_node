@@ -45,17 +45,26 @@ class RacerSimROS(object):
         rospy.init_node('sim_node')
 
         self.sim = racersim.Sim(
-            renderEnabled=rospy.get_param('~render/enabled', True),
-            map_height=rospy.get_param('~MAP_HEIGHT'),
-            map_width=rospy.get_param('~MAP_WIDTH'),
-            goal_width=rospy.get_param('~GOAL_WIDTH'),
-            wall_thickness=rospy.get_param('~WALL_THICKNESS'),
-            total_weight=rospy.get_param('~CAR_WEIGHT'),
-            max_angle=rospy.get_param('~MAX_ANGLE'),
-            p_gain=rospy.get_param('~P_GAIN'),
-            max_drive_force=rospy.get_param('~MAX_DRIVE_FORCE'),
-            drag_force_coeff=rospy.get_param('~DRAG_FORCE_COEFF'),
-            angular_impulse_coeff=rospy.get_param('~ANGULAR_IMPULSE_COEFF')
+            # From high_level_info.yaml
+            rospy.get_param('~MAP_HEIGHT'),
+            rospy.get_param('~MAP_WIDTH'),
+            rospy.get_param('~GOAL_WIDTH'),
+
+            # From sim_info.yaml
+            rospy.get_param('~CAR_WEIGHT'),
+            rospy.get_param('~BALL_WEIGHT'),
+            rospy.get_param('~TIRE_WIDTH'),
+            rospy.get_param('~TIRE_LENGTH'),
+            rospy.get_param('~MAX_ANGLE'),
+            rospy.get_param('~MAX_DRIVE_FORCE'),
+            rospy.get_param('~DRAG_FORCE_COEFF'),
+            rospy.get_param('~ANGULAR_IMPULSE_COEFF'),
+            rospy.get_param('~MAX_LATERAL_IMPULSE'),
+            rospy.get_param('~P_GAIN'),
+            rospy.get_param('~WALL_THICKNESS'),
+            rospy.get_param('~VEL_ITERS'),
+            rospy.get_param('~POS_ITERS'),
+            rospy.get_param('~RENDER_ENABLED', True)
         )
 
         self.lock = Lock()

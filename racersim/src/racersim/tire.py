@@ -31,14 +31,14 @@ import Box2D
 
 class TireDef(object):
     """Holds relevent data for a tire instance"""
-    def __init__(self, width=0.0125, length=0.036, total_weight=0.130,
-                 max_lateral_impulse=0.015, max_drive_force=0.2, drag_force_coeff=-0.00002,
-                 angular_impulse_coeff=0.02):
+    def __init__(self, width, length, car_weight, max_lateral_impulse, max_drive_force,
+                 drag_force_coeff, angular_impulse_coeff):
+
         self.width = width
         self.length = length
 
         # The "area" of the entire car (body and tires) is 0.0052087501809
-        self.density = total_weight / 0.0052087501809
+        self.density = car_weight / 0.0052087501809
 
         self.maxLateralImpulse = max_lateral_impulse
         self.maxDriveForce = max_drive_force
