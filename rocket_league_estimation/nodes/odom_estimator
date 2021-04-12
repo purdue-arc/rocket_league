@@ -36,6 +36,17 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
 
+class Filter(object):
+    """Low pass filter."""
+    def __init__(self, order, cutoff):
+        self.top, self.bot = signal.butter(order, 2*pi*cutoff, analog=True)
+        self.state = signal.lfilter_zi(self.top, self.bot)
+
+    def filter(self, x):
+        """Add a new measurement."""
+        y, self.state = signal.lfilter(self.top, self.bot, [x], zi=self.state)
+        return y
+
 class OdomEstimator(object):
     """Simple node that derives velocity from position."""
     def __init__(self):
@@ -45,22 +56,15 @@ class OdomEstimator(object):
         self.last_pose = None
         self.last_time = None
 
-        self.x_filter = signal.butter(
+        self.x_filter = Filter(
             rospy.get_param('~filters/x/order', 1),
-            2*pi*rospy.get_param('~filters/x/cutoff', 5.0),
-            analog=True)
-        self.y_filter = signal.butter(
+            rospy.get_param('~filters/x/cutoff', 5.0))
+        self.y_filter = Filter(
             rospy.get_param('~filters/y/order', 1),
-            2*pi*rospy.get_param('~filters/y/cutoff', 5.0),
-            analog=True)
-        self.theta_filter = signal.butter(
+            rospy.get_param('~filters/y/cutoff', 5.0))
+        self.theta_filter = Filter(
             rospy.get_param('~filters/theta/order', 1),
-            2*pi*rospy.get_param('~filters/theta/cutoff', 5.0),
-            analog=True)
-
-        self.x_filter_z = signal.lfilter_zi(self.x_filter[0], self.x_filter[1])
-        self.y_filter_z = signal.lfilter_zi(self.y_filter[0], self.y_filter[1])
-        self.theta_filter_z = signal.lfilter_zi(self.theta_filter[0], self.theta_filter[1])
+            rospy.get_param('~filters/theta/cutoff', 5.0))
 
         # params
         self.BASE_LINK = rospy.get_param('~base_link', 'base_link')
@@ -112,9 +116,9 @@ class OdomEstimator(object):
             vy_local = -dx*sin(theta) + dy*cos(theta)
 
             # add to low pass filter
-            vx_local_filtered, self.x_filter_z = signal.lfilter(self.x_filter[0], self.x_filter[1], [vx_local], zi=self.x_filter_z)
-            vy_local_filtered, self.y_filter_z = signal.lfilter(self.y_filter[0], self.y_filter[1], [vy_local], zi=self.y_filter_z)
-            v_theta_local_filtered, self.theta_filter_z = signal.lfilter(self.theta_filter[0], self.theta_filter[1], [v_theta], zi=self.theta_filter_z)
+            vx_local_filtered = self.x_filter.filter(vx_local)
+            vy_local_filtered = self.y_filter.filter(vy_local)
+            v_theta_local_filtered = self.theta_filter.filter(v_theta)
 
             # set odom velocities
             odom_msg.twist.twist.linear.x = vx_local_filtered
