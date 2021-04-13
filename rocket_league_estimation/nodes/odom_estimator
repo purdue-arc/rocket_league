@@ -38,8 +38,9 @@ from tf.transformations import euler_from_quaternion
 
 class Filter(object):
     """Low pass filter."""
-    def __init__(self, order, cutoff):
-        self.top, self.bot = signal.butter(order, 2*pi*cutoff, analog=True)
+    def __init__(self, order, fc, fs=30.0):
+        f_norm = 2*fc/fs
+        self.top, self.bot = signal.butter(order, f_norm)
         self.state = signal.lfilter_zi(self.top, self.bot)
 
     def filter(self, x):
@@ -56,15 +57,19 @@ class OdomEstimator(object):
         self.last_pose = None
         self.last_time = None
 
+        F_SAMPLE = rospy.get_param('~sampling_frequency', 30.0)
         self.x_filter = Filter(
             rospy.get_param('~filters/x/order', 1),
-            rospy.get_param('~filters/x/cutoff', 5.0))
+            rospy.get_param('~filters/x/cutoff', 3.0),
+            fs=F_SAMPLE)
         self.y_filter = Filter(
             rospy.get_param('~filters/y/order', 1),
-            rospy.get_param('~filters/y/cutoff', 5.0))
+            rospy.get_param('~filters/y/cutoff', 3.0),
+            fs=F_SAMPLE)
         self.theta_filter = Filter(
             rospy.get_param('~filters/theta/order', 1),
-            rospy.get_param('~filters/theta/cutoff', 5.0))
+            rospy.get_param('~filters/theta/cutoff', 3.0),
+            fs=F_SAMPLE)
 
         # params
         self.BASE_LINK = rospy.get_param('~base_link', 'base_link')
