@@ -48,6 +48,7 @@ RUN apt install -y intltool gstreamer1.0-gtk3 \
 RUN apt install -y \
     python-pygame \
     python-box2d \
+    python-scipy \
     ros-${ROS_DISTRO}-apriltag-ros \
     ros-${ROS_DISTRO}-pointgrey-camera-driver
 
