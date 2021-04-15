@@ -44,16 +44,12 @@ class CarDef(object):
     # Wheel: {width=0.036m, wheelbase=0.119m}
     DEFAULT_ANCHORS = [(0, 0.147), (0.107, 0.147), (0.107, 0.023), (0, 0.023)]
 
-    DEFAULT_TIRE_DEF = TireDef()
-
-    def __init__(self, initPos=(1.25, 1.25), initAngle=0, vertices=DEFAULT_VERTICES,
-                    tireAnchors=DEFAULT_ANCHORS, tireDef=DEFAULT_TIRE_DEF,
-                    total_weight=0.130, max_angle=45, p_gain=0.1):
+    def __init__(self, tireDef, initPos, initAngle, total_weight, max_angle, p_gain):
 
         self.initPos = initPos
         self.initAngle = initAngle
-        self.vertices = vertices
-        self.tireAnchors = tireAnchors
+        self.vertices = self.DEFAULT_VERTICES
+        self.tireAnchors = self.DEFAULT_ANCHORS
         self.tireDef = tireDef
 
         # The "area" of the entire car (body and tires) is 0.0052087501809
@@ -136,6 +132,11 @@ class Car(object):
                 turn -= self.body.angularVelocity
             turn *= -self.pgain
             new_angle = curr_angle + turn
+
+            print('angularVelocity: ' + str(self.body.angularVelocity))
+            print('angular_cmd.z: ' + str(-angular_cmd.z))
+            print('turn: ' + str(turn))
+
 
             if new_angle > self.maxAngle:
                 new_angle = self.maxAngle

@@ -123,6 +123,7 @@ class WaypointControllerROS(object):
             goal_pos = None
             goal_vel = None
             goal_time = None
+            vel_margin = None
             bkw = False
             i = self.last_pose_idx
             pnts_checked = 0
@@ -147,6 +148,7 @@ class WaypointControllerROS(object):
                     goal_pos = end_pos
                     goal_vel = self.path[i + 1].twist.linear.x
                     goal_time = self.path[i + 1].delta_t
+                    vel_margin = self.path[i + 1].velocity_tolerance
                     bkw = goal_vel < 0
                     d_angle = pursuit.calculate_angle(intersect, bot_pos, \
                                                       bot_orient, lookahead_dist, bkw)
@@ -178,14 +180,17 @@ class WaypointControllerROS(object):
             if time_left <= 0 :
                 # Report unfeasible path
                 linear_vel = 0
+                vel_error = goal_vel
+                rospy.logwarn("Path unfeasible to complete.")
             else:
                 linear_vel = dist / time_left
                 if goal_vel < 0:
                     linear_vel *= -1
                 vel_error = goal_vel - linear_vel
 
-                # TODO:
-                # If vel_error > allowable margin then report unfeasible path
+                if vel_error > vel_margin:
+                    linear_vel = 0
+                    rospy.logwarn("Path unfeasible to complete.")
 
             # Calculate angular velocity
             turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos, \
@@ -204,12 +209,12 @@ class WaypointControllerROS(object):
             twist.angular.z = angular_vel
             self.bot_velocity_cmd.publish(twist)
 
-            # publish error data. TODO: replace zeros with actual values
+            # Publish error data
             error = PathError()
-            error.time = Float32()
-            error.position = Float32()
+            error.time = Float32(time_left)
+            error.position = Float32(dist)
             error.orientation = Float32()
-            error.linear_velocity = Float32()
+            error.linear_velocity = Float32(vel_error)
             error.angular_velocity = Float32()
             self.path_error_pub.publish(error)
 
