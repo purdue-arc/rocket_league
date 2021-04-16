@@ -191,6 +191,7 @@ class WaypointControllerROS(object):
                 if vel_error > vel_margin:
                     linear_vel = 0
                     rospy.logwarn("Path unfeasible to complete.")
+                    # TODO: Tell highlevel planner we stopped
 
             # Calculate angular velocity
             turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos, \

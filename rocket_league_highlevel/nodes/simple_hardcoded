@@ -53,7 +53,7 @@ class HighLevelPlannerROS(object):
       self.target_orientation = None
 
       # for backwards testing TODO: set false otherwise
-      self.backwards = True
+      self.backwards = False
 
       # Subscribers
       rospy.Subscriber("car0/odom", Odometry, self.car0_odom_cb)
