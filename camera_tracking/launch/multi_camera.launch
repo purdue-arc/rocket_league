@@ -5,5 +5,6 @@
   <node pkg="camera_tracking" type="tf_parser" name="tf_parser" output="screen">
     <rosparam param="camera_names">[testcam]</rosparam>
     <rosparam param="tag_names">[tag_0, tag_1, tag_69]</rosparam>
+    <rosparam param="update_rate">0.01</rosparam>
   </node>
 </launch>

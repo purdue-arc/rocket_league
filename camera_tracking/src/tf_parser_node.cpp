@@ -18,32 +18,32 @@ int main(int argc, char* argv[]) {
   ros::param::get("~camera_names", cameraNames);
   ros::param::get("~tag_names", tagNames);
 
-  while (ros::ok()) {
-    try {
-      geometry_msgs::TransformStamped transform;
-      for (auto& tagName : tagNames) {
-        geometry_msgs::TransformStamped tagTransform;
-        tagTransform.header.stamp = ros::Time(0);
-        for (auto& cameraName : cameraNames) {
-          try {
-            transform =
-                tfBuffer.lookupTransform("map", cameraName + "_" + tagName,
-                                         ros::Time::now(), ros::Duration(1));
-            if (transform.header.stamp > tagTransform.header.stamp) {
-              tagTransform = transform;
-              tagTransform.child_frame_id = tagName;
+  ros::Timer timer = nh.createTimer(
+      ros::Duration(updateRate), [&](const ros::TimerEvent& e) -> void {
+        geometry_msgs::TransformStamped transform;
+        for (auto& tagName : tagNames) {
+          geometry_msgs::TransformStamped tagTransform;
+          tagTransform.header.stamp = ros::Time(0);
+          for (auto& cameraName : cameraNames) {
+            try {
+              transform = tfBuffer.lookupTransform(
+                  "map", cameraName + "_" + tagName, ros::Time(0));
+              if (transform.header.stamp > tagTransform.header.stamp) {
+                tagTransform = transform;
+                tagTransform.child_frame_id = tagName;
+              }
+            } catch (tf2::TransformException e) {
+              // Frame doesn't exist
+              continue;
             }
+          }
+
+          if (tagTransform.header.stamp != ros::Time(0)) {
             tfBroadcaster.sendTransform(tagTransform);
-          } catch (tf2::TransformException e) {
-            // Frame doesn't exist
-            continue;
           }
         }
-      }
-    } catch (tf2::TransformException e) {
-      // ROS_WARN("Cannot do transformation: %s", e.what());
-    }
-    ros::spinOnce();
-  }
+      });
+
+  ros::spin();
   return 0;
 }
