@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 
@@ -12,25 +13,25 @@ int main(int argc, char* argv[]) {
 
   std::string cameraName;
   std::string originID;
-  double updateRate;
 
   ros::param::param<std::string>("~camera_name", cameraName, "camera");
   ros::param::param<std::string>("~origin_id", originID, "origin");
-  ros::param::param<double>("~update_rate", updateRate, 0.1);
 
-  ros::Timer timer = nh.createTimer(
-      ros::Duration(updateRate), [&](const ros::TimerEvent& e) -> void {
-        geometry_msgs::TransformStamped transform;
-        try {
-          transform = tfBuffer.lookupTransform(cameraName + "_" + originID,
-                                               cameraName, ros::Time(0));
-        } catch (tf2::TransformException e) {
-          return;
-        }
-        transform.header.frame_id = "map";
-        tfBroadcaster.sendTransform(transform);
-      });
+  std::string targetFrame = cameraName + "_" + originID;
+  std::string sourceFrame = cameraName;
 
-  ros::spin();
+  while (ros::ok()) {
+    try {
+      geometry_msgs::TransformStamped transform;
+      transform =
+          tfBuffer.lookupTransform(cameraName + "_" + originID, cameraName,
+                                   ros::Time::now(), ros::Duration(1));
+      transform.header.frame_id = "map";
+      tfBroadcaster.sendTransform(transform);
+    } catch (tf2::TransformException e) {
+      // ROS_WARN("Cannot do transformation: %s", e.what());
+    }
+    ros::spinOnce();
+  }
   return 0;
 }

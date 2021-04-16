@@ -1,0 +1,19 @@
+<launch>
+  <arg name="load_manager" default="true"/>
+  <arg name="manager_name" default="camera_manager"/>
+  <arg name="manager_threads" default="4"/>
+  <arg name="camera_name" default="testcam"/>
+
+  <group ns="$(arg camera_name)">
+    <include file="$(find camera_tracking)/launch/camera_boilerplate.launch" pass_all_args="true" />
+
+      <!-- cv_camera camera nodelet -->
+    <node pkg="nodelet" type="nodelet" name="$(arg camera_name)" args="load cv_camera/CvCameraNodelet $(arg manager_name)" output="screen">
+      <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name)/cv.yaml"/>
+      <param name="frame_id" value="$(arg camera_name)"/>
+      <param name="camera_info_url" value="package://camera_tracking/config/$(arg camera_name)/calibration.yaml"/>
+      <remap from="$(arg camera_name)/image_raw" to="image_raw"/>
+      <remap from="$(arg camera_name)/camera_info" to="camera_info"/>
+    </node>
+  </group>
+</launch>

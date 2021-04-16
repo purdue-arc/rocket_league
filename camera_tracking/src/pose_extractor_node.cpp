@@ -35,21 +35,19 @@ int main(int argc, char* argv[]) {
   geometry_msgs::PoseWithCovarianceStamped identity;
   identity.pose.pose.orientation.w = 1.0;
 
-  ros::Timer timer = nh.createTimer(
-      ros::Duration(updateRate), [&](const ros::TimerEvent& e) -> void {
-        geometry_msgs::TransformStamped transform;
-        try {
-          transform =
-              tfBuffer.lookupTransform(mapFrame, targetFrame, ros::Time(0));
-          geometry_msgs::PoseWithCovarianceStamped pose;
-          tf2::doTransform(identity, pose, transform);
-          pose.header = transform.header;
-          pub.publish(pose);
-        } catch (tf2::TransformException e) {
-          return;
-        }
-      });
-
-  ros::spin();
+  while (ros::ok()) {
+    try {
+      geometry_msgs::TransformStamped transform;
+      transform = tfBuffer.lookupTransform(mapFrame, targetFrame,
+                                           ros::Time::now(), ros::Duration(1));
+      geometry_msgs::PoseWithCovarianceStamped pose;
+      tf2::doTransform(identity, pose, transform);
+      pose.header = transform.header;
+      pub.publish(pose);
+    } catch (tf2::TransformException e) {
+      // ROS_WARN("Cannot do transformation: %s", e.what());
+    }
+    ros::spinOnce();
+  }
   return 0;
 }
