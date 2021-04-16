@@ -135,4 +135,4 @@ dmypy.json
 .idea/
 
 # Catkin
-CATKINIGNORE
+CATKIN_IGNORE
