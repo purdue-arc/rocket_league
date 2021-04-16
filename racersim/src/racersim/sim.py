@@ -39,12 +39,9 @@ import random
 
 class Sim(object):
     """Oversees components of racersim"""
-
-    def __init__(self, renderEnabled=True, map_height=10, map_width=100,
-                 goal_width=0.125000, wall_thickness=0.083333,
-                 velIters=6, posIters=2, total_weight=0.130, max_angle=45,
-                 p_gain=0.15, max_drive_force=0.2, drag_force_coeff=-0.00002,
-                 angular_impulse_coeff=0.02):
+    def __init__(self, map_height, map_width, goal_width,
+                 car_weight, ball_weight, tire_width, tire_length, max_angle, max_drive_force, drag_force_coeff,
+                 angular_impulse_coeff, max_lateral_impulse, p_gain, wall_thickness, vel_iters, pos_iters, render_enabled):
 
         # These positions are fully randomized
         # initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
@@ -69,14 +66,14 @@ class Sim(object):
 
         self.world = World(map_height, map_width, goal_width, wall_thickness)
 
-        self.renderEnabled = renderEnabled
-        self.velIters = velIters
-        self.posIters = posIters
+        self.renderEnabled = render_enabled
+        self.velIters = vel_iters
+        self.posIters = pos_iters
 
-        self.tireDef = TireDef(total_weight=total_weight, max_drive_force=max_drive_force,
-                               drag_force_coeff=drag_force_coeff, angular_impulse_coeff=angular_impulse_coeff)
-        self.carDef = CarDef(initPos=initPosCar, initAngle=initAngleCar, total_weight=total_weight,
-                             tireDef=self.tireDef, max_angle=max_angle, p_gain=p_gain)
+        self.tireDef = TireDef(tire_width, tire_length, car_weight, max_lateral_impulse, max_drive_force,
+                               drag_force_coeff, angular_impulse_coeff)
+
+        self.carDef = CarDef(self.tireDef, initPosCar, initAngleCar, car_weight, max_angle, p_gain)
 
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world, initPos=initPosBall)
@@ -84,7 +81,7 @@ class Sim(object):
         self.path = None
         self.lookahead = [0, 0]
 
-        if renderEnabled:
+        if render_enabled:
             self.renderer = Renderer(map_height, map_width)
             self._render()
         
