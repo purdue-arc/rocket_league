@@ -133,14 +133,11 @@ class Car(object):
             turn *= -self.pgain
             new_angle = curr_angle + turn
 
-            print('angularVelocity: ' + str(self.body.angularVelocity))
-            print('angular_cmd.z: ' + str(-angular_cmd.z))
-            print('turn: ' + str(turn))
-
-
             if new_angle > self.maxAngle:
+                print("Max angle reached")
                 new_angle = self.maxAngle
             elif new_angle < -self.maxAngle:
+                print("Min angle reached")
                 new_angle = -self.maxAngle
 
             self._flJoint.SetLimits(new_angle, new_angle)

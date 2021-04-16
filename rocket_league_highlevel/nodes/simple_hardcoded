@@ -138,7 +138,7 @@ class HighLevelPlannerROS(object):
       distance = np.dot(car_pose, self.goal0_pose)
       distance = np.sqrt(distance)
 
-      self.target_time = 2 * distance/self.final_speed   # multiplying by 2 because path might not be direct
+      self.target_time = 1.25 * distance/self.final_speed   # multiplying by 2 because path might not be direct
 
    def ball_odom_cb(self, ball_odom_message):
       #print("ball_odom_cb:" + str(ball_odom_message))

@@ -35,7 +35,7 @@ import random
 class Ball(object):
     """Simulates game ball."""
 
-    def __init__(self, world, initPos=(1.5,1.5), radius=0.0345, density=168.6, restitution=1.0):
+    def __init__(self, world, initPos=(1.5,1.5), radius=0.0345, density=7.76, restitution=1.0):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
         bodyDef.position = initPos
