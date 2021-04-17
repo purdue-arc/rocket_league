@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     try {
       geometry_msgs::TransformStamped transform;
       transform = tfBuffer.lookupTransform(mapFrame, targetFrame,
-                                           ros::Time::now(), ros::Duration(1));
+                                           ros::Time::now(), ros::Duration(0.1));
       geometry_msgs::PoseWithCovarianceStamped pose;
       tf2::doTransform(identity, pose, transform);
       pose.header = transform.header;

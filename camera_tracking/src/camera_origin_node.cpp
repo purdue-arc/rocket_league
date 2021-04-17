@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
       geometry_msgs::TransformStamped transform;
       transform =
           tfBuffer.lookupTransform(cameraName + "_" + originID, cameraName,
-                                   ros::Time::now(), ros::Duration(1));
+                                   ros::Time::now(), ros::Duration(0.1));
       transform.header.frame_id = "map";
       tfBroadcaster.sendTransform(transform);
     } catch (tf2::TransformException e) {

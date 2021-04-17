@@ -23,7 +23,7 @@
   </include>
 
   <!-- Apriltag detection -->
-  <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">
+  <node pkg="nodelet" type="nodelet" name="apriltag" args="load apriltag_ros/ContinuousDetector $(arg manager_name)" output="screen">
     <remap from="/tf" to="tf"/>
     <param name="camera_frame" type="str" value="$(arg camera_name)"/>
     <param name="publish_tag_detections_image" type="bool" value="true"/>

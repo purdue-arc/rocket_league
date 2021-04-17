@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
   std::vector<std::string> cameraNames;
   std::vector<std::string> tagNames;
 
-  ros::param::param<double>("~update_rate", updateRate, 0.1);
+  ros::param::param<double>("~update_rate", updateRate, 0.01);
   ros::param::get("~camera_names", cameraNames);
   ros::param::get("~tag_names", tagNames);
 
