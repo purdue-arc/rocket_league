@@ -55,7 +55,7 @@ class TrajectoryPlannerROS(object):
         self.final_time = None   #The final time requested by the HLP
 
         # Info about the paths we're using
-        self.MAX_SPEED = rospy.get_param('~MAX_SPEED', 1)
+        self.MAX_SPEED = rospy.get_param('~FINAL_SPEED')
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
@@ -359,6 +359,7 @@ class TrajectoryPlannerROS(object):
             self.feasibility_publisher()
 
         else:
+             self.path_pub.publish(waypoint_array_msg)
              print("not possible")
              self.feasibility_publisher()
 
