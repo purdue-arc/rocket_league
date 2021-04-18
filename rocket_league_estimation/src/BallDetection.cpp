@@ -85,6 +85,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
         // into the current_frame variable
         cv::Mat current_frame = cv_ptr->image;
         cv::Mat frame_HSV, frame_threshold;
+        //resize image
+        cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
         // Convert from BGR to HSV colorspace
         cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
         //get image size
