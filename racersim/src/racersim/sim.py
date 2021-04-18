@@ -40,8 +40,9 @@ import random
 class Sim(object):
     """Oversees components of racersim"""
     def __init__(self, map_height, map_width, goal_width,
-                 car_weight, ball_weight, tire_width, tire_length, max_angle, max_drive_force, drag_force_coeff,
-                 angular_impulse_coeff, max_lateral_impulse, p_gain, wall_thickness, vel_iters, pos_iters, render_enabled):
+                 car_weight, ball_weight, ball_radius, tire_width, tire_length, max_angle, max_drive_force,
+                 drag_force_coeff, angular_impulse_coeff, max_lateral_impulse, p_gain, wall_thickness, vel_iters,
+                 pos_iters, render_enabled):
 
         # These positions are fully randomized
         # initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
@@ -52,17 +53,17 @@ class Sim(object):
                        random.uniform(map_height*0.6, map_height*0.75))
         initPosCar = (random.uniform(map_width*0.25,map_width*0.75),
                       random.uniform(map_height*0.25, map_height*0.3))
-        # initAngleCar = random.uniform(0, 2*math.pi)
-        # Point up 
-        initAngleCar = random.uniform(-math.pi/2, math.pi/2)
-        
-        # Point down
-        # initAngleCar = random.uniform(math.pi/2, math.pi * 3/2)
 
         # These positions are static
         # initPosBall = (map_width/3, map_height - 1)
         # initPosCar = (2, 2)
         # initAngleCar = 5
+
+        # initAngleCar = random.uniform(0, 2*math.pi)
+        initAngleCar = random.uniform(-math.pi/2, math.pi/2) # Points up
+        # initAngleCar = random.uniform(math.pi/2, math.pi * 3/2) # Points down
+
+
 
         self.world = World(map_height, map_width, goal_width, wall_thickness)
 
@@ -76,7 +77,7 @@ class Sim(object):
         self.carDef = CarDef(self.tireDef, initPosCar, initAngleCar, car_weight, max_angle, p_gain)
 
         self.car = Car(self.world, self.carDef)
-        self.ball = Ball(self.world, initPos=initPosBall)
+        self.ball = Ball(self.world, initPosBall, ball_weight, ball_radius)
 
         self.path = None
         self.lookahead = [0, 0]

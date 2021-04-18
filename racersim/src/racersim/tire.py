@@ -80,17 +80,6 @@ class Tire(object):
                                       self.body.inertia * \
                                       -self.body.angularVelocity, wake=True)
 
-        # print('')
-
-        # print('self.body.mass: ' + str(self.body.mass))
-        # print('self.getLateralVelocity: ' + str(self.getLateralVelocity()))
-        # print('impulse.length: ' + str(impulse.length))
-        # print('maxLateralImpulse: ' + str(self.maxLateralImpulse))
-
-        # print('angularImpulseCoeff: ' + str(self.angularImpulseCoeff))
-        # print('body.inertia: ' + str(self.body.inertia))
-        # print('body.angularVelocity: ' + str(self.body.angularVelocity))
-
         currForwardNormal = self.getForwardVelocity()
         currForwardSpeed = currForwardNormal.Normalize()
         dragForce = self.dragForceCoeff * currForwardSpeed

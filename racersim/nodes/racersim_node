@@ -53,6 +53,7 @@ class RacerSimROS(object):
             # From sim_info.yaml
             rospy.get_param('~CAR_WEIGHT'),
             rospy.get_param('~BALL_WEIGHT'),
+            rospy.get_param('~BALL_RADIUS'),
             rospy.get_param('~TIRE_WIDTH'),
             rospy.get_param('~TIRE_LENGTH'),
             rospy.get_param('~MAX_ANGLE'),
@@ -75,8 +76,8 @@ class RacerSimROS(object):
         self.path_points = [[0,0]]
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
-        self.timeout = rospy.get_param('~TIMEOUT', 1.0) # Seconds
-        rate = rospy.Rate(rospy.get_param('~RATE', 64)) # Hz
+        self.timeout = rospy.get_param('~TIMEOUT')
+        rate = rospy.Rate(rospy.get_param('~RATE'))
 
         # Publishers
         self.ball_pub = rospy.Publisher('ball/odom', \
