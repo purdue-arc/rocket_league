@@ -191,10 +191,12 @@ class TrajectoryPlannerROS(object):
         Uses Menger Curvature calculation technique.
         TODO: add stuff so that curvature is taken into account when finding speeds at different points
         """
+        ############## NOTE: self.MAX__CALC_CURVATURE is the maximum for the car to follow perfectly, but we need some 
+        ############## leeway, so are just setting a tunable parameter we get from yaml file
         if not self.backwards:
-            self.MAX_CURVATURE = np.sin(self.MAX_ANGLE * np.pi/180) / self.WHEEL_BASE
+            self.MAX_CALC_CURVATURE = np.sin(self.MAX_ANGLE * np.pi/180) / self.WHEEL_BASE
         else: 
-            self.MAX_ANGLE = np.tan(self.MAX_ANGLE * np.pi /180) / self.WHEEL_BASE
+            self.MAX_CALC_CURVATURE = np.tan(self.MAX_ANGLE * np.pi /180) / self.WHEEL_BASE
 
         for i in range(1, len(points) - 1):
             vec_1 = points[i+1] - points[i]
@@ -216,7 +218,11 @@ class TrajectoryPlannerROS(object):
 
 
             # check if allowed
-            #TODO: if k > self.MAX_CURVATURE:
+            if self.backwards:
+                self.MAX_CURVATURE = rospy.get_param('~BACKWARD_MAX_CURVATURE')
+            else:
+                self.MAX_CURVATURE = rospy.get_param('~FORWARD_MAX_CURVATURE')
+
             if k > self.MAX_CURVATURE:
                 print("too curved")
                 self.possible = False
@@ -347,14 +353,14 @@ class TrajectoryPlannerROS(object):
             waypoint_array_msg.waypoint.append(new_waypoint)
 
         print("ready to publish")
-        #if self.possible:
-        self.path_pub.publish(waypoint_array_msg)
-        print("published")
-        self.feasibility_publisher()
+        if self.possible:
+            self.path_pub.publish(waypoint_array_msg)
+            print("published")
+            self.feasibility_publisher()
 
-        # else:
-        #     print("not possible")
-        # #    self.feasibility_publisher()
+        else:
+             print("not possible")
+             self.feasibility_publisher()
 
         self.possible = True
 
