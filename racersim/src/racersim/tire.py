@@ -31,14 +31,12 @@ import Box2D
 
 class TireDef(object):
     """Holds relevent data for a tire instance"""
-    def __init__(self, width, length, car_weight, max_lateral_impulse, max_drive_force,
-                 drag_force_coeff, angular_impulse_coeff):
+    def __init__(self, width, length, max_lateral_impulse, max_drive_force,
+                 drag_force_coeff, angular_impulse_coeff, density):
 
         self.width = width
         self.length = length
-
-        # The "area" of the entire car (body and tires) is 0.0052087501809
-        self.density = car_weight / 0.0052087501809
+        self.density = density
 
         self.maxLateralImpulse = max_lateral_impulse
         self.maxDriveForce = max_drive_force
@@ -93,10 +91,6 @@ class Tire(object):
         # Each tire should power itself and 1/4th of the car
         mass = self.body.mass + self.car_weight / 4
         delta_v = linear_cmd.x - currSpeed
-
-        # # The required force to accelerate to linear_cmd.x
-        # # in one time step (assuming no friction)
-        # force = mass * delta_v / dt
 
         # Assume that the time step is 1 (box2d handles the conversion?)
         force = mass * delta_v

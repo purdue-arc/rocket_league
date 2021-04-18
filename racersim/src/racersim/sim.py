@@ -40,28 +40,28 @@ import random
 class Sim(object):
     """Oversees components of racersim"""
     def __init__(self, map_height, map_width, goal_width,
-                 car_weight, ball_weight, ball_radius, tire_width, tire_length, max_angle, max_drive_force,
-                 drag_force_coeff, angular_impulse_coeff, max_lateral_impulse, p_gain, wall_thickness, vel_iters,
-                 pos_iters, render_enabled):
+                 car_weight, ball_weight, ball_radius, tire_width, tire_length, max_angle, car_length, car_width,
+                 wheelbase, max_drive_force, drag_force_coeff, angular_impulse_coeff, max_lateral_impulse, bumper_width,
+                 p_gain, wall_thickness, vel_iters, pos_iters, render_enabled):
 
         # These positions are fully randomized
-        # initPosBall = (random.uniform(0,map_width), random.uniform(0,map_height))
-        # initPosCar = (random.uniform(0,map_width), random.uniform(0,map_height))
+        # init_pos_ball = (random.uniform(0,map_width), random.uniform(0,map_height))
+        # init_pos_car = (random.uniform(0,map_width), random.uniform(0,map_height))
 
         # These positions are semi-randomized (the car doesn't need to reverse)
-        initPosBall = (random.uniform(map_width*0.25, map_width*0.75),
+        init_pos_ball = (random.uniform(map_width*0.25, map_width*0.75),
                        random.uniform(map_height*0.6, map_height*0.75))
-        initPosCar = (random.uniform(map_width*0.25,map_width*0.75),
+        init_pos_car = (random.uniform(map_width*0.25,map_width*0.75),
                       random.uniform(map_height*0.25, map_height*0.3))
 
         # These positions are static
-        # initPosBall = (map_width/3, map_height - 1)
-        # initPosCar = (2, 2)
-        # initAngleCar = 5
+        # init_pos_ball = (map_width/3, map_height - 1)
+        # init_pos_car = (2, 2)
+        # init_angle_car = 5
 
-        # initAngleCar = random.uniform(0, 2*math.pi)
-        initAngleCar = random.uniform(-math.pi/2, math.pi/2) # Points up
-        # initAngleCar = random.uniform(math.pi/2, math.pi * 3/2) # Points down
+        # init_angle_car = random.uniform(0, 2*math.pi) # Random angle
+        init_angle_car = random.uniform(-math.pi/2, math.pi/2) # Points up
+        # init_angle_car = random.uniform(math.pi/2, math.pi * 3/2) # Points down
 
 
 
@@ -71,13 +71,17 @@ class Sim(object):
         self.velIters = vel_iters
         self.posIters = pos_iters
 
-        self.tireDef = TireDef(tire_width, tire_length, car_weight, max_lateral_impulse, max_drive_force,
-                               drag_force_coeff, angular_impulse_coeff)
+        # Calculates the density of the car and tires
+        area = 4 * tire_width * tire_length + car_length * car_width - bumper_width**2
+        density = car_weight / area
 
-        self.carDef = CarDef(self.tireDef, initPosCar, initAngleCar, car_weight, max_angle, p_gain)
+        self.tireDef = TireDef(tire_width, tire_length, max_lateral_impulse, max_drive_force,
+                               drag_force_coeff, angular_impulse_coeff, density)
+        self.carDef = CarDef(self.tireDef, init_pos_car, init_angle_car, max_angle, p_gain, car_length,
+                             car_width, wheelbase, bumper_width, density)
 
         self.car = Car(self.world, self.carDef)
-        self.ball = Ball(self.world, initPosBall, ball_weight, ball_radius)
+        self.ball = Ball(self.world, init_pos_ball, ball_weight, ball_radius)
 
         self.path = None
         self.lookahead = [0, 0]

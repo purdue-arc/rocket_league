@@ -38,22 +38,19 @@ from tire import Tire, TireDef
 class CarDef(object):
     """Holds relevent data for a car instance"""
 
-    # Car: {length=0.180m, width=0.107m, height=0.064m}
-    DEFAULT_VERTICES = [(0, 0.165), (0.015, 0.18), (0.092, 0.18), (0.107, 0.165), (0.107, 0), (0,0)]
-
-    # Wheel: {width=0.036m, wheelbase=0.119m}
-    DEFAULT_ANCHORS = [(0, 0.147), (0.107, 0.147), (0.107, 0.023), (0, 0.023)]
-
-    def __init__(self, tireDef, initPos, initAngle, total_weight, max_angle, p_gain):
+    def __init__(self, tireDef, initPos, initAngle, max_angle, p_gain, car_length, car_width, wheelbase,
+                 bumper_width, density):
 
         self.initPos = initPos
         self.initAngle = initAngle
-        self.vertices = self.DEFAULT_VERTICES
-        self.tireAnchors = self.DEFAULT_ANCHORS
         self.tireDef = tireDef
 
-        # The "area" of the entire car (body and tires) is 0.0052087501809
-        self.density = total_weight / 0.0052087501809
+        self.vertices = [(0, car_length - bumper_width), (bumper_width, car_length),
+                  (car_width - bumper_width, car_length), (car_width, car_length - bumper_width), (car_width, 0), (0, 0)]
+        self.tireAnchors = [(0, 0.7 * tireDef.length + wheelbase), (car_width, 0.7 * tireDef.length + wheelbase),
+                  (car_width , 0.7 * tireDef.length), (0, 0.7 * tireDef.length)]
+
+        self.density = density
 
         self.maxAngle = math.radians(max_angle)
         self.pgain = p_gain
