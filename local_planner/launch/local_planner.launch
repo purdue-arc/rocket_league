@@ -10,5 +10,6 @@
 
   <node type="trajectory_planner_node" pkg="local_planner" name="trajectory_planner_node" output="screen">
     <rosparam command="load" file="$(find local_planner)/YAML_files/trajectory_params.yaml" />
+    <rosparam command="load" file="$(find racersim)/YAML_files/sim_info.yaml" />
   </node>
 </launch>

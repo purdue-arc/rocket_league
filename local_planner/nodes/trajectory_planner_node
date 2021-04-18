@@ -59,7 +59,8 @@ class TrajectoryPlannerROS(object):
         self.final_heading = None    # Final heading of the car so it hits the ball the correct way
         self.final_normalized_heading = None    # Normalized heading vector
         self.main_points = []    # Array of the main points all create_paths use
-        self.MAX_CURVATURE = 1/(rospy.get_param('~MIN_RADIUS', 0.4572))
+        self.MAX_ANGLE = rospy.get_param('~MAX_ANGLE')   # maximum angle wheels can turn
+        self.WHEEL_BASE = rospy.get_param('~WHEELBASE', 0.119)
 
         # These variables act as parameters to generate a path
         self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.5)    # Multiplier for distance of 1st main point in front of the car
@@ -190,6 +191,10 @@ class TrajectoryPlannerROS(object):
         Uses Menger Curvature calculation technique.
         TODO: add stuff so that curvature is taken into account when finding speeds at different points
         """
+        if not self.backwards:
+            self.MAX_CURVATURE = np.sin(self.MAX_ANGLE * np.pi/180) / self.WHEEL_BASE
+        else: 
+            self.MAX_ANGLE = np.tan(self.MAX_ANGLE * np.pi /180) / self.WHEEL_BASE
 
         for i in range(1, len(points) - 1):
             vec_1 = points[i+1] - points[i]
@@ -212,7 +217,7 @@ class TrajectoryPlannerROS(object):
 
             # check if allowed
             #TODO: if k > self.MAX_CURVATURE:
-            if k > 20: #self.MAX_CURVATURE:
+            if k > self.MAX_CURVATURE:
                 print("too curved")
                 self.possible = False
 
@@ -342,14 +347,14 @@ class TrajectoryPlannerROS(object):
             waypoint_array_msg.waypoint.append(new_waypoint)
 
         print("ready to publish")
-        if self.possible:
-            self.path_pub.publish(waypoint_array_msg)
-            print("published")
-            self.feasibility_publisher()
+        #if self.possible:
+        self.path_pub.publish(waypoint_array_msg)
+        print("published")
+        self.feasibility_publisher()
 
-        else:
-            print(self.possible)
-            self.feasibility_publisher()
+        # else:
+        #     print("not possible")
+        # #    self.feasibility_publisher()
 
         self.possible = True
 
