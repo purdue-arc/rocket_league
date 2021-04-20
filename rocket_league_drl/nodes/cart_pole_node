@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+import gym
+import pdb
+import rospy
+from std_msgs.msg import Int16, Float32, Bool
+#from geometry_msgs.msg import Twist  # Remove later cause message type is not twist
+
+from rospy.numpy_msg import numpy_msg
+from rospy_tutorials.msg import Floats
+from threading import Lock
+
+#Subscribes to action from DRL (can make it a node with random action for now). Publishes obs (positions & velocity) from gym
+
+
+class CartPole(object):
+    def __init__(self):
+        
+        self.env = gym.make('CartPole-v0')
+        self.observation = self.env.reset() 
+        self.reward=0
+        self.score=0
+        self.done=0
+        self.last_action=None
+        rospy.init_node('cart_pole_node')
+
+        self.lock = Lock()
+
+        # Publishers
+        self.obs_pub = rospy.Publisher('cartpole/obs', numpy_msg(Floats), queue_size=1) 
+        self.reward_pub = rospy.Publisher('cartpole/reward', Float32, queue_size=1)
+        self.done_pub = rospy.Publisher('cartpole/done', Bool, queue_size=1)
+        self.score_pub = rospy.Publisher('cartpole/score', Float32, queue_size=1)
+
+
+        # Subscribers
+        rospy.Subscriber('cartpole/action', Int16, self.cartpole_step)
+
+        rospy.Subscriber('cartpole/reset', Bool, self.cartpole_reset)  # Temporary, will change to service if needed       
+        #rospy.Service('cartpole/reset', Empty, self.cartpole_reset)
+
+        
+
+        rospy.Timer(rospy.Duration(rospy.get_param('~frequency', 1/30)), self.cartpole_step)
+        #rospy.Timer(rospy.Duration(1.0), self.cartpole_step)
+            #try:
+            #    rospy.Timer(rospy.Duration(1.0), self.cartpole_step)   #Is this the equivalent of using rate? Also, make Duration a parameter
+            #except rospy.ROSInterruptException:  # Is this necessary?
+            #    pass # What does this do? Idk, why is it being passed?
+
+        rospy.spin()  #Snake doesn't seem to have this, WHY
+                
+
+    def cartpole_step(self,event=None):
+        """Cartpole doing stuff"""
+        #pdb.set_trace()
+
+        self.lock.acquire()
+        self.env.render()
+        if self.last_action is not None:
+             self.observation, self.reward, self.done, self.info = self.env.step(self.last_action)
+        
+        self.score += self.reward
+        self.score_pub.publish(self.score)
+        self.obs_pub.publish(self.observation)
+        self.reward_pub.publish(self.reward)
+        self.done_pub.publish(self.done)
+
+        self.lock.release()
+       
+        #if self.done:
+        #   self.observation=self.env.reset()
+
+        #self.env.render()
+
+    def cartpole_action(self,action_msg):
+        self.last_action=action_msg.data
+
+    #def cartpole_reset(self,__):     # For service, 2nd empty argument just because snake reset has one too
+    def cartpole_reset(self,reset_msg):     # Using subscriber
+    
+        if reset_msg.data:
+            self.lock.acquire()
+            self.observation=self.env.reset() 
+            self.reward=0
+            self.score=0
+            self.done=0
+            self.last_action=None
+            self.lock.release()
+
+
+
+if __name__ == "__main__":
+    CartPole()

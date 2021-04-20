@@ -42,7 +42,7 @@ print("Running " + env + " in " + mode + " mode.")
 
 if env == "snake":
     Interface = SnakeInterface
-elif env == "cartPole":
+elif env == "cartpole":
     Interface = CartPoleInterface
 else:
     print("Unrecognized environment!")
