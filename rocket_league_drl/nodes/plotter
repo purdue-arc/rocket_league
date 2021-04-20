@@ -46,7 +46,7 @@ class Plotter(object):
         self.history = None
 
         # Subscribers
-        rospy.Subscriber('snake/dqn/training', DiagnosticStatus, self.progress_cb)
+        rospy.Subscriber('training_stats', DiagnosticStatus, self.progress_cb)
 
         rospy.spin()
 

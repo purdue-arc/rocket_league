@@ -33,7 +33,7 @@ class CartPole(object):
 
 
         # Subscribers
-        rospy.Subscriber('cartpole/action', Int16, self.cartpole_step)
+        rospy.Subscriber('cartpole/action', Int16, self.cartpole_action)
 
         rospy.Subscriber('cartpole/reset', Bool, self.cartpole_reset)  # Temporary, will change to service if needed       
         #rospy.Service('cartpole/reset', Empty, self.cartpole_reset)
@@ -41,7 +41,7 @@ class CartPole(object):
         
 
         rospy.Timer(rospy.Duration(rospy.get_param('~frequency', 1/30)), self.cartpole_step)
-        #rospy.Timer(rospy.Duration(1.0), self.cartpole_step)
+        # rospy.Timer(rospy.Duration(1.0), self.cartpole_step)
             #try:
             #    rospy.Timer(rospy.Duration(1.0), self.cartpole_step)   #Is this the equivalent of using rate? Also, make Duration a parameter
             #except rospy.ROSInterruptException:  # Is this necessary?
@@ -55,7 +55,7 @@ class CartPole(object):
         #pdb.set_trace()
 
         self.lock.acquire()
-        self.env.render()
+        # self.env.render()
         if self.last_action is not None:
              self.observation, self.reward, self.done, self.info = self.env.step(self.last_action)
         
@@ -70,7 +70,7 @@ class CartPole(object):
         #if self.done:
         #   self.observation=self.env.reset()
 
-        #self.env.render()
+        # self.env.render()
 
     def cartpole_action(self,action_msg):
         self.last_action=action_msg.data

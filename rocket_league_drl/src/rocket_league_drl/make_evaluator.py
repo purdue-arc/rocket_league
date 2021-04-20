@@ -42,6 +42,7 @@ def makeEvaluator(cls):
             super().__init__()
 
             # initialize variables
+            self.reset_env()
             self.reset()
 
             while not rospy.is_shutdown():
@@ -57,5 +58,8 @@ def makeEvaluator(cls):
                 if not state[2]:
                     self.clear_state()
                     self.publish_action(self.agent.eval(state))
+                else:
+                    self.reset_env()
+                    self.reset()
 
     return Evaluator
