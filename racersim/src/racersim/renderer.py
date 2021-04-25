@@ -134,9 +134,6 @@ class Renderer(object):
             for fixture in tire.body.fixtures:
                 self._draw_polygon(tire.body, fixture, self.COLOR_TIRE)
         
-        for fixture in ball.body.fixtures:
-            self._draw_circle(ball.body, fixture, self.COLOR_BALL)
-        
         for wallBody in world.wallBodies:
             for fixture in wallBody.fixtures:
                 self._draw_polygon(wallBody, fixture, self.COLOR_WALL)
@@ -147,6 +144,9 @@ class Renderer(object):
 
         #Renders the lookahead point
         self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], int(self.SIZE_PNT * self.scaling))
+
+        for fixture in ball.body.fixtures:
+            self._draw_circle(ball.body, fixture, self.COLOR_BALL)
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()

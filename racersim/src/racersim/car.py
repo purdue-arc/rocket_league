@@ -45,10 +45,8 @@ class CarDef(object):
         self.initAngle = initAngle
         self.tireDef = tireDef
 
-        self.vertices = [(0, car_length - bumper_width), (bumper_width, car_length),
-                  (car_width - bumper_width, car_length), (car_width, car_length - bumper_width), (car_width, 0), (0, 0)]
-        self.tireAnchors = [(0, 0.7 * tireDef.length + wheelbase), (car_width, 0.7 * tireDef.length + wheelbase),
-                  (car_width , 0.7 * tireDef.length), (0, 0.7 * tireDef.length)]
+        self.vertices = [(-0.0535, 0.075), (-0.0385, 0.09), (0.0385, 0.09), (0.0535, 0.075), (0.0535, -0.09), (-0.0535, -0.09)]
+        self.tireAnchors = [(-0.0535, 0.0595), (0.0535, 0.0595), (0.0535, -0.0595), (-0.0535, -0.0595)]
 
         self.density = density
 

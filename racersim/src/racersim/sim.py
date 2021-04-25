@@ -49,18 +49,18 @@ class Sim(object):
         # init_pos_car = (random.uniform(0,map_width), random.uniform(0,map_height))
 
         # These positions are semi-randomized (the car doesn't need to reverse)
-        init_pos_ball = (random.uniform(map_width*0.25, map_width*0.75),
-                       random.uniform(map_height*0.6, map_height*0.75))
-        init_pos_car = (random.uniform(map_width*0.25,map_width*0.75),
-                      random.uniform(map_height*0.25, map_height*0.3))
+        # init_pos_ball = (random.uniform(map_width*0.25, map_width*0.75),
+        #                random.uniform(map_height*0.6, map_height*0.75))
+        # init_pos_car = (random.uniform(map_width*0.25,map_width*0.75),
+        #               random.uniform(map_height*0.25, map_height*0.3))
 
         # These positions are static
-        # init_pos_ball = (map_width/3, map_height - 1)
-        # init_pos_car = (2, 2)
-        # init_angle_car = 5
+        init_pos_ball = (0.6 * map_width, 0.8 * map_height)
+        init_pos_car = (0.6 * map_width, 0.5 * map_height)
+        init_angle_car = 6.0
 
         # init_angle_car = random.uniform(0, 2*math.pi) # Random angle
-        init_angle_car = random.uniform(-math.pi/2, math.pi/2) # Points up
+        # init_angle_car = random.uniform(-math.pi/2, math.pi/2) # Points up
         # init_angle_car = random.uniform(math.pi/2, math.pi * 3/2) # Points down
 
 
