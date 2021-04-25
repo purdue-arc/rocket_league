@@ -38,7 +38,7 @@ from tire import Tire, TireDef
 class CarDef(object):
     """Holds relevent data for a car instance"""
 
-    def __init__(self, tireDef, initPos, initAngle, max_angle, p_gain, car_length, car_width, wheelbase,
+    def __init__(self, tireDef, initPos, initAngle, max_angle, p_gain, i_gain, car_length, car_width, wheelbase,
                  bumper_width, density):
 
         self.initPos = initPos
@@ -54,6 +54,7 @@ class CarDef(object):
 
         self.maxAngle = math.radians(max_angle)
         self.pgain = p_gain
+        self.igain = i_gain
 
 class Car(object):
     """Simulates an ackerman-steering vehicle"""
@@ -99,6 +100,8 @@ class Car(object):
         self.body.angle = carDef.initAngle
         self.maxAngle = carDef.maxAngle
         self.pgain = carDef.pgain
+        self.igain = carDef.igain
+        self.i_sum = 0.0
 
     def getPoint(self):
         return (self.body.position[0], self.body.position[1], 0)
@@ -127,7 +130,13 @@ class Car(object):
                 turn += self.body.angularVelocity
             else:
                 turn -= self.body.angularVelocity
+
+            if turn == 0:
+                self.i_sum = 0
+            else:
+                self.i_sum += turn
             turn *= -self.pgain
+            turn -= self.i_sum * self.igain
             new_angle = curr_angle + turn
 
             if new_angle > self.maxAngle:

@@ -66,6 +66,7 @@ class RacerSimROS(object):
             rospy.get_param('~MAX_LATERAL_IMPULSE'),
             rospy.get_param('~BUMPER_WIDTH'),
             rospy.get_param('~P_GAIN'),
+            rospy.get_param('~I_GAIN'),
             rospy.get_param('~WALL_THICKNESS'),
             rospy.get_param('~VEL_ITERS'),
             rospy.get_param('~POS_ITERS'),
@@ -160,7 +161,7 @@ class RacerSimROS(object):
                 angular_cmd = empty.angular
 
             self.sim.step(linear_cmd, angular_cmd, delta_t)
-            self.sim.render_path(self.path)
+            self.sim.render_path(self.path, self.sim.car.getPoint())
 
             # Publish ball odometry
             ball_msg = Odometry()
