@@ -12,5 +12,5 @@
     <arg name="launch_boilerplate" value="false" />
   </include>
 
-  <node pkg="rosbag" type="record" name="record" output="screen" args="-a $(arg bag)" />
+  <node pkg="rosbag" type="record" name="record" output="screen" args="/cam0/image_raw /cam1/image_raw /cam0/camera_info /cam1/camera_info -O $(arg bag)" />
 </launch>
