@@ -21,13 +21,13 @@ from rospy_tutorials.msg import Floats
 
 
 @unique
-class CartPoleActions(IntEnum):
+class CartpoleActions(IntEnum):
     """Possible actions for deep learner."""     
     LEFT = 0
     RIGHT = auto()
     SIZE = auto()
 
-class CartPoleInterface(ROSInterface):
+class CartpoleInterface(ROSInterface):
     """ROS interface for the cartpole game."""
     def __init__(self):
         rospy.init_node('cartpole_drl')
@@ -88,7 +88,7 @@ class CartPoleInterface(ROSInterface):
     @property
     def ACTION_SIZE(self):
         """The action size for the network."""
-        return CartPoleActions.SIZE
+        return CartpoleActions.SIZE
 
     def reset_env(self):       #Seems like it calls reset from gym, doesn't seem to use done message directly
         """Reset environment for a new training episode."""
@@ -135,13 +135,13 @@ class CartPoleInterface(ROSInterface):
 
     def publish_action(self, action):    #Converts action message from DRL to gym message which is just 0 (left) or 1 (right)
         """Publish an action to the ROS network."""
-        assert action >= 0 and action < CartPoleActions.SIZE
+        assert action >= 0 and action < CartpoleActions.SIZE
 
         #action_msg = Twist()  Need to declare as int16?
 
-        if action == CartPoleActions.LEFT:
+        if action == CartpoleActions.LEFT:
             action_msg = 0
-        if action == CartPoleActions.RIGHT:
+        if action == CartpoleActions.RIGHT:
             action_msg = 1
 
         self._action_pub.publish(action_msg)
