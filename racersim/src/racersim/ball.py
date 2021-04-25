@@ -30,21 +30,25 @@ License:
 import Box2D
 import math
 from tf.transformations import quaternion_from_euler
+import random
 
 class Ball(object):
     """Simulates game ball."""
 
-    def __init__(self, world, initPos=(0.55,0.35), radius=0.05,
-                    density=0.00001, restitution=1.0):
-
+    def __init__(self, world, initPos, weight, radius, restitution=1.0):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
         bodyDef.position = initPos
+
         self.body = world.CreateBody(bodyDef)
 
         shape = Box2D.b2CircleShape(radius=radius)
-        self.body.CreateFixture(shape=shape, density=density, 
-                                 restitution=restitution)
+        fixtureDef = Box2D.b2FixtureDef(shape=shape)
+        fixtureDef.density = weight / (math.pi * radius**2)
+
+        fixtureDef.restitution = restitution
+        fixtureDef.userData = "ball:0"
+        self.body.CreateFixture(fixtureDef)
 
     def getPoint(self):
         return (self.body.position[0], self.body.position[1], 0)

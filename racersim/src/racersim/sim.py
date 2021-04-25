@@ -32,42 +32,60 @@ import math
 # Local classes
 from racersim.ball import Ball
 from racersim.car import Car, CarDef
-from racersim.goal import Goal
 from racersim.renderer import Renderer
 from racersim.tire import Tire, TireDef
 from racersim.world import World
+import random
 
 class Sim(object):
     """Oversees components of racersim"""
+    def __init__(self, map_height, map_width, goal_width,
+                 car_weight, ball_weight, ball_radius, tire_width, tire_length, max_angle, car_length, car_width,
+                 wheelbase, max_drive_force, drag_force_coeff, angular_impulse_coeff, max_lateral_impulse, bumper_width,
+                 p_gain, i_gain, wall_thickness, vel_iters, pos_iters, render_enabled):
 
-    def __init__(self, renderEnabled=True, velIters=6, posIters=2,
-                 bounds=1.5, scaling=500, carDef=None, tireDef=None):
+        # These positions are fully randomized
+        # init_pos_ball = (random.uniform(0,map_width), random.uniform(0,map_height))
+        # init_pos_car = (random.uniform(0,map_width), random.uniform(0,map_height))
 
-        self.world = World(bounds, bounds)
+        # These positions are semi-randomized (the car doesn't need to reverse)
+        # init_pos_ball = (random.uniform(map_width*0.25, map_width*0.75),
+        #                random.uniform(map_height*0.6, map_height*0.75))
+        # init_pos_car = (random.uniform(map_width*0.25,map_width*0.75),
+        #               random.uniform(map_height*0.25, map_height*0.3))
 
-        self.renderEnabled = renderEnabled
-        self.velIters = velIters
-        self.posIters = posIters
-        self.scaling = scaling
-        self.bounds = bounds
+        # These positions are static
+        init_pos_ball = (0.6 * map_width, 0.8 * map_height)
+        init_pos_car = (0.6 * map_width, 0.2 * map_height)
+        init_angle_car = math.pi/4.0 + math.pi
 
-        self.carDef = carDef
-        self.tireDef = tireDef
-        if self.carDef == None:
-            if self.tireDef != None:
-                self.carDef = CarDef(tireDef)
-            else:
-                self.carDef = CarDef()
-        
+        # init_angle_car = random.uniform(0, 2*math.pi) # Random angle
+        # init_angle_car = random.uniform(-math.pi/2, math.pi/2) # Points up
+        # init_angle_car = random.uniform(math.pi/2, math.pi * 3/2) # Points down
+
+        self.world = World(map_height, map_width, goal_width, wall_thickness)
+
+        self.renderEnabled = render_enabled
+        self.velIters = vel_iters
+        self.posIters = pos_iters
+
+        # Calculates the density of the car and tires
+        area = 4 * tire_width * tire_length + car_length * car_width - bumper_width**2
+        density = car_weight / area
+
+        self.tireDef = TireDef(tire_width, tire_length, max_lateral_impulse, max_drive_force,
+                               drag_force_coeff, angular_impulse_coeff, density)
+        self.carDef = CarDef(self.tireDef, init_pos_car, init_angle_car, max_angle, p_gain, i_gain, car_length,
+                             car_width, wheelbase, bumper_width, density)
+
         self.car = Car(self.world, self.carDef)
-        self.ball = Ball(self.world)
-        self.goal = Goal(self.world)
+        self.ball = Ball(self.world, init_pos_ball, ball_weight, ball_radius)
+
         self.path = None
         self.lookahead = [0, 0]
-	self.path_points = [[0, 0]]
 
-        if renderEnabled:
-            self.renderer = Renderer(bounds, scaling=scaling)
+        if render_enabled:
+            self.renderer = Renderer(map_height, map_width)
             self._render()
         
         self.running = True
@@ -89,7 +107,6 @@ class Sim(object):
         """Reset simulator to original state."""
         self.world.DestroyBody(self.car.body)
         self.world.DestroyBody(self.ball.body)
-        self.world.DestroyBody(self.goal.body)
                 
         if self.carDef == None:
             if self.tireDef != None:
@@ -99,7 +116,6 @@ class Sim(object):
         
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world)
-        self.goal = Goal(self.world)
 
         if self.renderEnabled:
             self._render()
@@ -109,7 +125,7 @@ class Sim(object):
     def _render(self):
         """Render the current state of the sim."""
         try:
-            self.renderer.render(self.car, self.ball, self.goal, \
-                                 self.world, self.lookahead, self.path_points, path=self.path)
+            self.renderer.render(self.car, self.ball, self.world,
+                                 self.lookahead, path=self.path)
         except Renderer.ShutdownError:
             self.renderEnabled = False
