@@ -107,7 +107,7 @@ class Renderer(object):
 
             pygame.draw.circle(self._screen, color, [x, y], size)
 
-    def render(self, car, ball, world, lookahead, path=None, tmp=None):
+    def render(self, car, ball, world, lookahead, path=None):
         """Render the current state of the sim."""
 
         if self._thread is not None and self._thread.is_alive():
@@ -134,9 +134,6 @@ class Renderer(object):
             for fixture in tire.body.fixtures:
                 self._draw_polygon(tire.body, fixture, self.COLOR_TIRE)
         
-        for fixture in ball.body.fixtures:
-            self._draw_circle(ball.body, fixture, self.COLOR_BALL)
-        
         for wallBody in world.wallBodies:
             for fixture in wallBody.fixtures:
                 self._draw_polygon(wallBody, fixture, self.COLOR_WALL)
@@ -147,7 +144,9 @@ class Renderer(object):
 
         #Renders the lookahead point
         self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], int(self.SIZE_PNT * self.scaling))
-        self._visualize_point(self.COLOR_BALL, [tmp], int(self.SIZE_PNT * self.scaling))
+
+        for fixture in ball.body.fixtures:
+            self._draw_circle(ball.body, fixture, self.COLOR_BALL)
 
         self._thread = Thread(target=pygame.display.flip)
         self._thread.start()

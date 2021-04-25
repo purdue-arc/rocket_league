@@ -56,8 +56,8 @@ class Sim(object):
 
         # These positions are static
         init_pos_ball = (0.6 * map_width, 0.8 * map_height)
-        init_pos_car = (0.6 * map_width, 0.3 * map_height)
-        init_angle_car = 5.5
+        init_pos_car = (0.6 * map_width, 0.2 * map_height)
+        init_angle_car = math.pi/4.0 + math.pi
 
         # init_angle_car = random.uniform(0, 2*math.pi) # Random angle
         # init_angle_car = random.uniform(-math.pi/2, math.pi/2) # Points up
@@ -83,7 +83,6 @@ class Sim(object):
 
         self.path = None
         self.lookahead = [0, 0]
-        self.tmp = [0, 0]
 
         if render_enabled:
             self.renderer = Renderer(map_height, map_width)
@@ -101,9 +100,8 @@ class Sim(object):
         if self.renderEnabled:
             self._render()
 
-    def render_path(self, path, pos):
+    def render_path(self, path):
         self.path = path
-        self.tmp = pos
 
     def reset(self):
         """Reset simulator to original state."""
@@ -127,8 +125,7 @@ class Sim(object):
     def _render(self):
         """Render the current state of the sim."""
         try:
-            tmp = [self.tmp[0], self.tmp[1]]
             self.renderer.render(self.car, self.ball, self.world,
-                                 self.lookahead, path=self.path, tmp=tmp)
+                                 self.lookahead, path=self.path)
         except Renderer.ShutdownError:
             self.renderEnabled = False

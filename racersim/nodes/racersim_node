@@ -161,7 +161,7 @@ class RacerSimROS(object):
                 angular_cmd = empty.angular
 
             self.sim.step(linear_cmd, angular_cmd, delta_t)
-            self.sim.render_path(self.path, self.sim.car.getPoint())
+            self.sim.render_path(self.path)
 
             # Publish ball odometry
             ball_msg = Odometry()

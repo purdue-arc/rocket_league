@@ -45,10 +45,8 @@ class CarDef(object):
         self.initAngle = initAngle
         self.tireDef = tireDef
 
-        self.vertices = [(0, car_length - bumper_width), (bumper_width, car_length),
-                  (car_width - bumper_width, car_length), (car_width, car_length - bumper_width), (car_width, 0), (0, 0)]
-        self.tireAnchors = [(0, 0.7 * tireDef.length + wheelbase), (car_width, 0.7 * tireDef.length + wheelbase),
-                  (car_width , 0.7 * tireDef.length), (0, 0.7 * tireDef.length)]
+        self.vertices = [(-0.0535, 0.075), (-0.0385, 0.09), (0.0385, 0.09), (0.0535, 0.075), (0.0535, -0.09), (-0.0535, -0.09)]
+        self.tireAnchors = [(-0.0535, 0.0595), (0.0535, 0.0595), (0.0535, -0.0595), (-0.0535, -0.0595)]
 
         self.density = density
 
@@ -123,8 +121,9 @@ class Car(object):
             tire.updateDrive(linear_cmd, dt)
 
         if linear_cmd.x != 0:
-            # Angular / PID Approach
             curr_angle = self._flJoint.angle
+
+            # The further you're off, the sharper you'll turn the tires
             turn = angular_cmd.z
             if linear_cmd.x > 0:
                 turn += self.body.angularVelocity
@@ -139,11 +138,17 @@ class Car(object):
             turn -= self.i_sum * self.igain
             new_angle = curr_angle + turn
 
+            # Turn tires at a constant rate
+            # new_angle = 0
+            # delta = angular_cmd.z - (-self.body.angularVelocity) * numpy.sign(linear_cmd.x)
+            # if (delta > 0):
+            #     new_angle = curr_angle - self.pgain * math.pi / 180
+            # elif delta < 0:
+            #     new_angle = curr_angle + self.pgain * math.pi / 180
+
             if new_angle > self.maxAngle:
-                print("Max angle reached")
                 new_angle = self.maxAngle
             elif new_angle < -self.maxAngle:
-                print("Min angle reached")
                 new_angle = -self.maxAngle
 
             self._flJoint.SetLimits(new_angle, new_angle)
