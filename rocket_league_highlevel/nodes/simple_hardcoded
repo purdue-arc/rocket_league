@@ -53,7 +53,7 @@ class HighLevelPlannerROS(object):
       self.target_orientation = None
 
       # for backwards testing TODO: set false otherwise
-      self.backwards = False
+      self.backwards = True
 
       # Subscribers
       rospy.Subscriber("car0/odom", Odometry, self.car0_odom_cb)
@@ -135,7 +135,7 @@ class HighLevelPlannerROS(object):
       car_pose = np.array([self.car0_pose.x, self.car0_pose.y, self.car0_pose.z], dtype='float64')
 
       # calculate final time
-      distance = np.dot(car_pose, self.goal0_pose)
+      distance = (car_pose[0] - self.goal0_pose[0])**2 + (car_pose[1] - self.goal0_pose[1])**2
       distance = np.sqrt(distance)
 
       self.target_time = 2 * distance/self.final_speed   # multiplying by 2 because path might not be direct
@@ -152,7 +152,7 @@ class HighLevelPlannerROS(object):
       # add orientation to target pose
       yaw = np.arctan2(self.target_orientation[1],self.target_orientation[0])
       if self.backwards:
-         yaw = -yaw
+         yaw = yaw + np.pi
       (self.target_pose.orientation.x,self.target_pose.orientation.y,self.target_pose.orientation.z,\
                 self.target_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
 
