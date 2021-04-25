@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="goal_tag_publisher" args="0 0 0 0 0 0 tag_69 car0" />
+</launch>

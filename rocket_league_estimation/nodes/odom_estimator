@@ -27,13 +27,26 @@ License:
 """
 
 # Python
-from math import sin, cos
+from math import sin, cos, pi
+from scipy import signal
 
 # ROS
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion
+
+class Filter(object):
+    """Low pass filter."""
+    def __init__(self, order, fc, fs=30.0):
+        f_norm = 2*fc/fs
+        self.top, self.bot = signal.butter(order, f_norm)
+        self.state = signal.lfilter_zi(self.top, self.bot)
+
+    def filter(self, x):
+        """Add a new measurement."""
+        y, self.state = signal.lfilter(self.top, self.bot, [x], zi=self.state)
+        return y
 
 class OdomEstimator(object):
     """Simple node that derives velocity from position."""
@@ -44,9 +57,19 @@ class OdomEstimator(object):
         self.last_pose = None
         self.last_time = None
 
-        self.x_buffer = []
-        self.y_buffer = []
-        self.theta_buffer = []
+        F_SAMPLE = rospy.get_param('~sampling_frequency', 30.0)
+        self.x_filter = Filter(
+            rospy.get_param('~filters/x/order', 1),
+            rospy.get_param('~filters/x/cutoff', 3.0),
+            fs=F_SAMPLE)
+        self.y_filter = Filter(
+            rospy.get_param('~filters/y/order', 1),
+            rospy.get_param('~filters/y/cutoff', 3.0),
+            fs=F_SAMPLE)
+        self.theta_filter = Filter(
+            rospy.get_param('~filters/theta/order', 1),
+            rospy.get_param('~filters/theta/cutoff', 3.0),
+            fs=F_SAMPLE)
 
         # params
         self.BASE_LINK = rospy.get_param('~base_link', 'base_link')
@@ -79,46 +102,33 @@ class OdomEstimator(object):
             odom_msg.child_frame_id = self.BASE_LINK
             odom_msg.pose = pose_msg.pose
 
-            # deltas to calculate twist velocities
+            # deltas in world frame
             dx = x - self.last_pose[0]
             dy = y - self.last_pose[1]
-            dt = (pose_msg.header.stamp - self.last_time).to_sec()
             d_theta = theta - self.last_pose[2]
 
-            # this is gross, but we're gonna do it
-            dx /= dt
-            dy /= dt
-            d_theta /= dt
+            # velocities in world frame
+            dt = (pose_msg.header.stamp - self.last_time).to_sec()
+            if dt == 0:
+                return
 
-            # this is also gross
-            # add to buffers
-            self.x_buffer.append(dx*cos(theta) + dy*sin(theta))
-            self.y_buffer.append(-dx*sin(theta) + dy*cos(theta))
-            self.theta_buffer.append(d_theta)
+            vx = dx / dt
+            vy = dy / dt
+            v_theta = d_theta / dt
 
-            # trim buffers
-            if len(self.x_buffer) > self.BUFFER_SIZE:
-                self.x_buffer.pop(0)
-            if len(self.y_buffer) > self.BUFFER_SIZE:
-                self.y_buffer.pop(0)
-            if len(self.theta_buffer) > self.BUFFER_SIZE:
-                self.theta_buffer.pop(0)
+            # velocites in local frame
+            vx_local =  dx*cos(theta) + dy*sin(theta)
+            vy_local = -dx*sin(theta) + dy*cos(theta)
 
-            # get averages
-            dx = 0
-            dy = 0
-            d_theta = 0
-            for i in self.x_buffer:
-                dx += i / len(self.x_buffer)
-            for i in self.y_buffer:
-                dy += i / len(self.y_buffer)
-            for i in self.theta_buffer:
-                d_theta += i / len(self.theta_buffer)
+            # add to low pass filter
+            vx_local_filtered = self.x_filter.filter(vx_local)
+            vy_local_filtered = self.y_filter.filter(vy_local)
+            v_theta_local_filtered = self.theta_filter.filter(v_theta)
 
             # set odom velocities
-            odom_msg.twist.twist.linear.x = dx
-            odom_msg.twist.twist.linear.y = dy
-            odom_msg.twist.twist.angular.z = d_theta
+            odom_msg.twist.twist.linear.x = vx_local_filtered
+            odom_msg.twist.twist.linear.y = vy_local_filtered
+            odom_msg.twist.twist.angular.z = v_theta_local_filtered
 
             # publish odom message
             self.odom_pub.publish(odom_msg)

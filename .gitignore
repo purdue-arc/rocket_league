@@ -134,5 +134,5 @@ dmypy.json
 #PyCharm
 .idea/
 
-# Catkin
-CATKIN_IGNORE
+# ros bags
+*.bag

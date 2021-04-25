@@ -1,0 +1,13 @@
+guid: Basler-23647866
+PixelFormat: BayerGR8
+Width: 1280
+Height: 960
+AcquisitionFrameRate: 30
+
+ExposureAuto: Continuous
+GainAuto: None
+Gain: 0
+BalanceWhiteAuto: Continuous
+
+publish_tf: false
+tf_publish_rate: 30

@@ -1,8 +1,0 @@
-<launch>
-  <node type="pose_estimator" pkg="rocket_league_estimation" name="car_pose_estimator">
-    <param name="base_link" value="car"/>
-    <rosparam command="load" file="$(find rocket_league_estimation)/params/pose_estimator.yaml"/>
-    <remap from="pose" to="bot_pose"/>
-    <remap from="odom" to="bot_odom"/>
-  </node>
-</launch>
