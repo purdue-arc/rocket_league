@@ -41,7 +41,7 @@ class Plotter(object):
         # Constants
         self.LOG_DIR = rospy.get_param('~log_dir')
         self.FREQUENCY = rospy.get_param('~log_freq', 100)
-        self.BUFF_SIZE = rospy.get_param('~buffer_size', 10)
+        self.BUFF_SIZE = rospy.get_param('~buffer_size', 100)
 
         self.history = None
 

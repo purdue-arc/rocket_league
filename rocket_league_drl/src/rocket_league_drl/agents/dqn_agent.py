@@ -59,13 +59,11 @@ class DQNAgent(DQN, AgentInterface):
 
         # variables
         model = Sequential(
-            Linear(obs_size, 512),
+            Linear(obs_size, 64),
             ReLU(),
-            Linear(512, 512),
+            Linear(64, 32),
             ReLU(),
-            Linear(512, 512),
-            ReLU(),
-            Linear(512, action_size)).to(self._DEVICE)
+            Linear(32, action_size)).to(self._DEVICE)
         optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
         net = QNetwork(model, optimizer, checkpointer=DummyCheckpointer(), target=PolyakTarget(UPDATE_RATE))
         policy = GreedyPolicy(net, action_size, epsilon_max)
