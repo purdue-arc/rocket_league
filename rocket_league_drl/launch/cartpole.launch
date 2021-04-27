@@ -13,7 +13,7 @@
   <arg name="interface"  default="ros"/>
   <param name="/use_sim_time" value="$(arg training)"/>
 
-  <node if="$(eval interface=='ros')" type="cart_pole_node" pkg="rocket_league_drl" name="cart_pole_node">
+  <node if="$(eval interface=='ros')" type="cart_pole_node" pkg="rocket_league_drl" name="cart_pole_node" output="screen">
     <param name="frequency" value="$(eval 1/rate)"/>
     <param name="render"    value="$(arg render)"/>
   </node>

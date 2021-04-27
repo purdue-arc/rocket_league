@@ -1,21 +1,20 @@
 #!/usr/bin/env python
 
 # package
-from rocket_league_drl.interfaces import ROSInterface    # Inherits wait_for_state
+from rocket_league_drl.interfaces import ROSInterface
 
 # ROS
 import rospy
-import gym
 
 # System
-import numpy as np
+import gym
 from enum import IntEnum, unique, auto
 from threading import Condition
 
 class CartpoleDirectInterface(ROSInterface):
     """ROS interface for the cartpole game."""
     def __init__(self):
-        rospy.init_node('gym_cartpole_drl')
+        rospy.init_node('cartpole_direct_drl')
         self._cond = Condition()
         self._RENDER = rospy.get_param('~render', False)
 
@@ -42,7 +41,7 @@ class CartpoleDirectInterface(ROSInterface):
         self._done = 0
         self._info = {}
 
-    def reset(self):                                        
+    def reset(self):
         """Reset internally for a new episode."""
         pass
 
@@ -52,18 +51,16 @@ class CartpoleDirectInterface(ROSInterface):
 
     def clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
-        with self._cond:
-            self._cond.notify_all()
+        pass
 
-    def get_state(self):                 
+    def get_state(self):
         """Get state tuple (observation, reward, done, info)."""
         assert self.has_state()
         return (self._obs, self._reward, self._done, self._info)
 
-    def publish_action(self, action):    
+    def publish_action(self, action):
         """Publish an action to the ROS network."""
         assert action >= 0 and action < self.ACTION_SIZE
         if self._RENDER:
             self._env.render()
         self._obs, self._reward, self._done, self._info = self._env.step(action)
-
