@@ -11,6 +11,4 @@
     <arg name="camera_name" value="cam1" />
     <arg name="launch_aravis" value="false" />
   </include>
-
-  <node pkg="rosbag" type="play" name="play" output="screen" args="--clock $(arg bag)" />  
 </launch>
