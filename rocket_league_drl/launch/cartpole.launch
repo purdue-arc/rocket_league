@@ -7,7 +7,7 @@
   <arg name="log_name"          default="cartpole_drl"/>
 
   <arg name="rate"          default="30.0"/>
-  <arg name="num_episodes"  default="5000"/>
+  <arg name="num_episodes"  default="1000"/>
   <arg name="agent_type"    default="dqn"/>
 
   <arg name="interface"  default="ros"/>
