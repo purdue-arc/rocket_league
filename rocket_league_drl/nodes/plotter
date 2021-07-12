@@ -61,7 +61,6 @@ class Plotter(object):
     def init_plot(self):
         """Initialize the plot and all axes."""
         labels = self.BASIC_VARS + self.ADVANCED_VARS
-        # plt.ion()
 
         # create host
         plt.figure(figsize=(11,8.5))
@@ -174,9 +173,10 @@ class Plotter(object):
             line.set_ydata(append(line.get_ydata(), mins[var]))
 
         # update plot
-        self.host.set_xlim(0, episode)
         for var, axis in self.axes.items():
             axis.relim()
+            axis.autoscale()
+        self.host.set_xlim(0, episode)
         plt.draw()
 
         # update file

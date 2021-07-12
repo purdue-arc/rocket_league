@@ -56,10 +56,10 @@ class DQNAgent(DQN, AgentInterface):
         epsilon_max = params.get('epsilon/max', 1.0)
 
         epsilon_type = params.get('~epsilon/type', "exponential")
-        if epsilon_type == "linear":
+        if epsilon_type == "exponential":
             self.EPSILON_DELTA = 0.0
             self.EPSILON_DECAY = params.get('~epsilon/decay', 0.99)
-        elif epsilon_type == "exponential":
+        elif epsilon_type == "linear":
             self.EPSILON_DECAY = 1.0
             self.EPSILON_DELTA = params.get('~epsilon/delta', 0.005)
         else:
@@ -94,10 +94,17 @@ class DQNAgent(DQN, AgentInterface):
             replay_start_size=BATCH_SIZE,
             update_frequency=BATCH_SIZE/2)
 
+    def get_diagnostics(self):
+        """Return list diagnostic key, value string pairs."""
+        return [
+            ("epsilon", str(self.policy.epsilon))
+        ]
+
     def act(self, state):
         """Take action during training."""
         action = super().act(self._convert_state(state))
-        if self.policy.epsilon >= (self.EPSILON_MIN + self.EPSILON_DELTA):
+        if self.policy.epsilon > self.EPSILON_MIN:
+            self.policy.epsilon *= self.EPSILON_DECAY
             self.policy.epsilon -= self.EPSILON_DELTA
         return action
 
