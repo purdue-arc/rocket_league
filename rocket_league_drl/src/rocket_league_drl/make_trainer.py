@@ -60,7 +60,7 @@ def makeTrainer(cls):
             self.train(num_episodes)
 
             # idle wait to allow saving weights, etc
-            rospy.loginfo("Done Training.")
+            rospy.loginfo("Done training.")
             rospy.spin()
 
         def train(self, num_episodes):
