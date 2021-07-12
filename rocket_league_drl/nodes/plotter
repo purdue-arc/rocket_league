@@ -31,7 +31,10 @@ License:
 
 import rospy
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
+from mpl_toolkits.axes_grid1 import host_subplot
+import mpl_toolkits.axisartist as AA
 import matplotlib.pyplot as plt
+from numpy import append
 
 class Plotter(object):
     """Log model weights during training."""
@@ -40,81 +43,145 @@ class Plotter(object):
 
         # Constants
         self.LOG_DIR = rospy.get_param('~log_dir')
-        self.FREQUENCY = rospy.get_param('~log_freq', 100)
-        self.BUFF_SIZE = rospy.get_param('~buffer_size', 100)
+        self.PLOT_FREQ = rospy.get_param('~plot_freq', 25)
+        self.BASIC_VARS = rospy.get_param('~variables/basic', ["epsilon", "steps"])
+        self.ADVANCED_VARS = rospy.get_param('~variables/advanced', ["net_reward"])
 
-        self.history = None
-
+        self.KEYS = ["episode"] + self.BASIC_VARS + self.ADVANCED_VARS
+        
         # Subscribers
         rospy.Subscriber('training_stats', DiagnosticStatus, self.progress_cb)
 
+        self.history = None
+        self.next_plot_episode = self.PLOT_FREQ
+        self.init_plot()
+
         rospy.spin()
+
+    def init_plot(self):
+        """Initialize the plot and all axes."""
+        labels = self.BASIC_VARS + self.ADVANCED_VARS
+        # plt.ion()
+
+        # create host
+        plt.figure(figsize=(11,8.5))
+        self.host = host_subplot(111, axes_class=AA.Axes)
+
+        plt.title("Training Log")
+        self.host.set_xlabel("Distance")     
+        self.host.set_ylabel(labels[0])
+
+        self.axes = {labels[0]:self.host}
+
+        # create exta axes
+        extras = len(labels) - 1
+        plt.subplots_adjust(right = 0.96 - 0.07*extras)
+        offset = 0
+        for label in labels[1:]:
+            axis = self.host.twinx()
+            axis.axis["right"] = axis.get_grid_helper().new_fixed_axis(loc="right", axes=axis, offset=(offset, 0))
+            axis.axis["right"].toggle(all=True)
+            axis.set_ylabel(label)
+          
+            self.axes[label] = axis
+            offset += 60
+
+        # create lines
+        self.lines = {}
+
+        for var in self.BASIC_VARS:
+            line, = self.axes[var].plot(-1, 0, label=var)
+            self.lines[var] = line
+
+        for var in self.ADVANCED_VARS:
+            line_max, = self.axes[var].plot(-1, 0, ':', label=var+"/max")
+            line_avg, = self.axes[var].plot(-1, 0, '-', label=var+"/avg", color=line_max.get_color())
+            line_min, = self.axes[var].plot(-1, 0, ':', label=var+"/min", color=line_max.get_color())
+            
+            self.lines[var+"/max"] = line_max
+            self.lines[var] = line_avg
+            self.lines[var+"/min"] = line_min
+
+        # create legend
+        self.host.legend()
+
+        # color y axes
+        for var, axis in self.axes.items():
+            axis.axis["left"].label.set_color(self.lines[var].get_color())
+            axis.axis["right"].label.set_color(self.lines[var].get_color())          
 
     def progress_cb(self, progress_msg):
         """Track training progress and save when configured to."""
-        episode = None
-        for kv in progress_msg.values:
-            if kv.key == "episode":
-                episode = int(kv.value)
+        data = {}
 
-        if episode is not None:
+        for item in progress_msg.values:
+            if item.key in self.KEYS:
+                data[item.key] = float(item.value)
+
+        if data["episode"] is not None:
             if self.history is None:
-                self.history = [progress_msg.values]
+                self.history = [data]
             else:
-                self.history.append(progress_msg.values)
+                self.history.append(data)
 
-            if episode % self.FREQUENCY == 0:
+            if data["episode"] >= self.next_plot_episode:
                 self.plot()
+                self.next_plot_episode += self.PLOT_FREQ
         else:
             rospy.logerr("Bad progress message.")
 
     def plot(self):
-        """Create plot and save"""
-        fig = plt.figure(figsize=(11,8.5))
+        """Add new data to plot, show, and save"""
+        # calculate the avgs, mins, maxs of all variables
+        sums = {key:0.0 for key in self.BASIC_VARS+self.ADVANCED_VARS}
+        mins = {key:float("inf") for key in self.ADVANCED_VARS}
+        maxs = {key:float("-inf") for key in self.ADVANCED_VARS}
 
-        measurements = []
-        for kv in self.history[0]:
-            if kv.key != "episode":
-                measurements.append(kv.key)
+        for episode in self.history:
+            for var, value in episode.items():
+                if var in sums:
+                    sums[var] += value
+                if var in mins:
+                    mins[var] = min(mins[var], value)
+                if var in maxs:
+                    maxs[var] = max(maxs[var], value)
 
-        x = []
-        for msg in self.history:
-            for kv in msg:
-                if kv.key == "episode":
-                    x.append(int(kv.value))
+        # calculate the avg of all variables
+        avgs = {key:sums[key]/len(self.history) for key in self.BASIC_VARS+self.ADVANCED_VARS}
 
-        for key in measurements:
-            y = []
-            buffer = []
-            y_max = None
-            y_min = None
-            for msg in self.history:
-                for kv in msg:
-                    if kv.key == key:
-                        val = float(kv.value)
-                        buffer.append(val)
-                        if len(buffer) > self.BUFF_SIZE:
-                            buffer.pop(0)
-                        avg = 0
-                        for i in buffer:
-                            avg += i
-                        avg /= float(len(buffer))
-                        y.append(avg)
-                        if y_max is None or val > y_max:
-                            y_max = val
-                        if y_min is None or val < y_min:
-                            y_min = val
+        # update lines
+        episode = self.history[-1]["episode"]
 
-            y_range = y_max - y_min
-            if y_range > 0:
-                plt.plot(x, [(i-y_min)/y_range for i in y], label=f"{key} => [{y_min :0.2e}, {y_max :0.2e}]")
+        for var in self.BASIC_VARS:
+            line = self.lines[var]
+            line.set_xdata(append(line.get_xdata(), episode))
+            line.set_ydata(append(line.get_ydata(), avgs[var]))
 
-        plt.title("Training Log")
-        plt.xlabel("Episodes")
-        plt.legend()
+        for var in self.ADVANCED_VARS:
+            #  avg
+            line = self.lines[var]
+            line.set_xdata(append(line.get_xdata(), episode))
+            line.set_ydata(append(line.get_ydata(), avgs[var]))
+
+            # max
+            line = self.lines[var+"/max"]
+            line.set_xdata(append(line.get_xdata(), episode))
+            line.set_ydata(append(line.get_ydata(), maxs[var]))
+
+            # min
+            line = self.lines[var+"/min"]
+            line.set_xdata(append(line.get_xdata(), episode))
+            line.set_ydata(append(line.get_ydata(), mins[var]))
+
+        # update plot
+        self.host.set_xlim(0, episode)
+        for var, axis in self.axes.items():
+            axis.relim()
+        plt.draw()
+
+        # update file
         rospy.loginfo(f"Saving training progress to {self.LOG_DIR}plot.png")
         plt.savefig(self.LOG_DIR + "plot.png")
-        plt.close(fig)
 
 if __name__ == "__main__":
     Plotter()
