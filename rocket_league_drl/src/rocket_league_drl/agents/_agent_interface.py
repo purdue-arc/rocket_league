@@ -66,6 +66,10 @@ class AgentInterface(ABC):
         }
         return State(data, self._DEVICE)
 
+    def get_diagnostics(self):
+        """Return list diagnostic key, value string pairs."""
+        pass
+
     @abstractmethod
     def act(self, state):
         """Take action during training."""

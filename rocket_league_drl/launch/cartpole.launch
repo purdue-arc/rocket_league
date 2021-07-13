@@ -1,0 +1,41 @@
+<launch>
+  <arg name="training"  default="false"/>
+  <arg name="render"    default="false"/>
+
+  <arg name="log_weights"       default="false"/>
+  <arg name="log_progress"      default="false"/>
+  <arg name="log_name"          default="cartpole_drl"/>
+
+  <arg name="rate"          default="30.0"/>
+  <arg name="num_episodes"  default="1000"/>
+  <arg name="agent_type"    default="dqn"/>
+
+  <arg name="interface"       default="ros"/>
+  <param name="/use_sim_time" value="$(arg training)"/>
+
+  <node if="$(eval interface=='ros')" type="cart_pole_node" pkg="rocket_league_drl" name="cart_pole_node" output="screen">
+    <param name="frequency" value="$(eval 1/rate)"/>
+    <param name="render"    value="$(arg render)"/>
+  </node>
+
+  <node type="run_drl.py" pkg="rocket_league_drl" name="cartpole_drl" output="screen"
+      args="$(eval 'cartpole_'+interface+' train' if training else 'cartpole_'+interface+' eval')">
+    <param name="rate"            value="$(arg rate)"/>
+    <param name="num_episodes"    value="$(arg num_episodes)"/>
+    <param name="agent_type"      value="$(arg agent_type)"/>
+    <param name="render"          value="$(arg render)"/>
+
+    <rosparam command="load" ns="dqn" file="$(find rocket_league_drl)/params/dqn.yaml"/>
+    <rosparam command="load" ns="vac" file="$(find rocket_league_drl)/params/vac.yaml"/>
+  </node>
+
+  <node if="$(arg log_weights)" type="logger" pkg="rocket_league_drl" name="logger" output="screen">
+    <param name="log_dir"     value="/home/$(optenv USER)/catkin_ws/data/$(arg log_name)/"/>
+    <rosparam command="load"  file="$(find rocket_league_drl)/params/logs.yaml"/>
+  </node>
+
+  <node if="$(arg log_progress)" type="plotter" pkg="rocket_league_drl" name="plotter" output="screen">
+    <param name="log_dir"     value="/home/$(optenv USER)/catkin_ws/data/$(arg log_name)/"/>
+    <rosparam command="load"  file="$(find rocket_league_drl)/params/logs.yaml"/>
+  </node>
+</launch>

@@ -1,8 +1,14 @@
-memory_len: 3000
+memory_len: 2000
 gamma: 0.95
 epsilon:
   max: 1.0
-  min: 0.01
-  steps: 3000
-learning_rate: 0.01
+  min: 0.001
+  type: "exponential"
+  decay: 0.999
+learning_rate: 0.00025
 batch_size: 64
+
+hidden_layers:
+ - 512
+ - 256
+ - 64

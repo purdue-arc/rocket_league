@@ -60,7 +60,7 @@ def makeTrainer(cls):
             self.train(num_episodes)
 
             # idle wait to allow saving weights, etc
-            rospy.loginfo("Done Training.")
+            rospy.loginfo("Done training.")
             rospy.spin()
 
         def train(self, num_episodes):
@@ -87,6 +87,8 @@ def makeTrainer(cls):
                 log_msg.values.append(KeyValue(key="episode", value=str(episode+1)))
                 log_msg.values.append(KeyValue(key="net_reward", value=str(net_reward)))
                 log_msg.values.append(KeyValue(key="steps", value=str(steps)))
+                for key, value in self.agent.get_diagnostics():
+                    log_msg.values.append(KeyValue(key=key, value=value))
                 self._log_pub.publish(log_msg)
 
         def _full_reset(self):

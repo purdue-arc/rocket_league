@@ -31,7 +31,7 @@ License:
 
 import sys
 from rocket_league_drl import makeAgent, makeTrainer, makeEvaluator
-from rocket_league_drl.interfaces import SnakeInterface, CartPoleInterface
+from rocket_league_drl.interfaces import SnakeInterface, CartpoleInterface, CartpoleDirectInterface
 
 from pdb import set_trace
 
@@ -42,10 +42,12 @@ print("Running " + env + " in " + mode + " mode.")
 
 if env == "snake":
     Interface = SnakeInterface
-elif env == "cartPole":
-    Interface = CartPoleInterface
+elif env == "cartpole_ros":
+    Interface = CartpoleInterface
+elif env == "cartpole_direct":
+    Interface = CartpoleDirectInterface
 else:
-    print("Unrecognized environment!")
+    print(f"Unrecognized environment {env}!")
 
 Agent = makeAgent(Interface)
 

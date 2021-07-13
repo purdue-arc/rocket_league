@@ -54,18 +54,32 @@ class DQNAgent(DQN, AgentInterface):
 
         self.EPSILON_MIN = params.get('epsilon/min', 0.01)
         epsilon_max = params.get('epsilon/max', 1.0)
-        epsilon_steps = params.get('epsilon/steps', 3000)
-        self.EPSILON_DELTA = (epsilon_max - self.EPSILON_MIN) / float(epsilon_steps)
+
+        epsilon_type = params.get('~epsilon/type', "exponential")
+        if epsilon_type == "exponential":
+            self.EPSILON_DELTA = 0.0
+            self.EPSILON_DECAY = params.get('~epsilon/decay', 0.99)
+        elif epsilon_type == "linear":
+            self.EPSILON_DECAY = 1.0
+            self.EPSILON_DELTA = params.get('~epsilon/delta', 0.005)
+        else:
+            print("Unknown epsilon type")
+            exit()
+
+        hidden_layers = params.get('hidden_layers', [64, 32])
 
         # variables
-        model = Sequential(
-            Linear(obs_size, 512),
-            ReLU(),
-            Linear(512, 512),
-            ReLU(),
-            Linear(512, 512),
-            ReLU(),
-            Linear(512, action_size)).to(self._DEVICE)
+        layers = []
+        for i in range(len(hidden_layers)):
+            if i == 0:
+                layers.append(Linear(obs_size, hidden_layers[i]))
+            else:
+                layers.append(Linear(hidden_layers[i-1], hidden_layers[i]))
+            layers.append(ReLU())
+        layers.append(Linear(hidden_layers[-1], action_size))
+        model = Sequential(*layers).to(self._DEVICE)
+        print(model)
+
         optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
         net = QNetwork(model, optimizer, checkpointer=DummyCheckpointer(), target=PolyakTarget(UPDATE_RATE))
         policy = GreedyPolicy(net, action_size, epsilon_max)
@@ -80,10 +94,17 @@ class DQNAgent(DQN, AgentInterface):
             replay_start_size=BATCH_SIZE,
             update_frequency=BATCH_SIZE/2)
 
+    def get_diagnostics(self):
+        """Return list diagnostic key, value string pairs."""
+        return [
+            ("epsilon", str(self.policy.epsilon))
+        ]
+
     def act(self, state):
         """Take action during training."""
         action = super().act(self._convert_state(state))
-        if self.policy.epsilon >= (self.EPSILON_MIN + self.EPSILON_DELTA):
+        if self.policy.epsilon > self.EPSILON_MIN:
+            self.policy.epsilon *= self.EPSILON_DECAY
             self.policy.epsilon -= self.EPSILON_DELTA
         return action
 
