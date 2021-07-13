@@ -1,0 +1,10 @@
+filters:
+  x:
+    order: 1
+    cutoff: 3.0
+  y:
+    order: 1
+    cutoff: 3.0
+  theta:
+    order: 1
+    cutoff: 3.0

@@ -1,0 +1,12 @@
+guid: PointGrey-00EA5196
+PixelFormat: BayerGB8
+Width: 1288
+Height: 964
+AcquisitionFrameRate: 30
+
+ExposureAuto: Continuous
+GainAuto: Continuous
+BalanceWhiteAuto: Continuous
+
+publish_tf: false
+tf_publish_rate: 30

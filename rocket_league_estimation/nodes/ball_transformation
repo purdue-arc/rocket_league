@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+
+import numpy
+
+import rospy
+from geometry_msgs.msg import PoseWithCovarianceStamped, Pose
+import message_filters
+
+def callback(sub0, sub1):
+  pub_pose = PoseWithCovarianceStamped()
+
+
+  if (sub0.pose.pose.position.z >= sub1.pose.pose.position.z):
+    rospy.loginfo("Using camera 0")
+    pub_pose = sub0
+
+  elif (sub1.pose.pose.position.z >= sub0.pose.pose.position.z):
+    rospy.loginfo("Using camera 1")
+    pub_pose = sub1
+
+#  if (sub0.pose.pose.position.z >= sub1.pose.pose.position.z and sub0.pose.pose.position.z >= sub2.pose.pose.position.z and sub0.pose.pose.position.z >= sub3.pose.pose.position.z):
+#    rospy.loginfo("Using camera 0")
+#    pub_pose = sub0
+#
+#  elif (sub1.pose.pose.position.z >= sub0.pose.pose.position.z and sub1.pose.pose.position.z >= sub2.pose.pose.position.z and sub1.pose.pose.position.z >= sub3.pose.pose.position.z):
+#    rospy.loginfo("Using camera 1")
+#    pub_pose = sub1
+#   
+#  elif (sub2.pose.pose.position.z >= sub0.pose.pose.position.z and sub2.pose.pose.position.z >= sub1.pose.pose.position.z and sub2.pose.pose.position.z >= sub3.pose.pose.position.z):
+#    rospy.loginfo("Using camera 2")
+#    pub_pose = sub2
+#   
+#  elif (sub3.pose.pose.position.z >= sub0.pose.pose.position.z and sub3.pose.pose.position.z >= sub1.pose.pose.position.z and sub3.pose.pose.position.z >= sub2.pose.pose.position.z):
+#    rospy.loginfo("Using camera 3")
+#    pub_pose = sub3
+  
+  pub_pose.pose.pose.position.z = 0.0
+  pub.publish(pub_pose)
+
+
+rospy.init_node('ball_tf')
+
+pub = rospy.Publisher('ball/pose', PoseWithCovarianceStamped, queue_size=1)
+
+sub0 = message_filters.Subscriber('cam0/ball_pose', PoseWithCovarianceStamped)
+sub1 = message_filters.Subscriber('cam1/ball_pose', PoseWithCovarianceStamped)
+#sub2 = message_filters.Subscriber('cam2/ball_pose', PoseWithCovarianceStamped)
+#sub3 = message_filters.Subscriber('cam3/ball_pose', PoseWithCovarianceStamped)
+ts = message_filters.ApproximateTimeSynchronizer([sub0, sub1], 10, 10)
+ts.registerCallback(callback)
+rospy.spin()

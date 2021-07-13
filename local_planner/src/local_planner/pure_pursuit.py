@@ -55,37 +55,63 @@ def find_intersection(path_seg, bot_path, lookahead_dist):
             return path_seg * t2
     return None
 
-def calculate_dist(pos, bot_pos, bot_orient, lookahead_dist):
-    """Determines arc distance to reach intersection point."""
+def calculate_lat_error(intersect_pos, bot_pos, bot_orient, lookahead_dist):
+    """Determines lateral error from intersection point."""
+
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
     a = -math.tan(bot_yaw)
-    c = math.tan(bot_yaw) * bot_pos[0] - bot_pos[1]
+    c = (math.tan(bot_yaw) * bot_pos[0]) - bot_pos[1]
     dist = math.sqrt(math.pow(a,2) + 1)
-    x = abs(((a * pos[0]) + pos[1] + c) / dist)
+    x = abs((a * intersect_pos[0]) + intersect_pos[1] + c) / dist
+
+    bot_line_x = bot_pos[0] + (math.cos(bot_yaw) * lookahead_dist)
+    bot_line_y = bot_pos[1] + (math.sin(bot_yaw) * lookahead_dist)
+    bot_line = np.array([bot_line_x, bot_line_y, 0])
+    tang_line = intersect_pos - bot_line
+    sign = np.sign(np.cross(tang_line, bot_line))[2]
+    return x * sign
+
+def calculate_turn_rad(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
+    """Determines turning radius to reach intersection point."""
+
+    _, _, bot_yaw = euler_from_quaternion(bot_orient)
+    a = -math.tan(bot_yaw)
+    c = (math.tan(bot_yaw) * bot_pos[0]) - bot_pos[1]
+    dist = math.sqrt(math.pow(a,2) + 1)
+    x = abs((a * intersect_pos[0]) + intersect_pos[1] + c) / dist
     radius = (lookahead_dist * lookahead_dist)/(2 * x)
 
-    dist = abs(np.linalg.norm(pos - bot_pos))
-    arc_angle = 2 * math.asin((dist / 2) / radius)
-    return arc_angle * radius
+    bot_line_x = math.cos(bot_yaw) * lookahead_dist
+    bot_line_y = math.sin(bot_yaw) * lookahead_dist
+    bot_line = np.array([bot_line_x, bot_line_y, 0])
+    sign = np.sign(np.cross(intersect_pos - bot_pos, bot_line))[2]
+    if bkw:
+        sign *= -1
 
-def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist):
+    return radius * sign
+
+def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     """
     Determines angle from heading to the intersection point.
     Angle is from -pi to pi, with 0 at car's heading.
     """
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
 
-    bot_line_x = bot_pos[0] + math.cos(bot_yaw) * lookahead_dist
-    bot_line_y = bot_pos[1] + math.sin(bot_yaw) * lookahead_dist
+    bot_line_x = math.cos(bot_yaw) * lookahead_dist
+    bot_line_y = math.sin(bot_yaw) * lookahead_dist
     bot_line = np.array([bot_line_x, bot_line_y, 0])
 
-    tang_line = intersect_pos - bot_line
+    tang_line = intersect_pos - (bot_pos + bot_line)
     dist = np.linalg.norm(tang_line)
-    angle = (2 * math.asin((dist / 2)/lookahead_dist))
-    sign = np.sign(np.cross(tang_line, bot_line))[2]
+    angle = (2 * math.asin(round((dist / 2) / lookahead_dist, 6)))
+    sign = np.sign(np.cross(intersect_pos - bot_line, bot_line))[2]
+    if bkw:
+        angle = math.pi - angle
     return angle * sign
 
-def get_angular_speed(target_vel, angle, dist):
+def get_angular_speed(linear_vel, turn_rad):
     """Relates path to the angular velocity."""
-    dt = dist / target_vel
-    return angle / dt
+    if turn_rad != 0:
+        return linear_vel / turn_rad
+    else:
+        return 0

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rocket_league_highlevel</name>
+  <version>1.0.0</version>
+  <description>Provides instructions for cars.</description>
+
+  <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
+  <license>BSD 3 Clause</license>
+  <url type="website">https://www.purduearc.com</url>
+  <author email="mcnama20@purdue.edu">Arianna McNamara</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>python-numpy</exec_depend>
+  <exec_depend>rocket_league_msgs</exec_depend>
+  <build_depend>rocket_league_msgs</build_depend>
+
+</package>

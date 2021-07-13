@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.0.2)
 project(local_planner)
 
 # find catkin so we can use our macros
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+    rocket_league_msgs
+)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed

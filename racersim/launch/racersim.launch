@@ -1,19 +1,9 @@
 <launch>
   <arg name="frame_id" default="map"/>
-  <arg name="timeout" default="1.0"/>
-  <arg name="rate" default="45"/>
-  <arg name="use_pygame" default="true"/>
-  <arg name="scaling" default="500"/>
-  <arg name="bounds" default="1.5"/>
 
   <node type="racersim_node" pkg="racersim" name="racersim_node" output="screen">
     <param name="~frame_id" value="$(arg frame_id)"/>
-    <param name="~timeout" value="$(arg timeout)"/>
-    <param name="~rate" value="$(arg rate)"/>
-    <param name="~render/enabled" value="$(arg use_pygame)"/>
-    <param name="~render/velIters" value="6"/>
-    <param name="~render/posIters" value="2"/>
-    <param name="~render/scaling" value="$(arg scaling)"/>
-    <param name="~world/bounds" value="$(arg bounds)"/>
+    <rosparam command="load" file="$(find rocket_league_highlevel)/YAML_files/high_level_info.yaml" />
+    <rosparam command="load" file="$(find racersim)/YAML_files/sim_info.yaml" />
   </node>
 </launch>
