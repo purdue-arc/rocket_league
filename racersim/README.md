@@ -39,7 +39,9 @@ The Sim class contains a step function to carry out a single update. This functi
 
 > Any new cars will need their `step()` function called above.
 
-It will also call the `self._render()` function which draws every object in a new window. If a window doesn't appear and you are using WSL2, check that you have properly configured the X-server.
+It will also call the `self._render()` function which draws every object in a new window. Rendering can be disabled in `sim_info.yaml`, its enabled by default.
+
+If a window doesn't appear and you are using WSL2, check that you have properly configured the X-server.
 
 **Common Mistakes**
 
