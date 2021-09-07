@@ -11,6 +11,12 @@ find_package(catkin REQUIRED COMPONENTS
   camera_aravis
   image_proc
   tf2
+  image_transport
+  cv_bridge
+)
+
+find_package(OpenCV REQUIRED
+  core
 )
 
 ## System dependencies are found with CMake's conventions
@@ -118,6 +124,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -169,6 +176,22 @@ target_link_libraries(${PROJECT_NAME}_tf_parser_node
 )
 target_link_libraries(${PROJECT_NAME}_pose_extractor_node
   ${catkin_LIBRARIES}
+)
+
+add_executable(chromatag_preprocess_node
+  src/chromatag_preprocess_node.cpp
+)
+
+add_dependencies(chromatag_preprocess_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  ${OpenCV_EXPORTED_TARGETS}
+)
+
+# Specify libraries to link a library or executable target against
+target_link_libraries(chromatag_preprocess_node
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
 )
 
 #############
