@@ -1,8 +1,10 @@
-from .make_agent import makeAgent
-from .make_evaluator import makeEvaluator
-from .make_trainer import makeTrainer
+from ._ros_interface import ROSInterface
+from .cartpole_interface import CartpoleInterface
+from .cartpole_direct_interface import CartpoleDirectInterface
+from .snake_interface import SnakeInterface
 
 __all__ = [
-    "makeAgent",
-    "makeEvaluator",
-    "makeTrainer"]
+    "ROSInterface",
+    "CartpoleInterface",
+    "CartpoleDirectInterface",
+    "SnakeInterface"]

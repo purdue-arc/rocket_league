@@ -28,7 +28,7 @@ License:
 """
 
 from abc import abstractmethod
-from typing import final
+# from typing import final
 from threading import Condition
 import time
 
@@ -76,7 +76,7 @@ class ROSInterface(Env):
         self.__time = rospy.Time.from_sec(time.time())
         self.__clock_pub.publish(self.__time)
 
-    @final
+    # @final
     def step(self, action):
         """
         Implementation of gym.Env.step. This function will intentionally block
@@ -99,7 +99,7 @@ class ROSInterface(Env):
         self.__step_time_and_wait_for_state()
         return self._get_state()
 
-    @final
+    # @final
     def reset(self):
         """Resets the environment to an initial state and returns an initial observation.
 

@@ -28,7 +28,7 @@ License:
 """
 
 # package
-from rocket_league_drl.interfaces import ROSInterface
+from rocket_league_drl import ROSInterface
 
 # ROS
 import rospy
@@ -37,7 +37,7 @@ from std_msgs.msg import Int32, Bool
 from std_srvs.srv import Empty
 
 # Gym
-from gym import Discrete, Box
+from gym.spaces import Discrete, Box
 
 # System
 import numpy as np

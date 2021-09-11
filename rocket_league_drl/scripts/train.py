@@ -29,32 +29,22 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import sys
-from rocket_league_drl import makeAgent, makeTrainer, makeEvaluator
-from rocket_league_drl.interfaces import SnakeInterface, CartpoleInterface, CartpoleDirectInterface
+from rocket_league_drl import SnakeInterface, CartpoleInterface, CartpoleDirectInterface
+from stable_baselines3 import PPO
+import gym
 
-from pdb import set_trace
+# env = SnakeInterface()
+# env = gym.make("CartPole-v0")
+env = CartpoleDirectInterface()
+model = PPO("MlpPolicy", env, verbose=1)
+model.learn(total_timesteps=10000)
 
-assert len(sys.argv) >= 2
-env = sys.argv[1]
-mode = sys.argv[2]
-print("Running " + env + " in " + mode + " mode.")
+obs = env.reset()
+for i in range(1000):
+    action, _states = model.predict(obs, deterministic=True)
+    obs, reward, done, info = env.step(action)
+    env.render()
+    if done:
+      obs = env.reset()
 
-if env == "snake":
-    Interface = SnakeInterface
-elif env == "cartpole_ros":
-    Interface = CartpoleInterface
-elif env == "cartpole_direct":
-    Interface = CartpoleDirectInterface
-else:
-    print(f"Unrecognized environment {env}!")
-
-Agent = makeAgent(Interface)
-agent = Agent(Interface)
-
-if mode == "train":
-    agent.train()
-elif mode == "eval":
-    agent.run()
-else:
-    print("Unrecognized mode!")
+env.close()
