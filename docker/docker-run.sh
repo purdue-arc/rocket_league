@@ -13,6 +13,7 @@ docker run --rm -it \
     -v $WS_DIR:/home/$USER/catkin_ws \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v ~/.gitconfig:/home/$USER/.gitconfig:ro \
+    -v ~/.ssh:/home/$USER/.ssh:ro \
     --name $CONTAINER_NAME \
     $@ \
     $REPO_NAME:local \
