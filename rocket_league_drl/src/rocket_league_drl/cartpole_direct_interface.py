@@ -19,9 +19,9 @@ class CartpoleDirectInterface(ROSInterface):
 
         self._env = gym.make('CartPole-v0')
         self._obs = None
-        self._reward = 0
-        self._done = 0
-        self._info = {}
+        self._reward = None
+        self._done = None
+        self._info = None
 
     @property
     def action_space(self):
@@ -35,31 +35,39 @@ class CartpoleDirectInterface(ROSInterface):
 
     def _reset_env(self):
         """Reset environment for a new training episode."""
-        self._obs = self._env.reset() 
-        self._reward = 0
-        self._done = 0
-        self._info = {}
+        self._obs = self._env.reset()
 
     def _reset_self(self):
         """Reset internally for a new episode."""
-        pass
+        self._obs = self._env.reset()
+        self._reward = 0
+        self._done = False
+        self._info = {}
 
     def _has_state(self):
         """Determine if the new state is ready."""
-        return True
+        return (
+            self._obs is not None and
+            self._reward is not None and
+            self._done is not None and
+            self._info is not None)
 
     def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
-        pass
+        self._obs = None
+        self._reward = None
+        self._done = None
+        self._info = None
 
     def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
-        assert self.has_state()
+        assert self._has_state()
         return (self._obs, self._reward, self._done, self._info)
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
-        assert action >= 0 and action < self.ACTION_SIZE
+        print("stepped")
+        assert action >= 0 and action < self.action_space.n
         if self._RENDER:
             self._env.render()
         self._obs, self._reward, self._done, self._info = self._env.step(action)
