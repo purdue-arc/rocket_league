@@ -50,12 +50,11 @@ else:
     print(f"Unrecognized environment {env}!")
 
 Agent = makeAgent(Interface)
+agent = Agent(Interface)
 
 if mode == "train":
-    Trainer = makeTrainer(Agent)
-    Trainer()
+    agent.train()
 elif mode == "eval":
-    Evaluator = makeEvaluator(Agent)
-    Evaluator()
+    agent.run()
 else:
     print("Unrecognized mode!")

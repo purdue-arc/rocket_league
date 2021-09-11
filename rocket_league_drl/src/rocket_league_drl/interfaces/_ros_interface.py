@@ -27,10 +27,11 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import rospy
+import gym
 
-class ROSInterface(ABC):
+class ROSInterface(gym.Env):
     """
     Abstract interface for all wrappers to extend.
 
@@ -49,6 +50,29 @@ class ROSInterface(ABC):
     - initialize the ROS node in __init__()
     - notify _cond when has_state() may have turned true
     """
+
+    def step(self, action):
+        """
+        Implementation of gym.Env.step. This function will intentionally block
+        if the ROS environment is not ready.
+
+        Run one timestep of the environment's dynamics. When end of
+        episode is reached, you are responsible for calling `reset()`
+        to reset this environment's state.
+        Accepts an action and returns a tuple (observation, reward, done, info).
+        Args:
+            action (object): an action provided by the agent
+        Returns:
+            observation (object): agent's observation of the current environment
+            reward (float) : amount of reward returned after previous action
+            done (bool): whether the episode has ended, in which case further step() calls will return undefined results
+            info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
+        """
+        with self._cond:
+            self._cond.wait_for(self.has_state)
+        state = self._get_state()
+        self._clear_state()
+        return state
 
     def wait_for_state(self):
         """Allow other threads to handle callbacks."""
