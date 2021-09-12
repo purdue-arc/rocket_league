@@ -2,6 +2,7 @@
 
 # package
 from rocket_league_drl import ROSInterface
+from gym.spaces import Discrete, Box
 
 # ROS
 import rospy
@@ -11,7 +12,7 @@ from std_srvs.srv import Empty
 # System
 import numpy as np
 from enum import IntEnum, unique, auto
-from threading import Condition
+from math import pi
 
 @unique
 class CartpoleActions(IntEnum):
@@ -22,20 +23,18 @@ class CartpoleActions(IntEnum):
 
 class CartpoleInterface(ROSInterface):
     """ROS interface for the cartpole game."""
+    _node_name = "cartpole_ros"
     def __init__(self):
-        rospy.init_node('cartpole_drl')
+        super().__init__()
 
         # Publishers
         self._action_pub = rospy.Publisher('cartpole/action', Int32, queue_size=1)
-
-        # Services
         self._reset_srv = rospy.ServiceProxy('cartpole/reset', Empty)
 
         # State variables
         self._obs = None
         self._reward = None
         self._done = None
-        self._cond = Condition()
 
         # Subscribers
         rospy.Subscriber('cartpole/observation', Float32MultiArray, self._obs_cb)
@@ -45,12 +44,12 @@ class CartpoleInterface(ROSInterface):
     @property
     def action_space(self):
         """The Space object corresponding to valid actions."""
-        return self._env.action_space
+        return Discrete(CartpoleActions.SIZE)
 
     @property
     def observation_space(self):
         """The Space object corresponding to valid observations."""
-        return self._env.observation_space
+        return Box(low=-pi, high=pi, shape=(4,), dtype=np.float32)
 
     def _reset_env(self):
         """Reset environment for a new training episode."""
@@ -58,7 +57,7 @@ class CartpoleInterface(ROSInterface):
 
     def _reset_self(self):
         """Reset internally for a new episode."""
-        self.clear_state()
+        self._clear_state()
 
     def _has_state(self):
         """Determine if the new state is ready."""
@@ -75,17 +74,17 @@ class CartpoleInterface(ROSInterface):
 
     def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
-        assert self.has_state()
+        assert self._has_state()
         return (self._obs, self._reward, self._done, {})
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
-        assert action >= 0 and action < CartpoleActions.SIZE
+        assert action >= 0 and action < self.action_space.n
         self._action_pub.publish(action)
 
     def _obs_cb(self, obs_msg):
         """Callback for observation of game."""
-        assert len(obs_msg.data) == self.OBSERVATION_SIZE
+        assert len(obs_msg.data) == self.observation_space.shape[0]
         self._obs = np.asarray(obs_msg.data, dtype=np.float32)
         with self._cond:
             self._cond.notify_all()

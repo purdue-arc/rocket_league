@@ -49,8 +49,8 @@ def show_progress(model, episodes=5):
 
 
 # env = gym.make("CartPole-v0")
-env = CartpoleDirectInterface()
-# env = CartpoleInterface()
+# env = CartpoleDirectInterface()
+env = CartpoleInterface()
 model = PPO("MlpPolicy", env, verbose=1)
 
 print("showing untrained performance")
