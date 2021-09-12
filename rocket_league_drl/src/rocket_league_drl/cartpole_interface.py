@@ -43,42 +43,42 @@ class CartpoleInterface(ROSInterface):
         rospy.Subscriber('cartpole/reward', Float32, self._reward_cb)
 
     @property
-    def OBSERVATION_SIZE(self):
-        """The observation size for the network."""
-        return 4
+    def action_space(self):
+        """The Space object corresponding to valid actions."""
+        return self._env.action_space
 
     @property
-    def ACTION_SIZE(self):
-        """The action size for the network."""
-        return CartpoleActions.SIZE
+    def observation_space(self):
+        """The Space object corresponding to valid observations."""
+        return self._env.observation_space
 
-    def reset_env(self):
+    def _reset_env(self):
         """Reset environment for a new training episode."""
         self._reset_srv.call()
 
-    def reset(self):
+    def _reset_self(self):
         """Reset internally for a new episode."""
         self.clear_state()
 
-    def has_state(self):
+    def _has_state(self):
         """Determine if the new state is ready."""
         return (
             self._obs is not None and
             self._reward is not None and
             self._done is not None)
 
-    def clear_state(self):
+    def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
         self._obs = None
         self._reward = None
         self._done = None
 
-    def get_state(self):
+    def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
         assert self.has_state()
         return (self._obs, self._reward, self._done, {})
 
-    def publish_action(self, action):
+    def _publish_action(self, action):
         """Publish an action to the ROS network."""
         assert action >= 0 and action < CartpoleActions.SIZE
         self._action_pub.publish(action)

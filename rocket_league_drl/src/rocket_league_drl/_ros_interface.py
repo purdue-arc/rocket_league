@@ -114,6 +114,7 @@ class ROSInterface(Env):
         self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
+        return self._get_state()[0]
 
     def __step_time_and_wait_for_state(self, max_retries=1):
         """Step time until a state is known."""
