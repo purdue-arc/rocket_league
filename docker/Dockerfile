@@ -22,26 +22,14 @@ RUN apt update && \
         intltool gstreamer1.0-gtk3 libgtk-3-dev libnotify-dev \
         libgstreamer1.0-0 libgstreamer-plugins-base1.0-dev \
         gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-        libcanberra-gtk3-module libxml2-dev && \
-    # Platform Specifics
-    if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+        libcanberra-gtk3-module libxml2-dev \
         # glvnd stuff
-        DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
-                libglvnd0 libglvnd0:arm64 \
-                libgl1 libgl1:arm64 \
-                libglx0 libglx0:arm64 \
-                libegl1 libegl1:arm64 \
-                libgles2 libgles2:arm64; \
-    elif [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-        # deep learning stuff
-        pip3 install \
-            rospkg \
-            scipy numpy \
-            matplotlib pandas \
-            tensorflow torch \
-            jupyterlab \
-            gym[box2d]; \
-    fi && \
+        libglvnd0 libgl1 libglx0 libegl1 libgles2 && \
+    # deep learning stuff
+    pip3 install \
+        rospkg scipy numpy matplotlib pandas \
+        # tensorflow \
+        torch jupyterlab gym[box2d] && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/*
 
@@ -58,8 +46,7 @@ RUN pip3 install box2d && \
     apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
         python3-pygame \
-        ros-${ROS_DISTRO}-apriltag-ros \
-        ros-${ROS_DISTRO}-pointgrey-camera-driver
+        ros-${ROS_DISTRO}-apriltag-ros
 
 # create user
 ARG USER=arc
