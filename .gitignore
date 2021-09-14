@@ -136,3 +136,6 @@ dmypy.json
 
 # ros bags
 *.bag
+
+# VSCode Editor
+.vscode/

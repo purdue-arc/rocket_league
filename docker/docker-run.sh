@@ -9,11 +9,11 @@ docker run --rm -it \
     -e USER \
     -e DISPLAY \
     -e NVIDIA_DRIVER_CAPABILITIES=all \
-    -v $XAUTHORITY:/home/$USER/.Xauthority \
+    -v $XAUTHORITY:/home/$USER/.Xauthority:ro \
     -v $WS_DIR:/home/$USER/catkin_ws \
-    -v ~/windows/Downloads:/home/$USER/Downloads \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v /dev:/dev \
+    -v ~/.gitconfig:/home/$USER/.gitconfig:ro \
+    -v ~/.ssh:/home/$USER/.ssh:ro \
     --name $CONTAINER_NAME \
     $@ \
     $REPO_NAME:local \
