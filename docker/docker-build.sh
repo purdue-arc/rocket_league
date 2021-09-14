@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DOCKER_DIR=$(readlink -f $(dirname $0))
-REPO_NAME="purduearc/rocket-league"
+REPO_NAME="purduearc/rocket-league-test-repository-please-ignore"
 
 docker build --build-arg USER=$USER \
              --build-arg PW="robot" \

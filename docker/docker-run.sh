@@ -1,7 +1,7 @@
 #!/bin/bash
 
 WS_DIR=$(readlink -f $(dirname $0)/../../../)
-REPO_NAME="purduearc/rocket-league"
+REPO_NAME="purduearc/rocket-league-test-repository-please-ignore"
 CONTAINER_NAME="arc-rocket-league-dev"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
