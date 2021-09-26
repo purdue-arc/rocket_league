@@ -44,6 +44,7 @@ add_message_files(
   Path.msg
   Waypoint.msg
   PathError.msg
+  MatchStatus.msg
 )
 
 ## Generate services in the 'srv' folder

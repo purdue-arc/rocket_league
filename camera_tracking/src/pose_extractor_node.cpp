@@ -12,8 +12,8 @@ int main(int argc, char* argv[]) {
   tf2_ros::TransformListener tfListener(tfBuffer);
 
   std::string topicName;
+  std::string mapFrame;
   std::string targetFrame;
-  std::string sourceFrame;
   double updateRate;
 
   if (!pnh.getParam("topic_name", topicName)) {
@@ -24,8 +24,8 @@ int main(int argc, char* argv[]) {
     ROS_ERROR("Required Param \"target_frame\" not set. Exiting.");
     return -1;
   }
-  if (!pnh.getParam("source_frame", sourceFrame)) {
-    ROS_ERROR("Required Param \"source_frame\" not set. Exiting.");
+  if (!pnh.getParam("map_frame", mapFrame)) {
+    ROS_ERROR("Required Param \"map_frame\" not set. Exiting.");
     return -1;
   }
   pnh.param<double>("update_rate", updateRate, 0.1);
@@ -33,16 +33,18 @@ int main(int argc, char* argv[]) {
   ros::Publisher pub =
       nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(topicName, 1);
   geometry_msgs::PoseWithCovarianceStamped identity;
+  identity.pose.pose.orientation.w = 1.0;
 
   ros::Timer timer = nh.createTimer(
       ros::Duration(updateRate), [&](const ros::TimerEvent& e) -> void {
         geometry_msgs::TransformStamped transform;
         try {
           transform =
-              tfBuffer.lookupTransform(targetFrame, sourceFrame, ros::Time(0));
+              tfBuffer.lookupTransform(mapFrame, targetFrame, ros::Time(0));
           geometry_msgs::PoseWithCovarianceStamped pose;
           tf2::doTransform(identity, pose, transform);
           pose.header = transform.header;
+          pub.publish(pose);
         } catch (tf2::TransformException e) {
           return;
         }

@@ -1,0 +1,16 @@
+<launch>
+  <arg name="bag" />
+
+  <!-- Run multiple cameras -->
+  <include file="$(find camera_tracking)/launch/aravis_camera.launch">
+    <arg name="camera_name" value="cam0" />
+    <arg name="launch_boilerplate" value="false" />
+  </include>
+
+  <include file="$(find camera_tracking)/launch/aravis_camera.launch">
+    <arg name="camera_name" value="cam1" />
+    <arg name="launch_boilerplate" value="false" />
+  </include>
+
+  <node pkg="rosbag" type="record" name="record" output="screen" args="/cam0/image_raw /cam1/image_raw /cam0/camera_info /cam1/camera_info -O $(arg bag)" />
+</launch>
