@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOCKER_DIR=$(readlink -f $(dirname $0))
+DOCKER_DIR=$(realpath -f $(dirname $0))
 REPO_NAME="purduearc/rocket-league-test-repository-please-ignore"
 
 ARCH=${ARCH:-"amd64, arm64"}
