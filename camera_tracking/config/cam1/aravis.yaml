@@ -2,6 +2,7 @@ guid: PointGrey-00EA99A2
 PixelFormat: BayerGB8
 Width: 1288
 Height: 964
+AcquisitionFrameRate: 30
 
 ExposureAuto: Continuous
 GainAuto: Continuous

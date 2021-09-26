@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find camera_tracking)/launch/multi_camera.launch"/>
+  <include file="$(find camera_tracking)/launch/pose_extractor.launch"/>
+  <include file="$(find camera_tracking)/launch/static_tfs.launch"/>
+</launch>

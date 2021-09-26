@@ -64,7 +64,7 @@ const float effort_to_ppm_throttle(const float effort)
 }
 const float effort_to_ppm_steering(const float effort)
 {
-  return THROTTLE_ZERO + (effort + STEERING_TRIM) * 500;
+  return STEERING_ZERO + (effort + STEERING_TRIM) * 500;
 }
 void throttle_callback(const std_msgs::Float32& throttle)
 {

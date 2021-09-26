@@ -8,20 +8,6 @@
 
   <include ns="cam1" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch">
     <arg name="height" value="1.041"/>
-    <arg name="quad" value="2"/>
-    <arg name="originX" value="0"/>
-    <arg name="originY" value="0"/>
-  </include>
-
-  <include ns="cam2" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch">
-    <arg name="height" value="1.041"/>
-    <arg name="quad" value="3"/>
-    <arg name="originX" value="0"/>
-    <arg name="originY" value="0"/>
-  </include>
-
-  <include ns="cam3" file="$(find rocket_league_estimation)/launch/ball_detection_to_pose.launch">
-    <arg name="height" value="1.041"/>
     <arg name="quad" value="4"/>
     <arg name="originX" value="0"/>
     <arg name="originY" value="0"/>

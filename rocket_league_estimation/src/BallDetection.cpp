@@ -54,9 +54,9 @@ BallDetection::BallDetection() :
     pnh{"~"},
     image_transport{nh},
     posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
-        "ball_pose", 1)},
+        "ball_pose", 10)},
     camera_subscriber{image_transport.subscribeCamera(
-        "image_rect_color", 1, &BallDetection::BallCallback, this)},
+        "image_rect_color", 10, &BallDetection::BallCallback, this)},
     quad{pnh.param<int>("quad", 0)},
     originX{pnh.param<double>("originX", 0)},
     originY{pnh.param<double>("originY", 0)},
@@ -85,6 +85,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
         // into the current_frame variable
         cv::Mat current_frame = cv_ptr->image;
         cv::Mat frame_HSV, frame_threshold;
+        //resize image
+        cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
         // Convert from BGR to HSV colorspace
         cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
         //get image size
