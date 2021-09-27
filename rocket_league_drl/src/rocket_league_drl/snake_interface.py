@@ -41,7 +41,7 @@ from gym.spaces import Discrete, Box
 
 # System
 import numpy as np
-from transformations import euler_from_quaternion
+from tf.transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
 from math import exp, pi
 
