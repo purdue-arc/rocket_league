@@ -10,8 +10,8 @@ ARG UID=1000
 ARG GID=1000
 
 RUN usermod -l $USER -u $UID -aG video -md /home/$USER $BASE_USER && \
-    groupmod -n $USER -g $GID $BASE_USER || \
-  { groupmod -n $USER $BASE_USER; echo "Unable to set gid to $GID. Are you on Mac OS?"; } && \
+    groupmod -n $USER -g $GID $BASE_USER 2>/dev/null  || \
+  { groupmod -n $USER $BASE_USER; echo "Unable to set gid to $GID. Are you on Mac OS?" >&2; } && \
     echo "$USER:$PW" | chpasswd
 
 USER $USER
