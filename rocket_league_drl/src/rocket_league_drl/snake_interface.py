@@ -28,7 +28,7 @@ License:
 """
 
 # package
-from rocket_league_drl.interfaces import ROSInterface
+from rocket_league_drl import ROSInterface
 
 # ROS
 import rospy
@@ -36,12 +36,14 @@ from geometry_msgs.msg import Twist, PoseArray, PointStamped
 from std_msgs.msg import Int32, Bool
 from std_srvs.srv import Empty
 
+# Gym
+from gym.spaces import Discrete, Box
+
 # System
 import numpy as np
 from transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
-from math import exp
-from threading import Condition
+from math import exp, pi
 
 @unique
 class SnakeActions(IntEnum):
@@ -58,6 +60,7 @@ class SnakeInterface(ROSInterface):
 
         # Constants
         self._NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
+        self._FIELD_SIZE = rospy.get_param('~field_size', 10)
         self._ANGULAR_VELOCITY = rospy.get_param('~control/max_angular_velocity', 3.0)
         self._LINEAR_VELOCITY = rospy.get_param('~control/max_linear_velocity', 3.0)
         self._DEATH_REWARD = rospy.get_param('~reward/death', 0.0)
@@ -76,7 +79,6 @@ class SnakeInterface(ROSInterface):
         self._alive = None
         self._prev_time = None
         self._prev_score = None
-        self._cond = Condition()
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
@@ -85,26 +87,30 @@ class SnakeInterface(ROSInterface):
         rospy.Subscriber('snake/active', Bool, self._alive_cb)
 
     @property
-    def OBSERVATION_SIZE(self):
-        """The observation size for the network."""
-        return 3 + 2*self._NUM_SEGMENTS
+    def action_size(self):
+        """The Space object corresponding to valid actions."""
+        return Discrete(SnakeActions.SIZE)
 
     @property
-    def ACTION_SIZE(self):
-        """The action size for the network."""
-        return SnakeActions.SIZE
+    def observation_space(self):
+        """The Space object corresponding to valid observations."""
+        locations = 2*(1+self._NUM_SEGMENTS)
+        return Box(
+            low=np.array([-pi] + locations*[0]),
+            high=np.array([pi] + locations*[self._FIELD_SIZE]),
+            dtype=np.float32)
 
-    def reset_env(self):
+    def _reset_env(self):
         """Reset environment for a new training episode."""
         self._reset_srv.call()
 
-    def reset(self):
+    def _reset_self(self):
         """Reset internally for a new episode."""
         self.clear_state()
         self._prev_time = None
         self._prev_score = None
 
-    def has_state(self):
+    def _has_state(self):
         """Determine if the new state is ready."""
         return (
             self._pose is not None and
@@ -112,14 +118,14 @@ class SnakeInterface(ROSInterface):
             self._score is not None and
             self._alive is not None)
 
-    def clear_state(self):
+    def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
         self._pose = None
         self._goal = None
         self._score = None
         self._alive = None
 
-    def get_state(self):
+    def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
         assert self.has_state()
 
@@ -149,7 +155,7 @@ class SnakeInterface(ROSInterface):
 
         return (observation, reward, done, {})
 
-    def publish_action(self, action):
+    def _publish_action(self, action):
         """Publish an action to the ROS network."""
         assert action >= 0 and action < SnakeActions.SIZE
 

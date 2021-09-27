@@ -29,33 +29,35 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import sys
-from rocket_league_drl import makeAgent, makeTrainer, makeEvaluator
-from rocket_league_drl.interfaces import SnakeInterface, CartpoleInterface, CartpoleDirectInterface
+from rocket_league_drl import CartpoleInterface, CartpoleDirectInterface
+from stable_baselines3 import PPO
+import gym, time
 
-from pdb import set_trace
+def show_progress(model, episodes=5):
+   env = gym.make("CartPole-v0")
+   obs = env.reset()
+   episodes = 0
+   while episodes < 5:
+      action, _states = model.predict(obs, deterministic=True)
+      obs, reward, done, info = env.step(action)
+      env.render()
+      time.sleep(0.01)
+      if done:
+         obs = env.reset()
+         episodes += 1
+   env.close()
 
-assert len(sys.argv) >= 2
-env = sys.argv[1]
-mode = sys.argv[2]
-print("Running " + env + " in " + mode + " mode.")
 
-if env == "snake":
-    Interface = SnakeInterface
-elif env == "cartpole_ros":
-    Interface = CartpoleInterface
-elif env == "cartpole_direct":
-    Interface = CartpoleDirectInterface
-else:
-    print(f"Unrecognized environment {env}!")
+# env = gym.make("CartPole-v0")
+# env = CartpoleDirectInterface()
+env = CartpoleInterface()
+model = PPO("MlpPolicy", env, verbose=1)
 
-Agent = makeAgent(Interface)
+print("showing untrained performance")
+show_progress(model)
 
-if mode == "train":
-    Trainer = makeTrainer(Agent)
-    Trainer()
-elif mode == "eval":
-    Evaluator = makeEvaluator(Agent)
-    Evaluator()
-else:
-    print("Unrecognized mode!")
+print("training on 10k steps")
+model.learn(total_timesteps=10000)
+
+print("showing trained performance")
+show_progress(model)
