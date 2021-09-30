@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Contains the Sim class.
 
 License:
@@ -37,8 +39,10 @@ from racersim.tire import Tire, TireDef
 from racersim.world import World
 import random
 
+
 class Sim(object):
     """Oversees components of racersim"""
+
     def __init__(self, map_height, map_width, goal_width,
                  car_weight, ball_weight, ball_radius, tire_width, tire_length, max_angle, car_length, car_width,
                  wheelbase, max_drive_force, drag_force_coeff, angular_impulse_coeff, max_lateral_impulse, bumper_width,
@@ -87,7 +91,7 @@ class Sim(object):
         if render_enabled:
             self.renderer = Renderer(map_height, map_width)
             self._render()
-        
+
         self.running = True
 
     def step(self, linearVelocity, angularVelocity, dt):
@@ -96,7 +100,7 @@ class Sim(object):
             self.car.step(linearVelocity, angularVelocity, dt)
             self.world.Step(dt, self.velIters, self.posIters)
             self.world.ClearForces()
-        
+
         if self.renderEnabled:
             self._render()
 
@@ -107,13 +111,13 @@ class Sim(object):
         """Reset simulator to original state."""
         self.world.DestroyBody(self.car.body)
         self.world.DestroyBody(self.ball.body)
-                
+
         if self.carDef == None:
             if self.tireDef != None:
                 self.carDef = CarDef(self.tireDef)
             else:
                 self.carDef = CarDef()
-        
+
         self.car = Car(self.world, self.carDef)
         self.ball = Ball(self.world)
 

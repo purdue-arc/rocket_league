@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Contains the WaypointControllerROS Node.
 
@@ -73,16 +73,18 @@ class WaypointControllerROS(object):
         self.is_debug = rospy.get_param('~is_debug', True)
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('car0/velocity',\
+        self.bot_velocity_cmd = rospy.Publisher('car0/velocity',
                                                 Twist, queue_size=1)
 
-        self.path_error_pub = rospy.Publisher('car0/path_error', PathError, queue_size=1)
+        self.path_error_pub = rospy.Publisher(
+            'car0/path_error', PathError, queue_size=1)
 
         if self.is_debug:
             self.lookahead_pnt_pub = rospy.Publisher('car0/lookahead_pnt',
                                                      PoseWithCovarianceStamped,
                                                      queue_size=1)
-            self.d_angle_pub = rospy.Publisher('car0/d_angle', Float32, queue_size=1)
+            self.d_angle_pub = rospy.Publisher(
+                'car0/d_angle', Float32, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('car0/path', Path, self.path_cb)
@@ -105,11 +107,12 @@ class WaypointControllerROS(object):
 
             # Converting odom msg to numpy arrays
             bot_pos, bot_orient, _ = convert.pose_covar_to_array(odom_msg.pose)
-            bot_linear, bot_angular, _ = convert.twist_covar_to_array(odom_msg.twist)
+            bot_linear, bot_angular, _ = convert.twist_covar_to_array(
+                odom_msg.twist)
 
             # Set lookahead dist by lookahead gain and current speed
             lookahead_boost = np.linalg.norm(bot_linear) \
-                                * self.lookahead_gain
+                * self.lookahead_gain
             lookahead_dist = self.lookahead_dist + lookahead_boost
 
             # Set number of waypoints to check
@@ -137,7 +140,7 @@ class WaypointControllerROS(object):
                 path_seg = end_pos - start_pos
                 bot_path = start_pos - bot_pos
 
-                intersect = pursuit.find_intersection(path_seg, bot_path, \
+                intersect = pursuit.find_intersection(path_seg, bot_path,
                                                       lookahead_dist)
 
                 if intersect is not None:
@@ -150,7 +153,7 @@ class WaypointControllerROS(object):
                     goal_time = self.path[i + 1].delta_t
                     vel_margin = self.path[i + 1].velocity_tolerance
                     bkw = goal_vel < 0
-                    d_angle = pursuit.calculate_angle(intersect, bot_pos, \
+                    d_angle = pursuit.calculate_angle(intersect, bot_pos,
                                                       bot_orient, lookahead_dist, bkw)
                     if abs(d_angle) > math.pi/2:
                         intersect = None
@@ -177,7 +180,7 @@ class WaypointControllerROS(object):
             dist = np.linalg.norm(goal_pos - bot_pos)
             delta_time = time.time() - self.start_time
             time_left = goal_time.data - delta_time
-            if time_left <= 0 :
+            if time_left <= 0:
                 # Report unfeasible path
                 linear_vel = 0
                 vel_error = goal_vel
@@ -194,7 +197,7 @@ class WaypointControllerROS(object):
                     # TODO: Tell highlevel planner we stopped
 
             # Calculate angular velocity
-            turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos, \
+            turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos,
                                                   bot_orient, lookahead_dist, bkw)
             angular_vel = pursuit.get_angular_speed(linear_vel, turn_rad)
 
@@ -218,6 +221,7 @@ class WaypointControllerROS(object):
             error.linear_velocity = Float32(vel_error)
             error.angular_velocity = Float32()
             self.path_error_pub.publish(error)
+
 
 if __name__ == "__main__":
     WaypointControllerROS()

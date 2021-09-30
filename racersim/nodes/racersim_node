@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Node to run the racersim with ROS bindings.
 License:
   BSD 3-Clause License
@@ -78,22 +78,24 @@ class RacerSimROS(object):
         self.last_time = None
         self.path = None
         self.lookahead = [0, 0]
-        self.path_points = [[0,0]]
+        self.path_points = [[0, 0]]
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~TIMEOUT')
         rate = rospy.Rate(rospy.get_param('~RATE'))
 
         # Publishers
-        self.ball_pub = rospy.Publisher('ball/odom', \
-             Odometry, queue_size=1)
+        self.ball_pub = rospy.Publisher('ball/odom',
+                                        Odometry, queue_size=1)
         self.bot_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
-        self.status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
+        self.status_pub = rospy.Publisher(
+            'match_status', MatchStatus, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('car0/velocity', Twist, self.command_cb)
         rospy.Subscriber('car0/path', Path, self.path_arr_cb)
-        rospy.Subscriber('car0/lookahead_pnt', PoseWithCovarianceStamped, self.lookahead_cb)
+        rospy.Subscriber('car0/lookahead_pnt',
+                         PoseWithCovarianceStamped, self.lookahead_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -119,13 +121,13 @@ class RacerSimROS(object):
         self.path = path_arr_msg.waypoint
         self.path_points = []
 
-	for point in self.path:
-		x = point.pose.position.x
-		y = point.pose.position.y
-		self.path_points.append([x, y])
+        for point in self.path:
+            x = point.pose.position.x
+            y = point.pose.position.y
+            self.path_points.append([x, y])
 
-	if self.path_points is None:
-		self.path_points = [[0, 0]]
+        if self.path_points is None:
+            self.path_points = [[0, 0]]
 
     def lookahead_cb(self, pose_msg):
         """Callback for lookahead_pnt messages."""
@@ -197,14 +199,15 @@ class RacerSimROS(object):
             bot_msg.twist.twist.angular.z = angular
             self.bot_pub.publish(bot_msg)
 
-            #Update the lookahead point
+            # Update the lookahead point
             self.sim.lookahead = self.lookahead
 
-	    #Update the path points
-	    self.sim.path_points = self.path_points
+            # Update the path points
+            self.sim.path_points = self.path_points
 
         self.last_time = now
         self.lock.release()
+
 
 if __name__ == "__main__":
     RacerSimROS()

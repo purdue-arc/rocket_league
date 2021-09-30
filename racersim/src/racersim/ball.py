@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Contains the Ball class.
 
 License:
@@ -31,6 +33,7 @@ import Box2D
 import math
 from tf.transformations import quaternion_from_euler
 import random
+
 
 class Ball(object):
     """Simulates game ball."""

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Contains the Goal class.
 
 License:
@@ -30,6 +32,7 @@ License:
 import Box2D
 import math
 from tf.transformations import quaternion_from_euler
+
 
 class Goal(object):
     """Simulates goal position"""

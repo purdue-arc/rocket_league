@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Contains the SimpleDriveROS Node.
 License:
@@ -35,6 +35,7 @@ from std_msgs.msg import Float32, Float64
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 
+
 class SimpleDriveROS(object):
     """A node to drive the car in a simple fashion."""
 
@@ -49,7 +50,7 @@ class SimpleDriveROS(object):
         self.frame_id = rospy.get_param('~frame_id', 'map')
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('car0/velocity',\
+        self.bot_velocity_cmd = rospy.Publisher('car0/velocity',
                                                 Twist, queue_size=1)
 
         # Subscribers
@@ -66,6 +67,7 @@ class SimpleDriveROS(object):
         twist.linear.x = -0.1
         twist.angular.z = 0.2
         self.bot_velocity_cmd.publish(twist)
+
 
 if __name__ == "__main__":
     SimpleDriveROS()
