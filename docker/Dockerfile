@@ -37,7 +37,7 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
         rm -rf /var/lib/apt/lists/* && \
         pip3 install Cython && \
         pip3 install torch-1.8.0-cp36-cp36m-linux_aarch64.whl; \
-    else; then \
+    else \
         pip3 install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html \
     fi
 
