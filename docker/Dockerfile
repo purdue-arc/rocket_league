@@ -1,5 +1,5 @@
+FROM nvidia/cuda:11.1.1-devel-ubuntu20.04
 ARG TARGETPLATFORM
-FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
 ENV ROS_DISTRO noetic
 
 # Add ROS Keyserver
@@ -28,17 +28,17 @@ RUN apt update && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/*
 
-# install pytorch
+# install pytorch [TODO On arm64]
 WORKDIR /pytorch
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-        wget https://nvidia.box.com/shared/static/p57jwntv436lfrd78inwl7iml6p13fzh.whl -O torch-1.8.0-cp36-cp36m-linux_aarch64.whl \
-        DEBIAN_FRONTEND=noninteractive apt upgrade -y && \
-        DEBIAN_FRONTEND=noninteractive apt install libopenblas-base libopenmpi-dev && \
-        rm -rf /var/lib/apt/lists/* && \
-        pip3 install Cython && \
-        pip3 install torch-1.8.0-cp36-cp36m-linux_aarch64.whl; \
-    else \
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
         pip3 install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html; \
+    #elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+    #    wget https://nvidia.box.com/shared/static/h1z9sw4bb1ybi0rm3tu8qdj8hs05ljbm.whl -O torch-1.9.0-cp36-cp36m-linux_aarch64.whl && \
+    #    apt update && \
+    #    DEBIAN_FRONTEND=noninteractive apt install -y libopenblas-base libopenmpi-dev && \
+    #    rm -rf /var/lib/apt/lists/* && \
+    #    pip3 install Cython && \
+    #    pip3 install torch-1.9.0-cp36-cp36m-linux_aarch64.whl; \
     fi
 
 # install project software dependencies
