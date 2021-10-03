@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DOCKER_DIR=$(cd $(pwd -P)/$(dirname $0) && echo $(pwd -P))
+DOCKER_DIR=$(realpath $(dirname $0))
 REPO_NAME="purduearc/rocket-league"
 
 ARCH=${ARCH:-"amd64, arm64"}

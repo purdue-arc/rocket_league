@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WS_DIR=$(cd $(pwd -P)/$(dirname $0)/../../../ && echo $(pwd -P))
+WS_DIR=$(realpath $(dirname $0)/../../../)
 REPO_NAME="purduearc/rocket-league"
 CONTAINER_NAME="${CONTAINER_NAME:-arc-rocket-league-dev}"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
