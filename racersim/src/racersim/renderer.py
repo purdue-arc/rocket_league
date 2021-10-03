@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Contains the Renderer class.
 
 License:
@@ -32,6 +34,7 @@ import pygame
 import Box2D
 import math
 
+
 class Renderer(object):
     """Render field elements of racer sim"""
 
@@ -53,34 +56,36 @@ class Renderer(object):
 
     def __init__(self, map_height, map_width):
 
-        #Most people will have a 1080p monitor
+        # Most people will have a 1080p monitor
         self.scaling = 1080 * 0.7 / map_height
 
         self.windowHeight = int(map_height * self.scaling)
         self.windowWidth = int(map_width * self.scaling)
 
         pygame.display.init()
-        self._screen = pygame.display.set_mode((self.windowWidth, self.windowHeight))
+        self._screen = pygame.display.set_mode(
+            (self.windowWidth, self.windowHeight))
         self._thread = None
 
     def _draw_polygon(self, body, fixture, color):
         """Draws polygons to the screen."""
-        vertices = [(body.transform * v) * self.scaling \
+        vertices = [(body.transform * v) * self.scaling
                     for v in fixture.shape.vertices]
-        vertices = [(v[0], v[1]) \
+        vertices = [(v[0], v[1])
                     for v in vertices]
 
         pygame.draw.polygon(self._screen, color, vertices)
 
     def _draw_car(self, body, fixture, color):
         """Draws the car to the screen."""
-        vertices = [(body.transform * v) * self.scaling \
+        vertices = [(body.transform * v) * self.scaling
                     for v in fixture.shape.vertices]
-        vertices = [(v[0], v[1]) \
+        vertices = [(v[0], v[1])
                     for v in vertices]
 
         v = vertices
-        pygame.draw.polygon(self._screen, self.COLOR_HEADLIGHTS, [v[1], v[2], v[3], v[4]])
+        pygame.draw.polygon(self._screen, self.COLOR_HEADLIGHTS, [
+                            v[1], v[2], v[3], v[4]])
         pygame.draw.polygon(self._screen, color, [v[0], v[1], v[4], v[5]])
 
     def _draw_circle(self, body, fixture, color):
@@ -89,9 +94,9 @@ class Renderer(object):
 
         position = (position[0], position[1])
 
-        pygame.draw.circle(self._screen, color, 
-            [int(x) for x in position],
-             int(fixture.shape.radius * self.scaling))
+        pygame.draw.circle(self._screen, color,
+                           [int(x) for x in position],
+                           int(fixture.shape.radius * self.scaling))
 
     def _draw_pnt(self, pnt, size, color):
         """Draws point to the screen."""
@@ -102,8 +107,9 @@ class Renderer(object):
             x = int(coord[0] * self.scaling)
             y = int(coord[1] * self.scaling)
 
-            #Gradually darkens the points
-            color = (max(color[0] - 15, 0), max(color[1] - 15, 0), max(color[2] - 15, 0))
+            # Gradually darkens the points
+            color = (max(color[0] - 15, 0),
+                     max(color[1] - 15, 0), max(color[2] - 15, 0))
 
             pygame.draw.circle(self._screen, color, [x, y], size)
 
@@ -125,7 +131,8 @@ class Renderer(object):
             poses = []
             for posed in path:
                 poses.append((posed.pose.position.x, posed.pose.position.y))
-            self._visualize_point(self.COLOR_PNT, poses, int(self.SIZE_PNT * self.scaling))
+            self._visualize_point(self.COLOR_PNT, poses,
+                                  int(self.SIZE_PNT * self.scaling))
 
         for fixture in car.body.fixtures:
             self._draw_car(car.body, fixture, self.COLOR_CAR)
@@ -133,7 +140,7 @@ class Renderer(object):
         for tire in car.tires:
             for fixture in tire.body.fixtures:
                 self._draw_polygon(tire.body, fixture, self.COLOR_TIRE)
-        
+
         for wallBody in world.wallBodies:
             for fixture in wallBody.fixtures:
                 self._draw_polygon(wallBody, fixture, self.COLOR_WALL)
@@ -142,8 +149,9 @@ class Renderer(object):
             for fixture in goalBody.body.fixtures:
                 self._draw_polygon(goalBody.body, fixture, self.COLOR_GOAL)
 
-        #Renders the lookahead point
-        self._visualize_point(self.COLOR_LOOKAHEAD, [lookahead], int(self.SIZE_PNT * self.scaling))
+        # Renders the lookahead point
+        self._visualize_point(self.COLOR_LOOKAHEAD, [
+                              lookahead], int(self.SIZE_PNT * self.scaling))
 
         for fixture in ball.body.fixtures:
             self._draw_circle(ball.body, fixture, self.COLOR_BALL)

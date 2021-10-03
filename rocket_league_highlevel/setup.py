@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
 setup_args = generate_distutils_setup(
-     packages=['rocket_league_highlevel'],
-     package_dir={'': 'src'}
+    packages=['rocket_league_highlevel'],
+    package_dir={'': 'src'}
 )
 
 setup(**setup_args)

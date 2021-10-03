@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Contains the Car and CarDef class.
 
 License:
@@ -33,7 +35,8 @@ from tf.transformations import quaternion_from_euler
 import numpy
 
 # Local classes
-from tire import Tire, TireDef
+from racersim.tire import Tire, TireDef
+
 
 class CarDef(object):
     """Holds relevent data for a car instance"""
@@ -45,14 +48,17 @@ class CarDef(object):
         self.initAngle = initAngle
         self.tireDef = tireDef
 
-        self.vertices = [(-0.0535, 0.075), (-0.0385, 0.09), (0.0385, 0.09), (0.0535, 0.075), (0.0535, -0.09), (-0.0535, -0.09)]
-        self.tireAnchors = [(-0.0535, 0.0595), (0.0535, 0.0595), (0.0535, -0.0595), (-0.0535, -0.0595)]
+        self.vertices = [(-0.0535, 0.075), (-0.0385, 0.09), (0.0385, 0.09),
+                         (0.0535, 0.075), (0.0535, -0.09), (-0.0535, -0.09)]
+        self.tireAnchors = [(-0.0535, 0.0595), (0.0535, 0.0595),
+                            (0.0535, -0.0595), (-0.0535, -0.0595)]
 
         self.density = density
 
         self.maxAngle = math.radians(max_angle)
         self.pgain = p_gain
         self.igain = i_gain
+
 
 class Car(object):
     """Simulates an ackerman-steering vehicle"""
@@ -78,23 +84,24 @@ class Car(object):
             tirePos = (carDef.tireAnchors[i][0] + carDef.initPos[0],
                        carDef.tireAnchors[i][1] + carDef.initPos[1])
 
-            tire = Tire(world, carDef.tireDef, tirePos, car_weight=self.body.mass)
+            tire = Tire(world, carDef.tireDef, tirePos,
+                        car_weight=self.body.mass)
             jointDef.bodyB = tire.body
             jointDef.localAnchorA.Set(carDef.tireAnchors[i][0],
                                       carDef.tireAnchors[i][1])
-            
+
             # Store first and second joints as FL and FR respectively
             if i == 0:
                 self._flJoint = world.CreateJoint(jointDef)
-                self._flJoint.SetLimits(0,0)
+                self._flJoint.SetLimits(0, 0)
             elif i == 1:
                 self._frJoint = world.CreateJoint(jointDef)
             else:
                 world.CreateJoint(jointDef)
-                self._flJoint.SetLimits(0,0)
-            
+                self._flJoint.SetLimits(0, 0)
+
             self.tires.append(tire)
-        
+
         self.body.angle = carDef.initAngle
         self.maxAngle = carDef.maxAngle
         self.pgain = carDef.pgain
@@ -105,7 +112,7 @@ class Car(object):
         return (self.body.position[0], self.body.position[1], 0)
 
     def getQuaternion(self):
-        angle = (self.body.angle + math.pi / 2)  % (2.0 * math.pi)
+        angle = (self.body.angle + math.pi / 2) % (2.0 * math.pi)
         return quaternion_from_euler(0, 0, angle)
 
     def set_angle(self, angle):

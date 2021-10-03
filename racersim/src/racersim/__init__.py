@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """2D simulation of ARC's rocket league environment.
 
 License:

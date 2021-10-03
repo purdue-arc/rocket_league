@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Contains the World class.
 
 License:
@@ -33,12 +35,13 @@ import math
 # Local classes
 from racersim.goal import Goal
 
+
 class World(Box2D.b2World):
     """Simulates world for car to exist in"""
 
     def __init__(self, map_height, map_width, goal_width, goal_height):
         super(World, self).__init__(contactListener=WorldListener(self))
-        self.gravity = (0,0)
+        self.gravity = (0, 0)
 
         self.gndBody = self.CreateBody()
         gndShape = Box2D.b2PolygonShape(box=(map_width, map_height))
@@ -79,13 +82,14 @@ class World(Box2D.b2World):
 
         # Setup result flag
         self.winner = None
-        
+
     def createWall(self, pos, width, height):
         wallBody = self.CreateBody(position=pos)
         wallShape = Box2D.b2PolygonShape(box=(width/2, height/2))
         wallFixtureDef = Box2D.b2FixtureDef(shape=wallShape, restitution=0.01)
         wallBody.CreateFixture(wallFixtureDef)
         self.wallBodies.append(wallBody)
+
 
 class WorldListener(Box2D.b2ContactListener):
     """Handles collision and sensor events"""

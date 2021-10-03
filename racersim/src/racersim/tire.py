@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Contains the Tire and TireDef class.
 
 License:
@@ -29,8 +31,10 @@ License:
 # 3rd party modules
 import Box2D
 
+
 class TireDef(object):
     """Holds relevent data for a tire instance"""
+
     def __init__(self, width, length, max_lateral_impulse, max_drive_force,
                  drag_force_coeff, angular_impulse_coeff, density):
 
@@ -43,8 +47,10 @@ class TireDef(object):
         self.dragForceCoeff = drag_force_coeff
         self.angularImpulseCoeff = angular_impulse_coeff
 
+
 class Tire(object):
     """Simulates a single tire of a vehicle"""
+
     def __init__(self, world, tireDef, position, car_weight=0.200):
         bodyDef = Box2D.b2BodyDef()
         bodyDef.type = Box2D.b2_dynamicBody
@@ -62,11 +68,11 @@ class Tire(object):
         self.density = tireDef.density
 
     def getForwardVelocity(self):
-        normal = self.body.GetWorldVector((0,1))
+        normal = self.body.GetWorldVector((0, 1))
         return Box2D.b2Dot(normal, self.body.linearVelocity) * normal
 
     def getLateralVelocity(self):
-        normal = self.body.GetWorldVector((1,0))
+        normal = self.body.GetWorldVector((1, 0))
         return Box2D.b2Dot(normal, self.body.linearVelocity) * normal
 
     def updateFriction(self):
@@ -74,18 +80,18 @@ class Tire(object):
         if impulse.length > self.maxLateralImpulse:
             impulse *= self.maxLateralImpulse / impulse.length
         self.body.ApplyLinearImpulse(impulse, self.body.worldCenter, wake=True)
-        self.body.ApplyAngularImpulse(self.angularImpulseCoeff * \
-                                      self.body.inertia * \
+        self.body.ApplyAngularImpulse(self.angularImpulseCoeff *
+                                      self.body.inertia *
                                       -self.body.angularVelocity, wake=True)
 
         currForwardNormal = self.getForwardVelocity()
         currForwardSpeed = currForwardNormal.Normalize()
         dragForce = self.dragForceCoeff * currForwardSpeed
-        self.body.ApplyForce(dragForce * currForwardNormal, \
+        self.body.ApplyForce(dragForce * currForwardNormal,
                              self.body.worldCenter, wake=True)
 
     def updateDrive(self, linear_cmd, dt):
-        currForwardNormal = self.body.GetWorldVector((0,1))
+        currForwardNormal = self.body.GetWorldVector((0, 1))
         currSpeed = Box2D.b2Dot(self.getForwardVelocity(), currForwardNormal)
 
         # Each tire should power itself and 1/4th of the car
@@ -104,5 +110,5 @@ class Tire(object):
         elif force < -self.maxDriveForce:
             force = -self.maxDriveForce
 
-        self.body.ApplyForce(force * currForwardNormal, \
+        self.body.ApplyForce(force * currForwardNormal,
                              self.body.worldCenter, wake=True)
