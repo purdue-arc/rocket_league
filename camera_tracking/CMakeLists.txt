@@ -8,9 +8,10 @@ project(camera_tracking)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-pointgrey_camera_driver
+  pointgrey_camera_driver
   image_proc
   tf2
+  tf2_ros
   image_transport
   cv_bridge
 )
