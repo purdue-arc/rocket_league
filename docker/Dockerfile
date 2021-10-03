@@ -1,5 +1,5 @@
+FROM nvidia/cuda:11.1.1-devel-ubuntu20.04
 ARG TARGETPLATFORM
-FROM nvidia/cuda:11.4.1-devel-ubuntu20.04
 ENV ROS_DISTRO noetic
 
 # Add ROS Keyserver
@@ -18,35 +18,37 @@ RUN apt update && \
         # ROS
         ros-${ROS_DISTRO}-desktop-full \
         python3-catkin-tools \
-        # Aravis Dependencies
-        intltool gstreamer1.0-gtk3 libgtk-3-dev libnotify-dev \
-        libgstreamer1.0-0 libgstreamer-plugins-base1.0-dev \
-        gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-        libcanberra-gtk3-module libxml2-dev \
         # glvnd stuff
         libglvnd0 libgl1 libglx0 libegl1 libgles2 && \
     pip3 install --upgrade pip && \
     # deep learning stuff
     pip3 install \
-        scipy numpy matplotlib \
-        torch jupyterlab gym[box2d] stable-baselines3 && \
+        scipy numpy matplotlib pandas \
+        jupyterlab gym[box2d] stable-baselines3 && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/*
 
-# install aravis
-WORKDIR /aravis
-RUN curl -fsSLo aravis-0.6.4.tar.xz http://ftp.gnome.org/pub/GNOME/sources/aravis/0.6/aravis-0.6.4.tar.xz && \
-    echo "b595a4724da51d0fdb71f2b6e2f1e12f328e423155c3e84607ee2ce704f516bd  aravis-0.6.4.tar.xz" | sha256sum --check && \
-    tar xf aravis-0.6.4.tar.xz && cd aravis-0.6.4 && \
-    ./configure && make && make install && ldconfig && \
-    cd / && rm -rf aravis
+# install pytorch [TODO On arm64]
+WORKDIR /pytorch
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+        pip3 install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html; \
+    #elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+    #    wget https://nvidia.box.com/shared/static/h1z9sw4bb1ybi0rm3tu8qdj8hs05ljbm.whl -O torch-1.9.0-cp36-cp36m-linux_aarch64.whl && \
+    #    apt update && \
+    #    DEBIAN_FRONTEND=noninteractive apt install -y libopenblas-base libopenmpi-dev && \
+    #    rm -rf /var/lib/apt/lists/* && \
+    #    pip3 install Cython && \
+    #    pip3 install torch-1.9.0-cp36-cp36m-linux_aarch64.whl; \
+    fi
 
 # install project software dependencies
 RUN pip3 install box2d && \
     apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
         python3-pygame \
-        ros-${ROS_DISTRO}-apriltag-ros
+        ros-${ROS_DISTRO}-apriltag-ros \
+        ros-${ROS_DISTRO}-pointgrey-camera-driver && \
+    rm -rf /var/lib/apt/lists/*
 
 # create user
 ARG USER=arc

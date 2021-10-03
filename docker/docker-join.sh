@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONTAINER_NAME="arc-rocket-league-dev"
+CONTAINER_NAME="${CONTAINER_NAME:-arc-rocket-league-dev}"
 
 docker exec -it \
     -e DISPLAY \

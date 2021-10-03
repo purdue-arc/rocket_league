@@ -104,7 +104,7 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias rossrc="~/catkin_ws/devel/setup.zsh && echo 'Sourced ROS setup file'"
+alias rossrc="source ~/catkin_ws/devel/setup.zsh && echo 'Sourced ROS setup file'"
 alias tmux="tmux -u"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
