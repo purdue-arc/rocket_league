@@ -1,7 +1,7 @@
 name: docker-build-base
 
 env:
-  REPO_NAME: purduearc/rocket-league-test-repository-please-ignore:ci
+  REPO_NAME: purduearc/rocket-league
 
 on:
   push:
