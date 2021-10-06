@@ -1,5 +1,7 @@
 name: docker-build-base
-REPO_NAME: purduearc/rocket-league-test-repository-please-ignore:ci
+
+env:
+  REPO_NAME: purduearc/rocket-league-test-repository-please-ignore:ci
 
 on:
   push:
@@ -28,8 +30,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           platform: linux/amd64,linux/arm64
-          tags: ${REPO_NAME}
-          cache-from: type=registry,ref=${REPO_NAME}:cache
-          cache-to: type=registry,ref=${REPO_NAME}:cache,mode=max
+          tags: ${{ env.REPO_NAME }}
+          cache-from: type=registry,ref=${{ env.REPO_NAME }}:cache
+          cache-to: type=registry,ref=${{ env.REPO_NAME }}:cache,mode=max
           push: false
           context: ./docker/
