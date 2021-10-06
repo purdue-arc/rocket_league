@@ -1,4 +1,4 @@
-name: docker-build-base
+name: docker-pull-request
 
 env:
   REPO_NAME: purduearc/rocket-league
