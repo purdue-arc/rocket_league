@@ -34,4 +34,4 @@ jobs:
           cache-from: type=registry,ref=${{ env.REPO_NAME }}:cache
           cache-to: type=registry,ref=${{ env.REPO_NAME }}:cache,mode=max
           push: false
-          context: ./docker/
+          context: docker
