@@ -1,0 +1,12 @@
+control:
+  max_linear_velocity: 3.0
+  max_angular_velocity: 3.0
+
+reward:
+  death: -10.0
+  goal: 50.0
+  distance:
+    base: 0.25
+    exp: 2.0
+
+max_episode_time: 30.0

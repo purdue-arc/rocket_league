@@ -5,7 +5,8 @@ ENV ROS_DISTRO noetic
 # Add ROS Keyserver
 RUN apt clean && apt update && DEBIAN_FRONTEND=noninteractive apt install -y curl lsb-core && \
     sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
-    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
+    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add - && \
+    rm -rf /var/lib/apt/lists/*
 
 # Update, Upgrade, Install, and Cleanup
 RUN apt update && \
@@ -13,25 +14,25 @@ RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
         # Basics
         sudo tmux nano vim git wget net-tools iputils-ping x11-apps \
-        mesa-utils python3-dev python3-pip pylint software-properties-common \
-        clang-format jq swig zsh \
+        mesa-utils python3-dev python3-pip python3-tk software-properties-common \
+        pylint clang-format jq swig zsh \
         # ROS
         ros-${ROS_DISTRO}-desktop-full \
         python3-catkin-tools \
         # glvnd stuff
         libglvnd0 libgl1 libglx0 libegl1 libgles2 && \
     # deep learning stuff
+    pip3 install --upgrade pip && \
     pip3 install \
-        rospkg scipy numpy matplotlib pandas \
-        # tensorflow \
+        scipy numpy matplotlib pandas \
         jupyterlab gym[box2d] && \
     # Clean Up to reduce image size
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
 # install pytorch [TODO On arm64]
-WORKDIR /pytorch
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-        pip3 install torch==1.9.1+cu111 torchvision==0.10.1+cu111 torchaudio==0.9.1 -f https://download.pytorch.org/whl/torch_stable.html; \
+        pip3 install torch==1.9.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html && \
+        rm -rf /root/.cache/pip/; \
     #elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
     #    wget https://nvidia.box.com/shared/static/h1z9sw4bb1ybi0rm3tu8qdj8hs05ljbm.whl -O torch-1.9.0-cp36-cp36m-linux_aarch64.whl && \
     #    apt update && \
@@ -42,13 +43,13 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
     fi
 
 # install project software dependencies
-RUN pip3 install box2d && \
+RUN pip3 install box2d stable-baselines3 && \
     apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
         python3-pygame \
         ros-${ROS_DISTRO}-apriltag-ros \
         ros-${ROS_DISTRO}-pointgrey-camera-driver && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
 # create user
 ARG USER=arc
