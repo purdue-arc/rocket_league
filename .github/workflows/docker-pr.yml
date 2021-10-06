@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           platforms: linux/amd64,linux/arm64
-          tags: ${{ env.REPO_NAME }}:${{ PR_NUMBER }}
+          tags: ${{ env.REPO_NAME }}:${{ env.PR_NUMBER }}
           cache-from: type=registry,ref=${{ env.REPO_NAME }}:cache
           push: true
           context: ./docker
