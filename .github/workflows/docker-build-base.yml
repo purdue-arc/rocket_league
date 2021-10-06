@@ -29,7 +29,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          platform: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64
           tags: ${{ env.REPO_NAME }}
           cache-from: type=registry,ref=${{ env.REPO_NAME }}:cache
           cache-to: type=registry,ref=${{ env.REPO_NAME }}:cache,mode=max
