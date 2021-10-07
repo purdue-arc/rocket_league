@@ -29,35 +29,21 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from rocket_league_drl import CartpoleInterface, CartpoleDirectInterface
+from rocket_league_drl import SnakeInterface
 from stable_baselines3 import PPO
-import gym, time
+import time
 
-def show_progress(model, episodes=5):
-   env = gym.make("CartPole-v0")
-   obs = env.reset()
-   episodes = 0
-   while episodes < 5:
-      action, _states = model.predict(obs, deterministic=True)
-      obs, reward, done, info = env.step(action)
-      env.render()
-      time.sleep(0.01)
-      if done:
-         obs = env.reset()
-         episodes += 1
-   env.close()
-
-
-# env = gym.make("CartPole-v0")
-# env = CartpoleDirectInterface()
-env = CartpoleInterface()
+env = SnakeInterface()
 model = PPO("MlpPolicy", env, verbose=1)
-
-print("showing untrained performance")
-show_progress(model)
 
 print("training on 10k steps")
 model.learn(total_timesteps=10000)
 
-print("showing trained performance")
-show_progress(model)
+print("done training")
+obs = env.reset()
+while True:
+   action, __ = model.predict(obs, deterministic=True)
+   obs, __, done, __ = env.step(action)
+   time.sleep(0.01)
+   if done:
+      obs = env.reset()

@@ -1,43 +1,14 @@
-"""
-Contains the SnakeInterface class
-
-License:
-  BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
-  All rights reserved.
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-  1. Redistributions of source code must retain the above copyright notice, this
-     list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-  3. Neither the name of the copyright holder nor the names of its
-     contributors may be used to endorse or promote products derived from
-     this software without specific prior written permission.
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""
+#!/usr/bin/env python
 
 # package
 from rocket_league_drl import ROSInterface
+from gym.spaces import Discrete, Box
 
 # ROS
 import rospy
 from geometry_msgs.msg import Twist, PoseArray, PointStamped
 from std_msgs.msg import Int32, Bool
 from std_srvs.srv import Empty
-
-# Gym
-from gym.spaces import Discrete, Box
 
 # System
 import numpy as np
@@ -55,8 +26,9 @@ class SnakeActions(IntEnum):
 
 class SnakeInterface(ROSInterface):
     """ROS interface for the snake game."""
+    _node_name = "snake_drl"
     def __init__(self):
-        rospy.init_node('snake_drl')
+        super().__init__()
 
         # Constants
         self._NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
@@ -87,7 +59,7 @@ class SnakeInterface(ROSInterface):
         rospy.Subscriber('snake/active', Bool, self._alive_cb)
 
     @property
-    def action_size(self):
+    def action_space(self):
         """The Space object corresponding to valid actions."""
         return Discrete(SnakeActions.SIZE)
 
@@ -106,7 +78,7 @@ class SnakeInterface(ROSInterface):
 
     def _reset_self(self):
         """Reset internally for a new episode."""
-        self.clear_state()
+        self._clear_state()
         self._prev_time = None
         self._prev_score = None
 
@@ -127,7 +99,7 @@ class SnakeInterface(ROSInterface):
 
     def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
-        assert self.has_state()
+        assert self._has_state()
 
         # combine pose / goal for observation
         pose = np.asarray(self._pose, dtype=np.float32)
@@ -157,7 +129,7 @@ class SnakeInterface(ROSInterface):
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
-        assert action >= 0 and action < SnakeActions.SIZE
+        assert action >= 0 and action < self.action_space.n
 
         action_msg = Twist()
         action_msg.linear.x = self._LINEAR_VELOCITY
