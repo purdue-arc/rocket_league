@@ -39,6 +39,7 @@ class SnakeInterface(ROSInterface):
         self._GOAL_REWARD = rospy.get_param('~reward/goal', 50.0)
         self._DISTANCE_REWARD = rospy.get_param('~reward/distance', 0.0)
         self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
+        self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
 
         # Publishers
         self._action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
@@ -51,6 +52,7 @@ class SnakeInterface(ROSInterface):
         self._alive = None
         self._prev_time = None
         self._prev_score = None
+        self._start_time = None
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
@@ -81,6 +83,7 @@ class SnakeInterface(ROSInterface):
         self._clear_state()
         self._prev_time = None
         self._prev_score = None
+        self._start_time = None
 
     def _has_state(self):
         """Determine if the new state is ready."""
@@ -125,6 +128,12 @@ class SnakeInterface(ROSInterface):
         if not self._alive:
             reward += self._DEATH_REWARD
             done = True
+
+        if self._start_time is None:
+            self._start_time = time
+
+        if (time - self._start_time).to_sec() >= self._MAX_TIME:
+                done = True
 
         return (observation, reward, done, {})
 
