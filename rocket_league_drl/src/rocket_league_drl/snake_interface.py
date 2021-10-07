@@ -14,7 +14,7 @@ from std_srvs.srv import Empty
 import numpy as np
 from tf.transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
-from math import exp, pi
+from math import pi
 
 @unique
 class SnakeActions(IntEnum):
@@ -37,8 +37,8 @@ class SnakeInterface(ROSInterface):
         self._LINEAR_VELOCITY = rospy.get_param('~control/max_linear_velocity', 3.0)
         self._DEATH_REWARD = rospy.get_param('~reward/death', 0.0)
         self._GOAL_REWARD = rospy.get_param('~reward/goal', 50.0)
-        self._BASE_REWARD = rospy.get_param('~reward/distance/base', 0.0)
-        self._EXP_REWARD = rospy.get_param('~reward/distance/exp', 0.0)
+        self._DISTANCE_REWARD = rospy.get_param('~reward/distance', 0.0)
+        self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
 
         # Publishers
         self._action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
@@ -112,9 +112,10 @@ class SnakeInterface(ROSInterface):
 
         time = rospy.Time.now()
         if self._prev_time is not None:
-            dist = np.sqrt(np.sum(np.square(pose[1:3] - goal)))
-            dist_reward_rate = self._BASE_REWARD * exp(-1.0 * self._EXP_REWARD * dist)
-            reward += (time - self._prev_time).to_sec() * dist_reward_rate
+            reward += (time - self._prev_time).to_sec() * self._CONSTANT_REWARD
+            dist_sq = np.sum(np.square(pose[1:3] - goal))
+            norm_dist = dist_sq / (self._FIELD_SIZE ** 2)
+            reward += (time - self._prev_time).to_sec() * self._DISTANCE_REWARD * norm_dist
         self._prev_time = time
 
         if self._prev_score is not None:

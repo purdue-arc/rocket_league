@@ -31,13 +31,14 @@ License:
 
 from rocket_league_drl import SnakeInterface
 from stable_baselines3 import PPO
-import time
+import time, rospy
 
 env = SnakeInterface()
 model = PPO("MlpPolicy", env, verbose=1)
 
-print("training on 10k steps")
-model.learn(total_timesteps=10000)
+steps = rospy.get_param('~training_steps', 50000)
+print(f"training on {steps} steps")
+model.learn(total_timesteps=steps)
 
 print("done training")
 obs = env.reset()
