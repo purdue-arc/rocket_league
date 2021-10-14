@@ -30,27 +30,29 @@ License:
 
 # 3rd party modules
 import math
+import os
 import pybullet as p
+import pybullet_data as p_data
 import random
 
 
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, render_enabled):
-
+    def __init__(self, ball_urdf_path, render_enabled):
         if render_enabled:
             self.client = p.connect(p.GUI)
         else:
             self.client = p.connect(p.DIRECT)
 
-        p.setGravity(0, 0, -10)
-        self.planeID = p.loadURDF("urdf/plane.urdf")
+        p.setAdditionalSearchPath(p_data.getDataPath())
+        self.planeID = p.loadURDF("plane.urdf")
 
         startPos = [0, 0, 1]
         startOrientation = p.getQuaternionFromEuler([0, 0, 0])
-        self.ballID = p.loadURDF("urdf/ball.urdf", startPos, startOrientation)
+        self.ballID = p.loadURDF(ball_urdf_path, startPos, startOrientation)
 
+        p.setGravity(0, 0, -10)
         self.running = True
 
     def step(self, linearVelocity, angularVelocity, dt):

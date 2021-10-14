@@ -28,10 +28,4 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from simulator.ball import Ball
-from simulator.car import Car, CarDef
-from simulator.goal import Goal
 from simulator.sim import Sim
-from simulator.renderer import Renderer
-from simulator.tire import Tire, TireDef
-from simulator.world import World

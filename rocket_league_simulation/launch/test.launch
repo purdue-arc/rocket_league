@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="ball_urdf_path" default="$(find rocket_league_simulation)/util/urdf/ball.urdf" />
+
+    <node pkg="rocket_league_simulation" type="simulator_node" name="simulator_node" output="screen" required="true">
+        <rosparam command="load" file="$(find rocket_league_simulation)/util/sim_info.yaml" />
+        <param name="BALL_URDF_PATH" value="$(arg ball_urdf_path)" />
+    </node>
+</launch>

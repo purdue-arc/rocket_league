@@ -27,10 +27,11 @@ License:
 """
 
 # 3rd party modules
-from threading import Lock
-import rospy
 from nav_msgs.msg import Odometry
+import os
+import rospy
 from std_srvs.srv import Empty, EmptyResponse
+from threading import Lock
 
 # Local library
 import simulator
@@ -39,10 +40,18 @@ from rocket_league_msgs.msg import Target, Path, PathError, Waypoint, MatchStatu
 
 
 class SimulatorROS(object):
-    """ROS wrapper for the racer sim."""
+    """ROS wrapper for the simulator."""
 
     def __init__(self):
         rospy.init_node('simulator')
+
+        ball_urdf_path = rospy.get_param('~BALL_URDF_PATH', None)
+        if ball_urdf_path is None:
+            rospy.signal_shutdown('no urdf path set for "ball"')
+
+        if not os.path.isfile(ball_urdf_path):
+            rospy.signal_shutdown(
+                'no urdf file exists at path {}'.format(ball_urdf_path))
 
         self.sim = simulator.Sim(
             # From high_level_info.yaml
@@ -51,6 +60,7 @@ class SimulatorROS(object):
             # rospy.get_param('~GOAL_WIDTH'),
 
             # From sim_info.yaml
+            ball_urdf_path,
             rospy.get_param('~RENDER_ENABLED', True)
         )
 
@@ -62,8 +72,8 @@ class SimulatorROS(object):
         self.path_points = [[0, 0]]
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
-        self.timeout = rospy.get_param('~TIMEOUT')
-        rate = rospy.Rate(rospy.get_param('~RATE'))
+        self.timeout = rospy.get_param('~TIMEOUT', 10)
+        rate = rospy.Rate(rospy.get_param('~RATE', 35))
 
         # Publishers
         self.ball_pub = rospy.Publisher('ball/odom',
