@@ -27,6 +27,7 @@ License:
 """
 
 # 3rd party modules
+from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 import os
 import rospy
@@ -46,6 +47,7 @@ class SimulatorROS(object):
         rospy.init_node('simulator')
 
         ball_urdf_path = rospy.get_param('~BALL_URDF_PATH', None)
+        car_urdf_path = rospy.get_param('~CAR_URDF_PATH', None)
         if ball_urdf_path is None:
             rospy.signal_shutdown('no urdf path set for "ball"')
 
@@ -61,6 +63,7 @@ class SimulatorROS(object):
 
             # From sim_info.yaml
             ball_urdf_path,
+            car_urdf_path,
             rospy.get_param('~RENDER_ENABLED', True)
         )
 
@@ -68,8 +71,10 @@ class SimulatorROS(object):
         self.last_command = None
         self.last_time = None
         self.path = None
-        self.lookahead = [0, 0]
-        self.path_points = [[0, 0]]
+        # self.lookahead = [0, 0]
+        # self.path_points = [[0, 0]]
+        self.throttle_cmd = 0.
+        self.steering_cmd = 0.
 
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~TIMEOUT', 10)
@@ -87,7 +92,9 @@ class SimulatorROS(object):
         rospy.Subscriber('car0/path', Path, self.path_arr_cb)
         rospy.Subscriber('car0/lookahead_pnt',
                          PoseWithCovarianceStamped, self.lookahead_cb)
-
+        rospy.Subscriber('effort/throttle', Float32, self.throttle_cb)
+        rospy.Subscriber('effort/steering', Float32, self.steering_cb)
+        
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
 
@@ -97,7 +104,13 @@ class SimulatorROS(object):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 pass
-
+    
+    def throttle_cb(self, throttle_msg):
+        self.throttle_cmd = throttle_msg.data
+    
+    def steering_cb(self, steering_msg):
+        self.steering_cmd = steering_msg.data
+    
     def reset_cb(self, _):
         """Resets simulator."""
         self.lock.acquire()
@@ -153,7 +166,7 @@ class SimulatorROS(object):
                 linear_cmd = empty.linear
                 angular_cmd = empty.angular
 
-            self.sim.step(linear_cmd, angular_cmd, delta_t)
+            self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
 
             # Publish ball odometry
             # ball_msg = Odometry()

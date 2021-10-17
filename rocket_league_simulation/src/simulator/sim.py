@@ -35,11 +35,12 @@ import pybullet as p
 import pybullet_data as p_data
 import random
 
+# car_urdf_path = "/home/zer0/catkin_ws/src/rocket_league/rocket_league_simulation/src/simulator/ur_temp/car.urdf"
 
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, ball_urdf_path, render_enabled):
+    def __init__(self, ball_urdf_path, car_urdf_path, render_enabled):
         if render_enabled:
             self.client = p.connect(p.GUI)
         else:
@@ -51,13 +52,41 @@ class Sim(object):
         startPos = [0, 0, 1]
         startOrientation = p.getQuaternionFromEuler([0, 0, 0])
         self.ballID = p.loadURDF(ball_urdf_path, startPos, startOrientation)
+        
+        
+        self.carID = p.loadURDF(car_urdf_path, [0,0,0], p.getQuaternionFromEuler([0,0,0]))
+        self.steering_angle = 0
+        self.length = 0.5
+        
+        self.car_handle = p.createConstraint(self.carID, -1,-1,-1, p.JOINT_FIXED, [0,0,0], [0,0,0], [0,0,1])
 
+        p.resetBasePositionAndOrientation(self.carID, [0,0,0.1], p.getQuaternionFromEuler([0,0,0]))
         p.setGravity(0, 0, -10)
         self.running = True
 
-    def step(self, linearVelocity, angularVelocity, dt):
+    def step(self, throttle, steering, dt):
         """Advance one time-step in the sim."""
         if self.running:
+            # implementing bicycle model
+            self.steering_angle += steering*dt
+            position, orientation = p.getBasePositionAndOrientation(self.carID)
+        # global_angle = math.atan(position[1]/position[0])
+            heading = p.getEulerFromQuaternion(orientation)[2]
+            # input_array = np.array([throttle, steering, 1])
+            # transform = np.array(
+            #     [ 
+                    
+            #     ]
+            # )
+            x_vel = throttle * math.cos(heading + steering/2)
+            y_vel = throttle * math.sin(heading + steering/2)
+            w = (throttle * math.tan(heading + steering) * math.cos(heading + steering/2))/self.length
+            
+            position = (position[0] + x_vel*dt, position[1] + y_vel*dt, position[2])
+            orientation = p.getQuaternionFromEuler([0, 0, heading + w * dt])
+            
+            p.changeConstraint(self.car_handle, position, orientation)
+            
             p.stepSimulation()
 
     def reset(self):
