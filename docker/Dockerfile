@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.1.1-devel-ubuntu20.04
+FROM nvidia/cuda:11.4.2-devel-ubuntu20.04
 ARG TARGETPLATFORM
 ENV ROS_DISTRO noetic
 
@@ -20,7 +20,10 @@ RUN apt update && \
         ros-${ROS_DISTRO}-desktop-full \
         python3-catkin-tools \
         # glvnd stuff
-        libglvnd0 libgl1 libglx0 libegl1 libgles2 && \
+        libglvnd0 libgl1 libglx0 libegl1 libgles2 \
+        # anaconda deps 
+        bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 \
+        mercurial subversion libopenblas-dev && \
     # deep learning stuff
     pip3 install --upgrade pip && \
     pip3 install \
@@ -29,18 +32,57 @@ RUN apt update && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
-# install pytorch [TODO On arm64]
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-        pip3 install torch==1.9.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html && \
-        rm -rf /root/.cache/pip/; \
-    #elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    #    wget https://nvidia.box.com/shared/static/h1z9sw4bb1ybi0rm3tu8qdj8hs05ljbm.whl -O torch-1.9.0-cp36-cp36m-linux_aarch64.whl && \
-    #    apt update && \
-    #    DEBIAN_FRONTEND=noninteractive apt install -y libopenblas-base libopenmpi-dev && \
-    #    rm -rf /var/lib/apt/lists/* && \
-    #    pip3 install Cython && \
-    #    pip3 install torch-1.9.0-cp36-cp36m-linux_aarch64.whl; \
-    fi
+
+# install anaconda
+#WORKDIR /anaconda
+#RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+#        wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh -O anaconda.sh; \
+#    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+#        wget https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-aarch64.sh -O anaconda.sh; \
+#    fi && \
+#    chmod +x anaconda.sh && \
+#    ./anaconda.sh -b -p /opt/conda && \
+#    rm anaconda.sh && \
+#    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+#    find /opt/conda/ -follow -type f -name '*.a' -delete && \
+#    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
+#    /opt/conda/bin/conda clean -afy
+#ENV PATH /opt/conda/bin:$PATH
+#WORKDIR /root
+
+# install pytorch
+#ENV OLD_CMAKE_PREFIX_PATH $CMAKE_PREFIX_PATH
+#ENV CMAKE_PREFIX_PATH /opt/conda
+ENV USE_NCCL 0
+ENV USE_DISTRIBUTED 0
+ENV USE_QNNPACK 0
+ENV USE_PYTORCH_QNNPACK 0
+ENV TORCH_CUDA_ARCH_LIST 5.3;6.2;7.2
+ENV PYTORCH_BUILD_VERSION 1.9
+ENV PYTORCH_BUILD_NUMBER 1
+#RUN conda install astunparse numpy ninja pyyaml mkl mkl-include setuptools \
+#        cmake cffi typing_extensions future six requests dataclasses && \
+#    git clone --recursive --branch release/1.9 https://github.com/pytorch/pytorch && \
+#    cd pytorch && \
+#    if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+#        wget https://gist.githubusercontent.com/dusty-nv/ce51796085178e1f38e3c6a1663a93a1/raw/bdb08d33760fc94ffbca20ed843c638228f8bb45/pytorch-1.9-jetpack-4.5.1.patch && \
+#        git apply pytorch-1.9-jetpack-4.5.1.patch; \
+#    fi && \
+#    python3 setup.py install && \
+#    cd .. && \
+#    rf -rf pytorch
+RUN git clone --recursive --branch release/1.9 https://github.com/pytorch/pytorch && \
+    cd pytorch && \
+    if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+        wget https://gist.githubusercontent.com/dusty-nv/ce51796085178e1f38e3c6a1663a93a1/raw/bdb08d33760fc94ffbca20ed843c638228f8bb45/pytorch-1.9-jetpack-4.5.1.patch && \
+        git apply pytorch-1.9-jetpack-4.5.1.patch; \
+    fi && \
+    pip3 install -r requirements.txt && \
+    pip3 install scikit-build ninja && \
+    python3 setup.py install && \
+    cd .. && \
+    rf -rf pytorch && /root/.cache/pip/
+#ENV CMAKE_PREFIX_PATH $OLD_CMAKE_PREFIX_PATH
 
 # install project software dependencies
 RUN pip3 install box2d stable-baselines3 && \

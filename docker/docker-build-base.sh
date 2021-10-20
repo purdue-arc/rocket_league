@@ -14,6 +14,5 @@ docker buildx build \
     --tag $REPO_NAME \
     --cache-from=type=registry,ref=${REPO_NAME}:cache \
     --cache-to=type=registry,ref=${REPO_NAME}:cache,mode=max \
-    --push \
     $@ \
     $DOCKER_DIR
