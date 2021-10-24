@@ -1,34 +1,8 @@
-"""
-Contains the SnakeInterface class
-
-License:
-  BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
-  All rights reserved.
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-  1. Redistributions of source code must retain the above copyright notice, this
-     list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-  3. Neither the name of the copyright holder nor the names of its
-     contributors may be used to endorse or promote products derived from
-     this software without specific prior written permission.
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""
+#!/usr/bin/env python
 
 # package
 from rocket_league_drl import ROSInterface
+from gym.spaces import Discrete, Box
 
 # ROS
 import rospy
@@ -36,14 +10,11 @@ from geometry_msgs.msg import Twist, PoseArray, PointStamped
 from std_msgs.msg import Int32, Bool
 from std_srvs.srv import Empty
 
-# Gym
-from gym.spaces import Discrete, Box
-
 # System
 import numpy as np
 from tf.transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
-from math import exp, pi
+from math import pi
 
 @unique
 class SnakeActions(IntEnum):
@@ -55,8 +26,9 @@ class SnakeActions(IntEnum):
 
 class SnakeInterface(ROSInterface):
     """ROS interface for the snake game."""
+    _node_name = "snake_drl"
     def __init__(self):
-        rospy.init_node('snake_drl')
+        super().__init__()
 
         # Constants
         self._NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
@@ -65,8 +37,9 @@ class SnakeInterface(ROSInterface):
         self._LINEAR_VELOCITY = rospy.get_param('~control/max_linear_velocity', 3.0)
         self._DEATH_REWARD = rospy.get_param('~reward/death', 0.0)
         self._GOAL_REWARD = rospy.get_param('~reward/goal', 50.0)
-        self._BASE_REWARD = rospy.get_param('~reward/distance/base', 0.0)
-        self._EXP_REWARD = rospy.get_param('~reward/distance/exp', 0.0)
+        self._DISTANCE_REWARD = rospy.get_param('~reward/distance', 0.0)
+        self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
+        self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
 
         # Publishers
         self._action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
@@ -79,6 +52,7 @@ class SnakeInterface(ROSInterface):
         self._alive = None
         self._prev_time = None
         self._prev_score = None
+        self._start_time = None
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
@@ -87,7 +61,7 @@ class SnakeInterface(ROSInterface):
         rospy.Subscriber('snake/active', Bool, self._alive_cb)
 
     @property
-    def action_size(self):
+    def action_space(self):
         """The Space object corresponding to valid actions."""
         return Discrete(SnakeActions.SIZE)
 
@@ -106,9 +80,10 @@ class SnakeInterface(ROSInterface):
 
     def _reset_self(self):
         """Reset internally for a new episode."""
-        self.clear_state()
+        self._clear_state()
         self._prev_time = None
         self._prev_score = None
+        self._start_time = None
 
     def _has_state(self):
         """Determine if the new state is ready."""
@@ -127,7 +102,7 @@ class SnakeInterface(ROSInterface):
 
     def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
-        assert self.has_state()
+        assert self._has_state()
 
         # combine pose / goal for observation
         pose = np.asarray(self._pose, dtype=np.float32)
@@ -140,9 +115,10 @@ class SnakeInterface(ROSInterface):
 
         time = rospy.Time.now()
         if self._prev_time is not None:
-            dist = np.sqrt(np.sum(np.square(pose[1:3] - goal)))
-            dist_reward_rate = self._BASE_REWARD * exp(-1.0 * self._EXP_REWARD * dist)
-            reward += (time - self._prev_time).to_sec() * dist_reward_rate
+            reward += (time - self._prev_time).to_sec() * self._CONSTANT_REWARD
+            dist_sq = np.sum(np.square(pose[1:3] - goal))
+            norm_dist = dist_sq / (self._FIELD_SIZE ** 2)
+            reward += (time - self._prev_time).to_sec() * self._DISTANCE_REWARD * norm_dist
         self._prev_time = time
 
         if self._prev_score is not None:
@@ -153,11 +129,17 @@ class SnakeInterface(ROSInterface):
             reward += self._DEATH_REWARD
             done = True
 
+        if self._start_time is None:
+            self._start_time = time
+
+        if (time - self._start_time).to_sec() >= self._MAX_TIME:
+                done = True
+
         return (observation, reward, done, {})
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
-        assert action >= 0 and action < SnakeActions.SIZE
+        assert action >= 0 and action < self.action_space.n
 
         action_msg = Twist()
         action_msg.linear.x = self._LINEAR_VELOCITY
