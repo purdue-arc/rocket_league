@@ -106,7 +106,8 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, handler)
 
     mutex = Lock()
-    threads = [Thread(target=x.run, args=(hosts, mutex)) for x in hosts]
+    threads = [Thread(target=x.run, args=(hosts, mutex)) for x in hosts if x.roscore]
+    threads += [Thread(target=x.run, args=(hosts, mutex)) for x in hosts if not x.roscore]
     for thread in threads:
         thread.start()
     for thread in threads:

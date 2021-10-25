@@ -4,12 +4,12 @@ hosts:
     run_cmd:
       - /home/danielg/ros_docker/catkin_ws/src/rocket_league/docker/docker-run.sh
       - --net=host
-    exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch talker:=true name:=gerblick_ubuntu'
-    roscore: true
+    exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch talker:=true name:=gerblick_ubuntu --wait'
+    roscore: false
   - username: core
     hostname: citadel
     run_cmd:
       - /var/home/core/catkin_ws/src/rocket_league/docker/docker-run.sh
       - --net=host
     exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch listener:=true name:=citadel'
-    roscore: false
+    roscore: true
