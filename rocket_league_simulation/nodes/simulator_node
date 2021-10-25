@@ -56,11 +56,6 @@ class SimulatorROS(object):
                 'no urdf file exists at path {}'.format(ball_urdf_path))
 
         self.sim = simulator.Sim(
-            # From high_level_info.yaml
-            # rospy.get_param('~MAP_HEIGHT'),
-            # rospy.get_param('~MAP_WIDTH'),
-            # rospy.get_param('~GOAL_WIDTH'),
-
             # From sim_info.yaml
             ball_urdf_path,
             car_urdf_path,
@@ -71,8 +66,7 @@ class SimulatorROS(object):
         self.last_command = None
         self.last_time = None
         self.path = None
-        # self.lookahead = [0, 0]
-        # self.path_points = [[0, 0]]
+
         self.throttle_cmd = 0.
         self.steering_cmd = 0.
 
@@ -94,7 +88,7 @@ class SimulatorROS(object):
                          PoseWithCovarianceStamped, self.lookahead_cb)
         rospy.Subscriber('effort/throttle', Float32, self.throttle_cb)
         rospy.Subscriber('effort/steering', Float32, self.steering_cb)
-        
+
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
 
@@ -104,13 +98,13 @@ class SimulatorROS(object):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 pass
-    
+
     def throttle_cb(self, throttle_msg):
         self.throttle_cmd = throttle_msg.data
-    
+
     def steering_cb(self, steering_msg):
         self.steering_cmd = steering_msg.data
-    
+
     def reset_cb(self, _):
         """Resets simulator."""
         self.lock.acquire()

@@ -29,48 +29,49 @@ License:
 """
 
 # 3rd party modules
-import math
-import os
 import pybullet as p
-import pybullet_data as p_data
-import random
-
-# Local modules
-from simulator.car import Car
+import math
+import numpy as np
 
 
-class Sim(object):
-    """Oversees components of the simulator"""
+class Car(object):
+    def __init__(self, carID, length, pos, orient):
+        self.id = carID
+        self.steering_angle = 0
+        self.length = length
 
-    def __init__(self, ball_urdf_path, car_urdf_path, render_enabled):
-        if render_enabled:
-            self.client = p.connect(p.GUI)
-        else:
-            self.client = p.connect(p.DIRECT)
+        # System response
+        self.throttle_state = np.zeros((2,), dtype=np.float)
+        self.A = np.array([[-8., -4.199], [8., 0.]])
+        self.B = np.array([[2], [0]])
+        self.C = np.array([[0, 2.1]])
 
-        p.setAdditionalSearchPath(p_data.getDataPath())
-        self.planeID = p.loadURDF("plane.urdf")
+        self.car_handle = p.createConstraint(
+            self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
 
-        startPos = [0, 0, 1]
-        startOrientation = p.getQuaternionFromEuler([0, 0, 0])
-        self.ballID = p.loadURDF(ball_urdf_path, startPos, startOrientation)
+        p.resetBasePositionAndOrientation(
+            self.id, pos, p.getQuaternionFromEuler(orient))
 
-        self.cars = []
+    def step(self, cmd, dt):
+        des_throttle = cmd[0]
+        steering = cmd[1]
 
-        self.carID = p.loadURDF(
-            car_urdf_path, [0, 0, 0], p.getQuaternionFromEuler([0, 0, 0]))
-        self.cars.append(Car(self.carID, 0.5, [0.1, 0, 0], [0, 0, 0]))
+        # Compute 2nd-order response of throttle
+        throttle = self.C @ self.throttle_state
+        throttle_dt = self.A @ self.throttle_state + \
+            self.B @ np.array([des_throttle])
+        self.throttle_state += throttle_dt * dt
 
-        p.setGravity(0, 0, -10)
-        self.running = True
+        # Compute motion using bicycle model
+        self.steering_angle += steering*dt
+        pos, orient = p.getBasePositionAndOrientation(self.id)
+        heading = p.getEulerFromQuaternion(orient)[2]
+        x_vel = throttle * math.cos(heading + steering/2)
+        y_vel = throttle * math.sin(heading + steering/2)
+        w = (throttle * math.tan(heading + steering) *
+             math.cos(heading + steering/2))/self.length
 
-    def step(self, throttle_cmd, steering_cmd, dt):
-        """Advance one time-step in the sim."""
-        if self.running:
-            for car in self.cars:
-                car.step((throttle_cmd, steering_cmd), dt)
-            p.stepSimulation()
+        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
+        orientation = p.getQuaternionFromEuler([0, 0, heading + w * dt])
 
-    def reset(self):
-        """Reset simulator to original state."""
-        pass
+        p.changeConstraint(self.car_handle, pos, orientation)

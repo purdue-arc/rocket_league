@@ -29,3 +29,4 @@ License:
 """
 
 from simulator.sim import Sim
+from simulator.car import Car
