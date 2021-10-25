@@ -1,21 +1,15 @@
 hosts:
   - username: danielg
     hostname: gerblick-ubuntu
-    command:
+    run_cmd:
       - /home/danielg/ros_docker/catkin_ws/src/rocket_league/docker/docker-run.sh
       - --net=host
-    shutdown:
-      - docker
-      - stop
-      - arc-rocket-league-dev
-    ros_master: true
+    exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch talker:=true name:=gerblick_ubuntu'
+    roscore: true
   - username: core
     hostname: citadel
-    command:
+    run_cmd:
       - /var/home/core/catkin_ws/src/rocket_league/docker/docker-run.sh
       - --net=host
-    shutdown:
-      - docker
-      - stop
-      - arc-rocket-league-dev
-    ros_master: false
+    exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch listener:=true name:=citadel'
+    roscore: false
