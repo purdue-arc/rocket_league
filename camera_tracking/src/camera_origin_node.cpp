@@ -28,6 +28,7 @@ int main(int argc, char* argv[]) {
           return;
         }
         transform.header.frame_id = "map";
+        transform.header.stamp = ros::Time::now();
         tfBroadcaster.sendTransform(transform);
       });
 

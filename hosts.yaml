@@ -3,6 +3,7 @@ hosts:
     hostname: r2d2
     run_cmd:
       - /home/arc/catkin_ws/src/rocket_league/docker/docker-run.sh
+      - --privileged
       - --net=host
     exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch listener:=true name:=r2d2 --wait'
     roscore: false
@@ -10,6 +11,7 @@ hosts:
     hostname: c3po
     run_cmd:
       - /home/arc/catkin_ws/src/rocket_league/docker/docker-run.sh
+      - --privileged
       - --net=host
     exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch talker:=true name:=c3po'
     roscore: true
