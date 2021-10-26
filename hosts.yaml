@@ -1,15 +1,15 @@
 hosts:
-  - username: danielg
-    hostname: gerblick-ubuntu
+  - username: arc
+    hostname: r2d2
     run_cmd:
-      - /home/danielg/ros_docker/catkin_ws/src/rocket_league/docker/docker-run.sh
+      - /home/arc/catkin_ws/src/rocket_league/docker/docker-run.sh
       - --net=host
-    exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch talker:=true name:=gerblick_ubuntu --wait'
+    exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch listener:=true name:=r2d2 --wait'
     roscore: false
-  - username: core
-    hostname: citadel
+  - username: arc
+    hostname: c3po
     run_cmd:
-      - /var/home/core/catkin_ws/src/rocket_league/docker/docker-run.sh
+      - /home/arc/catkin_ws/src/rocket_league/docker/docker-run.sh
       - --net=host
-    exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch listener:=true name:=citadel'
+    exec_cmd: 'roslaunch rocket_league_launch talker_listener_test.launch talker:=true name:=c3po'
     roscore: true
