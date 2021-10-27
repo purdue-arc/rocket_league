@@ -1,9 +1,0 @@
-<launch>
-  <arg name="frame_id" default="map"/>
-
-  <node type="racersim_node" pkg="racersim" name="racersim_node" output="screen">
-    <param name="~frame_id" value="$(arg frame_id)"/>
-    <rosparam command="load" file="$(find rocket_league_highlevel)/YAML_files/high_level_info.yaml" />
-    <rosparam command="load" file="$(find racersim)/YAML_files/sim_info.yaml" />
-  </node>
-</launch>
