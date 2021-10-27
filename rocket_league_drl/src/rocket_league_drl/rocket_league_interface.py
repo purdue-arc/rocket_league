@@ -21,17 +21,24 @@ class RocketLeagueInterface(ROSInterface):
         rospy.init_node('rocket_league_autonomy')
 
         # Constants
-        self._CONST = rospy.get_param('~const', 7)
+        self._FIELD_WIDTH = rospy.get_param('~field/width', 10)
+        self._FIELD_HEIGHT = rospy.get_param('~field/height', 15)
+        self._MIN_TARGET_TIME = rospy.get_param('~target/time/min', 0.5)
+        self._MAX_TARGET_TIME = rospy.get_param('~target/time/max', 5.0)
+        self._MIN_TARGET_VEL = rospy.get_param('~target/velocity/min', 0.1)
+        self._MAX_TARGET_VEL = rospy.get_param('~target/velocity/max', 5.0)
+        self._MIN_TARGET_ANG_VEL = rospy.get_param('~target/angular_velocity/min', -pi)
+        self._MAX_TARGET_ANG_VEL = rospy.get_param('~target/angular_velocity/max', pi)
+
 
         # Publishers
         self._action_pub = rospy.Publisher('self/target', Target, queue_size=1)
         self._reset_srv = rospy.ServiceProxy('sim/reset', Empty)
 
         # State variables
-        self._pose = None
-        self._goal = None
+        self._self_odom = None
+        self._ball_odom = None
         self._score = None
-        self._alive = None
         self._prev_time = None
         self._prev_score = None
 
@@ -43,8 +50,9 @@ class RocketLeagueInterface(ROSInterface):
     def action_size(self):
         """The Space object corresponding to valid actions."""
         return Box(
-            low= np.array(0.5,  ),
-            high=np.array(5.0,  ),
+            # delta T, x, y, theta, v, omega
+            low =np.array(self._MIN_TARGET_TIME, -self._FIELD_WIDTH/2, -self._FIELD_HEIGHT/2, -pi, self._MIN_TARGET_VEL, -self._MIN_TARGET_ANG_VEL),
+            high=np.array(self._MAX_TARGET_TIME,  self._FIELD_WIDTH/2,  self._FIELD_HEIGHT/2,  pi, self._MAX_TARGET_VEL,  self._MAX_TARGET_ANG_VEL),
             dtype=np.float32)
 
     @property
