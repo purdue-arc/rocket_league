@@ -47,7 +47,6 @@ class SimulatorROS(object):
         rospy.init_node('simulator')
 
         ball_urdf_path = rospy.get_param('~BALL_URDF_PATH', None)
-        car_urdf_path = rospy.get_param('~CAR_URDF_PATH', None)
         if ball_urdf_path is None:
             rospy.signal_shutdown('no urdf path set for "ball"')
 
@@ -55,10 +54,15 @@ class SimulatorROS(object):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(ball_urdf_path))
 
+        car_urdf_path = rospy.get_param('~CAR_URDF_PATH', None)
+        goal_urdf_path = rospy.get_param('~GOAL_URDF_PATH', None)
+
         self.sim = simulator.Sim(
             # From sim_info.yaml
             ball_urdf_path,
             car_urdf_path,
+            goal_urdf_path,
+            [0, 0.0, 0.1],
             rospy.get_param('~RENDER_ENABLED', True)
         )
 
@@ -77,17 +81,16 @@ class SimulatorROS(object):
         # Publishers
         self.ball_pub = rospy.Publisher('ball/odom',
                                         Odometry, queue_size=1)
-        self.bot_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
+        self.car_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
         self.status_pub = rospy.Publisher(
             'match_status', MatchStatus, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('car0/velocity', Twist, self.command_cb)
+        rospy.Subscriber('effort/throttle', Float32, self.throttle_cb)
+        rospy.Subscriber('effort/steering', Float32, self.steering_cb)
         rospy.Subscriber('car0/path', Path, self.path_arr_cb)
         rospy.Subscriber('car0/lookahead_pnt',
                          PoseWithCovarianceStamped, self.lookahead_cb)
-        rospy.Subscriber('effort/throttle', Float32, self.throttle_cb)
-        rospy.Subscriber('effort/steering', Float32, self.steering_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -147,54 +150,54 @@ class SimulatorROS(object):
             # Iterate sim one step
             delta_t = (now - self.last_time).to_sec()
 
-            # if self.sim.world.winner is not None:
-            #     status = MatchStatus()
-            #     status.status = self.sim.world.winner
-            #     self.status_pub.publish(status)
-            #     self.sim.world.winner = None
-
-            if self.last_command != None:
-                linear_cmd, angular_cmd = self.last_command
-            else:
-                empty = Twist()
-                linear_cmd = empty.linear
-                angular_cmd = empty.angular
+            if self.sim.scored:
+                status = MatchStatus()
+                status.status = self.sim.touched_last
+                self.status_pub.publish(status)
 
             self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
 
             # Publish ball odometry
-            # ball_msg = Odometry()
-            # ball_msg.header.stamp = now
-            # ball_msg.header.frame_id = self.frame_id
-            # ball_point = self.sim.ball.getPoint()
-            # ball_msg.pose.pose.position.x = ball_point[0]
-            # ball_msg.pose.pose.position.y = ball_point[1]
-            # ball_quat = self.sim.ball.getQuaternion()
-            # ball_msg.pose.pose.orientation.z = ball_quat[2]
-            # ball_msg.pose.pose.orientation.w = ball_quat[3]
-            # ball_linear = self.sim.ball.body.linearVelocity
-            # ball_msg.twist.twist.linear.x = ball_linear[0]
-            # ball_msg.twist.twist.linear.y = ball_linear[1]
-            # ball_angular = self.sim.ball.body.angularVelocity
-            # ball_msg.twist.twist.angular.z = ball_angular
-            # self.ball_pub.publish(ball_msg)
+            ball_msg = Odometry()
+            ball_msg.header.stamp = now
+            ball_msg.header.frame_id = self.frame_id
+            ball_pos, ball_quat = self.sim.getBallPose()
+            ball_msg.pose.pose.position.x = ball_pos[0]
+            ball_msg.pose.pose.position.y = ball_pos[1]
+            ball_msg.pose.pose.position.z = ball_pos[2]
+            ball_msg.pose.pose.orientation.x = ball_quat[0]
+            ball_msg.pose.pose.orientation.y = ball_quat[1]
+            ball_msg.pose.pose.orientation.z = ball_quat[2]
+            ball_msg.pose.pose.orientation.w = ball_quat[3]
+            ball_linear, ball_angular = self.sim.getBallVelocity()
+            ball_msg.twist.twist.linear.x = ball_linear[0]
+            ball_msg.twist.twist.linear.y = ball_linear[1]
+            ball_msg.twist.twist.linear.z = ball_linear[2]
+            ball_msg.twist.twist.angular.x = ball_angular[0]
+            ball_msg.twist.twist.angular.y = ball_angular[1]
+            ball_msg.twist.twist.angular.z = ball_angular[2]
+            self.ball_pub.publish(ball_msg)
 
             # Publish bot odometry
-            # bot_msg = Odometry()
-            # bot_msg.header.stamp = now
-            # bot_msg.header.frame_id = self.frame_id
-            # bot_point = self.sim.car.getPoint()
-            # bot_msg.pose.pose.position.x = bot_point[0]
-            # bot_msg.pose.pose.position.y = bot_point[1]
-            # bot_quat = self.sim.car.getQuaternion()
-            # bot_msg.pose.pose.orientation.z = bot_quat[2]
-            # bot_msg.pose.pose.orientation.w = bot_quat[3]
-            # linear = self.sim.car.body.linearVelocity
-            # bot_msg.twist.twist.linear.x = linear[0]
-            # bot_msg.twist.twist.linear.y = linear[1]
-            # angular = self.sim.car.body.angularVelocity
-            # bot_msg.twist.twist.angular.z = angular
-            # self.bot_pub.publish(bot_msg)
+            car_msg = Odometry()
+            car_msg.header.stamp = now
+            car_msg.header.frame_id = self.frame_id
+            car_pos, car_quat = self.sim.getCarPose()
+            car_msg.pose.pose.position.x = car_pos[0]
+            car_msg.pose.pose.position.y = car_pos[1]
+            car_msg.pose.pose.position.z = car_pos[2]
+            car_msg.pose.pose.orientation.x = car_quat[0]
+            car_msg.pose.pose.orientation.y = car_quat[1]
+            car_msg.pose.pose.orientation.z = car_quat[2]
+            car_msg.pose.pose.orientation.w = car_quat[3]
+            car_linear, car_angular = self.sim.getCarVelocity()
+            car_msg.twist.twist.linear.x = car_linear[0]
+            car_msg.twist.twist.linear.y = car_linear[1]
+            car_msg.twist.twist.linear.z = car_linear[2]
+            car_msg.twist.twist.angular.x = car_angular[0]
+            car_msg.twist.twist.angular.y = car_angular[1]
+            car_msg.twist.twist.angular.z = car_angular[2]
+            self.car_pub.publish(car_msg)
 
             # Update the lookahead point
             # self.sim.lookahead = self.lookahead

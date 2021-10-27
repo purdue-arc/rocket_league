@@ -42,35 +42,78 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, ball_urdf_path, car_urdf_path, render_enabled):
+    def __init__(self, ball_urdf_path, car_urdf_path, goal_urdf_path, goal_pos, render_enabled):
         if render_enabled:
-            self.client = p.connect(p.GUI)
+            self._client = p.connect(p.GUI)
         else:
-            self.client = p.connect(p.DIRECT)
+            self._client = p.connect(p.DIRECT)
 
         p.setAdditionalSearchPath(p_data.getDataPath())
-        self.planeID = p.loadURDF("plane.urdf")
+        self._planeID = p.loadURDF("plane.urdf")
 
-        startPos = [0, 0, 1]
-        startOrientation = p.getQuaternionFromEuler([0, 0, 0])
-        self.ballID = p.loadURDF(ball_urdf_path, startPos, startOrientation)
+        self._ballInitPos = [0, 0, 1]
+        self._ballInitOrient = p.getQuaternionFromEuler([0, 0, 0])
+        self._ballID = p.loadURDF(
+            ball_urdf_path, self._ballInitPos, self._ballInitOrient)
 
-        self.cars = []
+        self._goalPos = goal_pos
+        self._goalOrient = p.getQuaternionFromEuler([0, 0, 0])
+        self._goalWidth = 5.
+        self._goalHeight = 2.5
+        self._goalID = p.loadURDF(
+            goal_urdf_path, self._goalPos, self._goalOrient, useFixedBase=1)
 
-        self.carID = p.loadURDF(
+        self._cars = {}
+        self._carID = p.loadURDF(
             car_urdf_path, [0, 0, 0], p.getQuaternionFromEuler([0, 0, 0]))
-        self.cars.append(Car(self.carID, 0.5, [0.1, 0, 0], [0, 0, 0]))
+        self._cars[self._carID] = Car(self._carID, 0.5, [0.1, 0, 0], [0, 0, 0])
+
+        self.touched_last = None
+        self.scored = False
+        self.running = True
 
         p.setGravity(0, 0, -10)
-        self.running = True
 
     def step(self, throttle_cmd, steering_cmd, dt):
         """Advance one time-step in the sim."""
         if self.running:
-            for car in self.cars:
+            contacts = p.getContactPoints(bodyA=self._ballID)
+            for contact in contacts:
+                if contact[2] in self._cars:
+                    self.touchedLast = contact[2]
+                elif contact[2] == self._goalID:
+                    self.scored = True
+                    self.running = False
+                    return
+
+            for car in self._cars.values():
                 car.step((throttle_cmd, steering_cmd), dt)
+
             p.stepSimulation()
 
+    def getCarPose(self):
+        # TODO: Provide translation from ARC IDs to Sim IDs
+        return list(self._cars.values())[0].getPose()
+
+    def getCarVelocity(self):
+        # TODO: Provide translation from ARC IDs to Sim IDs
+        return list(self._cars.values())[0].getVelocity()
+
+    def getBallPose(self):
+        return p.getBasePositionAndOrientation(self._ballID)
+
+    def getBallVelocity(self):
+        return p.getBaseVelocity(self._ballID)
+
     def reset(self):
-        """Reset simulator to original state."""
-        pass
+        self.running = False
+        self.scored = False
+        self.touched_last = None
+
+        p.resetBasePositionAndOrientation(
+            self._ballID, self._ballInitPos, self._ballInitOrient)
+
+        for car in self.cars:
+            car.reset()
+
+        self.running = True
