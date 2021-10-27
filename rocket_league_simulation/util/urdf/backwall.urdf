@@ -1,22 +1,22 @@
 <?xml version="1.0"?> 
-<robot name="goal">
+<robot name="backwall">
     <!-- Colors --> 
-    <material name="green"> 
-        <color rgba="0.0 0.9 0.0 0.5"/>
+    <material name="gray"> 
+        <color rgba="0.25 0.25 0.25 1"/>
     </material>
 
 
-    <!-- Base Frame of Goal --> 
+    <!-- Base Frame of Backwall --> 
     <link name="base_link">
         <visual> 
             <geometry> 
-                <box size="1. 0.15 0.1"/>
+                <box size="10. 0.25 0.25"/>
             </geometry>
-            <material name="green"/>
+            <material name="gray"/>
         </visual>
         <collision>
             <geometry>
-                <box size="1. 0.15 0.1"/>
+                <box size="10. 0.25 0.25"/>
             </geometry>
       </collision>
     </link> 

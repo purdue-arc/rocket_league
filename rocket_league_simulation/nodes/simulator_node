@@ -46,23 +46,33 @@ class SimulatorROS(object):
     def __init__(self):
         rospy.init_node('simulator')
 
-        ball_urdf_path = rospy.get_param('~BALL_URDF_PATH', None)
-        if ball_urdf_path is None:
+        # Loading URDF models
+        urdf_paths = {}
+        urdf_paths["ball"] = rospy.get_param('~BALL_URDF_PATH', None)
+        if urdf_paths["ball"] is None:
             rospy.signal_shutdown('no urdf path set for "ball"')
 
-        if not os.path.isfile(ball_urdf_path):
+        if not os.path.isfile(urdf_paths["ball"]):
             rospy.signal_shutdown(
-                'no urdf file exists at path {}'.format(ball_urdf_path))
+                'no urdf file exists at path {}'.format(urdf_paths["ball"]))
 
-        car_urdf_path = rospy.get_param('~CAR_URDF_PATH', None)
-        goal_urdf_path = rospy.get_param('~GOAL_URDF_PATH', None)
+        urdf_paths["car"] = rospy.get_param('~CAR_URDF_PATH', None)
+        urdf_paths["goal"] = rospy.get_param('~GOAL_URDF_PATH', None)
+        urdf_paths["sidewall"] = rospy.get_param('~SIDEWALL_URDF_PATH', None)
+        urdf_paths["backwall"] = rospy.get_param('~BACKWALL_URDF_PATH', None)
+
+        # Setting field configuration
+        field_setup = {}
+        field_setup["goal"] = [0., 7.40, 0.125]
+        field_setup["rightsidewall"] = [5., 0., 0.125]
+        field_setup["leftsidewall"] = [-5., 0., 0.125]
+        field_setup["frontbackwall"] = [0., 7.5, 0.125]
+        field_setup["backbackwall"] = [0., -7.5, 0.125]
 
         self.sim = simulator.Sim(
             # From sim_info.yaml
-            ball_urdf_path,
-            car_urdf_path,
-            goal_urdf_path,
-            [0, 0.0, 0.1],
+            urdf_paths,
+            field_setup,
             rospy.get_param('~RENDER_ENABLED', True)
         )
 
