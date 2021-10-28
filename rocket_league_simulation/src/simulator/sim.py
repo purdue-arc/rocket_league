@@ -4,7 +4,7 @@
 
 License:
   BSD 3-Clause License
-  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -38,7 +38,6 @@ import random
 # Local modules
 from simulator.car import Car
 
-
 class Sim(object):
     """Oversees components of the simulator"""
 
@@ -52,10 +51,8 @@ class Sim(object):
         self._planeID = p.loadURDF("plane.urdf")
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
-        self._ballInitPos = [0, 0, 1]
-        self._ballInitOrient = zeroOrient
         self._ballID = p.loadURDF(
-            urdf_paths["ball"], self._ballInitPos, self._ballInitOrient)
+            urdf_paths["ball"], field_setup["ball"], zeroOrient)
 
         self._goalID = p.loadURDF(
             urdf_paths["goal"], field_setup["goal"], zeroOrient, useFixedBase=1)
@@ -71,9 +68,9 @@ class Sim(object):
 
         self._cars = {}
         self._carID = p.loadURDF(
-            urdf_paths["car"], [0, 0, 0], zeroOrient))
+            urdf_paths["car"], field_setup["car"], zeroOrient)
         self._cars[self._carID]=Car(
-            self._carID, 0.5, [0., -0.25, 0], [0, 0, math.pi/2])
+            self._carID, 0.5, field_setup["car"], [0, 0, math.pi/2])
 
         self.touched_last=None
         self.scored=False

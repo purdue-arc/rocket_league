@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""3D simulation of ARC's rocket league environment.
+"""2D visualization of ARC's rocket league environment.
 
 License:
   BSD 3-Clause License
@@ -28,5 +28,4 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from simulator.sim import Sim
-from simulator.car import Car
+from visualizer.window import Window
