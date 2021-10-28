@@ -1,0 +1,13 @@
+# TF
+FRAME_ID: 'map'
+
+# Workspace
+RENDER_ENABLED: false
+
+# Bounding Boxes
+FIELD_WIDTH: 3.048 # m (10 ft)
+FIELD_LENGTH: 4.572 # m (15 ft)
+GOAL_WIDTH: 0.3048 # m (1 ft)
+BALL_RADIUS: 0.0254 # m (1 in)
+CAR_WIDTH: 0.0508 # m (2 in)
+CAR_LENGTH: 0.127 # m (5 in)

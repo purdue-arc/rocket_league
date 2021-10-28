@@ -1,11 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-    <!-- Image assets -->
-    <arg name="ball_img_path" default="$(find rocket_league_visualization)/media/ball.png" />
-    <arg name="car_img_path" default="$(find rocket_league_visualization)/media/car.png" />
+    <rosparam command="load" file="$(find rocket_league_launch)/yaml/rocket_league_params.yaml"/>
 
-    <node pkg="rocket_league_visualization" type="visualizer_node" name="visualizer_node" output="screen" required="true">
-        <param name="FIELD_WIDTH" value="$(arg FIELD_WIDTH)" />
+    <include file="$(find rocket_league_visualization)/launch/visualizer.launch" pass_all_args="true">
+    <param name="FIELD_WIDTH" value="$(arg FIELD_WIDTH)" />
         <param name="FIELD_LENGTH" value="$(arg FIELD_LENGTH)" />
         <param name="GOAL_WIDTH" value="$(arg GOAL_WIDTH)" />
         <param name="BALL_RADIUS" value="$(arg BALL_RADIUS)" />
@@ -13,5 +11,6 @@
         <param name="CAR_LENGTH" value="$(arg CAR_LENGTH)" />
         <param name="BALL_IMG_PATH" value="$(arg ball_img_path)" />
         <param name="CAR_IMG_PATH" value="$(arg car_img_path)" />
-    </node>
+    </include>
+    <include file="$(find rocket_league_simulation)/launch/simulator.launch" pass_all_args="true" />
 </launch>

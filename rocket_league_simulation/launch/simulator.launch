@@ -1,13 +1,26 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="ball_urdf_path" default="$(find rocket_league_simulation)/assets/urdf/ball.urdf" />
-    <arg name="car_urdf_path" default="$(find rocket_league_simulation)/assets/urdf/car.urdf" />
-    <arg name="goal_urdf_path" default="$(find rocket_league_simulation)/assets/urdf/goal.urdf" />
-    <arg name="sidewall_urdf_path" default="$(find rocket_league_simulation)/assets/urdf/sidewall.urdf" />
-    <arg name="backwall_urdf_path" default="$(find rocket_league_simulation)/assets/urdf/backwall.urdf" />
+    <!-- Workspace configuration -->
+    <arg name="RENDER_ENABLED" default="TRUE" />
 
+    <!-- Bounding box values -->
+    <arg name="FIELD_WIDTH" />
+    <arg name="FIELD_LENGTH" />
+
+    <!-- URDF paths -->
+    <arg name="ball_urdf_path" default="$(find rocket_league_simulation)/urdf/ball.urdf" />
+    <arg name="car_urdf_path" default="$(find rocket_league_simulation)/urdf/car.urdf" />
+    <arg name="goal_urdf_path" default="$(find rocket_league_simulation)/urdf/goal.urdf" />
+    <arg name="sidewall_urdf_path" default="$(find rocket_league_simulation)/urdf/sidewall.urdf" />
+    <arg name="backwall_urdf_path" default="$(find rocket_league_simulation)/urdf/backwall.urdf" />
+
+    <!-- Launch simulation node -->
     <node pkg="rocket_league_simulation" type="simulator_node" name="simulator_node" output="screen" required="true">
-        <rosparam command="load" file="$(find rocket_league_simulation)/assets/sim_info.yaml" />
+        <rosparam command="load" file="$(find rocket_league_simulation)/yaml/simulation.yaml" />
+        <param name="RENDER_ENABLED" value="$(arg RENDER_ENABLED") />
+        <param name="FIELD_WIDTH" value="$(arg FIELD_WIDTH)" />
+        <param name="FIELD_LENGTH" value="$(arg FIELD_LENGTH)" />
+
         <param name="BALL_URDF_PATH" value="$(arg ball_urdf_path)" />
         <param name="CAR_URDF_PATH" value="$(arg car_urdf_path)" />
         <param name="GOAL_URDF_PATH" value="$(arg goal_urdf_path)" />
