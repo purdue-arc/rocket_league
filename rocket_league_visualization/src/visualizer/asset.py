@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""3D simulation of ARC's rocket league environment.
+"""Contains the Asset class.
 
 License:
   BSD 3-Clause License
@@ -28,5 +28,17 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from simulator.sim import Sim
-from simulator.car import Car
+# 3rd Party Modules
+import pygame
+
+class Asset(object):
+    def __init__(self, img_path, width, height):
+        self.img = pygame.image.load(img_path)
+        self.img = pygame.transform.scale(self.img, (width, height))
+
+        self.width = width
+        self.height = height
+        self.pos = (0, 0)
+    
+    def setPos(self, x, y):
+        self.pos = (x, y)

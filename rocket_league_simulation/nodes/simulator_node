@@ -64,11 +64,13 @@ class SimulatorROS(object):
 
         # Setting field configuration
         field_setup = {}
-        field_setup["goal"] = [0., 7.40, 0.125]
-        field_setup["rightsidewall"] = [5., 0., 0.125]
-        field_setup["leftsidewall"] = [-5., 0., 0.125]
-        field_setup["frontbackwall"] = [0., 7.5, 0.125]
-        field_setup["backbackwall"] = [0., -7.5, 0.125]
+        field_setup["car"] = [5.0, 7.3, 0.125]
+        field_setup["ball"] = [5.0 , 7.75, 0.125]
+        field_setup["goal"] = [5.0, 14, 0.125]
+        field_setup["rightsidewall"] = [10., 7.5, 0.125]
+        field_setup["leftsidewall"] = [0., 7.5, 0.125]
+        field_setup["frontbackwall"] = [5., 15., 0.125]
+        field_setup["backbackwall"] = [5., 0., 0.125]
 
         self.sim = simulator.Sim(
             # From sim_info.yaml
