@@ -60,6 +60,7 @@ class SimulatorROS(object):
         urdf_paths["goal"] = rospy.get_param('~GOAL_URDF_PATH', None)
         urdf_paths["sidewall"] = rospy.get_param('~SIDEWALL_URDF_PATH', None)
         urdf_paths["backwall"] = rospy.get_param('~BACKWALL_URDF_PATH', None)
+        urdf_paths["floor"] = rospy.get_param('~FLOOR_URDF_PATH', None)
 
         # Setting field configuration
         field_setup = {}

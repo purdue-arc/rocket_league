@@ -5,6 +5,8 @@
     <arg name="goal_urdf_path" default="$(find rocket_league_simulation)/util/urdf/goal.urdf" />
     <arg name="sidewall_urdf_path" default="$(find rocket_league_simulation)/util/urdf/sidewall.urdf" />
     <arg name="backwall_urdf_path" default="$(find rocket_league_simulation)/util/urdf/backwall.urdf" />
+    <arg name="floor_urdf_path" default="$(find rocket_league_simulation)/util/urdf/plane.urdf" />
+
 
     <node pkg="rocket_league_simulation" type="simulator_node" name="simulator_node" output="screen" required="true">
         <rosparam command="load" file="$(find rocket_league_simulation)/util/sim_info.yaml" />
@@ -13,5 +15,6 @@
         <param name="GOAL_URDF_PATH" value="$(arg goal_urdf_path)" />
         <param name="SIDEWALL_URDF_PATH" value="$(arg sidewall_urdf_path)" />
         <param name="BACKWALL_URDF_PATH" value="$(arg backwall_urdf_path)" />
+        <param name="FLOOR_URDF_PATH" value="$(arg floor_urdf_path)" />
     </node>
 </launch>

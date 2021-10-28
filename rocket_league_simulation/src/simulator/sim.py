@@ -49,7 +49,7 @@ class Sim(object):
             self._client = p.connect(p.DIRECT)
 
         p.setAdditionalSearchPath(p_data.getDataPath())
-        self._planeID = p.loadURDF("plane.urdf")
+        self._planeID = p.loadURDF(urdf_paths["floor"])
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
         self._ballInitPos = [0, 0, 1]
@@ -71,7 +71,7 @@ class Sim(object):
 
         self._cars = {}
         self._carID = p.loadURDF(
-            urdf_paths["car"], [0, 0, 0], zeroOrient))
+            urdf_paths["car"], [0, 0, 0], zeroOrient)
         self._cars[self._carID]=Car(
             self._carID, 0.5, [0., -0.25, 0], [0, 0, math.pi/2])
 
