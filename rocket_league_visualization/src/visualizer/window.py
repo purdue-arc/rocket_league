@@ -34,7 +34,6 @@ import pygame
 # Local modules
 from visualizer.asset import Asset
 
-
 class Window(object):
     """Interfaces PyGame for rendering."""
 

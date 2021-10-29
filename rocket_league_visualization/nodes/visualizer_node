@@ -25,6 +25,9 @@ License:
   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+TODO:
+- Scale to support multiple cars
 """
 
 # 3rd party modules
@@ -47,10 +50,18 @@ class VisualizerROS(object):
     def __init__(self):
         rospy.init_node("visualizer")
 
-        self.window = visualizer.Window(15, 10)
+        # Collecting global parameters
+        field_width = rospy.get_param('FIELD_WIDTH')
+        field_length = rospy.get_param('FIELD_LENGTH')
 
-        # TODO: Auto-instatiate IDs by topics or YAML
-        # TODO: Collect sizes from single source
+        # Creating pygame render
+        self.window = visualizer.Window(field_width, field_length)
+
+        # Collecting private parameters
+        self.frame_id = rospy.get_param("~FRAME_ID", "field")
+        self.timeout = rospy.get_param("~TIMEOUT", 10)
+        rate = rospy.Rate(rospy.get_param("~RATE", 30))
+
         car_img_path = rospy.get_param("~CAR_IMG_PATH", None)
         if car_img_path is not None:
             self.car_id = 1
@@ -65,10 +76,6 @@ class VisualizerROS(object):
         self.last_command = None
         self.last_time = None
         self.path = None
-
-        self.frame_id = rospy.get_param("~frame_id", "map")
-        self.timeout = rospy.get_param("~TIMEOUT", 10)
-        rate = rospy.Rate(rospy.get_param("~RATE", 35))
 
         # Subscribers
         rospy.Subscriber ('ball/odom', Odometry, self.ball_odom_cb)

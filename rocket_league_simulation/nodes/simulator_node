@@ -24,6 +24,9 @@ License:
   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+TODO:
+- Scale to support multiple vehicles
 """
 
 # 3rd party modules
@@ -36,9 +39,7 @@ from threading import Lock
 
 # Local library
 import simulator
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
-from rocket_league_msgs.msg import Target, Path, PathError, Waypoint, MatchStatus
-
+from rocket_league_msgs.msg import MatchStatus
 
 class SimulatorROS(object):
     """ROS wrapper for the simulator."""
@@ -46,22 +47,9 @@ class SimulatorROS(object):
     def __init__(self):
         rospy.init_node('simulator')
 
-        # Setting general ROS parameters
-        self.frame_id = rospy.get_param('~FRAME_ID', 'map')
-        self.timeout = rospy.get_param('~TIMEOUT', 10)
-        rate = rospy.Rate(rospy.get_param('~RATE', 35))
-
-        # Loading URDF models
-        urdf_paths = {}
-        urdf_paths["ball"] = self.check_urdf(rospy.get_param('~BALL_URDF_PATH'))
-        urdf_paths["car"] = self.check_urdf(rospy.get_param('~CAR_URDF_PATH'))
-        urdf_paths["goal"] = self.check_urdf(rospy.get_param('~GOAL_URDF_PATH'))
-        urdf_paths["sidewall"] = self.check_urdf(rospy.get_param('~SIDEWALL_URDF_PATH'))
-        urdf_paths["backwall"] = self.check_urdf(rospy.get_param('~BACKWALL_URDF_PATH'))
-
-        # Setting field configuration
-        fw = rospy.get_param('~FIELD_WIDTH')
-        fl = rospy.get_param('~FIELD_LENGTH')
+        # Collecting global parameters
+        fw = rospy.get_param('FIELD_WIDTH')
+        fl = rospy.get_param('FIELD_LENGTH')
         field_setup = {}
         field_setup["car"] = [fw/2, fl/2, 0.125]
         field_setup["ball"] = [fw/2, (fl/2)+0.1, 0.125]
@@ -71,20 +59,32 @@ class SimulatorROS(object):
         field_setup["frontbackwall"] = [fw/2, fl, 0.125]
         field_setup["backbackwall"] = [fw/2, 0., 0.125]
 
-        self.sim = simulator.Sim(
-            # From sim_info.yaml
-            urdf_paths,
-            field_setup,
-            rospy.get_param('~RENDER_ENABLED', True)
-        )
+        # Collecting private parameters
+        render_enabled = rospy.get_param('~RENDER_ENABLED', False)
+        rate = rospy.Rate(rospy.get_param('~RATE', 30))
+        self.frame_id = rospy.get_param('~FRAME_ID', 'field')
+        self.timeout = rospy.get_param('~TIMEOUT', 10)
+
+        urdf_paths = {}
+        urdf_paths["ball"] = rospy.get_param('~BALL_URDF_PATH')
+        self.check_urdf(urdf_paths["ball"])
+        urdf_paths["car"] = rospy.get_param('~CAR_URDF_PATH')
+        self.check_urdf(urdf_paths["car"])
+        urdf_paths["goal"] = rospy.get_param('~GOAL_URDF_PATH')
+        self.check_urdf(urdf_paths["goal"])
+        urdf_paths["sidewall"] = rospy.get_param('~SIDEWALL_URDF_PATH')
+        self.check_urdf(urdf_paths["sidewall"])
+        urdf_paths["backwall"] = rospy.get_param('~BACKWALL_URDF_PATH')
+        self.check_urdf(urdf_paths["backwall"])
+
+        # Creating physics simulator
+        self.sim = simulator.Sim(urdf_paths, field_setup, render_enabled)
 
         self.lock = Lock()
-        self.last_command = None
-        self.last_time = None
-        self.path = None
-
         self.throttle_cmd = 0.
         self.steering_cmd = 0.
+        self.last_command = None
+        self.last_time = None
 
         # Publishers
         self.ball_pub = rospy.Publisher('ball/odom',
@@ -96,9 +96,6 @@ class SimulatorROS(object):
         # Subscribers
         rospy.Subscriber('effort/throttle', Float32, self.throttle_cb)
         rospy.Subscriber('effort/steering', Float32, self.steering_cb)
-        rospy.Subscriber('car0/path', Path, self.path_arr_cb)
-        rospy.Subscriber('car0/lookahead_pnt',
-                         PoseWithCovarianceStamped, self.lookahead_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -112,16 +109,13 @@ class SimulatorROS(object):
 
     def check_urdf(self, param):
         """Validates that URDF exists, then returns path."""
-        urdf = rospy.get_param(param, None)
-        if urdf is None:
+        if param is None:
             rospy.signal_shutdown('no urdf path set for "{}"'.format(param))
 
-        if not os.path.isfile(urdf):
+        if not os.path.isfile(param):
             rospy.signal_shutdown(
-                'no urdf file exists at path {}'.format(urdf))
-        return urdf
+                'no urdf file exists at path {}'.format(param))
         
-
     def throttle_cb(self, throttle_msg):
         self.throttle_cmd = throttle_msg.data
 
@@ -136,25 +130,6 @@ class SimulatorROS(object):
         self.last_time = None
         self.lock.release()
         return EmptyResponse()
-
-    def path_arr_cb(self, path_arr_msg):
-        """Callback for path array messages."""
-        self.path = path_arr_msg.waypoint
-        self.path_points = []
-
-        for point in self.path:
-            x = point.pose.position.x
-            y = point.pose.position.y
-            self.path_points.append([x, y])
-
-        if self.path_points is None:
-            self.path_points = [[0, 0]]
-
-    def lookahead_cb(self, pose_msg):
-        """Callback for lookahead_pnt messages."""
-        x = pose_msg.pose.pose.position.x
-        y = pose_msg.pose.pose.position.y
-        self.lookahead = [x, y]
 
     def command_cb(self, command_msg):
         """Callback for command messages."""
@@ -218,12 +193,6 @@ class SimulatorROS(object):
             car_msg.twist.twist.angular.y = car_angular[1]
             car_msg.twist.twist.angular.z = car_angular[2]
             self.car_pub.publish(car_msg)
-
-            # Update the lookahead point
-            # self.sim.lookahead = self.lookahead
-
-            # Update the path points
-            # self.sim.path_points = self.path_points
 
         self.last_time = now
         self.lock.release()
