@@ -5,7 +5,5 @@
     <include file="$(find local_planner)/launch/local_planner.launch"/>
 
     <include file="$(find rocket_league_simulation)/launch/simulator.launch">
-        <arg name="FIELD_WIDTH" />
-        <arg name="FIELD_LENGTH" />
     </include>
 </launch>

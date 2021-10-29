@@ -26,5 +26,6 @@
         <param name="GOAL_URDF_PATH" value="$(arg goal_urdf_path)" />
         <param name="SIDEWALL_URDF_PATH" value="$(arg sidewall_urdf_path)" />
         <param name="BACKWALL_URDF_PATH" value="$(arg backwall_urdf_path)" />
+        <param name="FLOOR_URDF_PATH" value="$(arg floor_urdf_path)" />
     </node>
 </launch>
