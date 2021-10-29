@@ -32,12 +32,12 @@ License:
 import pygame
 
 class Asset(object):
-    def __init__(self, img_path, width, height):
+    def __init__(self, img_path, width, length):
         self.img = pygame.image.load(img_path)
-        self.img = pygame.transform.scale(self.img, (width, height))
+        self.img = pygame.transform.scale(self.img, (width, length))
 
         self.width = width
-        self.height = height
+        self.length = length
         self.pos = (0, 0)
     
     def setPos(self, x, y):
