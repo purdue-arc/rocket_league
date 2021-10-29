@@ -51,6 +51,7 @@ class VisualizerROS(object):
         rospy.init_node("visualizer")
 
         # Collecting global parameters
+        render_enabled = rospy.get_param("RENDER_ENABLED")
         field_width = rospy.get_param("FIELD_WIDTH")
         field_length = rospy.get_param("FIELD_LENGTH")
         goal_width = rospy.get_param("GOAL_WIDTH")

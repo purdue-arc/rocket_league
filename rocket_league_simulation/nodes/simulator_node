@@ -27,6 +27,7 @@ License:
 
 TODO:
 - Scale to support multiple vehicles
+- Add offset for walls
 """
 
 # 3rd party modules
@@ -50,14 +51,20 @@ class SimulatorROS(object):
         # Collecting global parameters
         fw = rospy.get_param('FIELD_WIDTH')
         fl = rospy.get_param('FIELD_LENGTH')
+        gw = rospy.get_param('GOAL_WIDTH')
         field_setup = {}
         field_setup["car"] = [fw/2, fl/2, 0.125]
         field_setup["ball"] = [fw/2, (fl/2)+0.1, 0.125]
-        field_setup["goal"] = [fw/2, fl-0.1, 0.125]
+        field_setup["goalA"] = [fw/2, fl, 0.125]
+        field_setup["goalB"] = [fw/2, 0, 0.125]
         field_setup["rightsidewall"] = [fw, fl/2, 0.125]
         field_setup["leftsidewall"] = [0., fl/2, 0.125]
-        field_setup["frontbackwall"] = [fw/2, fl, 0.125]
-        field_setup["backbackwall"] = [fw/2, 0., 0.125]
+
+        bww = (fw-gw)/2
+        field_setup["flbackwall"] = [bww/2, fl, 0.125]
+        field_setup["frbackwall"] = [fw-(bww/2), fl, 0.125]
+        field_setup["blbackwall"] = [bww/2, 0, 0.125]
+        field_setup["brbackwall"] = [fw-(bww/2), 0., 0.125]
 
         # Collecting private parameters
         render_enabled = rospy.get_param('~RENDER_ENABLED', False)
@@ -147,7 +154,7 @@ class SimulatorROS(object):
 
             if self.sim.scored:
                 status = MatchStatus()
-                status.status = self.sim.touched_last
+                status.status = self.sim.winner + " scored!"
                 self.status_pub.publish(status)
 
             self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)

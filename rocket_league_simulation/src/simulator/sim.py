@@ -38,6 +38,7 @@ import random
 # Local modules
 from simulator.car import Car
 
+
 class Sim(object):
     """Oversees components of the simulator"""
 
@@ -51,43 +52,84 @@ class Sim(object):
         self._planeID = p.loadURDF("plane.urdf")
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
-        self._ballID = p.loadURDF(
-            urdf_paths["ball"], field_setup["ball"], zeroOrient)
+        self._ballID = p.loadURDF(urdf_paths["ball"], field_setup["ball"], zeroOrient)
 
-        self._goalID = p.loadURDF(
-            urdf_paths["goal"], field_setup["goal"], zeroOrient, useFixedBase=1)
+        self._goalAID = p.loadURDF(
+            urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
+        )
+
+        self._goalBID = p.loadURDF(
+            urdf_paths["goal"], field_setup["goalB"], zeroOrient, useFixedBase=1
+        )
 
         p.loadURDF(
-            urdf_paths["sidewall"], field_setup["leftsidewall"], zeroOrient, useFixedBase=1)
+            urdf_paths["sidewall"],
+            field_setup["leftsidewall"],
+            zeroOrient,
+            useFixedBase=1,
+        )
         p.loadURDF(
-            urdf_paths["sidewall"], field_setup["rightsidewall"], zeroOrient, useFixedBase=1)
+            urdf_paths["sidewall"],
+            field_setup["rightsidewall"],
+            zeroOrient,
+            useFixedBase=1,
+        )
+
+        # TODO: Improve handling of split walls
         p.loadURDF(
-            urdf_paths["backwall"], field_setup["frontbackwall"], zeroOrient, useFixedBase=1)
+            urdf_paths["backwall"],
+            field_setup["flbackwall"],
+            zeroOrient,
+            useFixedBase=1,
+        )
         p.loadURDF(
-            urdf_paths["backwall"], field_setup["backbackwall"], zeroOrient, useFixedBase=1)
+            urdf_paths["backwall"],
+            field_setup["frbackwall"],
+            zeroOrient,
+            useFixedBase=1,
+        )
+        p.loadURDF(
+            urdf_paths["backwall"],
+            field_setup["blbackwall"],
+            zeroOrient,
+            useFixedBase=1,
+        )
+        p.loadURDF(
+            urdf_paths["backwall"],
+            field_setup["brbackwall"],
+            zeroOrient,
+            useFixedBase=1,
+        )
 
         self._cars = {}
-        self._carID = p.loadURDF(
-            urdf_paths["car"], field_setup["car"], zeroOrient)
-        self._cars[self._carID]=Car(
-            self._carID, 0.5, field_setup["car"], [0, 0, math.pi/2])
+        self._carID = p.loadURDF(urdf_paths["car"], field_setup["car"], zeroOrient)
+        self._cars[self._carID] = Car(
+            self._carID, 0.5, field_setup["car"], [0, 0, math.pi / 2]
+        )
 
-        self.touched_last=None
-        self.scored=False
-        self.running=True
+        self.touched_last = None
+        self.scored = False
+        self.running = True
+        self.winner = None
 
         p.setGravity(0, 0, -10)
 
     def step(self, throttle_cmd, steering_cmd, dt):
         """Advance one time-step in the sim."""
         if self.running:
-            contacts=p.getContactPoints(bodyA = self._ballID)
+            contacts = p.getContactPoints(bodyA=self._ballID)
             for contact in contacts:
                 if contact[2] in self._cars:
-                    self.touchedLast=contact[2]
-                elif contact[2] == self._goalID:
-                    self.scored=True
-                    self.running=False
+                    self.touchedLast = contact[2]
+                elif contact[2] == self._goalAID:
+                    self.scored = True
+                    self.running = False
+                    self.winner = "A"
+                    return
+                elif contact[2] == self._goalBID:
+                    self.scored = True
+                    self.running = False
+                    self.winner = "B"
                     return
 
             for car in self._cars.values():
@@ -110,14 +152,16 @@ class Sim(object):
         return p.getBaseVelocity(self._ballID)
 
     def reset(self):
-        self.running=False
-        self.scored=False
-        self.touched_last=None
+        self.running = False
+        self.scored = False
+        self.winner = None
+        self.touched_last = None
 
         p.resetBasePositionAndOrientation(
-            self._ballID, self._ballInitPos, self._ballInitOrient)
+            self._ballID, self._ballInitPos, self._ballInitOrient
+        )
 
         for car in self.cars:
             car.reset()
 
-        self.running=True
+        self.running = True

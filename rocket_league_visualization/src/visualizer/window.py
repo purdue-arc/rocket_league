@@ -46,22 +46,22 @@ class Window(object):
 
         pass
 
-    def __init__(self, map_width, map_height):
+    def __init__(self, map_width, map_length):
         # Support for 1080p monitors
-        self.scaling = 1080 * 0.7 / map_height
+        self.scaling = 1080 * 0.7 / map_length
 
-        self.window_height = int(map_height * self.scaling)
+        self.window_length = int(map_length * self.scaling)
         self.window_width = int(map_width * self.scaling)
 
         self.assets = {}
 
         pygame.display.init()
-        self._screen = pygame.display.set_mode((self.window_width, self.window_height))
+        self._screen = pygame.display.set_mode((self.window_width, self.window_length))
 
-    def createAsset(self, id, img_path, width, height, initPos=None):
+    def createAsset(self, id, img_path, width, length, initPos=None):
         width = int(width * self.scaling)
-        height = int(height * self.scaling)
-        self.assets[id] = Asset(img_path, width, height)
+        length = int(length * self.scaling)
+        self.assets[id] = Asset(img_path, width, length)
         if initPos is not None:
             self.updateAssetPos(id, initPos[0], initPos[1])
 
