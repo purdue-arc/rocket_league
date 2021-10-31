@@ -30,11 +30,14 @@ License:
 """
 
 import rospy
-from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
+from diagnostic_msgs.msg import DiagnosticStatus
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
+import matplotlib
+matplotlib.use('PS')
 import matplotlib.pyplot as plt
 from numpy import append
+from os.path import expanduser
 
 class Plotter(object):
     """Log model weights during training."""
@@ -42,15 +45,15 @@ class Plotter(object):
         rospy.init_node('model_progress_plotter')
 
         # Constants
-        self.LOG_DIR = rospy.get_param('~log_dir')
-        self.PLOT_FREQ = rospy.get_param('~plot_freq', 25)
-        self.BASIC_VARS = rospy.get_param('~variables/basic', ["epsilon", "steps"])
-        self.ADVANCED_VARS = rospy.get_param('~variables/advanced', ["net_reward"])
+        self.LOG_DIR = expanduser(rospy.get_param('~log_dir'))
+        self.PLOT_FREQ = rospy.get_param('~log/freq', 25)
+        self.BASIC_VARS = rospy.get_param('~log/basic', ["duration"])
+        self.ADVANCED_VARS = rospy.get_param('~log/advanced', ["net_reward"])
 
         self.KEYS = ["episode"] + self.BASIC_VARS + self.ADVANCED_VARS
         
         # Subscribers
-        rospy.Subscriber('training_stats', DiagnosticStatus, self.progress_cb)
+        rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
 
         self.history = None
         self.next_plot_episode = self.PLOT_FREQ
@@ -67,7 +70,7 @@ class Plotter(object):
         self.host = host_subplot(111, axes_class=AA.Axes)
 
         plt.title("Training Log")
-        self.host.set_xlabel("Distance")     
+        self.host.set_xlabel("Episode")     
         self.host.set_ylabel(labels[0])
 
         self.axes = {labels[0]:self.host}

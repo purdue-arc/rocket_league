@@ -22,3 +22,11 @@ max_episode_time: 30.0
 control:
   max_linear_velocity: 3.0
   max_angular_velocity: 3.0
+
+log:
+  freq: 25
+  basic:
+    - duration
+  advanced:
+    - score
+    - net_reward

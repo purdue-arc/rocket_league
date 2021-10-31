@@ -36,7 +36,7 @@ from gym import Env
 
 import rospy
 from rosgraph_msgs.msg import Clock
-
+from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
 class SimTimeException(Exception):
     """For when advancing sim time does not go as planned."""
@@ -72,6 +72,7 @@ class ROSInterface(Env):
         rospy.init_node(self._node_name)
         self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
         self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1)
+        self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
 
         self.__time = rospy.Time.from_sec(time.time())
         self.__clock_pub.publish(self.__time)
@@ -140,6 +141,15 @@ class ROSInterface(Env):
             raise rospy.ROSInterruptException()
         else:
             return has_state
+
+    def _log_data(self, data):
+        """Log data to ROS logging topic. data input is a dictionary"""
+        msg = DiagnosticStatus()
+        msg.level = DiagnosticStatus.OK
+        msg.name = self._node_name
+        msg.message = "logged data"
+        msg.values = [KeyValue(key=key, value=str(value)) for key, value in data.items()]
+        self.__log_pub.publish(msg)
 
     # All the below abstract methods / properties must be implemented by subclasses
     @property

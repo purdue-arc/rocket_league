@@ -53,6 +53,8 @@ class SnakeInterface(ROSInterface):
         self._prev_time = None
         self._prev_score = None
         self._start_time = None
+        self._total_reward = 0
+        self._episode = None
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
@@ -80,10 +82,23 @@ class SnakeInterface(ROSInterface):
 
     def _reset_self(self):
         """Reset internally for a new episode."""
+        # log useful data
+        if self._episode is None:
+            self._episode = 0
+        else:
+            self._log_data({
+                "episode" : self._episode,
+                "score" : self._score,
+                "duration" : (self._prev_time - self._start_time).to_sec(),
+                "net_reward" : self._total_reward})
+            self._episode += 1
+
+        # reset
         self._clear_state()
         self._prev_time = None
         self._prev_score = None
         self._start_time = None
+        self._total_reward = 0
 
     def _has_state(self):
         """Determine if the new state is ready."""
@@ -134,6 +149,8 @@ class SnakeInterface(ROSInterface):
 
         if (time - self._start_time).to_sec() >= self._MAX_TIME:
                 done = True
+
+        self._total_reward += reward
 
         return (observation, reward, done, {})
 
