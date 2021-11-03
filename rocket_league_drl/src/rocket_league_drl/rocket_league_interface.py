@@ -14,7 +14,7 @@ from gym.spaces import Box
 # System
 import numpy as np
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
-from math import pi, pow, sqrt, sin, cos
+from math import pi
 
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
@@ -117,6 +117,7 @@ class RocketLeagueInterface(ROSInterface):
         car = np.asarray(self._car_odom, dtype=np.float32)
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
+        assert self.observation_space.contains(observation)
 
         # Determine reward
         reward = 0
@@ -142,7 +143,7 @@ class RocketLeagueInterface(ROSInterface):
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
-        # @TODO bounds checking?
+        assert self.action_size.contains(action)
 
         delta_t, x, y, theta, v, omega = np.split(action, action.size)
         qx, qy, qz, qw = quaternion_from_euler(0, 0, theta)
@@ -172,12 +173,9 @@ class RocketLeagueInterface(ROSInterface):
             odom_msg.pose.pose.orientation.y,
             odom_msg.pose.pose.orientation.z,
             odom_msg.pose.pose.orientation.w))
-        vx = odom_msg.twist.twist.linear.x
-        vy = odom_msg.twist.twist.linear.y
-        v = sqrt(pow(vx, 2) + pow(vy, 2))
+        v = odom_msg.twist.twist.linear.x
         omega = odom_msg.twist.twist.angular.z
 
-        # @TODO bounds checking?
         self._car_odom = (
             x, y, yaw,
             v, omega)
@@ -192,7 +190,6 @@ class RocketLeagueInterface(ROSInterface):
         vx = odom_msg.twist.twist.linear.x
         vy = odom_msg.twist.twist.linear.y
 
-        # @TODO bounds checking?
         self._ball_odom = (
             x, y, vx, vy)
 
