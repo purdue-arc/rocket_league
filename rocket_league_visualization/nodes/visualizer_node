@@ -70,7 +70,8 @@ class VisualizerROS(object):
         car_img_path = rospy.get_param("~CAR_IMG_PATH", None)
         if car_img_path is not None:
             self.car_id = 1
-            self.window.createAsset(self.car_id, car_img_path, car_width, car_length)
+            self.window.createAsset(
+                self.car_id, car_img_path, car_width, car_length)
 
         ball_img_path = rospy.get_param("~BALL_IMG_PATH", None)
         if ball_img_path is not None:

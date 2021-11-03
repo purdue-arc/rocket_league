@@ -34,6 +34,7 @@ import pygame
 # Local modules
 from visualizer.asset import Asset
 
+
 class Window(object):
     """Interfaces PyGame for rendering."""
 
@@ -56,7 +57,8 @@ class Window(object):
         self.assets = {}
 
         pygame.display.init()
-        self._screen = pygame.display.set_mode((self.window_width, self.window_length))
+        self._screen = pygame.display.set_mode(
+            (self.window_width, self.window_length))
 
     def createAsset(self, id, img_path, width, length, initPos=None):
         width = int(width * self.scaling)

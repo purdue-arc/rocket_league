@@ -42,6 +42,7 @@ from threading import Lock
 import simulator
 from rocket_league_msgs.msg import MatchStatus
 
+
 class SimulatorROS(object):
     """ROS wrapper for the simulator."""
 
@@ -122,7 +123,7 @@ class SimulatorROS(object):
         if not os.path.isfile(param):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
-        
+
     def throttle_cb(self, throttle_msg):
         self.throttle_cmd = throttle_msg.data
 

@@ -31,6 +31,7 @@ License:
 # 3rd Party Modules
 import pygame
 
+
 class Asset(object):
     def __init__(self, img_path, width, length):
         self.img = pygame.image.load(img_path)
@@ -39,6 +40,6 @@ class Asset(object):
         self.width = width
         self.length = length
         self.pos = (0, 0)
-    
+
     def setPos(self, x, y):
         self.pos = (x, y)
