@@ -13,8 +13,8 @@ from gym.spaces import Box
 
 # System
 import numpy as np
-from tf.transformations import euler_from_quaternion
-from math import exp, pi, pow, sqrt
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from math import pi, pow, sqrt, sin, cos
 
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
@@ -34,7 +34,7 @@ class RocketLeagueInterface(ROSInterface):
         self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
 
         # Publishers
-        self._action_pub = rospy.Publisher('self/target', Target, queue_size=1)
+        self._target_pub = rospy.Publisher('self/target', Target, queue_size=1)
         self._reset_srv = rospy.ServiceProxy('sim/reset', Empty)
 
         # State variables
@@ -66,7 +66,6 @@ class RocketLeagueInterface(ROSInterface):
     @property
     def observation_space(self):
         """The Space object corresponding to valid observations."""
-        locations = 2*(1+self._NUM_SEGMENTS)
         return Box(
             # x, y, theta, v, omega (car)
             # x, y, vx, vy (ball)
@@ -143,16 +142,26 @@ class RocketLeagueInterface(ROSInterface):
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
-        assert action >= 0 and action < SnakeActions.SIZE
+        # @TODO bounds checking?
 
-        action_msg = Twist()
-        action_msg.linear.x = self._LINEAR_VELOCITY
-        if action == SnakeActions.LEFT:
-            action_msg.angular.z = self._ANGULAR_VELOCITY
-        if action == SnakeActions.RIGHT:
-            action_msg.angular.z = -self._ANGULAR_VELOCITY
+        delta_t, x, y, theta, v, omega = np.split(action, action.size)
+        qx, qy, qz, qw = quaternion_from_euler(0, 0, theta)
 
-        self._action_pub.publish(action_msg)
+        target_msg = Target()
+        target_msg.header.stamp = rospy.Time.now()
+        target_msg.header.frame_id = 'odom'         # @TODO param
+        target_msg.child_frame_id = 'base_link'     # @TODO param
+        target_msg.delta_t = delta_t
+        target_msg.pose.position.x = x
+        target_msg.pose.position.y = y
+        target_msg.pose.orientation.x = qx
+        target_msg.pose.orientation.y = qy
+        target_msg.pose.orientation.z = qz
+        target_msg.pose.orientation.w = qw
+        target_msg.twist.linear.x = v
+        target_msg.twist.angular.z = omega
+
+        self._target_pub.publish(target_msg)
 
     def _car_odom_cb(self, odom_msg):
         """Callback for odometry of car."""
