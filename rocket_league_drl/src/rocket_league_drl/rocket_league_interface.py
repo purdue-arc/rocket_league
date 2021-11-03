@@ -44,7 +44,7 @@ class RocketLeagueInterface(ROSInterface):
         self._prev_score = None
         self._start_time = None
         self._total_reward = 0
-        self._episode = None
+        self._episode = 0
 
         # Subscribers
         rospy.Subscriber('self/odom', Odometry, self._car_odom_cb)
@@ -89,9 +89,7 @@ class RocketLeagueInterface(ROSInterface):
     def _reset_self(self):
         """Reset internally for a new episode."""
         # log data
-        if self._episode is None:
-            self._episode = 0
-        else:
+        if self._has_state():
             self._log_data({
                 "episode" : self._episode,
                 "score" : self._score,
@@ -136,16 +134,19 @@ class RocketLeagueInterface(ROSInterface):
         reward = 0
 
         time = rospy.Time.now()
-        # @TODO reward
-        # if self._prev_time is not None:
-        #     dist = np.sqrt(np.sum(np.square(pose[1:3] - goal)))
-        #     dist_reward_rate = self._BASE_REWARD * exp(-1.0 * self._EXP_REWARD * dist)
-        #     reward += (time - self._prev_time).to_sec() * dist_reward_rate
+        if self._prev_time is not None:
+            pass
+            # reward += (time - self._prev_time).to_sec() * self._CONSTANT_REWARD
+            # dist_sq = np.sum(np.square(pose[1:3] - goal))
+            # norm_dist = dist_sq / (self._FIELD_SIZE ** 2)
+            # reward += (time - self._prev_time).to_sec() * self._DISTANCE_REWARD * norm_dist
         self._prev_time = time
 
         if self._prev_score is not None:
             reward += self._GOAL_REWARD * (self._score - self._prev_score)
         self._prev_score = self._score
+
+        self._total_reward += reward
 
         # check if time exceeded
         if self._start_time is None:
