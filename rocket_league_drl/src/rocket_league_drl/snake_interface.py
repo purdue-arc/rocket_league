@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # package
 from rocket_league_drl import ROSInterface
 from gym.spaces import Discrete, Box

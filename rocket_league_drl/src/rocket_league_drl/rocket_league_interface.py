@@ -1,5 +1,6 @@
 # package
 from rocket_league_drl import ROSInterface
+from gym.spaces import Box
 
 # ROS
 import rospy
@@ -8,9 +9,6 @@ from std_msgs.msg import Int32
 from rocket_league_msgs.msg import Target
 from std_srv.srv import Empty
 
-# Gym
-from gym.spaces import Box
-
 # System
 import numpy as np
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
@@ -18,8 +16,9 @@ from math import pi
 
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
+    _node_name = "rocket_league_autonomy"
     def __init__(self):
-        rospy.init_node('rocket_league_autonomy')
+        super().__init__()
 
         # Constants
         self._FIELD_WIDTH = rospy.get_param('~field/width', 10)
@@ -44,6 +43,8 @@ class RocketLeagueInterface(ROSInterface):
         self._prev_time = None
         self._prev_score = None
         self._start_time = None
+        self._total_reward = 0
+        self._episode = None
 
         # Subscribers
         rospy.Subscriber('self/odom', Odometry, self._car_odom_cb)
@@ -51,7 +52,7 @@ class RocketLeagueInterface(ROSInterface):
         rospy.Subscriber('game/score', Int32, self._score_cb)
 
     @property
-    def action_size(self):
+    def action_space(self):
         """The Space object corresponding to valid actions."""
         return Box(
             # delta T, x, y, theta, v, omega
@@ -87,12 +88,24 @@ class RocketLeagueInterface(ROSInterface):
 
     def _reset_self(self):
         """Reset internally for a new episode."""
-        self.clear_state()
+        # log data
+        if self._episode is None:
+            self._episode = 0
+        else:
+            self._log_data({
+                "episode" : self._episode,
+                "score" : self._score,
+                "duration" : (self._prev_time - self._start_time).to_sec(),
+                "net_reward" : self._total_reward})
+            self._episode += 1
+
+        # reset
+        self._clear_state()
         self._prev_time = None
         self._prev_score = None
         self._start_time = None
-
-        #@TODO log data
+        self._start_time = None
+        self._total_reward = 0
 
     def _has_state(self):
         """Determine if the new state is ready."""
@@ -111,7 +124,7 @@ class RocketLeagueInterface(ROSInterface):
 
     def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
-        assert self.has_state()
+        assert self._has_state()
 
         # combine car / ball odomes for observation
         car = np.asarray(self._car_odom, dtype=np.float32)
@@ -143,7 +156,7 @@ class RocketLeagueInterface(ROSInterface):
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
-        assert self.action_size.contains(action)
+        assert self.action_space.contains(action)
 
         delta_t, x, y, theta, v, omega = np.split(action, action.size)
         qx, qy, qz, qw = quaternion_from_euler(0, 0, theta)
