@@ -71,7 +71,11 @@ class Car(object):
         # Compute motion using bicycle model
         pos, orient = p.getBasePositionAndOrientation(self.id)
         heading = p.getEulerFromQuaternion(orient)[2]
-        self._steering_angle += steering*dt
+
+        steering_dt = steering * dt
+        if abs(self._steering_angle + steering_dt) < self._steering_limit:
+            self._steering_angle += steering*dt
+
         beta = math.atan(
             (self._length_r) * math.tan(self._steering_angle) / self._length)
         x_vel = throttle * math.cos(heading + beta)
