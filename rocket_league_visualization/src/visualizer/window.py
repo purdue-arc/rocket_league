@@ -44,7 +44,6 @@ class Window(object):
 
     class ShutdownError(Exception):
         """Exception for when pygame is shut down"""
-
         pass
 
     def __init__(self, map_width, map_length):

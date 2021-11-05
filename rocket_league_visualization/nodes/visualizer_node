@@ -118,16 +118,16 @@ class VisualizerROS(object):
         for point in self.path:
             x = point.pose.position.x
             y = point.pose.position.y
-            self.path_points.append([x, y])
+            self.path_points.append((x, y))
 
         if self.path_points is None:
-            self.path_points = [[0, 0]]
+            self.path_points = [(0, 0)]
 
     def lookahead_cb(self, pose_msg):
         """Callback for lookahead_pnt messages."""
         x = pose_msg.pose.pose.position.x
         y = pose_msg.pose.pose.position.y
-        self.lookahead = [x, y]
+        self.lookahead = (x, y)
 
     def loop_once(self):
         """Main loop."""

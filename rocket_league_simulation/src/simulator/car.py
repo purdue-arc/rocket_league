@@ -37,8 +37,10 @@ import numpy as np
 class Car(object):
     def __init__(self, carID, length, pos, orient):
         self.id = carID
-        self._steering_angle = 0
+        self._steering_angle = 0.
+        self._steering_limit = math.pi / 2.
         self._length = length
+        self._length_r = self._length/2.
 
         # Init settings
         self._initPos = pos
@@ -67,16 +69,18 @@ class Car(object):
         self._throttle_state += throttle_dt * dt
 
         # Compute motion using bicycle model
-        self._steering_angle += steering*dt
         pos, orient = p.getBasePositionAndOrientation(self.id)
         heading = p.getEulerFromQuaternion(orient)[2]
-        x_vel = throttle * math.cos(heading + steering/2)
-        y_vel = throttle * math.sin(heading + steering/2)
-        w = (throttle * math.tan(heading + steering) *
-             math.cos(heading + steering/2))/self._length
+        self._steering_angle += steering*dt
+        beta = math.atan(
+            (self._length_r) * math.tan(self._steering_angle) / self._length)
+        x_vel = throttle * math.cos(heading + beta)
+        y_vel = throttle * math.sin(heading + beta)
+        w = throttle * math.tan(self._steering_angle) * \
+            math.cos(beta) / self._length
 
         pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
-        orientation = p.getQuaternionFromEuler([0, 0, heading + w * dt])
+        orientation = p.getQuaternionFromEuler([0., 0., heading + w * dt])
 
         p.changeConstraint(self._car_handle, pos, orientation)
 

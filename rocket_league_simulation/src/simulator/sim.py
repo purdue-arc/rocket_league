@@ -125,14 +125,10 @@ class Sim(object):
                     self.touchedLast = contact[2]
                 elif contact[2] == self._goalAID:
                     self.scored = True
-                    self.running = False
                     self.winner = "A"
-                    return
                 elif contact[2] == self._goalBID:
                     self.scored = True
-                    self.running = False
                     self.winner = "B"
-                    return
 
             for car in self._cars.values():
                 car.step((throttle_cmd, steering_cmd), dt)
@@ -148,7 +144,8 @@ class Sim(object):
         return list(self._cars.values())[0].getVelocity()
 
     def getBallPose(self):
-        return p.getBasePositionAndOrientation(self._ballID)
+        pos, _ = p.getBasePositionAndOrientation(self._ballID)
+        return pos, p.getQuaternionFromEuler([0, 0, 0])
 
     def getBallVelocity(self):
         return p.getBaseVelocity(self._ballID)
