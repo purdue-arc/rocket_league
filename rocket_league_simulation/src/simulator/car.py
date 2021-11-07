@@ -83,10 +83,10 @@ class Car(object):
         w = throttle * math.tan(self._steering_angle) * \
             math.cos(beta) / self._length
 
-        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
+        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, -0.125)
         orientation = p.getQuaternionFromEuler([0., 0., heading + w * dt])
 
-        p.changeConstraint(self._car_handle, pos, orientation)
+        p.changeConstraint(self._car_handle, pos, orientation, maxForce = 50)
 
     def getPose(self):
         return p.getBasePositionAndOrientation(self.id)
