@@ -140,10 +140,10 @@ class RocketLeagueInterface(ROSInterface):
         # Determine reward
         reward = self._CONSTANT_REWARD
 
-        ball_dist_sq = np.sum(np.square(car[1:3] - ball[1:3]))
+        ball_dist_sq = np.sum(np.square(ball[1:3] - car[1:3]))
         reward += self._BALL_DISTANCE_REWARD * ball_dist_sq
 
-        goal_dist_sq = np.sum(np.square(car[1:3] - np.array([self._FIELD_HEIGHT, 0])))
+        goal_dist_sq = np.sum(np.square(ball[1:3] - np.array([self._FIELD_HEIGHT, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
 
         if self._won:
