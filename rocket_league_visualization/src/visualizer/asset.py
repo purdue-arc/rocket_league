@@ -42,4 +42,4 @@ class Asset(object):
         self.pos = (0, 0)
 
     def setPos(self, x, y):
-        self.pos = (x, y)
+        self.pos = (x - self.width / 2, y - self.length / 2)

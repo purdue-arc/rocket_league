@@ -57,7 +57,7 @@ class VisualizerROS(object):
         goal_width = rospy.get_param("GOAL_WIDTH")
         ball_radius = rospy.get_param("BALL_RADIUS")
         car_width = rospy.get_param("CAR_WIDTH")
-        car_length = rospy.get_param("CAR_LENGTH")
+        car_length = rospy.get_param("CAR_LENGTH")        
 
         # Creating pygame render
         self.window = visualizer.Window(field_width, field_length)
@@ -80,6 +80,14 @@ class VisualizerROS(object):
                 self.ball_id, ball_img_path, ball_radius * 2, ball_radius * 2
             )
 
+        goal_img_path = rospy.get_param("~GOAL_IMG_PATH", None)
+        if  goal_img_path is not None:
+            self.goal_id = 3
+            self.window.createAsset(
+                self.goal_id, goal_img_path, goal_width, .5 * goal_width 
+            )
+        self.window.updateAssetPos(self.goal_id, field_width / 2, field_length)
+
         self.lock = Lock()
         self.last_command = None
         self.last_time = None
@@ -92,6 +100,7 @@ class VisualizerROS(object):
         rospy.Subscriber(
             "car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb
         )
+
 
         while not rospy.is_shutdown():
             self.loop_once()
