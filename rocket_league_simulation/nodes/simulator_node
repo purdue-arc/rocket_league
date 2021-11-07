@@ -54,18 +54,25 @@ class SimulatorROS(object):
         fl = rospy.get_param('FIELD_LENGTH')
         gw = rospy.get_param('GOAL_WIDTH')
         field_setup = {}
-        field_setup["car"] = [fw/2, fl/2, 0.125]
-        field_setup["ball"] = [fw/2, (fl/2)+0.1, 0.125]
-        field_setup["goalA"] = [fw/2, fl, 0.125]
-        field_setup["goalB"] = [fw/2, 0, 0.125]
-        field_setup["rightsidewall"] = [fw, fl/2, 0.125]
-        field_setup["leftsidewall"] = [0., fl/2, 0.125]
+        # field_setup["car"] = [0, 0, 0.125]
+        # field_setup["ball"] = [0, 0.1, 0.125]
+        # field_setup["goalA"] = [0, fl/2, 0.125]
+        # field_setup["goalB"] = [0, -fl/2, 0.125]
+        # field_setup["rightsidewall"] = [fw/2, 0, 0.125]
+        # field_setup["leftsidewall"] = [-fw/2, 0, 0.125]
+        field_setup["car"] = [0, 0, 0.125]
+        field_setup["ball"] = [0, 0.1, 0.125]
+        field_setup["goalA"] = [fl/2, 0, 0.125]
+        field_setup["goalB"] = [-fl/2, 0, 0.125]
+        field_setup["rightsidewall"] = [0, fw/2, 0.125]
+        field_setup["leftsidewall"] = [0, -fw/2, 0.125]
 
         bww = (fw-gw)/2
-        field_setup["flbackwall"] = [bww/2, fl, 0.125]
-        field_setup["frbackwall"] = [fw-(bww/2), fl, 0.125]
-        field_setup["blbackwall"] = [bww/2, 0, 0.125]
-        field_setup["brbackwall"] = [fw-(bww/2), 0., 0.125]
+        offset = (gw+bww)/2
+        field_setup["flbackwall"] = [fl/2, -offset, 0.125]
+        field_setup["frbackwall"] = [fl/2, offset, 0.125]
+        field_setup["blbackwall"] = [-fl/2, -offset, 0.125]
+        field_setup["brbackwall"] = [-fl/2, offset, 0.125]
 
         # Collecting private parameters
         render_enabled = rospy.get_param('~RENDER_ENABLED', False)
@@ -84,6 +91,8 @@ class SimulatorROS(object):
         self.check_urdf(urdf_paths["sidewall"])
         urdf_paths["backwall"] = rospy.get_param('~BACKWALL_URDF_PATH')
         self.check_urdf(urdf_paths["backwall"])
+        urdf_paths["plane"] = rospy.get_param('~FLOOR_URDF')
+        self.check_urdf(urdf_paths["plane"])
 
         # Creating physics simulator
         self.sim = simulator.Sim(urdf_paths, field_setup, render_enabled)
@@ -148,7 +157,6 @@ class SimulatorROS(object):
         """Main loop."""
         self.lock.acquire()
         now = rospy.Time.now()
-
         if self.last_time is not None:
             # Iterate sim one step
             delta_t = (now - self.last_time).to_sec()
