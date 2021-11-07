@@ -70,7 +70,7 @@ class SimulatorROS(object):
         # Collecting private parameters
         render_enabled = rospy.get_param('~RENDER_ENABLED', False)
         rate = rospy.Rate(rospy.get_param('~RATE', 30))
-        self.frame_id = rospy.get_param('~FRAME_ID', 'field')
+        self.frame_id = rospy.get_param('~FRAME_ID', 'map')
         self.timeout = rospy.get_param('~TIMEOUT', 10)
 
         urdf_paths = {}

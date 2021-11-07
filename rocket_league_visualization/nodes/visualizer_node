@@ -63,7 +63,7 @@ class VisualizerROS(object):
         self.window = visualizer.Window(field_width, field_length)
 
         # Collecting private parameters
-        self.frame_id = rospy.get_param("~FRAME_ID", "field")
+        self.frame_id = rospy.get_param("~FRAME_ID", "map")
         self.timeout = rospy.get_param("~TIMEOUT", 10)
         rate = rospy.Rate(rospy.get_param("~RATE", 30))
 
