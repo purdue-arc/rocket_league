@@ -5,7 +5,7 @@ from gym.spaces import Box
 # ROS
 import rospy
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Int32
+from std_msgs.msg import String
 from rocket_league_msgs.msg import Target
 from std_srv.srv import Empty
 
@@ -31,6 +31,11 @@ class RocketLeagueInterface(ROSInterface):
         self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
         self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
         self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
+        
+        self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
+        self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', -5.0)
+        self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', -10.0)
+        self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)
 
         # Publishers
         self._target_pub = rospy.Publisher('self/target', Target, queue_size=1)
@@ -39,9 +44,7 @@ class RocketLeagueInterface(ROSInterface):
         # State variables
         self._car_odom = None
         self._ball_odom = None
-        self._score = None
-        self._prev_time = None
-        self._prev_score = None
+        self._won = None
         self._start_time = None
         self._total_reward = 0
         self._episode = 0
@@ -49,7 +52,7 @@ class RocketLeagueInterface(ROSInterface):
         # Subscribers
         rospy.Subscriber('self/odom', Odometry, self._car_odom_cb)
         rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
-        rospy.Subscriber('game/score', Int32, self._score_cb)
+        rospy.Subscriber('match_status', String, self._score_cb)
 
     @property
     def action_space(self):
@@ -92,15 +95,14 @@ class RocketLeagueInterface(ROSInterface):
         if self._has_state():
             self._log_data({
                 "episode" : self._episode,
-                "score" : self._score,
-                "duration" : (self._prev_time - self._start_time).to_sec(),
+                "score" : self._won * 1.0,
+                "duration" : (rospy.Time.now() - self._start_time).to_sec(),
                 "net_reward" : self._total_reward})
             self._episode += 1
 
         # reset
         self._clear_state()
-        self._prev_time = None
-        self._prev_score = None
+        self._won = None
         self._start_time = None
         self._start_time = None
         self._total_reward = 0
@@ -110,14 +112,14 @@ class RocketLeagueInterface(ROSInterface):
         return (
             self._pose is not None and
             self._goal is not None and
-            self._score is not None and
+            self._won is not None and
             self._alive is not None)
 
     def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
         self._pose = None
         self._goal = None
-        self._score = None
+        self._won = None
         self._alive = None
 
     def _get_state(self):
@@ -130,28 +132,25 @@ class RocketLeagueInterface(ROSInterface):
         observation = np.concatenate((car, ball))
         assert self.observation_space.contains(observation)
 
-        # Determine reward
-        reward = 0
-
-        time = rospy.Time.now()
-        if self._prev_time is not None:
-            pass
-            # reward += (time - self._prev_time).to_sec() * self._CONSTANT_REWARD
-            # dist_sq = np.sum(np.square(pose[1:3] - goal))
-            # norm_dist = dist_sq / (self._FIELD_SIZE ** 2)
-            # reward += (time - self._prev_time).to_sec() * self._DISTANCE_REWARD * norm_dist
-        self._prev_time = time
-
-        if self._prev_score is not None:
-            reward += self._GOAL_REWARD * (self._score - self._prev_score)
-        self._prev_score = self._score
-
-        self._total_reward += reward
-
         # check if time exceeded
         if self._start_time is None:
-            self._start_time = time
-        done = (time - self._start_time).to_sec() >= self._MAX_TIME
+            self._start_time = rospy.Time.now()
+        done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME
+
+        # Determine reward
+        reward = self._CONSTANT_REWARD
+
+        ball_dist_sq = np.sum(np.square(car[1:3] - ball[1:3]))
+        reward += self._BALL_DISTANCE_REWARD * ball_dist_sq
+
+        goal_dist_sq = np.sum(np.square(car[1:3] - np.array([self._FIELD_HEIGHT, 0])))
+        reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
+
+        if self._won:
+            reward += self._WIN_REWARD
+            done = True
+
+        self._total_reward += reward
 
         return (observation, reward, done, {})
 
@@ -164,8 +163,8 @@ class RocketLeagueInterface(ROSInterface):
 
         target_msg = Target()
         target_msg.header.stamp = rospy.Time.now()
-        target_msg.header.frame_id = 'odom'         # @TODO param
-        target_msg.child_frame_id = 'base_link'     # @TODO param
+        target_msg.header.frame_id = 'map'              # @TODO param
+        target_msg.child_frame_id = 'car0_base_link'    # @TODO param
         target_msg.delta_t = delta_t
         target_msg.pose.position.x = x
         target_msg.pose.position.y = y
@@ -212,6 +211,6 @@ class RocketLeagueInterface(ROSInterface):
 
     def _score_cb(self, score_msg):
         """Callback for score of game."""
-        self._score = score_msg.data
+        self._won = score_msg.data == "A scored!"
         with self._cond:
             self._cond.notify_all()
