@@ -57,10 +57,10 @@ class RocketLeagueInterface(ROSInterface):
         return Box(
             # delta T, x, y, theta, v, omega
             low =np.array(self._MIN_TARGET_TIME,
-                -self._FIELD_WIDTH/2, -self._FIELD_HEIGHT/2,
+                -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
                 -pi, self._MIN_TARGET_VEL, -self._MAX_TARGET_ANG_VEL),
             high=np.array(self._MAX_TARGET_TIME,
-                self._FIELD_WIDTH/2, self._FIELD_HEIGHT/2,
+                self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
                 pi, self._MAX_TARGET_VEL, self._MAX_TARGET_ANG_VEL),
             dtype=np.float32)
 
@@ -71,14 +71,14 @@ class RocketLeagueInterface(ROSInterface):
             # x, y, theta, v, omega (car)
             # x, y, vx, vy (ball)
             low=np.array(
-                -self._FIELD_WIDTH/2, -self._FIELD_HEIGHT/2,
+                -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
                 -pi, -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
-                -self._FIELD_WIDTH/2, -self._FIELD_HEIGHT/2,
+                -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
                 -self._MAX_OBS_VEL, -self._MAX_OBS_VEL),
             high=np.array(
-                self._FIELD_WIDTH/2, self._FIELD_HEIGHT/2,
+                self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
                 pi, self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
-                self._FIELD_WIDTH/2, self._FIELD_HEIGHT/2,
+                self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
                 self._MAX_OBS_VEL, self._MAX_OBS_VEL),
             dtype=np.float32)
 
