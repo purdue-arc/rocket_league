@@ -5,8 +5,8 @@ from gym.spaces import Box
 # ROS
 import rospy
 from nav_msgs.msg import Odometry
-from std_msgs.msg import String
-from rocket_league_msgs.msg import Target
+from std_msgs.msg import Float
+from rocket_league_msgs.msg import MatchStatus
 from std_srv.srv import Empty
 
 # System
@@ -20,26 +20,30 @@ class RocketLeagueInterface(ROSInterface):
     def __init__(self):
         super().__init__()
 
-        # Constants
+        ## Constants
+        # Actions
+        self._MIN_THROTTLE_EFFORT = rospy.get_param('~effort/throttle/min', -0.25)
+        self._MAX_THROTTLE_EFFORT = rospy.get_param('~effort/throttle/max',  0.25)
+        self._MIN_STEERING_EFFORT = rospy.get_param('~effort/steering/min', -1.0)
+        self._MAX_STEERING_EFFORT = rospy.get_param('~effort/steering/max',  1.0)
+
+        # Observations
         self._FIELD_WIDTH = rospy.get_param('~field/width', 10)
         self._FIELD_HEIGHT = rospy.get_param('~field/height', 15)
-        self._MIN_TARGET_TIME = rospy.get_param('~target/time/min', 0.5)
-        self._MAX_TARGET_TIME = rospy.get_param('~target/time/max', 5.0)
-        self._MIN_TARGET_VEL = rospy.get_param('~target/velocity/min', 0.1)
-        self._MAX_TARGET_VEL = rospy.get_param('~target/velocity/max', 1.5)
-        self._MAX_TARGET_ANG_VEL = rospy.get_param('~target/angular_velocity/max_abs', pi)
         self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
         self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
+
+        # Learning
         self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
-        
         self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
         self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', -5.0)
         self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', -10.0)
         self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)
 
         # Publishers
-        self._target_pub = rospy.Publisher('self/target', Target, queue_size=1)
-        self._reset_srv = rospy.ServiceProxy('sim/reset', Empty)
+        self._throttle_pub = rospy.Publisher('effort/throttle', Float, queue_size=1)
+        self._steering_pub = rospy.Publisher('effort/steering', Float, queue_size=1)
+        self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
         # State variables
         self._car_odom = None
@@ -50,21 +54,19 @@ class RocketLeagueInterface(ROSInterface):
         self._episode = 0
 
         # Subscribers
-        rospy.Subscriber('self/odom', Odometry, self._car_odom_cb)
+        rospy.Subscriber('car0/odom', Odometry, self._car_odom_cb)
         rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
-        rospy.Subscriber('match_status', String, self._score_cb)
+        rospy.Subscriber('match_status', MatchStatus, self._score_cb)
 
     @property
     def action_space(self):
         """The Space object corresponding to valid actions."""
         return Box(
-            # delta T, x, y, theta, v, omega
-            low =np.array(self._MIN_TARGET_TIME,
-                -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
-                -pi, self._MIN_TARGET_VEL, -self._MAX_TARGET_ANG_VEL),
-            high=np.array(self._MAX_TARGET_TIME,
-                self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
-                pi, self._MAX_TARGET_VEL, self._MAX_TARGET_ANG_VEL),
+            # throttle, steering
+            low =np.array(
+                self._MIN_THROTTLE_EFFORT, self._MIN_STEERING_EFFORT),
+            high=np.array(
+                self._MAX_THROTTLE_EFFORT, self._MAX_STEERING_EFFORT),
             dtype=np.float32)
 
     @property
@@ -130,7 +132,8 @@ class RocketLeagueInterface(ROSInterface):
         car = np.asarray(self._car_odom, dtype=np.float32)
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
-        assert self.observation_space.contains(observation)
+        if not self.observation_space.contains(observation):
+            rospy.logerr("observation outside of valid bounds:\nObservation: %s", observation.tostring())
 
         # check if time exceeded
         if self._start_time is None:
@@ -158,24 +161,10 @@ class RocketLeagueInterface(ROSInterface):
         """Publish an action to the ROS network."""
         assert self.action_space.contains(action)
 
-        delta_t, x, y, theta, v, omega = np.split(action, action.size)
-        qx, qy, qz, qw = quaternion_from_euler(0, 0, theta)
+        throttle, steering = np.split(action, action.size)
 
-        target_msg = Target()
-        target_msg.header.stamp = rospy.Time.now()
-        target_msg.header.frame_id = 'map'              # @TODO param
-        target_msg.child_frame_id = 'car0_base_link'    # @TODO param
-        target_msg.delta_t = delta_t
-        target_msg.pose.position.x = x
-        target_msg.pose.position.y = y
-        target_msg.pose.orientation.x = qx
-        target_msg.pose.orientation.y = qy
-        target_msg.pose.orientation.z = qz
-        target_msg.pose.orientation.w = qw
-        target_msg.twist.linear.x = v
-        target_msg.twist.angular.z = omega
-
-        self._target_pub.publish(target_msg)
+        self._throttle_pub.publish(throttle)
+        self._steering_pub.publish(steering)
 
     def _car_odom_cb(self, odom_msg):
         """Callback for odometry of car."""
@@ -211,6 +200,6 @@ class RocketLeagueInterface(ROSInterface):
 
     def _score_cb(self, score_msg):
         """Callback for score of game."""
-        self._won = score_msg.data == "A scored!"
+        self._won = score_msg.status == "A scored!"
         with self._cond:
             self._cond.notify_all()
