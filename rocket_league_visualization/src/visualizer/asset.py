@@ -40,6 +40,17 @@ class Asset(object):
         self.width = width
         self.length = length
         self.pos = (0, 0)
+        self.angle = 0
 
     def setPos(self, x, y):
         self.pos = (x, y)
+
+    def setAngle(self, angle):
+        self.angle = angle
+
+    def blit(self, screen):
+        rotated_image = pygame.transform.rotate(self.img, self.angle)
+        new_rect = rotated_image.get_rect(
+            center=self.img.get_rect(topleft=self.pos).center)
+
+        screen.blit(rotated_image, new_rect)

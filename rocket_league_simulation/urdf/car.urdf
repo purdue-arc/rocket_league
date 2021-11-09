@@ -10,27 +10,10 @@
 
 
     <!-- Base Frame of Car --> 
-    <!-- <link name="base_link">
-        <visual> 
-            <geometry> 
-                <box size="0.28 0.13 0.1"/>
-            </geometry>
-            <material name="blue"/>
-        </visual>
-        <collision>
-            <geometry>
-            <box size=".3 0.15 0.1"/>
-            </geometry>
-        </collision>
-        <inertial> 
-            <mass value="6"/>
-            <inertia ixx="0.2" ixy="0" ixz="0" iyy="0.2" iyz="0.0" izz="0.2"/>
-        </inertial> 
-    </link>  -->
+    <!-- Local frame is X up, Y left, and Z out -->
     <link name="base_link">
         <visual> 
             <geometry> 
-                
                 <box size="0.13 0.28 0.1"/>
             </geometry>
             <material name="blue"/>
@@ -38,7 +21,7 @@
         <collision>
             <geometry>
             
-            <box size=".13 0.28 0.1"/>
+            <box size="0.13 0.28 0.1"/>
             </geometry>
         </collision>
         <inertial> 
