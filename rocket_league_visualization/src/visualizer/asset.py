@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-"""2D simulation of ARC's rocket league environment.
+"""Contains the Asset class.
 
 License:
   BSD 3-Clause License
-  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -28,10 +28,29 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from racersim.ball import Ball
-from racersim.car import Car, CarDef
-from racersim.goal import Goal
-from racersim.sim import Sim
-from racersim.renderer import Renderer
-from racersim.tire import Tire, TireDef
-from racersim.world import World
+# 3rd Party Modules
+import pygame
+
+
+class Asset(object):
+    def __init__(self, img_path, width, length):
+        self.img = pygame.image.load(img_path)
+        self.img = pygame.transform.scale(self.img, (width, length))
+
+        self.width = width
+        self.length = length
+        self.pos = (0, 0)
+        self.angle = 0
+
+    def setPos(self, x, y):
+        self.pos = (x, y)
+
+    def setAngle(self, angle):
+        self.angle = angle
+
+    def blit(self, screen):
+        rotated_image = pygame.transform.rotate(self.img, self.angle)
+        new_rect = rotated_image.get_rect(
+            center=self.img.get_rect(topleft=self.pos).center)
+
+        screen.blit(rotated_image, new_rect)

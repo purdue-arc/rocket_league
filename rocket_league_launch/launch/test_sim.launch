@@ -2,5 +2,4 @@
 
 <launch>
   <node type="simple_drive_node" pkg="local_planner" name="simple_drive" output="screen" />
-  <include file="$(find racersim)/launch/racersim.launch"/>
 </launch>

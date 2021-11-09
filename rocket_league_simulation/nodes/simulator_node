@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""Node to run the simulator with ROS bindings.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+  3. Neither the name of the copyright holder nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+TODO:
+- Scale to support multiple vehicles
+- Add offset for walls
+"""
+
+# 3rd party modules
+from std_msgs.msg import Float32
+from nav_msgs.msg import Odometry
+import os
+import rospy
+from std_srvs.srv import Empty, EmptyResponse
+from threading import Lock
+
+# Local library
+import simulator
+from rocket_league_msgs.msg import MatchStatus
+
+
+class SimulatorROS(object):
+    """ROS wrapper for the simulator."""
+
+    def __init__(self):
+        rospy.init_node('simulator')
+
+        # Collecting global parameters
+        fw = rospy.get_param('FIELD_WIDTH')
+        fl = rospy.get_param('FIELD_LENGTH')
+        gw = rospy.get_param('GOAL_WIDTH')
+        field_setup = {}
+        # field_setup["car"] = [0, 0, 0.125]
+        # field_setup["ball"] = [0, 0.1, 0.125]
+        # field_setup["goalA"] = [0, fl/2, 0.125]
+        # field_setup["goalB"] = [0, -fl/2, 0.125]
+        # field_setup["rightsidewall"] = [fw/2, 0, 0.125]
+        # field_setup["leftsidewall"] = [-fw/2, 0, 0.125]
+        field_setup["car"] = [0, 0, 0.125]
+        field_setup["ball"] = [0, 0.1, 0.125]
+        field_setup["goalA"] = [fl/2, 0, 0.125]
+        field_setup["goalB"] = [-fl/2, 0, 0.125]
+        field_setup["rightsidewall"] = [0, fw/2, 0.125]
+        field_setup["leftsidewall"] = [0, -fw/2, 0.125]
+
+        bww = (fw-gw)/2
+        offset = (gw+bww)/2
+        field_setup["flbackwall"] = [fl/2, -offset, 0.125]
+        field_setup["frbackwall"] = [fl/2, offset, 0.125]
+        field_setup["blbackwall"] = [-fl/2, -offset, 0.125]
+        field_setup["brbackwall"] = [-fl/2, offset, 0.125]
+
+        # Collecting private parameters
+        render_enabled = rospy.get_param('~RENDER_ENABLED', False)
+        rate = rospy.Rate(rospy.get_param('~RATE', 30))
+        self.frame_id = rospy.get_param('~FRAME_ID', 'map')
+        self.timeout = rospy.get_param('~TIMEOUT', 10)
+
+        urdf_paths = {}
+        urdf_paths["ball"] = rospy.get_param('~BALL_URDF_PATH')
+        self.check_urdf(urdf_paths["ball"])
+        urdf_paths["car"] = rospy.get_param('~CAR_URDF_PATH')
+        self.check_urdf(urdf_paths["car"])
+        urdf_paths["goal"] = rospy.get_param('~GOAL_URDF_PATH')
+        self.check_urdf(urdf_paths["goal"])
+        urdf_paths["sidewall"] = rospy.get_param('~SIDEWALL_URDF_PATH')
+        self.check_urdf(urdf_paths["sidewall"])
+        urdf_paths["backwall"] = rospy.get_param('~BACKWALL_URDF_PATH')
+        self.check_urdf(urdf_paths["backwall"])
+        urdf_paths["plane"] = rospy.get_param('~FLOOR_URDF')
+        self.check_urdf(urdf_paths["plane"])
+
+        # Creating physics simulator
+        self.sim = simulator.Sim(urdf_paths, field_setup, render_enabled)
+
+        self.lock = Lock()
+        self.throttle_cmd = 0.
+        self.steering_cmd = 0.
+        self.last_command = None
+        self.last_time = None
+
+        # Publishers
+        self.ball_pub = rospy.Publisher('ball/odom',
+                                        Odometry, queue_size=1)
+        self.car_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
+        self.status_pub = rospy.Publisher(
+            'match_status', MatchStatus, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber('effort/throttle', Float32, self.throttle_cb)
+        rospy.Subscriber('effort/steering', Float32, self.steering_cb)
+
+        # Services
+        rospy.Service('sim_reset', Empty, self.reset_cb)
+
+        while not rospy.is_shutdown():
+            self.loop_once()
+            try:
+                rate.sleep()
+            except rospy.ROSInterruptException:
+                pass
+
+    def check_urdf(self, param):
+        """Validates that URDF exists, then returns path."""
+        if param is None:
+            rospy.signal_shutdown('no urdf path set for "{}"'.format(param))
+
+        if not os.path.isfile(param):
+            rospy.signal_shutdown(
+                'no urdf file exists at path {}'.format(param))
+
+    def throttle_cb(self, throttle_msg):
+        self.throttle_cmd = throttle_msg.data
+
+    def steering_cb(self, steering_msg):
+        self.steering_cmd = steering_msg.data
+
+    def reset_cb(self, _):
+        """Resets simulator."""
+        self.lock.acquire()
+        self.sim.reset()
+        self.last_command = None
+        self.last_time = None
+        self.lock.release()
+        return EmptyResponse()
+
+    def command_cb(self, command_msg):
+        """Callback for command messages."""
+        # Put this all in one tuple so that it is atomic
+        self.last_command = (command_msg.linear, command_msg.angular)
+
+    def loop_once(self):
+        """Main loop."""
+        self.lock.acquire()
+        now = rospy.Time.now()
+        if self.last_time is not None:
+            # Iterate sim one step
+            delta_t = (now - self.last_time).to_sec()
+
+            if self.sim.scored:
+                status = MatchStatus()
+                status.status = self.sim.winner + " scored!"
+                self.status_pub.publish(status)
+
+            self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
+
+            # Publish ball odometry
+            ball_msg = Odometry()
+            ball_msg.header.stamp = now
+            ball_msg.header.frame_id = self.frame_id
+            ball_pos, ball_quat = self.sim.getBallPose()
+            ball_msg.pose.pose.position.x = ball_pos[0]
+            ball_msg.pose.pose.position.y = ball_pos[1]
+            ball_msg.pose.pose.position.z = ball_pos[2]
+            ball_msg.pose.pose.orientation.x = ball_quat[0]
+            ball_msg.pose.pose.orientation.y = ball_quat[1]
+            ball_msg.pose.pose.orientation.z = ball_quat[2]
+            ball_msg.pose.pose.orientation.w = ball_quat[3]
+            ball_linear, ball_angular = self.sim.getBallVelocity()
+            ball_msg.twist.twist.linear.x = ball_linear[0]
+            ball_msg.twist.twist.linear.y = ball_linear[1]
+            ball_msg.twist.twist.linear.z = ball_linear[2]
+            ball_msg.twist.twist.angular.x = ball_angular[0]
+            ball_msg.twist.twist.angular.y = ball_angular[1]
+            ball_msg.twist.twist.angular.z = ball_angular[2]
+            self.ball_pub.publish(ball_msg)
+
+            # Publish bot odometry
+            car_msg = Odometry()
+            car_msg.header.stamp = now
+            car_msg.header.frame_id = self.frame_id
+            car_pos, car_quat = self.sim.getCarPose()
+            car_msg.pose.pose.position.x = car_pos[0]
+            car_msg.pose.pose.position.y = car_pos[1]
+            car_msg.pose.pose.position.z = car_pos[2]
+            car_msg.pose.pose.orientation.x = car_quat[0]
+            car_msg.pose.pose.orientation.y = car_quat[1]
+            car_msg.pose.pose.orientation.z = car_quat[2]
+            car_msg.pose.pose.orientation.w = car_quat[3]
+            car_linear, car_angular = self.sim.getCarVelocity()
+            car_msg.twist.twist.linear.x = car_linear[0]
+            car_msg.twist.twist.linear.y = car_linear[1]
+            car_msg.twist.twist.linear.z = car_linear[2]
+            car_msg.twist.twist.angular.x = car_angular[0]
+            car_msg.twist.twist.angular.y = car_angular[1]
+            car_msg.twist.twist.angular.z = car_angular[2]
+            self.car_pub.publish(car_msg)
+
+        self.last_time = now
+        self.lock.release()
+
+
+if __name__ == "__main__":
+    SimulatorROS()
