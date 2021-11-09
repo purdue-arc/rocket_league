@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-"""Contains the Ball class.
+"""3D simulation of ARC's rocket league environment.
 
 License:
   BSD 3-Clause License
-  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -28,34 +28,5 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-# 3rd party packages
-import Box2D
-import math
-from tf.transformations import quaternion_from_euler
-import random
-
-
-class Ball(object):
-    """Simulates game ball."""
-
-    def __init__(self, world, initPos, weight, radius, restitution=1.0):
-        bodyDef = Box2D.b2BodyDef()
-        bodyDef.type = Box2D.b2_dynamicBody
-        bodyDef.position = initPos
-
-        self.body = world.CreateBody(bodyDef)
-
-        shape = Box2D.b2CircleShape(radius=radius)
-        fixtureDef = Box2D.b2FixtureDef(shape=shape)
-        fixtureDef.density = weight / (math.pi * radius**2)
-
-        fixtureDef.restitution = restitution
-        fixtureDef.userData = "ball:0"
-        self.body.CreateFixture(fixtureDef)
-
-    def getPoint(self):
-        return (self.body.position[0], self.body.position[1], 0)
-
-    def getQuaternion(self):
-        angle = self.body.angle % (2.0 * math.pi)
-        return quaternion_from_euler(0, 0, angle)
+from simulator.sim import Sim
+from simulator.car import Car

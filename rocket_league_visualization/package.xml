@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rocket_league_visualization</name>
+  <version>0.0.0</version>
+  <description>The rocket_league_visualization package</description>
+  
+  <maintainer email="hsan@todo.todo">hsan</maintainer>
+  <license>BSD 3 Clause</license>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>pygame</exec_depend>
+  <exec_depend>rocket_league_msgs</exec_depend>
+</package>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>racersim</name>
+  <name>rocket_league_simulation</name>
   <version>1.0.0</version>
   <description>Simulated environment for ARC's rocket league competition</description>
 
@@ -14,7 +14,6 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>std_srvs</exec_depend>
-  <exec_depend>python-pygame</exec_depend>
-  <exec_depend>python-box2d</exec_depend>
+  <exec_depend>PyBullet</exec_depend>
   <exec_depend>rocket_league_msgs</exec_depend>
 </package>
