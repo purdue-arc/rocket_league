@@ -1,5 +1,5 @@
 # TF
-FRAME_ID: 'field'
+FRAME_ID: "map"
 
 # Workspace
 RENDER_ENABLED: true

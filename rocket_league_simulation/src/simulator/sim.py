@@ -49,7 +49,7 @@ class Sim(object):
             self._client = p.connect(p.DIRECT)
 
         p.setAdditionalSearchPath(p_data.getDataPath())
-        self._planeID = p.loadURDF("plane.urdf")
+        self._planeID = p.loadURDF(urdf_paths["plane"])
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
         self._ballID = p.loadURDF(

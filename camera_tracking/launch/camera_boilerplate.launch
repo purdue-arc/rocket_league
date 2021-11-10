@@ -14,7 +14,8 @@
   </node>
   <node pkg="camera_tracking" type="camera_origin" name="camera_origin" output="screen">
     <param name="camera_name" value="$(arg camera_name)"/>
-    <param name="origin_id" value="tag_0"/>
+    <param name="update_rate" value="0.01"/>
+    <param name="origin_id" value="tag_1"/>
   </node>
 
   <!-- De-Bayer / rectify -->

@@ -38,9 +38,9 @@ class Car(object):
     def __init__(self, carID, length, pos, orient):
         self.id = carID
         self._steering_angle = 0.
-        self._steering_limit = math.pi / 2.
+        self._steering_limit = math.pi / 4.
         self._length = length
-        self._length_r = self._length/2.
+        self._length_r = self._length / 2.
 
         # Init settings
         self._initPos = pos
@@ -62,6 +62,9 @@ class Car(object):
         des_throttle = cmd[0]
         steering = cmd[1]
 
+        # Steer with respect to upward x-axis
+        steering = -steering
+
         # Compute 2nd-order response of throttle
         throttle = self._C @ self._throttle_state
         throttle_dt = self._A @ self._throttle_state + \
@@ -69,7 +72,7 @@ class Car(object):
         self._throttle_state += throttle_dt * dt
 
         # Compute motion using bicycle model
-        pos, orient = p.getBasePositionAndOrientation(self.id)
+        pos, orient = self.getPose()
         heading = p.getEulerFromQuaternion(orient)[2]
 
         steering_dt = steering * dt
@@ -83,16 +86,37 @@ class Car(object):
         w = throttle * math.tan(self._steering_angle) * \
             math.cos(beta) / self._length
 
-        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
-        orientation = p.getQuaternionFromEuler([0., 0., heading + w * dt])
+        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, 0.1)
+        orient = p.getQuaternionFromEuler([0., 0., heading + w * dt])
+        orient = self.orientToGlobal(orient)
 
-        p.changeConstraint(self._car_handle, pos, orientation)
+        p.changeConstraint(self._car_handle, pos, orient, maxForce=50)
+
+    def orientToLocal(self, orient):
+        orient = p.getEulerFromQuaternion(orient)
+        orient = (orient[0], orient[1], orient[2] - (math.pi / 2.))
+        return p.getQuaternionFromEuler(orient)
+
+    def orientToGlobal(self, orient):
+        orient = p.getEulerFromQuaternion(orient)
+        orient = (orient[0], orient[1], orient[2] + (math.pi / 2.))
+        return p.getQuaternionFromEuler(orient)
 
     def getPose(self):
-        return p.getBasePositionAndOrientation(self.id)
+        position, orient = p.getBasePositionAndOrientation(self.id)
+        orient = self.orientToLocal(orient)
+        return (position, orient)
 
     def getVelocity(self):
-        return p.getBaseVelocity(self.id)
+        _, orientation = p.getBasePositionAndOrientation(self.id)
+        heading = p.getEulerFromQuaternion(orientation)[2]
+        r_inv = np.array([[math.cos(heading), -math.sin(heading), 0.],
+                         [math.sin(heading), math.cos(heading), 0.],
+                         [0., 0., 1.]], dtype=np.float)
+        linear, angular = p.getBaseVelocity(self.id)
+        linear = r_inv @ linear
+        print("Vel: {}".format(linear))
+        return (linear, angular)
 
     def reset(self):
         self._steering_angle = 0

@@ -32,10 +32,12 @@ TODO:
 
 # 3rd party modules
 from std_msgs.msg import Float32
+import math
 from nav_msgs.msg import Odometry
 import os
 import rospy
 from std_srvs.srv import Empty, EmptyResponse
+from tf.transformations import euler_from_quaternion
 from threading import Lock
 
 # Local library
@@ -63,7 +65,7 @@ class VisualizerROS(object):
         self.window = visualizer.Window(field_width, field_length)
 
         # Collecting private parameters
-        self.frame_id = rospy.get_param("~FRAME_ID", "field")
+        self.frame_id = rospy.get_param("~FRAME_ID", "map")
         self.timeout = rospy.get_param("~TIMEOUT", 10)
         rate = rospy.Rate(rospy.get_param("~RATE", 30))
 
@@ -112,12 +114,22 @@ class VisualizerROS(object):
     def car_odom_cb(self, odom_msg):
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
+        orient = odom_msg.pose.pose.orientation
+        quat = [orient.x, orient.y, orient.z, orient.w]
+        heading = euler_from_quaternion(quat)[2]
+        heading = heading * 180. / math.pi
+        self.lock.acquire()
         self.window.updateAssetPos(self.car_id, x, y)
+        self.window.updateAssetAngle(self.car_id, heading)
+        self.lock.release()
 
     def ball_odom_cb(self, odom_msg):
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
+
+        self.lock.acquire()
         self.window.updateAssetPos(self.ball_id, x, y)
+        self.lock.release()
 
     def path_arr_cb(self, path_arr_msg):
         """Callback for path array messages."""
@@ -140,7 +152,9 @@ class VisualizerROS(object):
 
     def loop_once(self):
         """Main loop."""
+        self.lock.acquire()
         self.window.show()
+        self.lock.release()
 
 
 if __name__ == "__main__":

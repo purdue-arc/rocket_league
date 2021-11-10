@@ -1,0 +1,17 @@
+hosts:
+  - username: arc
+    hostname: r2d2
+    run_cmd:
+      - /home/arc/catkin_ws/src/rocket_league/docker/docker-run.sh
+      - --privileged
+      - --net=host
+    exec_cmd: 'roslaunch rocket_league_launch r2d2.launch --wait'
+    roscore: false
+  - username: arc
+    hostname: c3po
+    run_cmd:
+      - /home/arc/catkin_ws/src/rocket_league/docker/docker-run.sh
+      - --privileged
+      - --net=host
+    exec_cmd: 'roslaunch rocket_league_launch c3po.launch'
+    roscore: true

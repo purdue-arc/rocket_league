@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-"""Contains the Asset class.
+"""
+Deep learning interface for ROS.
 
 License:
   BSD 3-Clause License
@@ -28,29 +29,32 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-# 3rd Party Modules
-import pygame
+from rocket_league_drl import CartpoleInterface
+from stable_baselines3 import PPO
+import gym, time
 
+def show_progress(model, episodes=5):
+   env = gym.make("CartPole-v0")
+   obs = env.reset()
+   episodes = 0
+   while episodes < 5:
+      action, __ = model.predict(obs, deterministic=True)
+      obs, __, done, __ = env.step(action)
+      env.render()
+      time.sleep(0.01)
+      if done:
+         obs = env.reset()
+         episodes += 1
+   env.close()
 
-class Asset(object):
-    def __init__(self, img_path, width, length):
-        self.img = pygame.image.load(img_path)
-        self.img = pygame.transform.scale(self.img, (width, length))
+env = CartpoleInterface()
+model = PPO("MlpPolicy", env, verbose=1)
 
-        self.width = width
-        self.length = length
-        self.pos = (0, 0)
-        self.angle = 0
+print("showing untrained performance")
+show_progress(model)
 
-    def setPos(self, x, y):
-        self.pos = (x, y)
+print("training on 10k steps")
+model.learn(total_timesteps=10000)
 
-    def setAngle(self, angle):
-        self.angle = angle
-
-    def blit(self, screen):
-        rotated_image = pygame.transform.rotate(self.img, self.angle)
-        new_rect = rotated_image.get_rect(
-            center=self.img.get_rect(topleft=self.pos).center)
-
-        screen.blit(rotated_image, new_rect)
+print("showing trained performance")
+show_progress(model)

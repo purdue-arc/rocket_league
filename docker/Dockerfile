@@ -43,7 +43,7 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
     fi
 
 # install project software dependencies
-RUN pip3 install PyBullet stable-baselines3 && \
+RUN pip3 install pybullet stable-baselines3 && \
     apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
     python3-pygame \

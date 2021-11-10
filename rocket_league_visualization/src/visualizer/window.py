@@ -29,6 +29,7 @@ License:
 """
 
 # 3rd party modules
+import math
 import pygame
 
 # Local modules
@@ -67,7 +68,15 @@ class Window(object):
             self.updateAssetPos(id, initPos[0], initPos[1])
 
     def updateAssetPos(self, id, x, y):
-        self.assets[id].setPos(x * self.scaling, y * self.scaling)
+        # Adjust for simulation coordinate frame
+        x = self.window_length - \
+            (int(x * self.scaling) + (self.window_length // 2))
+        y = self.window_width - \
+            (int(y * self.scaling) + (self.window_width // 2))
+        self.assets[id].setPos(y, x)
+
+    def updateAssetAngle(self, id, angle):
+        self.assets[id].setAngle(angle)
 
     def show(self):
         for event in pygame.event.get():
@@ -77,6 +86,6 @@ class Window(object):
 
         self._screen.fill(self.BACKGROUND_COLOR)
         for asset in self.assets.values():
-            self._screen.blit(asset.img, asset.pos)
+            asset.blit(self._screen)
 
         pygame.display.flip()
