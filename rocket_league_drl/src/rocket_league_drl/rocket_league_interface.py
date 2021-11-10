@@ -63,10 +63,10 @@ class RocketLeagueInterface(ROSInterface):
         """The Space object corresponding to valid actions."""
         return Box(
             # throttle, steering
-            low =np.array(
-                self._MIN_THROTTLE_EFFORT, self._MIN_STEERING_EFFORT),
-            high=np.array(
-                self._MAX_THROTTLE_EFFORT, self._MAX_STEERING_EFFORT),
+            low=np.array([
+                self._MIN_THROTTLE_EFFORT, self._MIN_STEERING_EFFORT]),
+            high=np.array([
+                self._MAX_THROTTLE_EFFORT, self._MAX_STEERING_EFFORT]),
             dtype=np.float32)
 
     @property
@@ -75,16 +75,16 @@ class RocketLeagueInterface(ROSInterface):
         return Box(
             # x, y, theta, v, omega (car)
             # x, y, vx, vy (ball)
-            low=np.array(
+            low=np.array([
                 -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
                 -pi, -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
                 -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
-                -self._MAX_OBS_VEL, -self._MAX_OBS_VEL),
-            high=np.array(
+                -self._MAX_OBS_VEL, -self._MAX_OBS_VEL]),
+            high=np.array([
                 self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
                 pi, self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
                 self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
-                self._MAX_OBS_VEL, self._MAX_OBS_VEL),
+                self._MAX_OBS_VEL, self._MAX_OBS_VEL]),
             dtype=np.float32)
 
     def _reset_env(self):
@@ -112,17 +112,15 @@ class RocketLeagueInterface(ROSInterface):
     def _has_state(self):
         """Determine if the new state is ready."""
         return (
-            self._pose is not None and
-            self._goal is not None and
-            self._won is not None and
-            self._alive is not None)
+            self._car_odom is not None and
+            self._ball_odom is not None and
+            self._won is not None)
 
     def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
-        self._pose = None
-        self._goal = None
+        self._car_odom = None
+        self._ball_odom = None
         self._won = None
-        self._alive = None
 
     def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
