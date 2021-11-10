@@ -5,9 +5,9 @@ from gym.spaces import Box
 # ROS
 import rospy
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float
+from std_msgs.msg import Float32
 from rocket_league_msgs.msg import MatchStatus
-from std_srv.srv import Empty
+from std_srvs.srv import Empty
 
 # System
 import numpy as np
@@ -41,8 +41,8 @@ class RocketLeagueInterface(ROSInterface):
         self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)
 
         # Publishers
-        self._throttle_pub = rospy.Publisher('effort/throttle', Float, queue_size=1)
-        self._steering_pub = rospy.Publisher('effort/steering', Float, queue_size=1)
+        self._throttle_pub = rospy.Publisher('effort/throttle', Float32, queue_size=1)
+        self._steering_pub = rospy.Publisher('effort/steering', Float32, queue_size=1)
         self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
         # State variables
