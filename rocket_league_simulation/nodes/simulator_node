@@ -161,10 +161,10 @@ class SimulatorROS(object):
             # Iterate sim one step
             delta_t = (now - self.last_time).to_sec()
 
+            status = MatchStatus()
             if self.sim.scored:
-                status = MatchStatus()
                 status.status = self.sim.winner + " scored!"
-                self.status_pub.publish(status)
+            self.status_pub.publish(status)
 
             self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
 
