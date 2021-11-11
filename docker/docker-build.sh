@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DOCKER_DIR=$(realpath $(dirname $0))
-REPO_NAME="purduearc/rocket-league-test-repository-please-ignore"
+REPO_NAME="purduearc/rocket-league"
 
 docker build --build-arg USER=$USER \
              --build-arg PW="robot" \

@@ -76,7 +76,8 @@ class VelocityControllerROS(object):
         rate = rospy.Rate(rospy.get_param('~rate', 30)) # Hz
 
         # Publishers
-        self.throttle_pub = rospy.Publisher('effort/throttle', Float32, queue_size=1)
+        # update this to one message losers
+        self.throttle_pub = rospy.Publisher('effort/throttle', Float32, queue_size=1) 
         self.steering_pub = rospy.Publisher('effort/steering', Float32, queue_size=1)
 
         # Subscribers

@@ -1,0 +1,30 @@
+<launch>
+  <arg name="render"        default="false"/>
+  <arg name="rate"          default="10.0"/>
+  <arg name="snake_size"    default="7"/>
+  <arg name="arena_size"    default="10"/>
+  <arg name="log"           default="true"/>
+
+  <param name="/use_sim_time" value="true"/>
+
+  <node type="snake_node" pkg="snakesim" name="snake_env" output="screen">
+    <param name="render"                  value="$(arg render)"/>
+    <param name="snake/initial_segments"  value="$(arg snake_size)"/>
+    <param name="snake/growth"            value="0"/>
+    <param name="arena/bounds"            value="$(arg arena_size)"/>
+    <param name="rate"                    value="$(arg rate)"/>
+  </node>
+
+  <node type="train_snake.py" pkg="rocket_league_drl" name="snake_agent" output="screen">
+    <param name="snake/initial_segments"  value="$(arg snake_size)"/>
+    <param name="field_size"              value="$(arg arena_size)"/>
+    <param name="rate"                    value="$(arg rate)"/>
+    <rosparam command="load" file="$(find rocket_league_drl)/params/snake.yaml"/>
+  </node>
+
+  <node if="$(arg log)" type="plotter" pkg="rocket_league_drl" name="plotter" output="screen">
+    <rosparam command="load" file="$(find rocket_league_drl)/params/snake.yaml"/>
+    <param name="log_dir" value="~/catkin_ws/data/snakesim/"/>
+    <remap from="~log" to="snake_agent/log"/>
+  </node>
+</launch>

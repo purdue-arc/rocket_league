@@ -1,4 +1,4 @@
-FROM purduearc/rocket-league-test-repository-please-ignore
+FROM purduearc/rocket-league
 
 USER root
 

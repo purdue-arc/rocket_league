@@ -1,0 +1,22 @@
+# steps to train
+training_steps: 5000
+
+reward:
+  # reward to be given each frame
+  constant: 0.0
+  # reward as a function of squared distance from the ball
+  ball_dist_sq: -5.0
+  # reward as a function of squared distance from the ball to the goal
+  goal_dist_sq: -10.0
+  # reward given when the episode ends with the car scoring a goal
+  win: 100.0
+
+max_episode_time: 30.0
+
+log:
+  freq: 25
+  basic:
+    - duration
+  advanced:
+    - score
+    - net_reward

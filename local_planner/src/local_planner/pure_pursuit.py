@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """Contains pure pursuit helper functions.
 
@@ -33,6 +33,7 @@ import numpy as np
 import math
 from tf.transformations import euler_from_quaternion
 
+
 def find_intersection(path_seg, bot_path, lookahead_dist):
     """
     Uses quadratic formula to find intersections between
@@ -55,13 +56,14 @@ def find_intersection(path_seg, bot_path, lookahead_dist):
             return path_seg * t2
     return None
 
+
 def calculate_lat_error(intersect_pos, bot_pos, bot_orient, lookahead_dist):
     """Determines lateral error from intersection point."""
 
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
     a = -math.tan(bot_yaw)
     c = (math.tan(bot_yaw) * bot_pos[0]) - bot_pos[1]
-    dist = math.sqrt(math.pow(a,2) + 1)
+    dist = math.sqrt(math.pow(a, 2) + 1)
     x = abs((a * intersect_pos[0]) + intersect_pos[1] + c) / dist
 
     bot_line_x = bot_pos[0] + (math.cos(bot_yaw) * lookahead_dist)
@@ -71,13 +73,14 @@ def calculate_lat_error(intersect_pos, bot_pos, bot_orient, lookahead_dist):
     sign = np.sign(np.cross(tang_line, bot_line))[2]
     return x * sign
 
+
 def calculate_turn_rad(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     """Determines turning radius to reach intersection point."""
 
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
     a = -math.tan(bot_yaw)
     c = (math.tan(bot_yaw) * bot_pos[0]) - bot_pos[1]
-    dist = math.sqrt(math.pow(a,2) + 1)
+    dist = math.sqrt(math.pow(a, 2) + 1)
     x = abs((a * intersect_pos[0]) + intersect_pos[1] + c) / dist
     radius = (lookahead_dist * lookahead_dist)/(2 * x)
 
@@ -89,6 +92,7 @@ def calculate_turn_rad(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
         sign *= -1
 
     return radius * sign
+
 
 def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     """
@@ -108,6 +112,7 @@ def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     if bkw:
         angle = math.pi - angle
     return angle * sign
+
 
 def get_angular_speed(linear_vel, turn_rad):
     """Relates path to the angular velocity."""
