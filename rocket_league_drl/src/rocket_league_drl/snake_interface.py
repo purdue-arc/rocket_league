@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # package
 from rocket_league_drl import ROSInterface
 from gym.spaces import Discrete, Box
@@ -54,7 +52,7 @@ class SnakeInterface(ROSInterface):
         self._prev_score = None
         self._start_time = None
         self._total_reward = 0
-        self._episode = None
+        self._episode = 0
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
@@ -82,10 +80,8 @@ class SnakeInterface(ROSInterface):
 
     def _reset_self(self):
         """Reset internally for a new episode."""
-        # log useful data
-        if self._episode is None:
-            self._episode = 0
-        else:
+        # log data
+        if self._has_state():
             self._log_data({
                 "episode" : self._episode,
                 "score" : self._score,
@@ -148,7 +144,7 @@ class SnakeInterface(ROSInterface):
             self._start_time = time
 
         if (time - self._start_time).to_sec() >= self._MAX_TIME:
-                done = True
+            done = True
 
         self._total_reward += reward
 

@@ -52,8 +52,11 @@ class Sim(object):
         self._planeID = p.loadURDF(urdf_paths["plane"])
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
+        
+        self._ballInitPos = field_setup["ball"]
+        self._ballInitOrient = zeroOrient
         self._ballID = p.loadURDF(
-            urdf_paths["ball"], field_setup["ball"], zeroOrient)
+            urdf_paths["ball"], self._ballInitPos, self._ballInitOrient)
 
         self._goalAID = p.loadURDF(
             urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
@@ -160,7 +163,7 @@ class Sim(object):
             self._ballID, self._ballInitPos, self._ballInitOrient
         )
 
-        for car in self.cars:
+        for car in self._cars.values():
             car.reset()
 
         self.running = True
