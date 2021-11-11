@@ -129,6 +129,7 @@ class Plotter(object):
             if data["episode"] >= self.next_plot_episode:
                 self.plot()
                 self.next_plot_episode += self.PLOT_FREQ
+                self.history = None
         else:
             rospy.logerr("Bad progress message.")
 
