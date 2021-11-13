@@ -8,21 +8,19 @@ project(camera_tracking)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  roscpp  
   pointgrey_camera_driver
   image_proc
   tf2
   tf2_ros
   image_transport
   cv_bridge
-)
-
-find_package(OpenCV REQUIRED
-  core
+  apriltag_ros
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(OpenCV REQUIRED core)
+find_package(Boost REQUIRED COMPONENTS system)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -110,10 +108,18 @@ find_package(OpenCV REQUIRED
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES camera_tracking
-#  CATKIN_DEPENDS camera_aravis image_proc
-#  DEPENDS system_lib
+  CATKIN_DEPENDS 
+    roscpp
+    pointgrey_camera_driver
+    image_proc
+    tf2
+    tf2_ros
+    image_transport
+    cv_bridge
+    apriltag_ros
+  DEPENDS OpenCV Boost
 )
 
 ###########
@@ -126,6 +132,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -145,25 +152,82 @@ add_executable(${PROJECT_NAME}_tf_rebroadcaster_node
   src/tf_rebroadcaster_node.cpp
   src/tf_rebroadcaster.cpp
 )
-add_executable(${PROJECT_NAME}_camera_origin_node src/camera_origin_node.cpp)
-add_executable(${PROJECT_NAME}_tf_parser_node src/tf_parser_node.cpp)
-add_executable(${PROJECT_NAME}_pose_extractor_node src/pose_extractor_node.cpp)
+add_executable(${PROJECT_NAME}_camera_origin_node
+  src/camera_origin_node.cpp
+)
+add_executable(${PROJECT_NAME}_tf_parser_node
+  src/tf_parser_node.cpp
+)
+add_executable(${PROJECT_NAME}_pose_extractor_node
+  src/pose_extractor_node.cpp
+)
+add_executable(${PROJECT_NAME}_chromatag_preprocess_node
+  src/chromatag_preprocess_node.cpp
+)
+add_executable(${PROJECT_NAME}_localizer_node
+  src/localizer_node.cpp
+  src/localizer.cpp
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-set_target_properties(${PROJECT_NAME}_tf_rebroadcaster_node PROPERTIES OUTPUT_NAME tf_rebroadcaster PREFIX "")
-set_target_properties(${PROJECT_NAME}_camera_origin_node PROPERTIES OUTPUT_NAME camera_origin PREFIX "")
-set_target_properties(${PROJECT_NAME}_tf_parser_node PROPERTIES OUTPUT_NAME tf_parser PREFIX "")
-set_target_properties(${PROJECT_NAME}_pose_extractor_node PROPERTIES OUTPUT_NAME pose_extractor PREFIX "")
+set_target_properties(${PROJECT_NAME}_tf_rebroadcaster_node PROPERTIES
+  OUTPUT_NAME tf_rebroadcaster
+  PREFIX ""
+)
+set_target_properties(${PROJECT_NAME}_camera_origin_node PROPERTIES
+  OUTPUT_NAME camera_origin
+  PREFIX ""
+)
+set_target_properties(${PROJECT_NAME}_tf_parser_node PROPERTIES
+  OUTPUT_NAME tf_parser
+  PREFIX ""
+)
+set_target_properties(${PROJECT_NAME}_pose_extractor_node PROPERTIES
+  OUTPUT_NAME pose_extractor
+  PREFIX ""
+)
+set_target_properties(${PROJECT_NAME}_localizer_node PROPERTIES
+  OUTPUT_NAME localizer
+  PREFIX ""
+)
+set_target_properties(${PROJECT_NAME}_chromatag_preprocess_node PROPERTIES
+  OUTPUT_NAME chromatag_preprocess
+  PREFIX ""
+)
+set_target_properties(${PROJECT_NAME}_localizer_node PROPERTIES
+  OUTPUT_NAME localizer
+  PREFIX ""
+)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(${PROJECT_NAME}_tf_rebroadcaster_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(${PROJECT_NAME}_camera_origin_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(${PROJECT_NAME}_tf_parser_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(${PROJECT_NAME}_pose_extractor_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_tf_rebroadcaster_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+add_dependencies(${PROJECT_NAME}_camera_origin_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+add_dependencies(${PROJECT_NAME}_tf_parser_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+add_dependencies(${PROJECT_NAME}_pose_extractor_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+add_dependencies(${PROJECT_NAME}_chromatag_preprocess_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+add_dependencies(${PROJECT_NAME}_localizer_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_tf_rebroadcaster_node
@@ -178,21 +242,13 @@ target_link_libraries(${PROJECT_NAME}_tf_parser_node
 target_link_libraries(${PROJECT_NAME}_pose_extractor_node
   ${catkin_LIBRARIES}
 )
-
-add_executable(chromatag_preprocess_node
-  src/chromatag_preprocess_node.cpp
-)
-
-add_dependencies(chromatag_preprocess_node
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  ${OpenCV_EXPORTED_TARGETS}
-)
-
-# Specify libraries to link a library or executable target against
-target_link_libraries(chromatag_preprocess_node
+target_link_libraries(${PROJECT_NAME}_chromatag_preprocess_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
+)
+target_link_libraries(${PROJECT_NAME}_localizer_node
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 #############
@@ -211,16 +267,13 @@ target_link_libraries(chromatag_preprocess_node
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-install(TARGETS ${PROJECT_NAME}_tf_rebroadcaster_node
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(TARGETS ${PROJECT_NAME}_camera_origin_node
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(TARGETS ${PROJECT_NAME}_tf_parser_node
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(TARGETS ${PROJECT_NAME}_pose_extractor_node
+install(TARGETS
+  ${PROJECT_NAME}_tf_rebroadcaster_node
+  ${PROJECT_NAME}_camera_origin_node
+  ${PROJECT_NAME}_tf_parser_node
+  ${PROJECT_NAME}_pose_extractor_node
+  ${PROJECT_NAME}_chromatag_preprocess_node
+  ${PROJECT_NAME}_localizer_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -8,16 +8,6 @@
     <param name="num_worker_threads" value="$(arg manager_threads)"/>
   </node>
 
-  <!-- tf Remapping -->
-  <node pkg="camera_tracking" type="tf_rebroadcaster" name="tf_rebroadcaster" output="screen">
-    <param name="prefix" value="$(arg camera_name)"/>
-  </node>
-  <node pkg="camera_tracking" type="camera_origin" name="camera_origin" output="screen">
-    <param name="camera_name" value="$(arg camera_name)"/>
-    <param name="update_rate" value="0.01"/>
-    <param name="origin_id" value="tag_1"/>
-  </node>
-
   <!-- De-Bayer / rectify -->
   <include file="$(find image_proc)/launch/image_proc.launch">
     <arg name="manager" value="$(arg manager_name)"/>
@@ -25,10 +15,17 @@
 
   <!-- Apriltag detection -->
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">
-    <remap from="/tf" to="tf"/>
     <param name="camera_frame" type="str" value="$(arg camera_name)"/>
     <param name="publish_tag_detections_image" type="bool" value="true"/>
     <rosparam command="load" file="$(find camera_tracking)/config/apriltag_settings.yaml"/>
     <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml"/>
+  </node>
+
+  <!-- Localization -->
+  <node pkg="camera_tracking" type="localizer" name="localizer" output="screen">
+    <param name="origin_id" type="str" value="1"/>
+    <rosparam param="pub_topics">
+      '69': /car0/pose
+    </rosparam>
   </node>
 </launch>
