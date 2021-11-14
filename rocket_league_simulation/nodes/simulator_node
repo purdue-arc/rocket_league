@@ -52,20 +52,25 @@ class SimulatorROS(object):
         # Collecting global parameters
         fw = rospy.get_param('FIELD_WIDTH')
         fl = rospy.get_param('FIELD_LENGTH')
+        wt = rospy.get_param('WALL_THICKNESS')
         gw = rospy.get_param('GOAL_WIDTH')
 
         field_setup = {}
-        field_setup["goalA"] = [fl/2, 0, 0.125]
-        field_setup["goalB"] = [-fl/2, 0, 0.125]
-        field_setup["rsidewall"] = [0, fw/2, 0.125]
-        field_setup["lsidewall"] = [0, -fw/2, 0.125]
+        field_setup["goalA"] = [(fl/2.) + (wt/2.), 0, 0.125]
+        field_setup["goalB"] = [(-fl/2.) - (wt/2.), 0, 0.125]
+        field_setup["rsidewall"] = [0, (fw/2) + (wt/2.), 0.125]
+        field_setup["lsidewall"] = [0, (-fw/2) - (wt/2.), 0.125]
 
         bww = (fw-gw)/2
         offset = (gw+bww)/2
-        field_setup["flbackwall"] = [fl/2, -offset, 0.125]
-        field_setup["frbackwall"] = [fl/2, offset, 0.125]
-        field_setup["blbackwall"] = [-fl/2, -offset, 0.125]
-        field_setup["brbackwall"] = [-fl/2, offset, 0.125]
+        field_setup["flbackwall"] = [(fl/2) + (wt/2.), -offset, 0.125]
+        field_setup["frbackwall"] = [(fl/2) + (wt/2.), offset, 0.125]
+        field_setup["blbackwall"] = [(-fl/2) - (wt/2.), -offset, 0.125]
+        field_setup["brbackwall"] = [(-fl/2) - (wt/2.), offset, 0.125]
+
+        # Setup bounds for spawning car and ball
+        spawn_bounds = [[-(fl/2) + (2 * wt), (fl/2) - (2 * wt)],
+                        [-(fw/2) + (2 * wt), (fw/2) - (2 * wt)]]
 
         # Collecting private parameters
         render_enabled = rospy.get_param('~RENDER_ENABLED', False)
@@ -88,7 +93,8 @@ class SimulatorROS(object):
         self.check_urdf(urdf_paths["plane"])
 
         # Creating physics simulator
-        self.sim = simulator.Sim(urdf_paths, field_setup, render_enabled)
+        self.sim = simulator.Sim(
+            urdf_paths, field_setup, spawn_bounds, render_enabled)
 
         self.lock = Lock()
         self.throttle_cmd = 0.

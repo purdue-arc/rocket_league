@@ -33,7 +33,7 @@ import math
 import pygame
 
 # Local modules
-from visualizer.asset import Asset
+from visualizer.asset import Asset, Image, Rectangle
 
 
 class Window(object):
@@ -47,12 +47,14 @@ class Window(object):
         """Exception for when pygame is shut down"""
         pass
 
-    def __init__(self, map_width, map_length):
+    def __init__(self, map_width, map_length, wall_thickness):
         # Support for 1080p monitors
-        self.scaling = 1080 * 0.7 / map_length
+        self.scaling = 1080 * 0.7 / (map_length + wall_thickness)
 
-        self.window_length = int(map_length * self.scaling)
-        self.window_width = int(map_width * self.scaling)
+        self.window_length = int(
+            (map_length + wall_thickness) * self.scaling)
+        self.window_width = int(
+            (map_width + wall_thickness) * self.scaling)
 
         self.assets = {}
 
@@ -60,10 +62,15 @@ class Window(object):
         self._screen = pygame.display.set_mode(
             (self.window_width, self.window_length))
 
-    def createAsset(self, id, img_path, width, length, initPos=None):
+    def createAsset(self, id, width, length, initPos=None, imgPath=None, color=None):
         width = int(width * self.scaling)
         length = int(length * self.scaling)
-        self.assets[id] = Asset(img_path, width, length)
+
+        if imgPath is None:
+            self.assets[id] = Rectangle(width, length, color)
+        else:
+            self.assets[id] = Image(width, length, imgPath)
+
         if initPos is not None:
             self.updateAssetPos(id, initPos[0], initPos[1])
 
