@@ -1,0 +1,66 @@
+#!/usr/bin/env python3  
+"""Very simple node to estimate odometry from poses over time.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  1. Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+  3. Neither the name of the copyright holder nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
+buffer_size = 5
+
+# ROS
+import rospy
+from geometry_msgs.msg import PoseWithCovarianceStamped
+
+import collections
+import rospy
+from geometry_msgs.msg import PoseWithCovarianceStamped, Pose
+
+buffer = collections.deque(maxlen=buffer_size)
+
+def callback(sub):
+  buffer.append(sub)
+
+  temp_x = 0
+  temp_y = 0
+
+  for i in buffer:
+    temp_x += i.pose.pose.position.x
+    temp_y += i.pose.pose.position.y
+
+  temp_x = temp_x / buffer_size
+  temp_y = temp_y / buffer_size
+
+  sub.pose.pose.position.x = temp_x
+  sub.pose.pose.position.y = temp_y
+
+
+  pub.publish(sub)
+
+
+rospy.init_node('car_smoother')
+
+pub = rospy.Publisher('car0/smooth_pose', PoseWithCovarianceStamped, queue_size=1)
+
+rospy.Subscriber('car0/pose', PoseWithCovarianceStamped, callback)
+rospy.spin()

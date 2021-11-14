@@ -24,7 +24,7 @@
   <!-- Localization -->
   <node pkg="camera_tracking" type="localizer" name="localizer" output="screen">
     <param name="origin_id" type="str" value="0"/>
-    <param name="buffer_size" type="int" value="100"/>
+    <param name="buffer_size" type="int" value="300"/>
     <rosparam param="pub_topics">
       '0': /origin/pose
       '2': /car0/pose
