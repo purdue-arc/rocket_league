@@ -51,6 +51,16 @@ RUN pip3 install pybullet stable-baselines3 && \
     ros-${ROS_DISTRO}-pointgrey-camera-driver && \
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
+# Install eigen
+RUN mkdir eigen && \
+    cd eigen && \
+    wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && \
+    tar xzf eigen-3.4.0.tar.gz && \
+    cmake eigen-3.4.0 && \
+    make install && \
+    cd .. && \
+    rm -rf eigen
+
 # create user
 ARG USER=arc
 ARG PW=password

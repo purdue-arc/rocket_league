@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 find_package(OpenCV REQUIRED core)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Eigen3 REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -119,7 +119,7 @@ catkin_package(
     image_transport
     cv_bridge
     apriltag_ros
-  DEPENDS OpenCV Boost
+  DEPENDS OpenCV
 )
 
 ###########
@@ -132,7 +132,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 ## Declare a C++ library
@@ -248,7 +248,7 @@ target_link_libraries(${PROJECT_NAME}_chromatag_preprocess_node
 )
 target_link_libraries(${PROJECT_NAME}_localizer_node
   ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
+  Eigen3::Eigen
 )
 
 #############

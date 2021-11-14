@@ -1,5 +1,5 @@
 #include <camera_tracking/localizer.h>
-#include <boost/numeric/ublas/matrix.hpp>
+#include <Eigen/Dense>
 
 namespace camera_tracking {
 
@@ -29,13 +29,21 @@ std::string Localizer::idsToString(std::vector<int> ids) {
 }
 
 void Localizer::callback(apriltag_ros::AprilTagDetectionArrayConstPtr msg) {
+  Eigen::Matrix3d baseRotation;
+  std::map<std::string, Eigen::Matrix4d> transforms;
+
   for (auto& detection : msg->detections) {
     std::string idStr = idsToString(detection.id);
+    geometry_msgs::Quaternion rot = detection.pose.pose.pose.orientation;
+    geometry_msgs::Point pos = detection.pose.pose.pose.position;
+    Eigen::Quaterniond quat(rot.w, rot.x, rot.y, rot.z);
+
     if (idStr == _originId) {
-      // TODO
+      baseRotation = quat.toRotationMatrix();
     } else if (_pubs.find(idStr) != _pubs.end()) {
-      ros::Publisher& pub = _pubs[idStr];
-      pub.publish(detection.pose);
+      transforms[idStr].block(0, 0, 3, 3) << quat.toRotationMatrix();
+      transforms[idStr].col(3) << pos.x, pos.y, pos.z, 1.0;
+      transforms[idStr].row(3).head(3) << 0.0, 0.0, 0.0;
     } else {
       ROS_INFO("Detected tag with unknown id: %s", idStr.c_str());
     }

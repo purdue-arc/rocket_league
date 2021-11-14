@@ -16,8 +16,6 @@ int main(int argc, char* argv[]) {
   ros::param::get("~pub_topics", pubTopics);
   ros::param::param<int>("~buffer_size", bufferSize, 10);
   ros::param::param<int>("~queue_size", queueSize, 100);
-  for (auto& kv : pubTopics)
-    ROS_INFO("%s: %s", kv.first.c_str(), kv.second.c_str());
 
   camera_tracking::Localizer localizer(nh, detectionTopic, originId, pubTopics,
                                        bufferSize, queueSize);
