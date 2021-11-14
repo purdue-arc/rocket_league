@@ -170,7 +170,7 @@ class Sim(object):
             self._ballID, randBallPos, p.getQuaternionFromEuler([0, 0, 0])
         )
 
-        for car in self.cars:
+        for car in self._cars.values():
             randCarPos = [random.uniform(self.field_setup["flbackwall"][0], self.field_setup["blbackwall"][0]),
                           random.uniform(self.field_setup["lsidewall"][1], self.field_setup["rsidewall"][1]), 0.125]
             randCarOrient = [0, 0, random.uniform(0, 2 * math.pi)]

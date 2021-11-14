@@ -111,7 +111,7 @@ class Car(object):
         _, orientation = p.getBasePositionAndOrientation(self.id)
         heading = p.getEulerFromQuaternion(orientation)[2]
         r_inv = np.array([[math.cos(heading), -math.sin(heading), 0.],
-                         [math.sin(heading), math.cos(heading), 0.],
+                             [math.sin(heading), math.cos(heading), 0.],
                          [0., 0., 1.]], dtype=np.float)
         linear, angular = p.getBaseVelocity(self.id)
         linear = r_inv @ linear
