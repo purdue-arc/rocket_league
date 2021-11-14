@@ -55,7 +55,7 @@ class Sim(object):
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
 
         randBallPos = [random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
-                       random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]), 0.125]
+                       random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]), 0.05]
         self._ballID = p.loadURDF(
             urdf_paths["ball"], randBallPos, zeroOrient)
 
@@ -109,7 +109,7 @@ class Sim(object):
         self._cars = {}
 
         randCarPos = [random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
-                      random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]), 0.125]
+                      random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]), 0.05]
         randCarOrient = [0, 0, random.uniform(0, 2 * math.pi)]
         self._carID = p.loadURDF(
             urdf_paths["car"], randCarPos, zeroOrient)
