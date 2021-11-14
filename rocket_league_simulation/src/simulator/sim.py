@@ -48,12 +48,16 @@ class Sim(object):
         else:
             self._client = p.connect(p.DIRECT)
 
+        self.field_setup = field_setup
         p.setAdditionalSearchPath(p_data.getDataPath())
         self._planeID = p.loadURDF(urdf_paths["plane"])
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
+
+        randBallPos = [random.uniform(field_setup["flbackwall"][0], field_setup["blbackwall"][0]),
+                       random.uniform(field_setup["lsidewall"][1], field_setup["rsidewall"][1]), 0.125]
         self._ballID = p.loadURDF(
-            urdf_paths["ball"], field_setup["ball"], zeroOrient)
+            urdf_paths["ball"], randBallPos, zeroOrient)
 
         self._goalAID = p.loadURDF(
             urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
@@ -65,13 +69,13 @@ class Sim(object):
 
         p.loadURDF(
             urdf_paths["sidewall"],
-            field_setup["leftsidewall"],
+            field_setup["lsidewall"],
             zeroOrient,
             useFixedBase=1,
         )
         p.loadURDF(
             urdf_paths["sidewall"],
-            field_setup["rightsidewall"],
+            field_setup["rsidewall"],
             zeroOrient,
             useFixedBase=1,
         )
@@ -103,10 +107,14 @@ class Sim(object):
         )
 
         self._cars = {}
+
+        randCarPos = [random.uniform(field_setup["flbackwall"][0], field_setup["blbackwall"][0]),
+                      random.uniform(field_setup["lsidewall"][1], field_setup["rsidewall"][1]), 0.125]
+        randCarOrient = [0, 0, random.uniform(0, 2 * math.pi)]
         self._carID = p.loadURDF(
-            urdf_paths["car"], field_setup["car"], zeroOrient)
+            urdf_paths["car"], randCarPos, zeroOrient)
         self._cars[self._carID] = Car(
-            self._carID, 0.5, field_setup["car"], [0, 0, math.pi / 2]
+            self._carID, 0.5, randCarPos, randCarOrient,
         )
 
         self.touched_last = None
@@ -156,11 +164,16 @@ class Sim(object):
         self.winner = None
         self.touched_last = None
 
+        randBallPos = [random.uniform(self.field_setup["flbackwall"][0], self.field_setup["blbackwall"][0]),
+                       random.uniform(self.field_setup["lsidewall"][1], self.field_setup["rsidewall"][1]), 0.125]
         p.resetBasePositionAndOrientation(
-            self._ballID, self._ballInitPos, self._ballInitOrient
+            self._ballID, randBallPos, p.getQuaternionFromEuler([0, 0, 0])
         )
 
         for car in self.cars:
-            car.reset()
+            randCarPos = [random.uniform(self.field_setup["flbackwall"][0], self.field_setup["blbackwall"][0]),
+                          random.uniform(self.field_setup["lsidewall"][1], self.field_setup["rsidewall"][1]), 0.125]
+            randCarOrient = [0, 0, random.uniform(0, 2 * math.pi)]
+            car.reset(randCarPos, randCarOrient)
 
         self.running = True

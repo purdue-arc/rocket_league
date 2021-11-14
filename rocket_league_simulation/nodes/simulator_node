@@ -53,19 +53,12 @@ class SimulatorROS(object):
         fw = rospy.get_param('FIELD_WIDTH')
         fl = rospy.get_param('FIELD_LENGTH')
         gw = rospy.get_param('GOAL_WIDTH')
+
         field_setup = {}
-        # field_setup["car"] = [0, 0, 0.125]
-        # field_setup["ball"] = [0, 0.1, 0.125]
-        # field_setup["goalA"] = [0, fl/2, 0.125]
-        # field_setup["goalB"] = [0, -fl/2, 0.125]
-        # field_setup["rightsidewall"] = [fw/2, 0, 0.125]
-        # field_setup["leftsidewall"] = [-fw/2, 0, 0.125]
-        field_setup["car"] = [0, 0, 0.125]
-        field_setup["ball"] = [0, 0.1, 0.125]
         field_setup["goalA"] = [fl/2, 0, 0.125]
         field_setup["goalB"] = [-fl/2, 0, 0.125]
-        field_setup["rightsidewall"] = [0, fw/2, 0.125]
-        field_setup["leftsidewall"] = [0, -fw/2, 0.125]
+        field_setup["rsidewall"] = [0, fw/2, 0.125]
+        field_setup["lsidewall"] = [0, -fw/2, 0.125]
 
         bww = (fw-gw)/2
         offset = (gw+bww)/2

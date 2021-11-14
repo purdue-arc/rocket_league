@@ -117,9 +117,9 @@ class Car(object):
         linear = r_inv @ linear
         return (linear, angular)
 
-    def reset(self):
+    def reset(self, pos, orient):
         self._steering_angle = 0
         self._throttle_state = np.zeros((2,), dtype=np.float)
 
         p.resetBasePositionAndOrientation(
-            self.id, self._initPos, p.getQuaternionFromEuler(self._initOrient))
+            self.id, pos, p.getQuaternionFromEuler(orient))
