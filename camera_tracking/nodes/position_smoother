@@ -35,35 +35,63 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 import collections
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, Pose
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from threading import Lock
 
 buffer = collections.deque(maxlen=buffer_size)
+lock = Lock()
 
-def callback(sub):
-  buffer.append(sub)
+def callback(pose):
+  x = pose.pose.pose.position.x
+  y = pose.pose.pose.position.y
+  __, __, yaw = euler_from_quaternion([
+    pose.pose.pose.orientation.x,
+    pose.pose.pose.orientation.y,
+    pose.pose.pose.orientation.z,
+    pose.pose.pose.orientation.w
+  ])
 
+  sample = (x, y, yaw)
+  with lock:
+    buffer.append(sample)
+  
+def sample():
   temp_x = 0
   temp_y = 0
-  temp_z = 0
+  temp_yaw = 0
 
-  for i in buffer:
-    temp_x += i.pose.pose.position.x
-    temp_y += i.pose.pose.position.y
-    temp_z += i.pose.pose.position.z
+  with lock:
+    for sample in buffer:
+      temp_x += sample[0]
+      temp_y += sample[1]
+      temp_yaw += sample[2]
 
-  temp_x = temp_x / buffer_size
-  temp_y = temp_y / buffer_size
-  temp_z = temp_z / buffer_size
+    temp_x /= buffer_size
+    temp_y /= buffer_size
+    temp_yaw /= buffer_size
 
-  sub.pose.pose.position.x = temp_x
-  sub.pose.pose.position.y = temp_y
-
-
-  pub.publish(sub)
-
+  pose = PoseWithCovarianceStamped()
+  pose.header.stamp = rospy.Time.now()
+  pose.header.frame_id = "map"
+  pose.pose.pose.position.x = temp_x
+  pose.pose.pose.position.y = temp_y
+  x, y, z, w = quaternion_from_euler(0, 0, temp_yaw)
+  pose.pose.pose.orientation.x = x
+  pose.pose.pose.orientation.y = y
+  pose.pose.pose.orientation.z = z
+  pose.pose.pose.orientation.w = w
+  pub.publish(pose)
 
 rospy.init_node('car_smoother')
 
 pub = rospy.Publisher('car0/smooth_pose', PoseWithCovarianceStamped, queue_size=1)
 
 rospy.Subscriber('car0/pose', PoseWithCovarianceStamped, callback)
-rospy.spin()
+
+rate = rospy.Rate(30.0)
+while not rospy.is_shutdown():
+    sample()
+    try:
+        rate.sleep()
+    except rospy.ROSInterruptException:
+        pass
