@@ -14,16 +14,18 @@ bagname = "2021-10-31-19-58-57.bag";
 bag = rosbag(strcat(pathname, bagname));
 msg = readMessages(bag);
 
-vx = zeros(1, length(msg) - 1);
-vy = zeros(1, length(msg) - 1);
-vz = zeros(1, length(msg) - 1);
-t = zeros(1, length(msg) - 1);
+vx = [];
+vy = [];
+vz = [];
+t = [];
+j = 0;
 for i = 1:(length(msg) - 1)
     if(msg{i + 1}.MessageType == "geometry_msgs/PoseWithCovarianceStamped" && msg{i}.MessageType == "geometry_msgs/PoseWithCovarianceStamped")
-        vx(i) = msg{i + 1}.Pose.Pose.Position.X - msg{i}.Pose.Pose.Position.X;
-        vy(i) = msg{i + 1}.Pose.Pose.Position.Y - msg{i}.Pose.Pose.Position.Y;
-        vx(i) = msg{i + 1}.Pose.Pose.Position.Z - msg{i}.Pose.Pose.Position.Z;
-        t(i) = i;
+        vx = [vx, msg{i + 1}.Pose.Pose.Position.X - msg{i}.Pose.Pose.Position.X];
+        vy = [vy, msg{i + 1}.Pose.Pose.Position.Y - msg{i}.Pose.Pose.Position.Y];
+        vz = [vz, msg{i + 1}.Pose.Pose.Position.Z - msg{i}.Pose.Pose.Position.Z];
+        t = [t, j];
+        j = j + 1;
     end
 end
 vx2 = vx .^ 2;
