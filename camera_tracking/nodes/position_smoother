@@ -43,13 +43,16 @@ def callback(sub):
 
   temp_x = 0
   temp_y = 0
+  temp_z = 0
 
   for i in buffer:
     temp_x += i.pose.pose.position.x
     temp_y += i.pose.pose.position.y
+    temp_z += i.pose.pose.position.z
 
   temp_x = temp_x / buffer_size
   temp_y = temp_y / buffer_size
+  temp_z = temp_z / buffer_size
 
   sub.pose.pose.position.x = temp_x
   sub.pose.pose.position.y = temp_y
