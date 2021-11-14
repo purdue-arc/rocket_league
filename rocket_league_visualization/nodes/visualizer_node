@@ -93,6 +93,7 @@ class VisualizerROS(object):
             6, backwall_width, wall_thickness, color=(0, 0, 0),
             initPos=(-(field_length + (wall_thickness / 2.)) / 2., -(field_width / 2.) + (backwall_width / 2.)))
 
+
         car_img_path = rospy.get_param("~CAR_IMG_PATH", None)
         if car_img_path is not None:
             self.car_id = 7
@@ -104,6 +105,23 @@ class VisualizerROS(object):
             self.ball_id = 8
             self.window.createAsset(
                 self.ball_id, ball_radius * 2, ball_radius * 2, imgPath=ball_img_path)
+
+        #TODO: Verify wall thickness and goal positions
+        goal_img_path = rospy.get_param("~GOAL_IMG_PATH", None)
+        if goal_img_path is not None:
+            #Top Goal:
+            self.goal1_id = 9
+            self.window.createAsset(
+                self.goal1_id, goal_width, wall_thickness, imgPath=goal_img_path
+            )
+            self.window.updateAssetPos(self.goal1_id, (field_length / 2)  + (wall_thickness / 4), 0)
+            #Bottom Goal:
+            self.goal2_id = 10
+            self.window.createAsset(
+                self.goal2_id, goal_width, wall_thickness, imgPath=goal_img_path
+            )
+            self.window.updateAssetPos(self.goal2_id, -((field_length / 2)  + (wall_thickness / 4)), 0)
+            self.window.updateAssetAngle(self.goal2_id, 180)
 
         self.lock = Lock()
         self.last_command = None
