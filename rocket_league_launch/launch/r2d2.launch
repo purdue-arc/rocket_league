@@ -1,5 +1,8 @@
 <launch>
     <include file="$(find camera_tracking)/launch/pointgrey_camera.launch">
-        <arg name="camera_name" value="cam0"/>
+        <arg name="camera_name" value="cam2"/>
+    </include>
+    <include file="$(find camera_tracking)/launch/pointgrey_camera.launch">
+        <arg name="camera_name" value="cam1"/>
     </include>
 </launch>
