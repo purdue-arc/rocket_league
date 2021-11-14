@@ -5,6 +5,7 @@
         <color rgba="0.25 0.25 0.25 1"/>
     </material>
 
+
     <link name="base_link">
         <visual>
             <geometry>
