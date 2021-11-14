@@ -1,70 +1,42 @@
 pathname = "../../../bags/"; %change this to the directory of YOUR rosbag
-%uncomment the right rosbag file
-%bagname = "2021-10-31-19-51-40.bag";
-bagname = "2021-10-31-19-53-51.bag";
-%bagname = "2021-10-31-19-55-46.bag";
-%bagname = "2021-10-31-19-56-14.bag";
-%bagname = "2021-10-31-19-56-42.bag";
-%bagname = "2021-10-31-19-57-14.bag";
-%bagname = "2021-10-31-19-57-30.bag";
-%bagname = "2021-10-31-19-58-14.bag";
-%bagname = "2021-10-31-19-58-28.bag";
-%bagname = "2021-10-31-19-58-57.bag";
-%bagname = "2021-10-31-19-59-32.bag";
+bagname = "2021-11-14-23-12-25.bag";
 
 bag = rosbag(strcat(pathname, bagname));
 
-% velocity_time = [];
-% velocity_value = [];
-%
-% last_pose = [0 0 0];
-% last_time = 0;
-% 
-% msgs = readMessages(select(bag, "Topic", "/car0/pose"));
-% for i = 1:numel(msgs)
-%     x = msgs{i}.Pose.Pose.Position.X;
-%     y = msgs{i}.Pose.Pose.Position.Y;
-%     z = msgs{i}.Pose.Pose.Position.Z;
-%     pose = [x y z];
-%     t = msgs{i}.Header.Stamp.seconds();
-%         
-%     if i == 1
-%         velocity_value = [velocity_value 0];
-%         velocity_time = [velocity_time t];
-%         last_pose = pose;
-%         last_time = t;
-%     else
-%         if t ~= last_time
-%             delta = pose - last_pose;
-%             mag = sqrt(sum(delta.^2));
-%             v = mag / (t - last_time);
-%             velocity_value = [velocity_value v];
-%             velocity_time = [velocity_time t];
-%             last_pose = pose;
-%             last_time = t;
-%         end
-%     end
-% end
+raw_poses = timeseries(select(bag, "Topic", "/car0/pose"));
+poses = timeseries(select(bag, "Topic", "/car0/smooth_pose"));
 
-msgs = timeseries(select(bag, "Topic", "control_effort/throttle"));
-msgs.Time = msgs.Time - msgs.Time(1);
-% effort_time = [];
-% effort_value = [];
-% for i = 1:numel(msgs)
-%     t = msgs{i}.Header.Stamp.seconds();
-%     v = msgs{i}.data;
-% 
-%     effort_value = [effort_value v];
-%     effort_time = [effort_time t];
-% end   
+% Optionally, overwrite time with more precise values
+% poses.Time = poses.Data(:, 1) + poses.Data(:, 1).*10^-9;
 
+% Isolate position (x, y, z)
+raw_poses.Data = raw_poses.Data(:, 4:6);
+poses.Data = poses.Data(:, 4:6);
 
-% t0 = min(effort_time(1), velocity_time(1));
-% effort_time = effort_time - t0;
-velocity_time = velocity_time - velocity_time(1);
+% Calculate velocity
+delta_xyz = poses.Data - [0 0 0; poses.Data(1:end-1, :)];
+delta_t = poses.Time - [0; poses.Time(1:end-1, :)];
+v_xyz = delta_xyz ./ delta_t;
+v = sqrt(sum(v_xyz.^2, 2));
+
+velocities = timeseries(smoothdata(v), poses.Time);
+
+% Calculate effort
+efforts = timeseries(select(bag, "Topic", "control_effort/throttle"));
+
+t0 = min(poses.Time(1), efforts.Time(1));
+raw_poses.Time = raw_poses.Time - t0;
+poses.Time = poses.Time - t0;
+velocities.Time = velocities.Time - t0;
+efforts.Time = efforts.Time - t0;
 
 hold on
 yyaxis left
-plot(msgs.Time, msgs.Data);
+plot(velocities);
 yyaxis right
-plot(velocity_time, velocity_value);
+plot(efforts);
+
+figure
+hold on
+plot(raw_poses);
+plot(poses);
