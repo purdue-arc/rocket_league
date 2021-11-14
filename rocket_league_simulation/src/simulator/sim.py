@@ -42,15 +42,14 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled, field_length, goal_offset):
+    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled, field_length):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
             self._client = p.connect(p.DIRECT)
 
         self.field_length = field_length
-        self.goal_offset = goal_offset
-        
+
         self.spawn_bounds = spawn_bounds
         p.setAdditionalSearchPath(p_data.getDataPath())
         self._planeID = p.loadURDF(urdf_paths["plane"])
