@@ -94,7 +94,7 @@ class SimulatorROS(object):
 
         # Creating physics simulator
         self.sim = simulator.Sim(
-            urdf_paths, field_setup, spawn_bounds, render_enabled)
+            urdf_paths, field_setup, spawn_bounds, render_enabled, fl)
 
         self.lock = Lock()
         self.throttle_cmd = 0.
