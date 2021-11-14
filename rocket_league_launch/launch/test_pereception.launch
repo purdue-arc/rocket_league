@@ -15,11 +15,4 @@
             <arg name="camera_name" value="cam1"/>
         </include>
     </group>
-
-    <!--node pkg="camera_tracking" type="tf_parser" name="tf_parser" output="log">
-        <rosparam param="camera_names">[cam0, cam1]</rosparam>
-        <rosparam param="tag_names">[tag_0, tag_69]</rosparam>
-    </node-->
-
-    <node pkg="rosbag" type="play" name="player" args="--skip-empty=0.5 --clock /home/danielg/catkin_ws/data/out.bag" required="true" />
 </launch>
