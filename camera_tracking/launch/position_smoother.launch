@@ -1,0 +1,7 @@
+<launch>
+
+  <rosparam command="load" file="$(find camera_tracking)/config/$(arg camera_name)/pointgrey.yaml"/>
+
+  <node pkg="rosbag" type="record" name="record" output="screen" />
+
+</launch>
