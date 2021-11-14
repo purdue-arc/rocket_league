@@ -29,28 +29,30 @@ License:
 """
 
 # 3rd Party Modules
+import math
 import pygame
 
 
 class Asset(object):
     def __init__(self, img_path, width, length):
-        self.img = pygame.image.load(img_path)
-        self.img = pygame.transform.scale(self.img, (width, length))
-
         self.width = width
         self.length = length
         self.pos = (0, 0)
         self.angle = 0
 
+        self.init_img = pygame.image.load(img_path)
+        self.init_img = pygame.transform.scale(self.init_img, (width, length))
+        self.img = self.init_img
+
     def setPos(self, x, y):
         self.pos = (x, y)
 
     def setAngle(self, angle):
-        self.angle = angle
+        if angle < 0:
+            angle = 360. + angle
+
+        self.img = pygame.transform.rotate(self.init_img, angle)
 
     def blit(self, screen):
-        rotated_image = pygame.transform.rotate(self.img, self.angle)
-        new_rect = rotated_image.get_rect(
-            center=self.img.get_rect(topleft=self.pos).center)
-
-        screen.blit(rotated_image, new_rect)
+        rect = self.img.get_rect(center=self.pos)
+        screen.blit(self.img, rect)

@@ -115,7 +115,6 @@ class Car(object):
                          [0., 0., 1.]], dtype=np.float)
         linear, angular = p.getBaseVelocity(self.id)
         linear = r_inv @ linear
-        print("Vel: {}".format(linear))
         return (linear, angular)
 
     def reset(self):
