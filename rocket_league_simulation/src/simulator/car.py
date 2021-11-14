@@ -86,7 +86,7 @@ class Car(object):
         w = throttle * math.tan(self._steering_angle) * \
             math.cos(beta) / self._length
 
-        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, 0.1)
+        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, 0)
         orient = p.getQuaternionFromEuler([0., 0., heading + w * dt])
         orient = self.orientToGlobal(orient)
 
