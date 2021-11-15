@@ -58,6 +58,9 @@ class RocketLeagueInterface(ROSInterface):
         rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
         rospy.Subscriber('match_status', MatchStatus, self._score_cb)
 
+        # block until environment is ready
+        rospy.wait_for_service('sim_reset')
+
     @property
     def action_space(self):
         """The Space object corresponding to valid actions."""

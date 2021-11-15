@@ -42,21 +42,24 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, urdf_paths, field_setup, render_enabled):
+    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled, field_length):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
             self._client = p.connect(p.DIRECT)
 
+        self.field_length = field_length
+
+        self.spawn_bounds = spawn_bounds
         p.setAdditionalSearchPath(p_data.getDataPath())
         self._planeID = p.loadURDF(urdf_paths["plane"])
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
-        
-        self._ballInitPos = field_setup["ball"]
-        self._ballInitOrient = zeroOrient
+
+        randBallPos = [random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
+                       random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]), 0.05]
         self._ballID = p.loadURDF(
-            urdf_paths["ball"], self._ballInitPos, self._ballInitOrient)
+            urdf_paths["ball"], randBallPos, zeroOrient)
 
         self._goalAID = p.loadURDF(
             urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
@@ -68,13 +71,13 @@ class Sim(object):
 
         p.loadURDF(
             urdf_paths["sidewall"],
-            field_setup["leftsidewall"],
+            field_setup["lsidewall"],
             zeroOrient,
             useFixedBase=1,
         )
         p.loadURDF(
             urdf_paths["sidewall"],
-            field_setup["rightsidewall"],
+            field_setup["rsidewall"],
             zeroOrient,
             useFixedBase=1,
         )
@@ -106,10 +109,14 @@ class Sim(object):
         )
 
         self._cars = {}
+
+        randCarPos = [random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
+                      random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]), 0.05]
+        randCarOrient = [0, 0, random.uniform(0, 2 * math.pi)]
         self._carID = p.loadURDF(
-            urdf_paths["car"], field_setup["car"], zeroOrient)
+            urdf_paths["car"], randCarPos, zeroOrient)
         self._cars[self._carID] = Car(
-            self._carID, 0.5, field_setup["car"], [0, 0, math.pi / 2]
+            self._carID, 0.5, randCarPos, randCarOrient,
         )
 
         self.touched_last = None
@@ -159,11 +166,16 @@ class Sim(object):
         self.winner = None
         self.touched_last = None
 
+        randBallPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                       random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]), 0.125]
         p.resetBasePositionAndOrientation(
-            self._ballID, self._ballInitPos, self._ballInitOrient
+            self._ballID, randBallPos, p.getQuaternionFromEuler([0, 0, 0])
         )
 
         for car in self._cars.values():
-            car.reset()
+            randCarPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                          random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]), 0.125]
+            randCarOrient = [0, 0, random.uniform(0, 2 * math.pi)]
+            car.reset(randCarPos, randCarOrient)
 
         self.running = True

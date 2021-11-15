@@ -86,7 +86,7 @@ class Car(object):
         w = throttle * math.tan(self._steering_angle) * \
             math.cos(beta) / self._length
 
-        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, 0.1)
+        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, 0)
         orient = p.getQuaternionFromEuler([0., 0., heading + w * dt])
         orient = self.orientToGlobal(orient)
 
@@ -117,9 +117,9 @@ class Car(object):
         linear = r_inv @ linear
         return (linear, angular)
 
-    def reset(self):
+    def reset(self, pos, orient):
         self._steering_angle = 0
         self._throttle_state = np.zeros((2,), dtype=np.float)
 
         p.resetBasePositionAndOrientation(
-            self.id, self._initPos, p.getQuaternionFromEuler(self._initOrient))
+            self.id, pos, p.getQuaternionFromEuler(orient))

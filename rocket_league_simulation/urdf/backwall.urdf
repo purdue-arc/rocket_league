@@ -5,19 +5,7 @@
         <color rgba="0.25 0.25 0.25 1"/>
     </material>
 
-    <!-- <link name="base_link">
-        <visual>
-            <geometry>
-                <box size="1.067 0.25 0.25"/>
-            </geometry>
-            <material name="gray"/>
-        </visual>
-        <collision>
-            <geometry>
-                <box size="1.067 0.25 0.25"/>
-            </geometry>
-        </collision>
-    </link> -->
+
     <link name="base_link">
         <visual>
             <geometry>
