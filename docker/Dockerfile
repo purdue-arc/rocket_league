@@ -15,7 +15,7 @@ RUN apt update && \
     # Basics
     sudo tmux nano vim git wget net-tools iputils-ping x11-apps \
     mesa-utils python3-dev python3-pip python3-tk software-properties-common \
-    pylint clang-format jq swig zsh \
+    pylint clang-format jq swig zsh libeigen3-dev \
     # ROS
     ros-${ROS_DISTRO}-desktop-full \
     python3-catkin-tools \
@@ -50,16 +50,6 @@ RUN pip3 install pybullet stable-baselines3 && \
     ros-${ROS_DISTRO}-apriltag-ros \
     ros-${ROS_DISTRO}-pointgrey-camera-driver && \
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
-
-# Install eigen
-RUN mkdir eigen && \
-    cd eigen && \
-    wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && \
-    tar xzf eigen-3.4.0.tar.gz && \
-    cmake eigen-3.4.0 && \
-    make install && \
-    cd .. && \
-    rm -rf eigen
 
 # create user
 ARG USER=arc
