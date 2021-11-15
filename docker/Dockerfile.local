@@ -1,4 +1,5 @@
-FROM purduearc/rocket-league
+ARG TAG=latest
+FROM purduearc/rocket-league:${TAG}
 
 USER root
 

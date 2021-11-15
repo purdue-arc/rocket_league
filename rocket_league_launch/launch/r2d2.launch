@@ -1,5 +1,9 @@
 <launch>
     <include file="$(find camera_tracking)/launch/pointgrey_camera.launch">
-        <arg name="camera_name" value="cam0"/>
+        <arg name="camera_name" value="cam2"/>
     </include>
+    <include file="$(find camera_tracking)/launch/pointgrey_camera.launch">
+        <arg name="camera_name" value="cam3"/>
+    </include>
+    <node pkg="camera_tracking" type="position_smoother" name="position_smoother" />
 </launch>

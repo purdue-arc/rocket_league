@@ -1,0 +1,18 @@
+<launch>
+    <group ns="cam0">
+        <include file="$(find camera_tracking)/launch/camera_boilerplate.launch">
+            <arg name="load_manager" value="true"/>
+            <arg name="manager_name" value="camera_manager"/>
+            <arg name="manager_threads" value="4"/>
+            <arg name="camera_name" value="cam0"/>
+        </include>
+    </group>
+    <group ns="cam1">
+        <include file="$(find camera_tracking)/launch/camera_boilerplate.launch">
+            <arg name="load_manager" value="true"/>
+            <arg name="manager_name" value="camera_manager"/>
+            <arg name="manager_threads" value="4"/>
+            <arg name="camera_name" value="cam1"/>
+        </include>
+    </group>
+</launch>

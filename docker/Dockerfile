@@ -15,7 +15,7 @@ RUN apt update && \
     # Basics
     sudo tmux nano vim git wget net-tools iputils-ping x11-apps \
     mesa-utils python3-dev python3-pip python3-tk software-properties-common \
-    pylint clang-format jq swig zsh \
+    pylint clang-format jq swig zsh libeigen3-dev \
     # ROS
     ros-${ROS_DISTRO}-desktop-full \
     python3-catkin-tools \
