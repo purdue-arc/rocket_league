@@ -31,7 +31,7 @@
 //ros stuff
 //#include <ros/ros.h>
 #include <image_transport/image_transport.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <image_transport/camera_subscriber.h>
 
 //open cv stuff
@@ -53,15 +53,11 @@ BallDetection::BallDetection() :
     nh{},
     pnh{"~"},
     image_transport{nh},
-    posePub{nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(
-        "ball_pose", 10)},
+    vecPub{nh.advertise<geometry_msgs::Vector3Stamped>(
+        "ball_vec", 10)},
     camera_subscriber{image_transport.subscribeCamera(
         "image_rect_color", 10, &BallDetection::BallCallback, this)},
-    quad{pnh.param<int>("quad", 0)},
-    originX{pnh.param<double>("originX", 0)},
-    originY{pnh.param<double>("originY", 0)},
     showImage{pnh.param<bool>("showImage", false)},
-    height{pnh.param<int>("cam_height", 1220)},
     minHue{pnh.param<int>("min_hue", 060)},
     minSat{pnh.param<int>("min_sat", 135)},
     minVib{pnh.param<int>("min_vib", 050)},
@@ -78,7 +74,7 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
     cv_bridge::CvImagePtr cv_ptr;
     try {
         //define publisher
-        geometry_msgs::PoseWithCovarianceStamped pose;
+        geometry_msgs::Vector3Stamped vec;
         // Convert the ROS message  
         cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
         // Store the values of the OpenCV-compatible image
@@ -114,46 +110,11 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             camera.fromCameraInfo(info);
             cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
             
-            //calculating polar coordinates with camera at (0,0)
-            cv::Point3d down = cv::Point3d(0, 0, 1);         
-            double theta_1 = acos(1 / sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z));
-            double r = height * tan(theta_1);
-            double theta = atan(cam.y/cam.x);
-            //convert from polar to cartesian
-            double cartesianX = r * abs(cos(theta));
-            double cartesianY = r * abs(sin(theta));
-            //setting the sign
-            if (cam.x <= 0) {
-                cartesianX *= -1;
-            }
-            if (cam.y >= 0) {
-                cartesianY *= -1;
-            }
-            //honeslty i'm not sure if this is going to work, but i'll find out soon enough.
-            cartesianX -= originX;
-            cartesianY -= originY;
-            //same story; sets quadrant stuff
-            switch(quad) {
-                case 2:
-                    cam.x *= -1;
-                    break;
-                case 3:
-                    cam.x *= -1;
-                    cam.y *= -1;
-                    break;
-                case 4:
-                    cam.y *= -1;
-                    break;
-                default:
-                    ROS_INFO("other quad (probably 1)");
-                    break;
-            }
-            // set x,y coord
-            pose.pose.pose.position.x = cartesianX;
-            pose.pose.pose.position.y = cartesianY;
-            //i'm not sorry.
-            pose.pose.pose.position.z = cv::contourArea(contours.at(getMaxAreaContourId(contours)));
-            ROS_INFO("x: %f, y: %f, z: 0.0", centerX, centerY);
+            //create the vector to publish
+            vec.vector.x = cam.x;
+            vec.vector.y = cam.y;
+            vec.vector.z = cam.z;
+            
             if (showImage) {
                 cv::namedWindow("image");
                 cv::namedWindow("threshold");
@@ -164,23 +125,16 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
                 cv::imshow("threshold", frame_threshold);
                 cv::waitKey(30);
             }
+            
+            vec.header = msg->header;
+            vecPub.publish(vec);
         }
-        else {
-            pose.pose.pose.position.x = std::nan("1");
-            pose.pose.pose.position.y = std::nan("1");
-            pose.pose.pose.position.z = 0;
-        }
-        pose.pose.pose.orientation.x = 0.0;
-        pose.pose.pose.orientation.y = 0.0;
-        pose.pose.pose.orientation.z = 0.0;
-        pose.pose.pose.orientation.w = 1.0;
-        pose.header = msg->header;
-        posePub.publish(pose);
     }
     catch (cv_bridge::Exception& e) {
         ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
     }
 }
+
 int getMaxAreaContourId(std::vector <std::vector<cv::Point>> contours) {
     double maxArea = 0;
     //calculates the area of each contour and then returns the largest one.

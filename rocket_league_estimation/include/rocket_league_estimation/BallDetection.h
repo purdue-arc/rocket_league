@@ -46,7 +46,7 @@ private:
     ros::NodeHandle pnh;
     image_transport::ImageTransport image_transport;
     image_transport::CameraSubscriber camera_subscriber;
-    ros::Publisher posePub;
+    ros::Publisher vecPub;
     ros::Subscriber detectionSub;
     int quad, height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
     double originX, originY;
