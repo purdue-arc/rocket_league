@@ -48,7 +48,7 @@ private:
     image_transport::CameraSubscriber camera_subscriber;
     ros::Publisher vecPub;
     ros::Subscriber detectionSub;
-    int quad, height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
+    int minHue, minSat, minVib, maxHue, maxSat, maxVib;
     double originX, originY;
     bool showImage;
     image_geometry::PinholeCameraModel camera;
