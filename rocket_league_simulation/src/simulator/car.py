@@ -51,7 +51,7 @@ class Car(object):
         self._throttle_state = np.zeros((2,), dtype=np.float)
         self._A = np.array([[-8., -4.199], [8., 0.]])
         self._B = np.array([[2], [0]])
-        self._C = np.array([[0, 2.1]])
+        self._C = np.array([[0, 12.6]])
 
         self._car_handle = p.createConstraint(
             self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
