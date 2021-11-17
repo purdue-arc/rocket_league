@@ -90,7 +90,7 @@ void Localizer::ballCallback(geometry_msgs::Vector3StampedConstPtr msg) {
   Eigen::Vector4d vec = _transform * camVec;
   double t = (_ballRadius - camPos.z()) / vec.z();
 
-  Eigen::Vector4d pose = Eigen::Vector4d::Identity();
+  Eigen::Matrix4d pose = Eigen::Matrix4d::Identity();
   pose.col(3) << vec;
   _ballPub.publish(toMsg(pose));
 }
