@@ -1,5 +1,4 @@
 #include <camera_tracking/localizer.h>
-#include <geometry_msgs/PointStamped.h>
 
 namespace camera_tracking {
 
@@ -12,7 +11,7 @@ Localizer::Localizer(const ros::NodeHandle& nh, const std::string& detectionTopi
   _sub = _nh.subscribe(detectionTopic, queueSize, &Localizer::apriltagCallback, this);
   _pub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(pubTopic, queueSize);
   _ballSub = _nh.subscribe(ballSubTopic, queueSize, &Localizer::ballCallback, this);
-  _ballPub = _nh.advertise<geometry_msgs::PointStamped>(ballPubTopic, queueSize);
+  _ballPub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(ballPubTopic, queueSize);
   for (auto& kv : pubTopics)
     _pubs[kv.first] = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(kv.second, queueSize);
   _buffer.reserve(_bufferSize);
@@ -86,18 +85,14 @@ void Localizer::ballCallback(geometry_msgs::Vector3StampedConstPtr msg) {
   Eigen::Vector4d camPos = _transform.col(3);
   if (camPos.z() == 0)
     return;
-  
+
   Eigen::Vector4d camVec(msg->vector.x, msg->vector.y, msg->vector.z, 0);
   Eigen::Vector4d vec = _transform * camVec;
   double t = (_ballRadius - camPos.z()) / vec.z();
 
-  geometry_msgs::PointStamped point;
-  point.header.stamp = msg->header.stamp;
-  point.header.frame_id = "map";
-  point.point.x = camPos.x() + vec.x() * t;
-  point.point.y = camPos.y() + vec.y() * t;
-  point.point.z = _ballRadius;
-  _ballPub.publish(point);
+  Eigen::Vector4d pose = Eigen::Vector4d::Identity();
+  pose.col(3) << vec;
+  _ballPub.publish(toMsg(pose));
 }
 
 Eigen::Matrix4d Localizer::combineMatrices(const Eigen::Matrix3d& rot, const Eigen::Vector3d& pos) {

@@ -25,9 +25,22 @@
   <node pkg="camera_tracking" type="localizer" name="localizer" output="screen">
     <param name="origin_id" type="str" value="0"/>
     <param name="buffer_size" type="int" value="300"/>
+    <param name="ball_sub_topic" type="str" value="ball_vec"/>
+    <param name="ball_pub_topic" type="str" value="/ball_pos"/>
+    <param name="ball_radius" type="double" value="0.05"/>
     <rosparam param="pub_topics">
       '0': /origin/pose
       '2': /car0/pose
     </rosparam>
+  </node>
+
+  <node pkg="camera_tracking" type="ball_detection" name="ball_detection">
+    <param name="showImage" value="false"/>
+    <param name="min_hue" value="60"/>
+    <param name="min_sat" value="135"/>
+    <param name="min_vib" value="50"/>
+    <param name="max_hue" value="140"/>
+    <param name="max_sat" value="255"/>
+    <param name="max_vib" value="255"/>
   </node>
 </launch>
