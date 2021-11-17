@@ -1,8 +1,9 @@
-#ifndef CAMERA_TRACKING_TF_REBROADCASTER_H
+#ifndef CAMERA_TRACKING_TF_LOCALIZER_H
 #define CAMERA_TRACKING_TF_LOCALIZER_H
 
 #include <ros/ros.h>
 #include <apriltag_ros/AprilTagDetectionArray.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <Eigen/Dense>
 
 namespace camera_tracking {

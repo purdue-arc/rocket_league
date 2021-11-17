@@ -1,4 +1,5 @@
 #include <camera_tracking/localizer.h>
+#include <geometry_msgs/PointStamped.h>
 
 namespace camera_tracking {
 
