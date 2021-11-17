@@ -10,8 +10,7 @@ ARG UID=1000
 ARG GID=1000
 
 RUN usermod -l $USER -u $UID -aG video -md /home/$USER $BASE_USER && \
-    groupmod -n $USER -g $GID $BASE_USER || \
-    {groupmod -n $USER `getent group $GID | awk -F ':' '{print $1}'` && usermod -g $GID $USER} && \
+    { groupmod -n $USER -g $GID $BASE_USER || groupmod -n $USER $BASE_USER } && \
     echo "$USER:$PW" | chpasswd
 
 USER $USER
