@@ -1,4 +1,4 @@
-Header stamp #(time message was created. Frame_id is what below is w.r.t)
+Header header #(time message was created. Frame_id is what below is w.r.t)
 string child_frame_id #(car base_link)
 
 # desired time, position, orientation, and velocity
