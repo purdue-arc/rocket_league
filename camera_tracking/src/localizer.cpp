@@ -92,7 +92,7 @@ void Localizer::ballCallback(geometry_msgs::Vector3StampedConstPtr msg) {
 
   Eigen::Matrix4d pose = Eigen::Matrix4d::Identity();
   pose.col(3) << vec;
-  _ballPub.publish(toMsg(pose));
+  _ballPub.publish(toMsg(pose, msg->header.stamp));
 }
 
 Eigen::Matrix4d Localizer::combineMatrices(const Eigen::Matrix3d& rot, const Eigen::Vector3d& pos) {
