@@ -95,9 +95,8 @@ class SimulatorROS(object):
         self.check_urdf(urdf_paths["plane"])
 
         # Creating physics simulator
-        dt = 1./rospy.get_param('~RATE', 30)
         self.sim = simulator.Sim(
-            dt, urdf_paths, field_setup, spawn_bounds, render_enabled, fl)
+            urdf_paths, field_setup, spawn_bounds, render_enabled, fl)
 
         self.lock = Lock()
         self.throttle_cmd = 0.

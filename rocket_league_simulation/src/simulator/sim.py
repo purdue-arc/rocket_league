@@ -42,13 +42,11 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, dt, urdf_paths, field_setup, spawn_bounds, render_enabled, field_length):
+    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled, field_length):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
             self._client = p.connect(p.DIRECT)
-
-        p.setTimeStep(dt)
 
         self.field_length = field_length
 
@@ -147,7 +145,9 @@ class Sim(object):
             for car in self._cars.values():
                 car.step((throttle_cmd, steering_cmd), dt)
 
-            p.stepSimulation()
+            # PyBullet runs at 240hz
+            for _ in range(int(dt * 240.)):
+                p.stepSimulation()
 
     def getCarPose(self):
         # TODO: Provide translation from ARC IDs to Sim IDs
