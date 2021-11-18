@@ -56,9 +56,6 @@ class Car(object):
         self._car_handle = p.createConstraint(
             self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
 
-        p.resetBasePositionAndOrientation(
-            self.id, self._initPos, p.getQuaternionFromEuler(self._initOrient))
-
     def step(self, cmd, dt):
         des_throttle = cmd[0]
         steering = cmd[1]
@@ -70,9 +67,11 @@ class Car(object):
         self._throttle_state += throttle_dt * dt
 
         # Compute 0th-order response of steering
-        steering = max(min(steering, self._steering_limit), -self._steering_limit)
+        steering = max(min(steering, self._steering_limit), -
+                       self._steering_limit)
         steering_dt = (steering - self._steering_angle) / dt
-        steering_dt = max(min(steering_dt, self._steering_rate), -self._steering_rate)
+        steering_dt = max(
+            min(steering_dt, self._steering_rate), -self._steering_rate)
         self._steering_angle += steering_dt * dt
 
         # Compute motion using bicycle model
@@ -86,7 +85,7 @@ class Car(object):
         w = throttle * math.tan(self._steering_angle) * \
             math.cos(beta) / self._length
 
-        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, 0)
+        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
         orient = p.getQuaternionFromEuler([0., 0., heading + w * dt])
         orient = self.orientToGlobal(orient)
 
@@ -111,7 +110,7 @@ class Car(object):
         _, orientation = p.getBasePositionAndOrientation(self.id)
         heading = p.getEulerFromQuaternion(orientation)[2]
         r_inv = np.array([[math.cos(heading), -math.sin(heading), 0.],
-                             [math.sin(heading), math.cos(heading), 0.],
+                          [math.sin(heading), math.cos(heading), 0.],
                          [0., 0., 1.]], dtype=np.float)
         linear, angular = p.getBaseVelocity(self.id)
         linear = r_inv @ linear
