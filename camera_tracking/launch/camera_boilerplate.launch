@@ -26,7 +26,7 @@
     <param name="origin_id" type="str" value="0"/>
     <param name="buffer_size" type="int" value="300"/>
     <param name="ball_sub_topic" type="str" value="ball_vec"/>
-    <param name="ball_pub_topic" type="str" value="/ball_pos"/>
+    <param name="ball_pub_topic" type="str" value="/ball/pose"/>
     <param name="ball_radius" type="double" value="0.05"/>
     <rosparam param="pub_topics">
       '0': /origin/pose
@@ -34,6 +34,7 @@
     </rosparam>
   </node>
 
+  <!-- Ball tracking -->
   <node pkg="camera_tracking" type="ball_detection" name="ball_detection">
     <param name="showImage" value="false"/>
     <param name="min_hue" value="60"/>
