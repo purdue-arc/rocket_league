@@ -1,8 +1,8 @@
 <launch>
-  <arg name="load_manager" />
-  <arg name="manager_name" />
-  <arg name="manager_threads" />
-  <arg name="camera_name" />
+  <arg name="load_manager" default="true"/>
+  <arg name="manager_name" default="camera_manager"/>
+  <arg name="manager_threads" default="4"/>
+  <arg name="camera_name" default="cam0"/>
 
   <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
     <param name="num_worker_threads" value="$(arg manager_threads)"/>
