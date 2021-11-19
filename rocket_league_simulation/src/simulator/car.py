@@ -38,15 +38,16 @@ class Car(object):
     def __init__(self, carID, length, pos, orient):
         self.id = carID
         self._steering_angle = 0.
-        self._steering_limit = math.pi / 4.
+        self._steering_limit = math.pi / 6.
         self._length = length
         self._length_r = self._length / 2.
+        self._steering_rate = 2*self._steering_limit / 0.25
 
         # System response
         self._throttle_state = np.zeros((2,), dtype=np.float)
         self._A = np.array([[-8., -4.199], [8., 0.]])
         self._B = np.array([[2], [0]])
-        self._C = np.array([[0, 2.1]])
+        self._C = np.array([[0, 12.6]])
 
         self._car_handle = p.createConstraint(
             self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
@@ -58,22 +59,23 @@ class Car(object):
         des_throttle = cmd[0]
         steering = cmd[1]
 
-        # Steer with respect to upward x-axis
-        steering = -steering
-
         # Compute 2nd-order response of throttle
         throttle = self._C @ self._throttle_state
         throttle_dt = self._A @ self._throttle_state + \
             self._B @ np.array([des_throttle])
         self._throttle_state += throttle_dt * dt
 
+        # Compute 0th-order response of steering
+        steering = max(min(steering, self._steering_limit), -
+                       self._steering_limit)
+        steering_dt = (steering - self._steering_angle) / dt
+        steering_dt = max(
+            min(steering_dt, self._steering_rate), -self._steering_rate)
+        self._steering_angle += steering_dt * dt
+
         # Compute motion using bicycle model
         pos, orient = self.getPose()
         heading = p.getEulerFromQuaternion(orient)[2]
-
-        steering_dt = steering * dt
-        if abs(self._steering_angle + steering_dt) < self._steering_limit:
-            self._steering_angle += steering*dt
 
         beta = math.atan(
             (self._length_r) * math.tan(self._steering_angle) / self._length)
@@ -82,7 +84,7 @@ class Car(object):
         w = throttle * math.tan(self._steering_angle) * \
             math.cos(beta) / self._length
 
-        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, 0)
+        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
         orient = p.getQuaternionFromEuler([0., 0., heading + w * dt])
         orient = self.orientToGlobal(orient)
 

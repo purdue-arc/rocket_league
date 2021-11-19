@@ -69,8 +69,10 @@ class SimulatorROS(object):
         field_setup["brbackwall"] = [(-fl/2) - (wt/2.), offset, 0.125]
 
         # Setup bounds for spawning car and ball
+        spawn_height = rospy.get_param('~SPAWN_HEIGHT', 0.5)
         spawn_bounds = [[-(fl/2) + (2 * wt), (fl/2) - (2 * wt)],
-                        [-(fw/2) + (2 * wt), (fw/2) - (2 * wt)]]
+                        [-(fw/2) + (2 * wt), (fw/2) - (2 * wt)],
+                        [spawn_height, spawn_height]]
 
         # Collecting private parameters
         render_enabled = rospy.get_param('~RENDER_ENABLED', False)
