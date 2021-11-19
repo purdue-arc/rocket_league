@@ -37,7 +37,6 @@ import os
 import rospy
 from std_srvs.srv import Empty, EmptyResponse
 from threading import Lock
-import time
 
 # Local library
 import simulator
@@ -55,8 +54,17 @@ class SimulatorROS(object):
         fl = rospy.get_param('FIELD_LENGTH')
         wt = rospy.get_param('WALL_THICKNESS')
         gw = rospy.get_param('GOAL_WIDTH')
+        car_init = rospy.get_param('CAR_INIT', None)
+        ball_init = rospy.get_param('BALL_INIT', None)
 
         field_setup = {}
+
+        if car_init is not None:
+            field_setup['car'] = car_init
+
+        if ball_init is not None:
+            field_setup['ball'] = ball_init
+
         field_setup["goalA"] = [(fl/2.) + (wt/2.), 0, 0.125]
         field_setup["goalB"] = [(-fl/2.) - (wt/2.), 0, 0.125]
         field_setup["rsidewall"] = [0, (fw/2) + (wt/2.), 0.125]
@@ -76,7 +84,7 @@ class SimulatorROS(object):
                         [spawn_height, spawn_height]]
 
         # Collecting private parameters
-        render_enabled = rospy.get_param('~RENDER_ENABLED', False)
+        render_enabled = rospy.get_param('~PYBULLET_RENDER', False)
         rate = rospy.Rate(rospy.get_param('~RATE', 30))
         self.frame_id = rospy.get_param('~FRAME_ID', 'map')
         self.timeout = rospy.get_param('~TIMEOUT', 10)

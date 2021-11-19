@@ -27,20 +27,38 @@ License:
 """
 
 # 3rd party modules
+from nav_msgs.msg import Odometry
 import rospy
 import rostest
 import sys
+from std_msgs.msg import Float32
 import unittest
 
 
 class TestSimulation(unittest.TestCase):
     def setUp(self):
-        pass
+        rospy.init_node("test_simulation")
+
+        rospy.Subscriber('car0/odom', Odometry, self.odom_cb)
+        self.odom_msg = None
+
+        self.throttle_pub = rospy.Publisher(
+            'effort/throttle', Float32, queue_size=1)
+        self.steering_pub = rospy.Publisher(
+            'effort/steering', Float32, queue_size=1)
+
+    def odom_cb(self, msg):
+        self.odom_msg = msg
 
     def test_one_equals_one(self):
         self.assertEquals(1, 1, "1!=1")
 
+    def test_car_throttle(self):
+        self.throttle_pub.publish(Float32(0.5))
+        rospy.sleep(10)
+        self.assertTrue(self.odom_msg.twist.twist.linear.x > 0.0)
+
 
 if __name__ == '__main__':
     rostest.rosrun('rocket_league_test', 'test_simulation',
-                   TestSimulation, sys.argv)
+                   TestSimulation)
