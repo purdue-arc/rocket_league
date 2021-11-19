@@ -37,6 +37,7 @@ import os
 import rospy
 from std_srvs.srv import Empty, EmptyResponse
 from threading import Lock
+import time
 
 # Local library
 import simulator
@@ -101,7 +102,6 @@ class SimulatorROS(object):
         self.lock = Lock()
         self.throttle_cmd = 0.
         self.steering_cmd = 0.
-        self.last_command = None
         self.last_time = None
 
         # Publishers
@@ -144,15 +144,9 @@ class SimulatorROS(object):
         """Resets simulator."""
         self.lock.acquire()
         self.sim.reset()
-        self.last_command = None
         self.last_time = None
         self.lock.release()
         return EmptyResponse()
-
-    def command_cb(self, command_msg):
-        """Callback for command messages."""
-        # Put this all in one tuple so that it is atomic
-        self.last_command = (command_msg.linear, command_msg.angular)
 
     def loop_once(self):
         """Main loop."""
