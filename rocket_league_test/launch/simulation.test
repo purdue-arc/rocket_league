@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+    <test test-name="test_simulation" pkg = "rocket_league_test" type="test_simulation" />
+</launch>
