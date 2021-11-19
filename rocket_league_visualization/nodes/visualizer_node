@@ -124,7 +124,6 @@ class VisualizerROS(object):
             self.window.updateAssetAngle(self.goal2_id, 180)
 
         self.lock = Lock()
-        self.last_command = None
         self.last_time = None
         self.path = None
 
@@ -137,7 +136,7 @@ class VisualizerROS(object):
         )
 
         while not rospy.is_shutdown():
-            self.loop_once()
+            self.window.show()
             try:
                 rate.sleep()
             except rospy.ROSInterruptException:
@@ -150,18 +149,13 @@ class VisualizerROS(object):
         quat = [orient.x, orient.y, orient.z, orient.w]
         heading = euler_from_quaternion(quat)[2]
         heading = heading * 180. / math.pi
-        self.lock.acquire()
         self.window.updateAssetPos(self.car_id, x, y)
         self.window.updateAssetAngle(self.car_id, heading)
-        self.lock.release()
 
     def ball_odom_cb(self, odom_msg):
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
-
-        self.lock.acquire()
         self.window.updateAssetPos(self.ball_id, x, y)
-        self.lock.release()
 
     def path_arr_cb(self, path_arr_msg):
         """Callback for path array messages."""
@@ -181,12 +175,6 @@ class VisualizerROS(object):
         x = pose_msg.pose.pose.position.x
         y = pose_msg.pose.pose.position.y
         self.lookahead = (x, y)
-
-    def loop_once(self):
-        """Main loop."""
-        self.lock.acquire()
-        self.window.show()
-        self.lock.release()
 
 
 if __name__ == "__main__":
