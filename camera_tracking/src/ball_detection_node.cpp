@@ -24,7 +24,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#include "camera_tracking/BallDetection.h"
+#include "camera_tracking/ball_detection_node.h"
 //#include "rocket_league_estimation/PHCModel.h"
 
 

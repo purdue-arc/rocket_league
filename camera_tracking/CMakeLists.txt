@@ -177,7 +177,7 @@ add_executable(${PROJECT_NAME}_localizer_node
 )
 add_executable(ball_detection
   src/ball_detection.cpp
-  src/BallDetection.cpp
+  src/ball_detection_node.cpp
 )
 
 add_dependencies(ball_detection
