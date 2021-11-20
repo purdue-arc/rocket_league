@@ -66,7 +66,7 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
 
         /* Convert from BGR to HSV colorspace */
         cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
-        
+
         /* get image size */
         int h = current_frame.size().height;
         int w = current_frame.size().width;
@@ -112,7 +112,7 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
                 std_msgs::Header header;
                 cv_bridge::CvImage img_bridge;
                 header.stamp = ros::Time::now(); 
-                img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::RGB8, frame_threshold);
+                img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, frame_threshold);
                 img_bridge.toImageMsg(threshImg);
                 imgPub.publish(threshImg);     
             }
