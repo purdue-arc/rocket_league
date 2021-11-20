@@ -46,6 +46,7 @@ private:
     ros::NodeHandle pnh;
     image_transport::ImageTransport image_transport;
     image_transport::CameraSubscriber camera_subscriber;
+    image_transport::Publisher imgPub;
     ros::Publisher vecPub;
     ros::Subscriber detectionSub;
     int minHue, minSat, minVib, maxHue, maxSat, maxVib;

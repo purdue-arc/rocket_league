@@ -53,10 +53,14 @@ BallDetection::BallDetection() :
     nh{},
     pnh{"~"},
     image_transport{nh},
-    vecPub{nh.advertise<geometry_msgs::Vector3Stamped>(
-        "ball_vec", 10)},
-    camera_subscriber{image_transport.subscribeCamera(
-        "image_rect_color", 10, &BallDetection::BallCallback, this)},
+    vecPub{nh.advertise<geometry_msgs::Vector3Stamped>("ball_vec", 10)},
+    imgPub{image_transport.advertise("threshold_img", 1)},
+    camera_subscriber{image_transport.subscribeCamera("image_rect_color", 10, &BallDetection::BallCallback, this)},
+
+    /*
+     * future plan for this node is to make all of these adjustable with dynamic_reconfigure
+     */
+
     showImage{pnh.param<bool>("showImage", false)},
     minHue{pnh.param<int>("min_hue", 060)},
     minSat{pnh.param<int>("min_sat", 135)},
@@ -64,17 +68,14 @@ BallDetection::BallDetection() :
     maxHue{pnh.param<int>("max_hue", 150)},
     maxSat{pnh.param<int>("max_sat", 255)},
     maxVib{pnh.param<int>("max_vib", 255)}
-    {    
-       if (false) {
-            throw std::runtime_error("Parameters not specified");
-        }
-    }
+    {}
 
 void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info) {
     cv_bridge::CvImagePtr cv_ptr;
     try {
-        //define publisher
+        //define published messages
         geometry_msgs::Vector3Stamped vec;
+        sensor_msgs::Image threshImg;
         // Convert the ROS message  
         cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
         // Store the values of the OpenCV-compatible image
@@ -116,14 +117,16 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             vec.vector.z = cam.z;
             
             if (showImage) {
-                cv::namedWindow("image");
-                cv::namedWindow("threshold");
-                cv::circle(current_frame, cv::Point2d(centerX, centerY), 15, cv::Scalar(0, 0, 255), cv::FILLED);
-                cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
-                cv::resize(frame_threshold, frame_threshold, cv::Size(), 0.5, 0.5);
-                cv::imshow("image", current_frame);
-                cv::imshow("threshold", frame_threshold);
-                cv::waitKey(30);
+                
+                /* publishes the threshold image */
+
+                std_msgs::Header header;
+                cv_bridge::CvImage img_bridge;
+                sensor_msgs::Image img_msg;
+                header.stamp = ros::Time::now(); 
+                img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::RGB8, frame_threshold);
+                img_bridge.toImageMsg(img_msg);
+                imgPub.publish(img_msg);     
             }
             
             vec.header = msg->header;
