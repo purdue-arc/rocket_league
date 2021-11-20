@@ -61,7 +61,7 @@ BallDetection::BallDetection() :
      * future plan for this node is to make all of these adjustable with dynamic_reconfigure
      */
 
-    showImage{pnh.param<bool>("showImage", false)},
+    publishThresh{pnh.param<bool>("publishThresh", false)},
     minHue{pnh.param<int>("min_hue", 060)},
     minSat{pnh.param<int>("min_sat", 135)},
     minVib{pnh.param<int>("min_vib", 050)},
@@ -116,7 +116,7 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             vec.vector.y = cam.y;
             vec.vector.z = cam.z;
             
-            if (showImage) {
+            if (publishThresh) {
                 
                 /* publishes the threshold image */
 

@@ -36,7 +36,7 @@
 
   <!-- Ball tracking -->
   <node pkg="camera_tracking" type="ball_detection" name="ball_detection">
-    <param name="showImage" value="false"/>
+    <param name="publishThresh" value="false"/>
     <param name="min_hue" value="60"/>
     <param name="min_sat" value="135"/>
     <param name="min_vib" value="50"/>

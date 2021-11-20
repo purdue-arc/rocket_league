@@ -51,7 +51,7 @@ private:
     ros::Subscriber detectionSub;
     int minHue, minSat, minVib, maxHue, maxSat, maxVib;
     double originX, originY;
-    bool showImage;
+    bool publishThresh;
     image_geometry::PinholeCameraModel camera;
 
 };
