@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-    <rosparam command="load" file="$(find rocket_league_launch)/yaml/rocket_league_params.yaml" pass_all_args="true"/>
-
-
-    <include file="$(find rocket_league_simulation)/launch/simulator.launch">
-    </include>
-</launch>

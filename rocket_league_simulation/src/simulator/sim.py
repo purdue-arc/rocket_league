@@ -52,12 +52,13 @@ class Sim(object):
 
         self.spawn_bounds = spawn_bounds
         p.setAdditionalSearchPath(p_data.getDataPath())
-        self._planeID = p.loadURDF(urdf_paths["plane"])
+        self._planeID = p.loadURDF(urdf_paths["plane"], [0, 0, 0])
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
 
         randBallPos = [random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
-                       random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]), 0.05]
+                       random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]),
+                       random.uniform(spawn_bounds[2][0], spawn_bounds[2][1])]
         self._ballID = p.loadURDF(
             urdf_paths["ball"], randBallPos, zeroOrient)
 
@@ -111,10 +112,11 @@ class Sim(object):
         self._cars = {}
 
         randCarPos = [random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
-                      random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]), 0.05]
+                      random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]),
+                      random.uniform(spawn_bounds[2][0], spawn_bounds[2][1])]
         randCarOrient = [0, 0, random.uniform(0, 2 * math.pi)]
         self._carID = p.loadURDF(
-            urdf_paths["car"], randCarPos, zeroOrient)
+            urdf_paths["car"], basePosition=randCarPos, baseOrientation=p.getQuaternionFromEuler(randCarOrient))
         self._cars[self._carID] = Car(
             self._carID, 0.5, randCarPos, randCarOrient,
         )
@@ -143,7 +145,9 @@ class Sim(object):
             for car in self._cars.values():
                 car.step((throttle_cmd, steering_cmd), dt)
 
-            p.stepSimulation()
+            # PyBullet runs at 240hz
+            for _ in range(int(dt * 240.)):
+                p.stepSimulation()
 
     def getCarPose(self):
         # TODO: Provide translation from ARC IDs to Sim IDs
@@ -167,14 +171,18 @@ class Sim(object):
         self.touched_last = None
 
         randBallPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                       random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]), 0.125]
+                       random.uniform(
+                           self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                       random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
         p.resetBasePositionAndOrientation(
             self._ballID, randBallPos, p.getQuaternionFromEuler([0, 0, 0])
         )
 
         for car in self._cars.values():
             randCarPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                          random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]), 0.125]
+                          random.uniform(
+                              self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                          random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
             randCarOrient = [0, 0, random.uniform(0, 2 * math.pi)]
             car.reset(randCarPos, randCarOrient)
 
