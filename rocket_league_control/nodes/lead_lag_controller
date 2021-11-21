@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Discrete lead-lag controller for throttle.
+
+License:
+  BSD 3-Clause License
+  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+# ROS
+import rospy
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float32
+
+class LeadLag(object):
+    """Discrete lead-lang controller for throttle."""
+    def __init__(self):
+        rospy.init_node('throttle_controller')
+
+        # Constants
+        self.K_LEAD = rospy.get_param('~lead/gain')
+        self.ALPHA_LEAD = rospy.get_param('~lead/alpha')
+        self.BETA_LEAD = rospy.get_param('~lead/beta')
+        self.ALPHA_LAG = rospy.get_param('~lag/alpha')
+        self.BETA_LAG = rospy.get_param('~lag/beta')
+    
+        self.MAX = rospy.get_param('~limits/min')
+        self.MIN = rospy.get_param('~limits/max')
+
+        # State variables
+        self.prev_error = 0
+        self.reference = 0
+
+        # Publishers
+        self.pub = rospy.Publisher('effort/throttle', Float32, queue_size=1) 
+
+        # Subscribers
+        rospy.Subscriber('cmd_vel', Twist, self.command_cb)
+        rospy.Subscriber('odom', Odometry, self.odom_cb)
+
+        # trust that odom_cb runs at proper rate
+        rospy.spin()
+
+    def command_cb(self, command_msg):
+        """Callback for command messages for car."""
+        self.reference = command_msg.linear.x
+
+    def odom_cb(self, odom_msg):
+        """Callback for odom messages from car."""
+        error = self.reference - odom_msg.twist.twist.linear.x
+        
+        # effort = K(z+a)/(z+b)_lead*(z+a)/(z+b)_lag
+        effort = (self.K_LEAD *
+            (error + self.ALPHA_LEAD * self.prev_error) /
+            (error + self.BETA_LEAD * self.prev_error) *
+            (error + self.ALPHA_LAG * self.prev_error) /
+            (error + self.BETA_LAG * self.prev_error))
+        self.prev_error = error
+
+        effort = max(min(effort, self.MAX), self.MIN)
+
+        self.pub.publish(effort)
+
+if __name__ == "__main__":
+    LeadLag()
