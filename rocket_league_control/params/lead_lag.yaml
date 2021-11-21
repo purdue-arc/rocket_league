@@ -1,0 +1,10 @@
+lead:
+  gain:
+  alpha:
+  beta:
+lag:
+  alpha:
+  beta:
+limits:
+  min: -0.25
+  max:  0.25

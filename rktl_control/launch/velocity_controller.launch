@@ -1,6 +1,6 @@
 <launch>
-  <node type="velocity_controller" pkg="rktl_control" name="velocity_controller" output="screen">
-    <rosparam command="load" file="$(find rktl_control)/params/velocity_controller.yaml" />
+  <node type="velocity_controller" pkg="rktl_control" name="lead_lag_controller" output="screen">
+    <rosparam command="load" file="$(find rktl_control)/params/lead_lag.yaml" />
     <remap from="effort/throttle" to ="control_effort/throttle"/>
     <remap from="effort/steering" to ="control_effort/steering"/>
     <remap from="odom" to ="bot_odom"/>
