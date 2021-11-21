@@ -19,7 +19,8 @@ class LeadLag(object):
         rospy.init_node('throttle_controller')
 
         # Constants
-        self.K_LEAD = rospy.get_param('~lead/gain')
+        self.GAIN_PRE = rospy.get_param('~prefilter/gain')
+        self.GAIN_LEAD = rospy.get_param('~lead/gain')
         self.ALPHA_LEAD = rospy.get_param('~lead/alpha')
         self.BETA_LEAD = rospy.get_param('~lead/beta')
         self.ALPHA_LAG = rospy.get_param('~lag/alpha')
@@ -44,14 +45,14 @@ class LeadLag(object):
 
     def command_cb(self, command_msg):
         """Callback for command messages for car."""
-        self.reference = command_msg.linear.x
+        self.reference = self.GAIN_PRE * command_msg.linear.x
 
     def odom_cb(self, odom_msg):
         """Callback for odom messages from car."""
         error = self.reference - odom_msg.twist.twist.linear.x
         
         # effort = K(z+a)/(z+b)_lead*(z+a)/(z+b)_lag
-        effort = (self.K_LEAD *
+        effort = (self.GAIN_LEAD *
             (error + self.ALPHA_LEAD * self.prev_error) /
             (error + self.BETA_LEAD * self.prev_error) *
             (error + self.ALPHA_LAG * self.prev_error) /
