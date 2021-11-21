@@ -26,18 +26,17 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-buffer_size = 10
-
 # ROS
 import rospy
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 import collections
-import rospy
-from geometry_msgs.msg import PoseWithCovarianceStamped, Pose
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from threading import Lock
 
+rospy.set_param('buffer_size', 10)
+buffer_size = rospy.get_param('buffer_size')
 buffer = collections.deque(maxlen=buffer_size)
 lock = Lock()
 
@@ -50,8 +49,9 @@ def callback(pose):
     pose.pose.pose.orientation.z,
     pose.pose.pose.orientation.w
   ])
+  time = pose.header.stamp
 
-  sample = (x, y, yaw)
+  sample = (x, y, yaw, time)
   with lock:
     buffer.append(sample)
   
@@ -59,34 +59,42 @@ def sample():
   temp_x = 0
   temp_y = 0
   temp_yaw = 0
+  time = 0
 
   with lock:
     for sample in buffer:
       temp_x += sample[0]
       temp_y += sample[1]
       temp_yaw += sample[2]
+    
+    if (len(buffer) != 0):
+      temp_x /= len(buffer)
+      temp_y /= len(buffer)
+      temp_yaw /= len(buffer)
 
-    temp_x /= buffer_size
-    temp_y /= buffer_size
-    temp_yaw /= buffer_size
-
-  pose = PoseWithCovarianceStamped()
-  pose.header.stamp = rospy.Time.now()
-  pose.header.frame_id = "map"
-  pose.pose.pose.position.x = temp_x
-  pose.pose.pose.position.y = temp_y
+  odom = Odometry()
+  odom.header.stamp = rospy.Time.now()
+  odom.header.frame_id = "map"
+  odom.pose.pose.position.x = temp_x
+  odom.pose.pose.position.y = temp_y
   x, y, z, w = quaternion_from_euler(0, 0, temp_yaw)
-  pose.pose.pose.orientation.x = x
-  pose.pose.pose.orientation.y = y
-  pose.pose.pose.orientation.z = z
-  pose.pose.pose.orientation.w = w
-  pub.publish(pose)
+  odom.pose.pose.orientation.x = x
+  odom.pose.pose.orientation.y = y
+  odom.pose.pose.orientation.z = z
+  odom.pose.pose.orientation.w = w
+  odom.twist.twist.linear.x = 0
+  odom.twist.twist.linear.y = 0
+  odom.twist.twist.linear.z = 0
+  odom.twist.twist.angular.x = 0
+  odom.twist.twist.angular.y = 0
+  odom.twist.twist.angular.z = 0
+  pub.publish(odom)
 
-rospy.init_node('car_smoother')
+rospy.init_node('odom_generator')
 
-pub = rospy.Publisher('car0/smooth_pose', PoseWithCovarianceStamped, queue_size=1)
+pub = rospy.Publisher('odom', Odometry, queue_size=1)
 
-rospy.Subscriber('car0/pose', PoseWithCovarianceStamped, callback)
+rospy.Subscriber('pose', PoseWithCovarianceStamped, callback)
 
 rate = rospy.Rate(30.0)
 while not rospy.is_shutdown():

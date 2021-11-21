@@ -64,22 +64,7 @@ target_link_libraries(detection_to_pose
   ${catkin_LIBRARIES}
 )
 
-add_executable(ball_detection
-  src/ball_detection.cpp
-  src/BallDetection.cpp
-)
 
-add_dependencies(ball_detection
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  ${OpenCV_EXPORTED_TARGETS}
-)
-
-# Specify libraries to link a library or executable target against
-target_link_libraries(ball_detection
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-)
 
 #############
 ## Install ##
@@ -94,7 +79,6 @@ catkin_install_python(PROGRAMS
 # Mark cpp executables for installation
 install(TARGETS
   detection_to_pose
-  ball_detection
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

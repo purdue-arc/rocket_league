@@ -26,12 +26,29 @@
 
 #pragma once
 
+/* ros */
 #include <ros/ros.h>
+
+/* image */
 #include <image_transport/image_transport.h>
+#include <image_transport/camera_subscriber.h>
+#include <image_geometry/pinhole_camera_model.h>
+
+
+/* opencv */
+#include <opencv2/opencv.hpp> 
+#include <opencv2/imgproc.hpp>
+#include <opencv2/core/types.hpp>
+#include <cv_bridge/cv_bridge.h> 
+
+/* messages */
+#include <geometry_msgs/Vector3Stamped.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
-#include <opencv2/opencv.hpp>
-#include <image_geometry/pinhole_camera_model.h>
+
+/* math & vectors */
+#include <vector>
+#include <math.h>
 
 class BallDetection {
 public:
@@ -46,11 +63,12 @@ private:
     ros::NodeHandle pnh;
     image_transport::ImageTransport image_transport;
     image_transport::CameraSubscriber camera_subscriber;
-    ros::Publisher posePub;
+    image_transport::Publisher imgPub;
+    ros::Publisher vecPub;
     ros::Subscriber detectionSub;
-    int quad, height, minHue, minSat, minVib, maxHue, maxSat, maxVib;
+    int minHue, minSat, minVib, maxHue, maxSat, maxVib;
     double originX, originY;
-    bool showImage;
+    bool publishThresh;
     image_geometry::PinholeCameraModel camera;
 
 };
