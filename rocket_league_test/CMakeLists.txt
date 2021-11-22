@@ -3,24 +3,29 @@ project(rocket_league_test)
 
 # find catkin so we can use our macros
 find_package(catkin REQUIRED COMPONENTS
+  roscpp
   rocket_league_msgs
+  std_msgs
   )
 
 # generate variables for installation
-catkin_package()
+catkin_package(
+  CATKIN_DEPENDS
+)
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
 
 #############
 ## Install ##
 #############
 
-# Mark executable python scripts and nodes for installation
-catkin_install_python(PROGRAMS
-  nodes/test_simulation
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 # Mark launch files for installation
-install(DIRECTORY launch/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(my_unit_test test/simulation_test.launch test/simulation_test.cpp)
+  target_link_libraries(my_unit_test ${catkin_LIBRARIES})
+endif()

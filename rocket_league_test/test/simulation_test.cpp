@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-"""Node to test simulation.
+/* Node to test simulation.
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -24,41 +23,57 @@ License:
   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""
+*/
 
-# 3rd party modules
-from nav_msgs.msg import Odometry
-import rospy
-import rostest
-import sys
-from std_msgs.msg import Float32
-import unittest
+#include <ros/ros.h>
+#include <std_msgs/Float64.h>
 
+#include "gtest/gtest.h"
 
-class TestSimulation(unittest.TestCase):
-    def setUp(self):
-        rospy.init_node("test_simulation")
+class TargetTest: public ::testing::Test
+{
+public:
+    TargetTest(): spinner(0) {};
+    ~TargetTest() {};
 
-        rospy.Subscriber('car0/odom', Odometry, self.odom_cb)
-        self.odom_msg = None
+    ros::NodeHandle* node;
+    ros::AsyncSpinner* spinner;
+    ros::Publisher pub;
 
-        self.throttle_pub = rospy.Publisher(
-            'effort/throttle', Float32, queue_size=1)
-        self.steering_pub = rospy.Publisher(
-            'effort/steering', Float32, queue_size=1)
+    void SetUp() override
+    {
+        ::testing::Test::SetUp();
+        this->node = new ros::NodeHandle("~");
+        this->pub = this->node->advertise<std_msgs::Float64>("effort/throttle", 1);
+        this->spinner = new ros::AsyncSpinner(0);
+        this->spinner->start();
+    };
 
-    def odom_cb(self, msg):
-        self.odom_msg = msg
+    void TearDown() override
+    {
+        ros::shutdown();
+        delete this->spinner;
+        delete this->node;
+        ::testing::Test::TearDown();
+    }
+};
 
-    def test_one_equals_one(self):
-        self.assertEquals(1, 1, "1!=1")
+TEST_F(TargetTest, test_ok)
+{
+    std_msgs::Float64 fwd;
+    fwd.data = 4.0;
+    this->pub.publish(fwd);
+    ros::Duration(20.).sleep();
+    ASSERT_TRUE(false);
+}
 
-    def test_car_throttle(self):
-        self.throttle_pub.publish(Float32(0.5))
-        rospy.sleep(10)
-        self.assertTrue(self.odom_msg.twist.twist.linear.x > 0.0)
-
-
-if __name__ == '__main__':
-    rostest.rosrun('rocket_league_test', 'test_simulation',
-                   TestSimulation)
+int main(int argc, char **argv)
+{
+    ros::init(argc, argv, "node_name");
+    if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug))
+    {
+        ros::console::notifyLoggerLevelsChanged(); // To show debug output in the tests
+    }
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

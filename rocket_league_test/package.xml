@@ -10,7 +10,7 @@
   <author email="mccarth@purdue.edu">Harrison McCarty</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <exec_depend>rospy</exec_depend>
+  <exec_depend>roscpp</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>std_srvs</exec_depend>
