@@ -2,8 +2,16 @@
     <include file="$(find camera_tracking)/launch/pointgrey_camera.launch">
         <arg name="camera_name" value="cam2"/>
     </include>
+
     <include file="$(find camera_tracking)/launch/pointgrey_camera.launch">
         <arg name="camera_name" value="cam3"/>
     </include>
-    <node pkg="camera_tracking" type="position_smoother" name="position_smoother" />
+
+    <node ns="car0" pkg="camera_tracking" type="odom_generator" name="odom_generator">
+        <param name="buffer_size" value="10"/>
+    </node>
+
+    <node ns="ball" pkg="camera_tracking" type="odom_generator" name="odom_generator">
+        <param name="buffer_size" value="10"/>
+    </node>
 </launch>

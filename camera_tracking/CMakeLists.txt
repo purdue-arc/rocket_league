@@ -16,6 +16,13 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   apriltag_ros
+  geometry_msgs
+  image_geometry
+)
+
+find_package(OpenCV REQUIRED
+  core
+  highgui
 )
 
 ## System dependencies are found with CMake's conventions
@@ -168,6 +175,23 @@ add_executable(${PROJECT_NAME}_localizer_node
   src/localizer_node.cpp
   src/localizer.cpp
 )
+add_executable(ball_detection
+  src/ball_detection.cpp
+  src/ball_detection_node.cpp
+)
+
+add_dependencies(ball_detection
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  ${OpenCV_EXPORTED_TARGETS}
+)
+
+# Specify libraries to link a library or executable target against
+target_link_libraries(ball_detection
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+)
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -298,6 +322,11 @@ install(DIRECTORY launch/
 )
 install(DIRECTORY config/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+)
+
+install(TARGETS
+  ball_detection
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 #############

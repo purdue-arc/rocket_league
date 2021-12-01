@@ -4,11 +4,14 @@ namespace camera_tracking {
 
 Localizer::Localizer(const ros::NodeHandle& nh, const std::string& detectionTopic,
                      const std::string& originId, const std::string& pubTopic,
-                     const std::map<std::string, std::string>& pubTopics, int bufferSize,
-                     int queueSize)
-  : _nh(nh), _originId(originId), _bufferSize(bufferSize), _bufferPos(0) {
-  _sub = _nh.subscribe(detectionTopic, queueSize, &Localizer::callback, this);
+                     const std::map<std::string, std::string>& pubTopics,
+                     const std::string& ballSubTopic, const std::string& ballPubTopic,
+                     double ballRadius, int bufferSize, int queueSize)
+  : _nh(nh), _originId(originId), _ballRadius(ballRadius), _bufferSize(bufferSize), _bufferPos(0) {
+  _sub = _nh.subscribe(detectionTopic, queueSize, &Localizer::apriltagCallback, this);
   _pub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(pubTopic, queueSize);
+  _ballSub = _nh.subscribe(ballSubTopic, queueSize, &Localizer::ballCallback, this);
+  _ballPub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(ballPubTopic, queueSize);
   for (auto& kv : pubTopics)
     _pubs[kv.first] = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(kv.second, queueSize);
   _buffer.reserve(_bufferSize);
@@ -26,7 +29,7 @@ std::string Localizer::idsToString(std::vector<int> ids) {
   return oss.str();
 }
 
-void Localizer::callback(apriltag_ros::AprilTagDetectionArrayConstPtr msg) {
+void Localizer::apriltagCallback(apriltag_ros::AprilTagDetectionArrayConstPtr msg) {
   // Collect transforms and current camera transform
   std::map<std::string, Eigen::Matrix4d> transforms;
   for (auto& detection : msg->detections) {
@@ -66,16 +69,30 @@ void Localizer::callback(apriltag_ros::AprilTagDetectionArrayConstPtr msg) {
   Eigen::Matrix3d ensureRHS = Eigen::Matrix3d::Identity();
   ensureRHS(2, 2) = ((svd.matrixV() * svd.matrixU().transpose()).determinant() > 0) ? 1.0 : -1.0;
   Eigen::Matrix3d camRotate = svd.matrixV() * ensureRHS * svd.matrixU().transpose();
-  Eigen::Matrix4d camTransform = combineMatrices(camRotate, Eigen::Vector3d::Zero()) *
-                                 combineMatrices(Eigen::Matrix3d::Identity(), avgPos);
-  _pub.publish(toMsg(camTransform, msg->header.stamp));
+  _transform = combineMatrices(camRotate, Eigen::Vector3d::Zero()) *
+               combineMatrices(Eigen::Matrix3d::Identity(), avgPos);
+  _pub.publish(toMsg(_transform, msg->header.stamp));
 
   // re-publish detections
   for (auto& kv : transforms) {
     auto& id = kv.first;
     auto& tagTransform = kv.second;
-    _pubs[id].publish(toMsg(camTransform * tagTransform, msg->header.stamp));
+    _pubs[id].publish(toMsg(_transform * tagTransform, msg->header.stamp));
   }
+}
+
+void Localizer::ballCallback(geometry_msgs::Vector3StampedConstPtr msg) {
+  Eigen::Vector4d camPos = _transform.col(3);
+  if (camPos.z() == 0)
+    return;
+
+  Eigen::Vector4d camVec(msg->vector.x, msg->vector.y, msg->vector.z, 0);
+  Eigen::Vector4d vec = _transform * camVec;
+  double t = (_ballRadius - camPos.z()) / vec.z();
+
+  Eigen::Matrix4d pose = Eigen::Matrix4d::Identity();
+  pose.col(3) << vec;
+  _ballPub.publish(toMsg(pose, msg->header.stamp));
 }
 
 Eigen::Matrix4d Localizer::combineMatrices(const Eigen::Matrix3d& rot, const Eigen::Vector3d& pos) {

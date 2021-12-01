@@ -24,13 +24,39 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#include "rocket_league_estimation/BallDetection.h"
+#pragma once
 
+#include <ros/ros.h>
+#include <apriltag_ros/AprilTagDetectionArray.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
 
-int main(int argc, char *argv[])
-{
-    ros::init(argc, argv, "ball_detection");
-    BallDetection detector;
-    ros::spin();
-    return 0;
-}
+class DetectionToPose {
+public:
+    DetectionToPose();
+    ~DetectionToPose() = default;
+
+private:
+    void DetectionCallback(
+        const apriltag_ros::AprilTagDetectionArray& detection_msg);
+
+    ros::NodeHandle m_nh;
+    ros::NodeHandle m_pnh;
+
+    ros::Publisher m_posePub;
+    ros::Subscriber m_detectionSub;
+
+    tf2_ros::Buffer m_tfBuffer;
+    tf2_ros::TransformListener m_tfListener;
+    tf2_ros::TransformBroadcaster m_tfBroadcaster;
+
+    int m_parentTagId;
+    std::string m_parentTagName;
+    std::string m_parentBodyName;
+    
+    int m_childTagId;
+    std::string m_childTagName;
+    std::string m_childBodyName;
+
+    const bool m_publishTf, m_publishPose;
+};
