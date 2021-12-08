@@ -10,8 +10,8 @@ def callback(joy):
     pub_steer = Float32()
     pub_thot = Float32()
 
-    pub_steer.data = joy.axes[0] * -2
-    pub_thot.data = (joy.axes[5] - 1) / 8
+    pub_steer.data = joy.axes[0] * 8
+    pub_thot.data = (joy.axes[5] - 1) / -8
 
     if (joy.buttons[6] == 1):
         rospy.ServiceProxy('/sim_reset', Empty)()
