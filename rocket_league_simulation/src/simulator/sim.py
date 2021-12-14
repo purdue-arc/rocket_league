@@ -186,8 +186,8 @@ class Sim(object):
         )
 
         for car in self._cars.values():
-            carPos = self.carInitPos
-            carOrient = self.carInitOrient
+            carPos = self.initCarPos
+            carOrient = self.initCarOrient
 
             if carPos is None:
                 carPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
