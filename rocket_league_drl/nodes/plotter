@@ -1,32 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Convenience node to log model weights when training.
-
-License:
-  BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
-  All rights reserved.
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-  1. Redistributions of source code must retain the above copyright notice, this
-     list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-  3. Neither the name of the copyright holder nor the names of its
-     contributors may be used to endorse or promote products derived from
-     this software without specific prior written permission.
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Convenience node to plot progress when training.
 """
 
 import rospy
@@ -37,7 +12,7 @@ import matplotlib
 matplotlib.use('PS')
 import matplotlib.pyplot as plt
 from numpy import append
-from os.path import expanduser
+from os.path import expanduser, normpath
 
 class Plotter(object):
     """Log model weights during training."""
@@ -45,8 +20,8 @@ class Plotter(object):
         rospy.init_node('model_progress_plotter')
 
         # Constants
-        self.LOG_DIR = expanduser(rospy.get_param('~log_dir'))
-        self.PLOT_FREQ = rospy.get_param('~log/freq', 25)
+        self.LOG_DIR = normpath(expanduser(rospy.get_param('~log/base_dir')))
+        self.PLOT_FREQ = rospy.get_param('~log/plot_freq', 25)
         self.BASIC_VARS = rospy.get_param('~log/basic', ["duration"])
         self.ADVANCED_VARS = rospy.get_param('~log/advanced', ["net_reward"])
 
@@ -56,6 +31,7 @@ class Plotter(object):
         rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
 
         self.history = None
+        self.UUID = None
         self.next_plot_episode = self.PLOT_FREQ
         self.init_plot()
 
@@ -70,7 +46,7 @@ class Plotter(object):
         self.host = host_subplot(111, axes_class=AA.Axes)
 
         plt.title("Training Log")
-        self.host.set_xlabel("Episode")     
+        self.host.set_xlabel("Episode")
         self.host.set_ylabel(labels[0])
 
         self.axes = {labels[0]:self.host}
@@ -110,10 +86,14 @@ class Plotter(object):
         # color y axes
         for var, axis in self.axes.items():
             axis.axis["left"].label.set_color(self.lines[var].get_color())
-            axis.axis["right"].label.set_color(self.lines[var].get_color())          
+            axis.axis["right"].label.set_color(self.lines[var].get_color())
 
     def progress_cb(self, progress_msg):
         """Track training progress and save when configured to."""
+        if self.UUID is None and progress_msg.hardware_id:
+            self.UUID = progress_msg.hardware_id
+            self.LOG_DIR += "/" + self.UUID
+
         data = {}
 
         for item in progress_msg.values:
@@ -184,8 +164,8 @@ class Plotter(object):
         plt.draw()
 
         # update file
-        rospy.loginfo(f"Saving training progress to {self.LOG_DIR}plot.png")
-        plt.savefig(self.LOG_DIR + "plot.png")
+        rospy.loginfo(f"Saving training progress to {self.LOG_DIR}/plot.png")
+        plt.savefig(self.LOG_DIR + "/plot.png")
 
 if __name__ == "__main__":
     Plotter()
