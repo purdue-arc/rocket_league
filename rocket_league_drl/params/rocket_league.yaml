@@ -14,7 +14,11 @@ reward:
 max_episode_time: 30.0
 
 log:
-  freq: 25
+  base_dir: "~/catkin_ws/data/rocketleague/"
+  # frequency to save model weights. Unit is timesteps
+  model_freq: 2048
+  # frequency to save progress plot. Unit is episodes
+  plot_freq: 25
   basic:
     - duration
   advanced:

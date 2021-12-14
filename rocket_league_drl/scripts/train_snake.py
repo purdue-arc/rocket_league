@@ -12,7 +12,7 @@ from os.path import expanduser, normpath
 import time, rospy
 
 env = SnakeInterface()
-model = PPO("MlpPolicy", env, verbose=1)
+model = PPO("MlpPolicy", env)
 
 # log training progress as CSV
 log_dir = normpath(expanduser(rospy.get_param('~log/base_dir'))) + "/" + env.get_run_uuid()
