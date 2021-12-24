@@ -160,7 +160,7 @@ class SimulatorROS(object):
         """Main loop."""
         self.lock.acquire()
         now = rospy.Time.now()
-        if self.last_time is not None:
+        if self.last_time is not None and self.last_time != now:
             # Iterate sim one step
             delta_t = (now - self.last_time).to_sec()
 
@@ -215,7 +215,6 @@ class SimulatorROS(object):
 
         self.last_time = now
         self.lock.release()
-
 
 if __name__ == "__main__":
     SimulatorROS()
