@@ -2,7 +2,7 @@
 
 from rl_path_planner.msg import BezierCurve as BezierCurveMsg
 from geometry_msgs.msg import Point
-from math import pow, sqrt
+from math import pow
 
 
 class BezierCurve:
@@ -38,7 +38,7 @@ class BezierCurve:
                         raise ValueError(f'{k!r} must be {list}, got {type(v)}')
                     self.control_points = v
                 else:
-                    raise ValueError(f'Unknown keyword argument \'{k}\'')
+                    raise ValueError(f'Unknown keyword argument {k!r}')
         
         if self.order is not None and self.control_points is None:
             self.control_points = [Point()] * (self.order + 1)
@@ -55,21 +55,6 @@ class BezierCurve:
 
         self.myHodograph = self if self.order == 0 else None
         self.coefficients = BezierCurve.calcCoefficients(self.order + 1)
-
-        #if len(control_points) == 0:
-        #    self.order = 0
-        #    self.control_points = []
-        #    self.coefficients = []
-        #    self.myHodograph = self
-        #else:
-        #    self.order = len(control_points) - 1
-        #    self.control_points = control_points
-        #    self.coefficients = [0 for _ in control_points]
-        #    self.coefficients[0] = 1
-        #    for i in range(self.order):
-        #        for j in range(i + 1, 0, -1):
-        #            self.coefficients[j] += self.coefficients[j - 1]
-        #    self.myHodograph = None
 
     def __repr__(self):
         point_str = lambda p: f'({p.x:.2f}, {p.y:.2f}, {p.z:.2f})'

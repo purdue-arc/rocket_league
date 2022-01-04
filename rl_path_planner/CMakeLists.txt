@@ -14,10 +14,15 @@ find_package(catkin REQUIRED COMPONENTS
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 catkin_python_setup()
 
-# Messages
+# msg and srv
 add_message_files(
   FILES
   BezierCurve.msg
+)
+
+add_service_files(
+  FILES
+  CreateBezierPath.srv
 )
 
 generate_messages(
