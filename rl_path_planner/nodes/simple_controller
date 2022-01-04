@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+
+import rospy
+from std_msgs.msg import Duration
+from nav_msgs.msg import Odometry
+from rl_path_planner.msg import Waypoint, MultiBezierPath
+from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
+from rl_path_planner.srv import CreateBezierPath, CreateBezierPathRequest
+
+class SimpleController:
+    def __init__(self):
+        rospy.init_node('simple_controller')
+
+        self.car_odom_topic = rospy.get_param('~car_odom_topic', '/car0/odom')
+        self.ball_odom_topic = rospy.get_param('~ball_odom_topic', '/ball/odom')
+        self.reset_service = rospy.get_param('~reset_service', 'reset_controller')
+        self.path_service = rospy.get_param('~path_service', 'create_bezier_path')
+        self.path_topic = rospy.get_param('~path_topic', '/car0/bezier_path')
+
+        self.car_odom = Odometry()
+        self.ball_odom = Odometry()
+
+        self.car_sub = rospy.Subscriber(self.car_odom_topic, Odometry, self.car_odom_callback)
+        self.ball_sub = rospy.Subscriber(self.ball_odom_topic, Odometry, self.ball_odom_callback)
+        self.reset_server = rospy.Service(self.reset_service, Empty, self.reset)
+        self.path_client = rospy.ServiceProxy(self.path_service, CreateBezierPath)
+        self.path_pub = rospy.Publisher(self.path_topic, MultiBezierPath, queue_size=1, latch=True)
+
+        self.path = MultiBezierPath()
+
+        rospy.spin()
+
+    def car_odom_callback(self, data: Odometry):
+        self.car_odom = data
+
+    def ball_odom_callback(self, data: Odometry):
+        self.ball_odom = data
+
+    def reset(self, req: EmptyRequest):
+        waypoint1 = Waypoint()
+        waypoint1.target_pose = self.car_odom.pose.pose
+
+        waypoint2 = Waypoint()
+        waypoint2.target_pose = self.ball_odom.pose.pose
+        waypoint2.target_speed = 1.0
+        waypoint2.use_target_speed = 1
+        
+        path_request = CreateBezierPathRequest()
+        path_request.waypoints = [waypoint1, waypoint2]
+        path_request.max_segment_duration = Duration()
+        path_response = self.path_client(path_request)
+        self.path = path_response.path
+        self.path_pub.publish(self.path)
+        
+        return EmptyResponse()
+
+if __name__ == '__main__':
+    SimpleController()

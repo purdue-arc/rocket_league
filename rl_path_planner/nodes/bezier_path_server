@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+import rospy
+from rl_path_planner.srv import CreateBezierPath, CreateBezierPathRequest, CreateBezierPathResponse
+from rl_path_planner import BezierCurve, BezierPath
+from geometry_msgs.msg import Point
+
+class BezierPathServer:
+    def __init__(self):
+        rospy.init_node('bezier_path_server')
+        self.create = rospy.Service('create_bezier_path', CreateBezierPath, self.create_bezier_path)
+        rospy.spin()
+
+    def create_bezier_path(self, req: CreateBezierPathRequest):
+        res = CreateBezierPathResponse()
+        res.path.segments = []
+        for i, p1 in enumerate(req.waypoints[:-1]):
+            p2 = req.waypoints[i + 1]
+            control_points = [p1.target_pose.position, Point(), p2.target_pose.position]
+            curve = BezierCurve(control_points)
+            duration = rospy.Duration(1)
+            segment = BezierPath(curve, duration)
+            res.path.segments.append(segment.toMsg())
+        return res
+
+if __name__ == '__main__':
+    BezierPathServer()

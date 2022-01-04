@@ -39,11 +39,14 @@ import rospy
 from std_srvs.srv import Empty, EmptyResponse
 from tf.transformations import euler_from_quaternion
 from threading import Lock
+import numpy as np
 
 # Local library
 import visualizer
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
 from rocket_league_msgs.msg import Target, Path, PathError, Waypoint, MatchStatus
+from rl_path_planner.msg import MultiBezierPath
+from rl_path_planner import BezierPath
 
 
 class VisualizerROS(object):
@@ -123,6 +126,9 @@ class VisualizerROS(object):
                 self.goal2_id, -((field_length / 2) + (wall_thickness / 4)), 0)
             self.window.updateAssetAngle(self.goal2_id, 180)
 
+        self.lines_id = 11
+        self.window.createAsset(self.lines_id, 0, 0, color=(255, 0, 0), lines=True)
+
         self.lock = Lock()
         self.last_command = None
         self.last_time = None
@@ -135,6 +141,7 @@ class VisualizerROS(object):
         rospy.Subscriber(
             "car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb
         )
+        rospy.Subscriber("car0/bezier_path", MultiBezierPath, self.bezier_path_cb)
 
         while not rospy.is_shutdown():
             self.loop_once()
@@ -175,6 +182,16 @@ class VisualizerROS(object):
 
         if self.path_points is None:
             self.path_points = [(0, 0)]
+    
+    def bezier_path_cb(self, msg: MultiBezierPath):
+        """Callback for bezier path messages."""
+        self.window.resetAssetLines(self.lines_id)
+        paths = [BezierPath(x) for x in msg.segments]
+        for path in paths:
+            times = np.arange(0.0, path.duration.to_sec(), 0.1)
+            for t in times:
+                point = path.at(t)
+                self.window.updateAssetPos(self.lines_id, point.x, point.y)
 
     def lookahead_cb(self, pose_msg):
         """Callback for lookahead_pnt messages."""

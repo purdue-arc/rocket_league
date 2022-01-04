@@ -1,9 +1,4 @@
-int32 numTargets
-geometry_msgs/Pose[] targetPoses
-geometry_msgs/Twist[] targetTwists
-duration[] durations
-duration maxSegmentDuration
+rl_path_planner/Waypoint[] waypoints
+std_msgs/Duration max_segment_duration
 ---
-int32 numSegements
-rl_path_planner/BezierCurve[] segments
-duration[] durations
+rl_path_planner/MultiBezierPath path

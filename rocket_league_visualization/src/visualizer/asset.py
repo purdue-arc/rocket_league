@@ -33,7 +33,6 @@ import math
 import pygame
 from abc import ABC, abstractmethod
 
-
 class Asset(ABC):
     @abstractmethod
     def setPos(self):
@@ -81,3 +80,18 @@ class Rectangle(Asset):
 
     def blit(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
+
+class Lines(Asset):
+    def __init__(self, color):
+        self.color = color
+        self.points = []
+    
+    def resetPoints(self):
+        self.points = []
+
+    def setPos(self, x, y):
+        self.points.append((x, y))
+
+    def blit(self, screen):
+        if len(self.points) > 1:
+            pygame.draw.lines(screen, self.color, False, self.points)

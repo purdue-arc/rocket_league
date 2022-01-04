@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 from rl_path_planner import BezierCurve
+from rl_path_planner.msg import BezierPath as BezierPathMsg
 from rospy import Duration
 from geometry_msgs.msg import Vector3
+from std_msgs.msg import Duration as DurationMsg
 from math import sqrt
 
 
@@ -12,14 +14,22 @@ class BezierPath:
         self.duration = None
 
         if args:
-            if len(args) == 2 and type(args[0]) is BezierCurve and type(args[1]) is Duration:
+            if len(args) == 1 and type(args[0]) is BezierPathMsg:
+                self.bezier_curve = BezierCurve(args[0].bezier_curve)
+                self.duration = args[0].duration.data
+            elif len(args) == 2 and type(args[0]) is BezierCurve and type(args[1]) is Duration:
                 self.bezier_curve = args[0]
                 self.duration = args[1]
             else:
                 raise ValueError(f'Unknown arguments {args!r}')
         if kwargs:
             for k, v in kwargs.items():
-                if k == 'bezier_curve':
+                if k == 'msg':
+                    if type(v) is not BezierPathMsg:
+                        raise ValueError(f'{k!r} must be {BezierPathMsg}, got {type(v)}')
+                    self.bezier_curve = v.bezier_curve
+                    self.duration = v.duration
+                elif k == 'bezier_curve':
                     if type(v) is not BezierCurve:
                         raise ValueError(f'{k!r} must be {BezierCurve}, got {type(v)}')
                     self.bezier_curve = v
@@ -29,6 +39,12 @@ class BezierPath:
                     self.duration = v
                 else:
                     raise ValueError(f'Unknown keyword argument {k!r}')
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.bezier_curve!r}, [{self.duration!r}])'
+
+    def __str__(self):
+        return f'{self.__class__.__name__}[{self.bezier_curve!s}, {self.duration!s}ns]'
 
     def toParam(self, secs):
         return (secs.to_sec() if type(secs) is Duration else float(secs)) / self.duration.to_sec()
@@ -67,3 +83,9 @@ class BezierPath:
         if speed == 0.0:
             return Vector3()
         return Vector3(vel.x / speed, vel.y / speed, vel.z / speed)
+
+    def toMsg(self):
+        bezier_curve_msg = self.bezier_curve.toMsg()
+        duration_msg = DurationMsg(self.duration)
+        msg = BezierPathMsg(bezier_curve=bezier_curve_msg, duration=duration_msg)
+        return msg

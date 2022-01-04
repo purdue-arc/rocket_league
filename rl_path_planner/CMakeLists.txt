@@ -4,6 +4,7 @@ project(rl_path_planner)
 # find catkin so we can use our macros
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  std_srvs
   std_msgs
   geometry_msgs
   message_generation
@@ -18,6 +19,9 @@ catkin_python_setup()
 add_message_files(
   FILES
   BezierCurve.msg
+  BezierPath.msg
+  MultiBezierPath.msg
+  Waypoint.msg
 )
 
 add_service_files(
@@ -27,6 +31,7 @@ add_service_files(
 
 generate_messages(
   DEPENDENCIES
+  std_srvs
   std_msgs
   geometry_msgs
 )
@@ -34,4 +39,15 @@ generate_messages(
 # generate variables for installation
 catkin_package(
   CATKIN_DEPENDS message_runtime
+)
+
+#############
+## Install ##
+#############
+
+# Mark executable python scripts and nodes for installation
+catkin_install_python(PROGRAMS
+  nodes/bezier_path_server
+  nodes/simple_controller
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

@@ -67,7 +67,7 @@ class BezierCurve:
         return f'{self.__class__.__name__}({self.order}, [{points}])'
 
     def __str__(self):
-        return f'{self.__class__.__name__} of order {self.order}'
+        return f'{self.__class__.__name__}: order {self.order}'
 
     def calcCoefficients(n):
         if len(BezierCurve._coefficients) >= n:
@@ -107,21 +107,3 @@ class BezierCurve:
     def toMsg(self):
         msg = BezierCurveMsg(order=self.order, control_points=self.control_points)
         return msg
-
-
-    #def speed(self, t):
-    #    vec = self.deriv(t)
-    #    return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z)
-#
-    #def heading(self, t):
-    #    vec = self.hodograph().at(t)
-    #    length = self.speed(t)
-    #    vec.x /= length
-    #    vec.y /= length
-    #    vec.z /= length
-    #    return vec
-#
-    #def acceleration(self, t):
-    #    vel = self.deriv(t)
-    #    accel = self.hodograph().hodograph().at(t)
-    #    return (accel.x * vel.x + accel.y * vel.y + accel.z * vel.z) / self.speed(t)
