@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find rocket_league_launch)/launch/rocket_league_sim.launch" pass_all_args="true" />
+
+    <rosparam command="load" file="$(find rocket_league_test)/params/test_simulation.yaml" />
+    <test pkg="rocket_league_test" type="my_unit_test" test-name="my_unit_test" />
+</launch>

@@ -43,10 +43,6 @@ class Car(object):
         self._length_r = self._length / 2.
         self._steering_rate = 2*self._steering_limit / 0.25
 
-        # Init settings
-        self._initPos = pos
-        self._initOrient = orient
-
         # System response
         self._throttle_state = np.zeros((2,), dtype=np.float)
         self._A = np.array([[-8., -4.199], [8., 0.]])
@@ -55,6 +51,9 @@ class Car(object):
 
         self._car_handle = p.createConstraint(
             self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
+
+        p.resetBasePositionAndOrientation(
+            self.id, pos, p.getQuaternionFromEuler(orient))
 
     def step(self, cmd, dt):
         des_throttle = cmd[0]

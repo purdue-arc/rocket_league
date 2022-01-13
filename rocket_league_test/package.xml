@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rocket_league_test</name>
+  <version>1.0.0</version>
+  <description>Tests for ARC's rocket league competition</description>
+
+  <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
+  <license>BSD 3 Clause</license>
+  <url type="website">https://www.purduearc.com</url>
+  <author email="mccarth@purdue.edu">Harrison McCarty</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>rostest</exec_depend>
+  <exec_depend>rocket_league_msgs</exec_depend>
+</package>
