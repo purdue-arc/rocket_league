@@ -22,4 +22,4 @@ class TestSimulation(unittest.TestCase):
     
 
 if __name__ == '__main__':
-  rostest.rosrun('rocket_league_test', 'test_simulation', TestSimulation, sys.argv)
+  rostest.rosrun('rktl_test', 'test_simulation', TestSimulation, sys.argv)

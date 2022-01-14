@@ -1,7 +1,0 @@
-<launch>
-    <arg name="talker" default="false" />
-    <arg name="listener" default="false" />
-
-    <node if="$(arg talker)" name="$(arg name)_talker" pkg="rospy_tutorials" type="talker.py" output="screen" />
-    <node if="$(arg listener)" name="$(arg name)_listener" pkg="rospy_tutorials" type="listener.py" output="screen" />
-</launch>

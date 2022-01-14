@@ -7,7 +7,7 @@
         <param name="dev" value="/dev/input/js0"/>
     </node>
 
-    <node name="xbox_interface" pkg="rocket_league_simulation" type="xbox_interface" output="screen" respawn="false">
+    <node name="xbox_interface" pkg="rktl_sim" type="xbox_interface" output="screen" respawn="false">
         <param name="device" value="/dev/input/js0"/>
     </node> 
 </launch>

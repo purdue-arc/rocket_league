@@ -1,4 +1,4 @@
 <launch>
-    <include file="$(find rocket_league_launch)/launch/rocket_league_sim.launch" />
-    <test test-name="test_simulation" pkg="rocket_league_test" type="test_simulation.py"/>
+    <include file="$(find rktl_launch)/launch/rocket_league_sim.launch" />
+    <test test-name="test_simulation" pkg="rktl_test" type="test_simulation.py"/>
 </launch>
