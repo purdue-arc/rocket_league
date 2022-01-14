@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>local_planner</name>
+  <name>rktl_planner</name>
   <version>1.0.0</version>
   <description>Handles localized actions to plan and follow trajectories.</description>
 
@@ -10,6 +10,7 @@
   <author email="mccarth@purdue.edu">Harrison McCarty</author>
   <author email="mcnama20@purdue.edu">Arianna McNamara</author>
   <author email="vvvu@purdue.edu">Vincent Vu</author>
+  <author email="ateigen@purdue.edu">Adrian Teigen</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <exec_depend>geometry_msgs</exec_depend>

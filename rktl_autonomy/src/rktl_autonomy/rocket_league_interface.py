@@ -1,5 +1,5 @@
 # package
-from rocket_league_drl import ROSInterface
+from rktl_autonomy import ROSInterface
 from gym.spaces import Box
 
 # ROS

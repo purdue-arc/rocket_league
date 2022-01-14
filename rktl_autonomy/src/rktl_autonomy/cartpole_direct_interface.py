@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # package
-from rocket_league_drl import ROSInterface
+from rktl_autonomy import ROSInterface
 
 # ROS
 import rospy
