@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Training script for the Rocket League project.
-
+"""Training script for the Rocket League project.
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)

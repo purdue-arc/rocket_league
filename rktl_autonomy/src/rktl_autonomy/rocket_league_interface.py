@@ -1,6 +1,4 @@
-"""
-Interface to the Rocket League project.
-
+"""Interface to the Rocket League project.
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)

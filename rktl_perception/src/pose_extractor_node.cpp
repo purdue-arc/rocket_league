@@ -1,3 +1,10 @@
+/* TODO
+ * License:
+ *   BSD 3-Clause License
+ *   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+ *   All rights reserved.
+ */
+
 #include <ros/ros.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>

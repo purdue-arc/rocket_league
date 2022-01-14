@@ -1,3 +1,10 @@
+/* Node to convert colorspace for better tag detections.
+ * License:
+ *   BSD 3-Clause License
+ *   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+ *   All rights reserved.
+ */
+
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>

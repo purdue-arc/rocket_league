@@ -1,6 +1,4 @@
-"""
-Interface to the cart_pole_node for testing.
-
+"""Interface to the cart_pole_node for testing.
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)

@@ -1,6 +1,4 @@
-"""
-Fake interface to CartPole-v0 for testing purposes.
-
+"""Fake interface to CartPole-v0 for testing purposes.
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)

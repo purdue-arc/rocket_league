@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Training script for the CartPoleInterface for testing.
-
+"""Training script for the CartPoleInterface for testing.
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)

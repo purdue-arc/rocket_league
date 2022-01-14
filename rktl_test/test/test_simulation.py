@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""Contains the TestSimulation class.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
 
 import unittest
 import rospy

@@ -1,3 +1,10 @@
+/* TODO
+ * License:
+ *   BSD 3-Clause License
+ *   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+ *   All rights reserved.
+ */
+
 #ifndef CAMERA_TRACKING_TF_LOCALIZER_H
 #define CAMERA_TRACKING_TF_LOCALIZER_H
 
