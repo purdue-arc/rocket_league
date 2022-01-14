@@ -1,3 +1,12 @@
+"""
+Interface to the Snake game in ARC Tutorials for testing.
+
+License:
+  BSD 3-Clause License
+  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
 # package
 from rktl_autonomy import ROSInterface
 from gym.spaces import Discrete, Box

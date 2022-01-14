@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-
 """
-Deep learning interface for ROS.
+Training script for the Rocket League project.
+
+License:
+  BSD 3-Clause License
+  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
 """
 
 from rktl_autonomy import RocketLeagueInterface
