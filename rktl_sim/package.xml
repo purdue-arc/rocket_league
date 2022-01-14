@@ -17,5 +17,5 @@
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>std_srvs</exec_depend>
   <exec_depend>PyBullet</exec_depend>
-  <exec_depend>rocket_league_msgs</exec_depend>
+  <exec_depend>rktl_msgs</exec_depend>
 </package>

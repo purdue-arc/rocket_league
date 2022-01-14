@@ -40,7 +40,7 @@ from nav_msgs.msg import Odometry
 # Local modules
 import local_planner.convert as convert
 import local_planner.pure_pursuit as pursuit
-from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
+from rktl_msgs.msg import Target, Path, PathError, Waypoint
 
 
 class WaypointControllerROS(object):

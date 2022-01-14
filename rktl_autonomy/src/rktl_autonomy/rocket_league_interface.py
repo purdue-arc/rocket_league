@@ -6,7 +6,7 @@ from gym.spaces import Box
 import rospy
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32
-from rocket_league_msgs.msg import MatchStatus
+from rktl_msgs.msg import MatchStatus
 from std_srvs.srv import Empty
 
 # System

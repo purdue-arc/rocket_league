@@ -43,7 +43,7 @@ from threading import Lock
 # Local library
 import visualizer
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
-from rocket_league_msgs.msg import Target, Path, PathError, Waypoint, MatchStatus
+from rktl_msgs.msg import Target, Path, PathError, Waypoint, MatchStatus
 
 
 class VisualizerROS(object):

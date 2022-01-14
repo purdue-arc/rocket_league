@@ -4,7 +4,7 @@ project(rktl_test)
 # find catkin so we can use our macros
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  rocket_league_msgs
+  rktl_msgs
   std_msgs
   rostest
   )

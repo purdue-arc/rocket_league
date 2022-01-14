@@ -54,7 +54,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES rocket_league_msgs
+#  LIBRARIES rktl_msgs
   CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )

@@ -35,7 +35,7 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64, Empty, Float32
 import numpy as np
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
-from rocket_league_msgs.msg import Target, Path, PathError, Waypoint
+from rktl_msgs.msg import Target, Path, PathError, Waypoint
 from matplotlib import pyplot as plt
 
 

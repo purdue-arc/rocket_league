@@ -40,7 +40,7 @@ from threading import Lock
 
 # Local library
 import simulator
-from rocket_league_msgs.msg import MatchStatus
+from rktl_msgs.msg import MatchStatus
 
 
 class SimulatorROS(object):
