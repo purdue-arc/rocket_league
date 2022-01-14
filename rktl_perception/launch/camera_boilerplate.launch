@@ -17,12 +17,12 @@
   <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="apriltag" output="screen">
     <param name="camera_frame" type="str" value="$(arg camera_name)"/>
     <param name="publish_tag_detections_image" type="bool" value="true"/>
-    <rosparam command="load" file="$(find camera_tracking)/config/apriltag_settings.yaml"/>
-    <rosparam command="load" file="$(find camera_tracking)/config/tags.yaml"/>
+    <rosparam command="load" file="$(find rktl_perception)/config/apriltag_settings.yaml"/>
+    <rosparam command="load" file="$(find rktl_perception)/config/tags.yaml"/>
   </node>
 
   <!-- Localization -->
-  <node pkg="camera_tracking" type="localizer" name="localizer" output="screen">
+  <node pkg="rktl_perception" type="localizer" name="localizer" output="screen">
     <param name="origin_id" type="str" value="0"/>
     <param name="buffer_size" type="int" value="300"/>
     <param name="ball_sub_topic" type="str" value="ball_vec"/>
@@ -35,7 +35,7 @@
   </node>
 
   <!-- Ball tracking -->
-  <node pkg="camera_tracking" type="ball_detection" name="ball_detection">
+  <node pkg="rktl_perception" type="ball_detection" name="ball_detection">
     <param name="publishThresh" value="false"/>
     <param name="min_hue" value="60"/>
     <param name="min_sat" value="135"/>
