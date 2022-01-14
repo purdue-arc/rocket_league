@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rocket_league_test</name>
+  <name>rktl_test</name>
   <version>1.0.0</version>
   <description>Tests for ARC's rocket league competition</description>
 

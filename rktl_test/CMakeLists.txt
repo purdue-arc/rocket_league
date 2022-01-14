@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(rocket_league_test)
+project(rktl_test)
 
 # find catkin so we can use our macros
 find_package(catkin REQUIRED COMPONENTS
