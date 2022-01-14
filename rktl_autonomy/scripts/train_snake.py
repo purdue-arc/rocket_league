@@ -29,7 +29,7 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from rocket_league_drl import SnakeInterface
+from rktl_autonomy import SnakeInterface
 from stable_baselines3 import PPO
 import time, rospy
 

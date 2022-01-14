@@ -10,6 +10,6 @@
 
   <node type="trajectory_planner_node" pkg="rktl_planner" name="trajectory_planner_node" output="screen">
     <rosparam command="load" file="$(find rktl_planner)/config/trajectory_params.yaml" />
-    <rosparam command="load" file="$(find rocket_league_highlevel)/config/high_level_info.yaml" />
+    <rosparam command="load" file="$(find rktl_planner)/config/high_level_info.yaml" />
   </node>
 </launch>

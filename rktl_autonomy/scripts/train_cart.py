@@ -29,7 +29,7 @@ License:
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-from rocket_league_drl import CartpoleInterface
+from rktl_autonomy import CartpoleInterface
 from stable_baselines3 import PPO
 import gym, time
 

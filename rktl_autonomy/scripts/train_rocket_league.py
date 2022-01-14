@@ -4,7 +4,7 @@
 Deep learning interface for ROS.
 """
 
-from rocket_league_drl import RocketLeagueInterface
+from rktl_autonomy import RocketLeagueInterface
 from stable_baselines3 import PPO
 import time, rospy
 
