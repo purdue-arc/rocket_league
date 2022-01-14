@@ -208,6 +208,6 @@ class RocketLeagueInterface(ROSInterface):
 
     def _score_cb(self, score_msg):
         """Callback for score of game."""
-        self._won = score_msg.status == "A scored!"
+        self._won = score_msg.status == MatchStatus.VICTORY_TEAM_A
         with self._cond:
             self._cond.notify_all()

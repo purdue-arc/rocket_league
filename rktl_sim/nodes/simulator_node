@@ -146,7 +146,9 @@ class SimulatorROS(object):
 
             status = MatchStatus()
             if self.sim.scored:
-                status.status = self.sim.winner + " scored!"
+                status.status = MatchStatus.VICTORY_TEAM_A
+            else:
+                status.status = MatchStatus.ONGOING
             self.status_pub.publish(status)
 
             self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
