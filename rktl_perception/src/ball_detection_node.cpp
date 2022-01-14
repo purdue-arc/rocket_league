@@ -24,7 +24,7 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#include "camera_tracking/ball_detection_node.h"
+#include "rktl_perception/ball_detection_node.h"
 
 int getMaxAreaContourId(std::vector <std::vector<cv::Point>> contours);
 
