@@ -1,5 +1,0 @@
-<launch>
-  <arg name="bag" />
-
-  <node pkg="rosbag" type="record" name="record" output="screen" args="/cam0/image_raw /cam1/image_raw /cam2/image_raw /cam3/image_raw /cam0/camera_info /cam1/camera_info /cam2/camera_info /cam3/camera_info -O $(arg bag)" />
-</launch>

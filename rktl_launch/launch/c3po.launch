@@ -1,8 +1,8 @@
 <launch>
-    <include file="$(find rktl_perception)/launch/pointgrey_camera.launch">
+    <include file="$(find rktl_perception)/launch/camera.launch">
         <arg name="camera_name" value="cam0"/>
     </include>
-    <include file="$(find rktl_perception)/launch/pointgrey_camera.launch">
+    <include file="$(find rktl_perception)/launch/camera.launch">
         <arg name="camera_name" value="cam1"/>
     </include>
 </launch>

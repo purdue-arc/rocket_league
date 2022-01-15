@@ -1,5 +1,0 @@
-<launch>
-  <include file="$(find rktl_perception)/launch/multi_camera.launch"/>
-  <include file="$(find rktl_perception)/launch/pose_extractor.launch"/>
-  <include file="$(find rktl_perception)/launch/static_tfs.launch"/>
-</launch>
