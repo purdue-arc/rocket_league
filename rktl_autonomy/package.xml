@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>rktl_autonomy</name>
+  <version>0.0.0</version>
+  <description>Deep reinforcement learning for ARC Rocket League project</description>
+  <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
+  <license>BSD 3 Clause</license>
+  <url type="website">http://www.purduearc.com</url>
+  <author email="baxter26@purdue.edu">James Baxter</author>
+  <author email="mcnama20@purdue.edu">Meenakshi McNamara</author>
+  <author email="halchaer@purdue.edu">Haddy Alchaer</author>
+  <author email="rgeorgi@purdue.edu">Reuben Georgi</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>arc_tutorials</exec_depend>
+</package>

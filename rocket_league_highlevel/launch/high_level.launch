@@ -1,8 +1,0 @@
-<launch>
-  <arg name="frame_id" default="map"/>
-  <arg name="is_debug" default="true"/>
-
-  <node type="simple_hardcoded" pkg="rocket_league_highlevel" name="simple_hardcoded" output="screen">
-    <rosparam command="load" file="$(find rocket_league_highlevel)/YAML_files/high_level_info.yaml" />
-  </node>
-</launch>

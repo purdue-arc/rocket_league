@@ -1,8 +1,0 @@
-<launch>
-  <arg name="target" default="car0"/>
-
-  <node ns="$(arg target)" type="odom_estimator" pkg="rocket_league_estimation" name="odometry" output="screen">
-    <param name="base_link" value="$(arg target)"/>
-    <rosparam command="load" file="$(find rocket_league_estimation)/params/$(arg target)_odom.yaml"/>
-  </node>
-</launch>
