@@ -18,7 +18,7 @@ model = PPO("MlpPolicy", env)
 
 # log training progress as CSV
 log_dir = normpath(expanduser(rospy.get_param('~log/base_dir'))) + "/" + env.get_run_uuid()
-logger = configure(log_dir, ["stdout", "csv"])
+logger = configure(log_dir, ["stdout", "csv", "log"])
 model.set_logger(logger)
 
 # log model weights
