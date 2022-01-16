@@ -29,6 +29,7 @@ log:
   model_freq: 2048
   # frequency to save progress plot. Unit is episodes
   plot_freq: 25
+  # variables to include in progress plot
   basic:
     - duration
   advanced:

@@ -21,7 +21,7 @@
   <!-- agent -->
   <node type="train_snake.py" pkg="rktl_autonomy" name="snake_agent" output="screen" required="true">
     <rosparam command="load" file="$(find rktl_autonomy)/config/snake.yaml"/>
-    <param name="snake/initial_segments"  value="$(arg snake_size)"/>
+    <param name="num_segments"            value="$(arg snake_size)"/>
     <param name="field_size"              value="$(arg arena_size)"/>
     <param name="rate"                    value="$(arg rate)"/>
   </node>
