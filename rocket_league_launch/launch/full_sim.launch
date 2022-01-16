@@ -1,7 +1,0 @@
-<!-- Launches system in simulation for basic testing. -->
-
-<launch>
-  <include file="$(find local_planner)/launch/local_planner.launch"/>
-  <include file="$(find rocket_league_simulator)/launch/simulator.launch"/>
-  <include file="$(find rocket_league_highlevel)/launch/high_level.launch"/>
-</launch>

@@ -1,2 +1,0 @@
-Header stamp
-string status

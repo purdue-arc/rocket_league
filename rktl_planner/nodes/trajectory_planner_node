@@ -1,0 +1,673 @@
+#!/usr/bin/env python3
+"""Contains the TrajectoryPlannerROS Node.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+import rospy
+
+import pdb
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose, Twist
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64, Empty, Float32
+import numpy as np
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from rktl_msgs.msg import Target, Path, PathError, Waypoint
+from matplotlib import pyplot as plt
+
+
+class TrajectoryPlannerROS(object):
+    """A node to plan local car trajectories."""
+    def __init__(self):
+        rospy.init_node('trajectory_planner_node')
+
+        # Variables
+        self.target_pose = None    #Position of goal
+        self.bot_pose = None    # Position of car
+        self.bot_vel = None    # velocity of car (in car's reference frame)
+        self.bot_normalized_vel = None    # velocity of car after being normalized
+        self.bot_init_heading = None    # The initial heading of the car (map frame)
+        self.final_angular_vel = None   # The final linear velocity requested by the HLP
+        self.final_linear_vel = None   # The final angular velocity requested by the HLP
+        self.final_time = None   #The final time requested by the HLP
+
+        # Info about the paths we're using
+        self.MAX_SPEED = rospy.get_param('~FINAL_SPEED')
+        self.final_heading = None    # Final heading of the car so it hits the ball the correct way
+        self.final_normalized_heading = None    # Normalized heading vector
+        self.main_points = []    # Array of the main points all create_paths use
+        self.MAX_ANGLE = rospy.get_param('~MAX_ANGLE')   # maximum angle wheels can turn
+        self.WHEEL_BASE = rospy.get_param('~WHEELBASE', 0.119)
+
+        # These variables act as parameters to generate a path
+        self.DISTANCE_FROM_CAR = rospy.get_param('~DISTANCE_FROM_CAR',0.5)    # Multiplier for distance of 1st main point in front of the car
+        self.DISTANCE_FROM_BALL = rospy.get_param('~DISTANCE_FROM_BALL', 0.08)    # Defines the distance away from the ball that our final (lined up) point should be
+        self.SECOND_POINT_DISTANCE = rospy.get_param('~SECOND_POINT_DISTANCE', 1)    # Multiplier for radial distance of 2nd point from midpoint of 1st and 3rd points
+                                          # (adjusts curvature somewhat)
+        self.FOLLOW_THROUGH_DISTANCE = rospy.get_param('~FOLLOW_THROUGH_DISTANCE',0.08)
+
+        # This variable determines the number of points published to the waypoint controller
+        self.RESOLUTION = rospy.get_param('~RESOLUTION', 5)
+
+        # These variables determine the published velocity tolerances
+        self.USUAL_VELOCITY_TOLERANCE = rospy.get_param('~USUAL_VELOCITY_TOLERANCE', 0.3)
+        self.FINAL_VELOCITY_TOLERANCE = rospy.get_param('~FINAL_VELOCITY_TOLERANCE', 0.05)
+
+        # booleans
+        self.backwards = False   # true if the car will drive backwards
+        self.possible = True   # false if not possible
+        self.extra_time = 0   # the number of additional seconds required by the path 
+
+        # Publishers   TODO: fix these
+        self.path_pub = rospy.Publisher("car0/path", Path, queue_size=1)
+        self.feasibility_pub = rospy.Publisher("car0/target_feasibility", Float32, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber("car0/target", Target, self.target_cb)
+        rospy.Subscriber("car0/odom", Odometry, self.car_odom_cb)
+        # rospy.Subscriber("trigger", Empty, self.trigger_cb)
+
+        rospy.spin()
+
+    def loop_once(self):
+        """ Runs code to generate the paths"""
+        #rospy.logwarn("going")
+        # self.calculate_final_heading()
+        self.generate_main_points()
+
+        # This function is swappable
+        # self.four_point_path()
+        # self.bezier_curves_path(smoothness=2)
+        # self.lagrange_functions_path()
+        self.hermite_splines_path()
+        # self.recursive_splines_path(angle_limit=30,smoothness=10, distance_reduction=0.65)
+
+
+    def target_cb(self, target_message):
+        """Callback for getting information about goals for the car
+        This callback will also trigger a new path generation"""
+        self.target_pose = target_message.pose #.position
+        vel = target_message.twist
+        self.final_linear_vel = vel.linear
+        self.final_angular_vel = vel.angular
+        self.final_time = target_message.delta_t.data
+
+        # brackwards stuff
+        speed = np.array((self.final_linear_vel.x, self.final_linear_vel.y))
+        speed = np.sqrt(np.dot(speed,speed))
+        if self.final_linear_vel.x < 0:
+            self.backwards = True
+
+        # Final vector is simply the final linear velocity
+        quat = (self.target_pose.orientation.x,
+                self.target_pose.orientation.y,
+                self.target_pose.orientation.z,
+                self.target_pose.orientation.w)
+        _,_,yaw = euler_from_quaternion(quat)
+        self.final_heading = np.array([np.cos(yaw),np.sin(yaw)])
+        # Normalize the vector for future calculations
+        self.final_normalized_heading = normalize(self.final_heading)
+        if self.backwards:
+            self.final_normalized_heading = - self.final_normalized_heading
+
+
+        if not rospy.is_shutdown():
+            if self.check_if_GO():
+                self.loop_once()
+
+
+    def car_odom_cb(self, bot_odom_message):
+        """ Callback for car pose and velocity"""
+        # Pose represents robot's position and orientation
+        self.bot_pose = bot_odom_message.pose.pose
+
+        # Get bot velocity vector and normalize it for future calculations
+        self.bot_vel = bot_odom_message.twist.twist
+        linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
+        mag = np.linalg.norm(linear_vel)
+        self.bot_normalized_vel = normalize(linear_vel)
+
+        # Get bot's init vector heading through orientation
+        quat = (self.bot_pose.orientation.x,
+                self.bot_pose.orientation.y,
+                self.bot_pose.orientation.z,
+                self.bot_pose.orientation.w)
+        __, __, heading = euler_from_quaternion(quat)
+        x = np.cos(heading)
+        y = np.sin(heading)
+        self.bot_init_heading = np.array([x, y])
+
+    def feasibility_publisher(self):
+        """publishes feasibility score where higher numbers are bad, 0 is ideal, and negative is impossibl
+        TODO: calculate feasibility instead of just setting it to zero"""
+        possible = Float32()
+        if not self.possible:
+            self.extra_time = -1
+        possible = Float32(self.extra_time)
+        print(type(possible))
+
+        self.feasibility_pub.publish(possible)
+
+
+    def check_if_GO(self):   # TODO:  check that I got every included that we need
+        """ Checks if needed variables are properly initialized to run loop_once()"""
+        if (self.target_pose is not None) and (self.final_time is not None) and (self.bot_pose is not None) and \
+            (self.bot_vel is not None) and (self.bot_normalized_vel is not None) and (self.bot_init_heading is not None) \
+                and(self.final_linear_vel is not None) and (self.DISTANCE_FROM_CAR is not None) and \
+                    (self.DISTANCE_FROM_BALL is not None) and (self.SECOND_POINT_DISTANCE is not None) and\
+                         (self.bot_init_heading is not None) and (self.RESOLUTION is not None) and\
+                              (self.bot_vel is not None):
+            return True
+        else:
+            return False
+
+
+    def check_curvature(self,points):
+        """
+        checks if the estimated curvature is less than the maximum allowed at all points.
+        Uses Menger Curvature calculation technique.
+        TODO: add stuff so that curvature is taken into account when finding speeds at different points
+        """
+        ############## NOTE: self.MAX__CALC_CURVATURE is the maximum for the car to follow perfectly, but we need some 
+        ############## leeway, so are just setting a tunable parameter we get from yaml file
+        if not self.backwards:
+            self.MAX_CALC_CURVATURE = np.sin(self.MAX_ANGLE * np.pi/180) / self.WHEEL_BASE
+        else: 
+            self.MAX_CALC_CURVATURE = np.tan(self.MAX_ANGLE * np.pi /180) / self.WHEEL_BASE
+
+        for i in range(1, len(points) - 1):
+            vec_1 = points[i+1] - points[i]
+            vec_2 = points[i-1] - points[i]
+            vec_3 = points[i+1] - points[i-1]
+
+            area = 0.5 * np.cross(vec_1,vec_2)
+            area = float(area)
+
+            dist_1 = np.linalg.norm(vec_1)
+            dist_2 = np.linalg.norm(vec_2)
+            dist_3 = np.linalg.norm(vec_3)
+
+            if dist_1 == 0 or dist_3 == 0 or dist_2 == 0:
+                k = 0
+            else:
+                k = 4 * area/ (dist_1 * dist_2 * dist_3)
+            k = np.abs(k)
+
+
+            # check if allowed
+            if self.backwards:
+                self.MAX_CURVATURE = rospy.get_param('~BACKWARD_MAX_CURVATURE')
+            else:
+                self.MAX_CURVATURE = rospy.get_param('~FORWARD_MAX_CURVATURE')
+
+            if k > self.MAX_CURVATURE:
+                print("too curved")
+                self.possible = False
+
+            print("k is" + str(k))
+            
+
+    def find_actual_time(self,points):
+        """
+        Calculates the actual time it will take to follow the path at max speed
+        """
+        # compute total distance
+        total_distance = 0
+        for i in range(1,len(points)):
+            vec_1 = points[i] - points[i-1]
+            distance = np.linalg.norm(vec_1) # TODO: find actual distance
+            total_distance = distance + total_distance
+
+        # if can't go that fast then 
+        if total_distance/self.final_time > self.MAX_SPEED:
+            # give extra time
+            self.extra_time = total_distance/self.MAX_SPEED - self.final_time
+
+            # set final time to the actual final time for further use
+            self.final_time = self.final_time + self.extra_time
+
+
+
+    def waypoints_from_points(self,points):   # TODO: add varying speeds and nonzero angular velocities
+        """Converts points from list or numpy array to pose array and sets twists as well"""
+
+        # add extra points for stoppin
+        point = np.vstack((np.array([self.bot_pose.position.x, self.bot_pose.position.y]), points))
+        if self.backwards:
+            bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
+            bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
+            first_point = bot_position - self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
+            points = np.vstack((first_point,points))
+            print("backwards")
+
+
+        self.check_curvature(points)
+        self.find_actual_time(points)
+        times = self.final_time * np.linspace(0,1,len(points))
+
+        points = np.vstack([points,self.follow_through_path()])
+        
+        waypoint_array_msg = Path()
+        waypoint_array_msg.child_frame_id = "map"
+        waypoint_array_msg.waypoint = []
+        for i in range(len(points)):
+            new_pose = Pose()
+            new_pose.position.x = points[i][0]
+            new_pose.position.y = points[i][1]
+
+            new_twist = Twist()
+
+            # Generate quaternion for orientation (they just point at the next point in the path)
+            if i + 1 < len(points) and i > 0:
+                yaw = np.arctan2(points[i + 1][1]  - points[i-1][1], points[i + 1][0] - points[i-1][0])
+
+                # make orientation the opposite direction if backwards
+                if self.backwards:
+                    yaw = np.arctan2(-(points[i + 1][1]  - points[i-1][1]), -(points[i + 1][0] - points[i-1][0]))
+                    if i == 0:
+                        yaw = np.arctan2(self.bot_init_heading[1],self.bot_init_heading[0])
+            elif i == len(points) - 1:
+                yaw = np.arctan2(self.final_heading[1],self.final_heading[0])
+
+            elif i == 0:
+                yaw = np.arctan2(self.bot_init_heading[1],self.bot_init_heading[0])
+
+            if self.backwards and i == 0:
+                yaw = np.arctan2(-(points[2][1] - points[1][1]), -(points[2][0] - points[0][0]))
+
+            (new_pose.orientation.x,new_pose.orientation.y,new_pose.orientation.z,\
+                new_pose.orientation.w) = quaternion_from_euler(0,0,yaw)
+            
+            # Add twist TODO: scale properly and update for better directions
+            tangents = np.zeros((len(points),2))
+            if i + 2 < len(points) and i > 0:
+                tangents[i] = (1 - 0.5) * (points[i + 1] - points[i - 1])
+                tangents[i] = normalize(tangents[i])
+                vec_1 = points[i] - points[i-1]
+                vec_2 = points[i] - points[i+1]
+                vel = (np.linalg.norm(vec_1) + np.linalg.norm(vec_2))/(times[i+1] - times[i-1]) # TODO: find actual distance 
+                
+
+                new_twist.linear.x = vel
+                new_twist.linear.y =  0
+                new_twist.linear.z = 0
+                new_twist.angular.x = 0
+                new_twist.angular.y = 0
+                new_twist.angular.z = 0
+
+                if self.backwards:
+                    new_twist.linear.x = -vel
+
+            elif i == len(points) - 1:
+                new_twist.linear = self.final_linear_vel
+                new_twist.angular = self.final_angular_vel
+            elif i == len(points) - 2:
+                new_twist.linear = self.final_linear_vel
+                new_twist.angular = self.final_angular_vel
+            elif i == 0:
+                new_twist = self.bot_vel
+
+                # allow small amount of forward motion
+                if self.backwards:
+                    new_twist.linear.x = 0
+                    new_twist.linear.y = 0
+                    new_twist.linear.z = 0
+                    new_twist.angular.z = 0
+
+
+            # create a new waypoint and add it to the array of them
+            new_waypoint = Waypoint()
+            new_waypoint.pose = new_pose
+            new_waypoint.twist = new_twist
+            if i < len(times): new_waypoint.delta_t = Float32(times[i])
+            if i == len(times): new_waypoint.delta_t = Float32(times[i-1] + 2)   # this is the follow through point
+            
+            if i != len(points) - 1: new_waypoint.velocity_tolerance = Float32(np.abs(new_twist.linear.x \
+                * self.USUAL_VELOCITY_TOLERANCE))
+            if i == len(points) -1: new_waypoint.velocity_tolerance = Float32(np.abs(new_twist.linear.x \
+                * self.FINAL_VELOCITY_TOLERANCE))
+            
+            waypoint_array_msg.waypoint.append(new_waypoint)
+
+        print("ready to publish")
+        if self.possible:
+            self.path_pub.publish(waypoint_array_msg)
+            print("published")
+            self.feasibility_publisher()
+
+        else:
+             self.path_pub.publish(waypoint_array_msg)
+             print("not possible")
+             self.feasibility_publisher()
+
+        self.possible = True
+
+
+
+
+
+
+################## create main points ####################################################################
+
+    def create_spline(self, init_position, init_heading, final_position, final_heading, second_point_distance):
+        """
+        Generate 3 points using spline generation given parameters
+        The 3 points are first position, a calculated second point between, and the final position
+        """
+        if self.backwards:
+            final_heading = -final_heading
+        #try:
+        # Normalize everything before calculating
+        init_normalized_heading = normalize(init_heading)
+        final_normalized_heading = normalize(final_heading)
+
+        # Midpoint, and draw line between final and init position
+        midpoint = (final_position + init_position) / 2
+        line_between = final_position - init_position
+
+        # Use line to make a perpendicular, and then calculate second point
+        # that is second_point_distance away from the midpoint
+        #TODO: get this working properly
+        perpendicular = np.array([line_between[1], -line_between[0]])   # rotates left
+        # perpendicular = np.dot(perpendicular, init_normalized_heading) * perpendicular
+        perpendicular = normalize(perpendicular)
+
+        perpendicular = - perpendicular * np.sign(np.cross(line_between, init_heading))
+        print("rotate: " + str( np.sign(np.cross(line_between, init_heading))))
+        # if not self.backwards:
+          #  perpendicular = - perpendicular
+        perpendicular = perpendicular * np.abs(1 - np.dot(init_normalized_heading, final_normalized_heading))\
+                * second_point_distance # * (np.linalg.norm(2*init_position-final_position))
+        second_point = midpoint + perpendicular
+        return [init_position, second_point, final_position]
+        #except:
+         #   print("Uh oh,something went wrong with creating spline!")
+          #  return []
+
+    def generate_main_points(self):
+        """Return 4 points primarily used in the path, given car and goal position"""
+        #try:
+        # Represent variables as numpy vectors for simplicity
+        ball_position = np.array([self.target_pose.position.x, self.target_pose.position.y])
+        bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
+        bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
+
+        # change stuff if backwards... wait until first point is defined to allow small amount of forward decelerating motion
+        if self.backwards:
+            print("backwards")
+            bot_position = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
+            self.bot_init_heading = -self.bot_init_heading 
+            bot_linear_vel = -bot_linear_vel
+            # self.final_normalized_heading = -self.final_normalized_heading
+            # self.final_heading = -self.final_heading
+            print("turned stuff backwards")
+
+
+        # First point is certain distance ahead of car, which varies on the bot's velocity and a constant
+        first_point = bot_position + self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
+        if self.backwards:
+            first_point = bot_position + 2 * self.bot_init_heading * self.DISTANCE_FROM_CAR * (1 + np.linalg.norm(bot_linear_vel))
+
+        # Third point is a certain distance behind the ball
+        third_point = ball_position - self.final_normalized_heading * self.DISTANCE_FROM_BALL
+
+        # Last point will the ball's position itself, as the car still needs to hit it
+        fourth_point = ball_position
+
+        # Get the second point by creating a spline between the first and third
+        points = self.create_spline(first_point, self.bot_init_heading, third_point, self.final_heading,\
+                self.SECOND_POINT_DISTANCE)
+        points.append(fourth_point)
+        self.main_points = np.array(points)
+        #except:
+         #   print("Uh oh,something went wrong with generating main points!")
+     #       self.main_points = np.array([])
+    #
+    def follow_through_path(self):
+        """
+        Add point a short distance past the ball to ensure the bot follows through and return it as a pose
+        """
+        ball_position = np.array([self.target_pose.position.x, self.target_pose.position.y])
+        point = self.final_normalized_heading * self.FOLLOW_THROUGH_DISTANCE + ball_position
+        return np.array(point)
+        
+
+
+
+
+
+
+
+############################### Path generating methods #######################################################################
+
+
+    def four_point_path(self):
+        """
+        Publish the main points.
+        Might be useful so on the real field, we can adjust main points first before doing complicated smoothing
+        """
+        if (len(self.main_points) != 0):
+            self.waypoints_from_points(self.main_points)
+
+
+    def bezier_curves_path(self, smoothness):
+        """
+        Take the main points, and create more points by smoothing it,
+        Using Bezier curves, which draws a line connecting to all the midpoints. Repeat for desired level of smoothness
+        Publish these points as an array, resulting in path
+
+        Parameters needed:
+        - smoothness
+            - determines how many times the bezier algorithm should be applied
+            - the higher, the smoother it will be, but the more it will deviate from the original main points
+        """
+        # Check to make sure main points have been generated first
+        if (len(self.main_points) != 0):
+            points = self.main_points
+
+            # Perform Bezier smoothing for certain amount of times
+            for x in range(0, smoothness):
+                temp = []
+                temp.append(points[0])
+
+                # Taking the midpoint of the current point and the next point
+                for i in range(0, len(points) - 1):
+                    midpoint = (points[i] + points[i + 1]) / 2
+                    temp.append(midpoint)
+                temp.append(points[len(points) - 1])
+                points = temp
+
+            # Convert points to poses and publish
+            self.waypoints_from_points(points)
+
+    def lagrange_functions_path(self):
+        """
+        Take the main points, and create more points bot can follow by smoothing it,
+        Using Lagrange functions.
+        Publish these points as an array, resulting in path
+        """
+        try:
+            # Create dependent parameter of function
+            t = np.linspace(0, len(self.main_points) - 1, self.RESOLUTION)
+
+            # Initialize functions
+            B = np.ones((len(self.main_points),len(t)))
+
+            # Define Lagrange Interpolated Curve functions
+            for i in range(0,len(self.main_points)):
+                for j in range(0,len(self.main_points)):
+                    if (i != j):
+                        B[i] = B[i] * (t - j)/(i - j)
+
+            # Find x and y values of main points
+            x = self.main_points[:,0]
+            y = self.main_points[:,1]
+
+            # Create points of path by taking dot product of functions and main points
+            path_x = np.dot(x, B)
+            path_y = np.dot(y, B)
+            path = np.column_stack([path_x,path_y])
+
+            # Convert points to poses and publish
+            self.waypoints_from_points(path)
+
+        except:
+            print("Whoops! We couldn't make a path.")
+
+    def hermite_splines_path(self):
+        """
+        Take the main points, and create more points bot can follow by smoothing it,
+        Using Hermite Splines.
+        Publish these points as an array, resulting in path
+        """
+        # try:
+        # Create an array of points to work with
+        points = self.main_points
+        #points = np.vstack([np.array([self.bot_pose.position.x, self.bot_pose.position.y]),points])
+
+        # Create parameter for our function to operate over, and divide the resolution
+        # into parts for each splice. We may end up with slightly fewer points than
+        # the resolution calls for... Something to look into.
+        t = np.linspace(0, 1, int(self.RESOLUTION / (len(points) - 1)))
+        # Initialize tangent vectors
+        tangents = np.zeros((len(points), 2))  # Plus 1 is because I'm starting the curve at the bot
+
+        # constant or heading multiplier
+        # c = 0.3
+        c = 0.5
+
+        # Define tangents at midpoints
+        for i in range(1, len(points) - 2):
+            tangents[i] = (1 - 0.5) * (points[i + 1] - points[i - 1])
+            # print(tangents[i])
+            tangents[i] = normalize(tangents[i])
+            vec_1 = points[i] - points[i-1]
+            vec_2 = points[i] - points[i+1]
+            # Create multiplier based on the difference on the angle between points
+            head_mul = None
+            if np.sqrt(np.dot(vec_1,vec_1)*np.dot(vec_2,vec_2)) != 0:
+                head_mul = np.arccos(np.dot(vec_1,vec_2)/(np.sqrt(np.dot(vec_1,vec_1)*np.dot(vec_2,vec_2))))
+            else:
+                head_mul = (np.pi - (head_mul))
+            tangents[i] = tangents[i] *np.abs(head_mul)
+
+
+        # Define tangents at endpoints
+        tangents[0] = self.bot_init_heading
+ 
+        tangents[0] = 4 * tangents[0]
+        tangents[len(tangents) - 2] = self.final_normalized_heading
+        tangents[len(tangents) -1] = self.final_normalized_heading
+
+
+        # multiply tangents by constant
+        tangents = tangents * c
+
+        # Creating splines
+        tees = np.vstack([t ** 3, t ** 2, t,np.ones(len(t))]) #, np.ones(len(t))], (len(t), 4))
+        tees = np.transpose(tees)
+
+        constants = np.array(([2, -2, 1, 1], [-3, 3, -2, -1], [0, 0, 1, 0], [1, 0, 0, 0]))
+
+        # initialize paths
+        path_y = np.array(())
+        path_x = np.array(())
+
+        # final matrix to multiply point information by
+        B = np.matmul(tees, constants)
+
+        # Create paths for off of splines
+        for i in range(0, len(points)-1):
+            x = np.array((points[i], points[i + 1], tangents[i], tangents[i + 1]))
+            #x = np.transpose(x)    
+            F = np.matmul(B, x) 
+
+            path_x = np.append(path_x,F[:,0])
+            path_y = np.append(path_y,F[:,1])
+
+        # Create path to use in waypoints_from_points,.
+        path = np.column_stack([path_x,path_y])
+
+        # Convert points to poses and publish
+        print("hermite spline")
+        self.waypoints_from_points(path)
+
+#        except:
+ #           print("path failed")
+
+
+    def recursive_splines_path(self, angle_limit, smoothness, distance_reduction):
+        """
+        Take the main points, and create more points bot can follow by smoothing it,
+        Using repetitive spline generation. If our points exceed angle limit, generate another spline between them
+        Publish these points as an array, resulting in path
+
+        Parameters needed:
+        - angle_limit
+            - Max angle between the points
+            - Algorithm will repeat until angles < angle_limit, or after its iterated thru algorithm 'smoothness' times
+        - smoothness
+            - Max amount of times the algorithms should repeat
+            - Algorithm will repeat until angles < angle_limit, or after its iterated thru algorithm 'smoothness' times
+        - distance_reduction
+            - When repeating algorithm and generating splines, reduce the second_point_distance with distance_reduction
+            - distance_reduction * second_point_distance = new_second_point_distance
+        """
+        try:
+            if (len(self.main_points) != 0):
+                # To smooth things, we are only looking at every point except the very last point (the ball's position)
+                points = [self.main_points[0], self.main_points[1], self.main_points[2]]
+                distance_over_time = self.SECOND_POINT_DISTANCE / 2
+                smoothed = False
+
+                # Repeatedly create spline until we've reached max level of smoothness or it's already smooth
+                for i in range(0, smoothness):
+                    smoothed = True
+
+                    # This array will keep track of our smoothed points while we loop thru our current points
+                    temp = []
+                    temp.append(points[0])
+                    for x in range(1, len(points)):
+                        # Calculate the angle between the current point and the last point
+                        first_vector = self.bot_init_heading if x == 1 else points[x - 1] - points[x - 2]
+                        second_vector = points[x] - points[x - 1]
+                        angle = np.degrees(np.arccos(np.dot(first_vector, second_vector) / (np.linalg.norm(first_vector)\
+                             * np.linalg.norm(second_vector))))
+
+                        # If our angle is > angle_limit, create another spline between those points
+                        if (not np.isnan(angle) and angle > angle_limit):
+                            final_vector = points[x + 1] - points[x] if x < len(points) - 1 else self.final_heading
+                            new_points = self.create_spline(points[x - 1], first_vector, points[x], final_vector,\
+                                 distance_over_time)
+                            distance_over_time *= distance_reduction
+
+                            # We don't want to include the generated spline's first point, as it's the same as our current point and we are trying to smooth it
+                            temp.append(new_points[1])
+                            temp.append(new_points[2])
+                            smoothed = False
+                        elif (not np.isnan(angle)):
+                            # If our angle is fine, do nothing to it
+                            temp.append(points[x])
+
+                    # Reassign our current points to the new smoothed ones
+                    points = temp
+
+                    # If we are already smoothed, don't bother looping again
+                    if (smoothed):
+                        break
+
+                # Add out ball's position back
+                points.append(self.main_points[3])
+                self.waypoints_from_points(points)
+        except:
+            print("path failed")
+
+def normalize(v):
+    norm = np.linalg.norm(v)
+    if norm == 0:
+       return v
+    return v / norm
+
+if __name__ == "__main__":
+    TrajectoryPlannerROS()

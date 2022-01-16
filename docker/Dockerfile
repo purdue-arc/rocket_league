@@ -25,7 +25,7 @@ RUN apt update && \
     pip3 install --upgrade pip && \
     pip3 install \
     scipy numpy matplotlib pandas \
-    jupyterlab gym[box2d] && \
+    jupyterlab gym[box2d] autopep8 && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
@@ -49,7 +49,9 @@ RUN pip3 install pybullet stable-baselines3 && \
     python3-pygame \
     ros-${ROS_DISTRO}-apriltag-ros \
     ros-${ROS_DISTRO}-pointgrey-camera-driver \
-    ros-${ROS_DISTRO}-joy && \
+    ros-${ROS_DISTRO}-usb-cam \
+    ros-${ROS_DISTRO}-joy \
+    ros-${ROS_DISTRO}-rosbridge-server && \
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
 # create user
