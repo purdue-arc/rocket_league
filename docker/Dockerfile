@@ -51,7 +51,8 @@ RUN pip3 install pybullet stable-baselines3 && \
     ros-${ROS_DISTRO}-pointgrey-camera-driver \
     ros-${ROS_DISTRO}-usb-cam \
     ros-${ROS_DISTRO}-joy \
-    ros-${ROS_DISTRO}-rosbridge-server && \
+    ros-${ROS_DISTRO}-rosbridge-server \
+    ros-${ROS_DISTRO}-rosserial-arduino && \
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
 # create user
