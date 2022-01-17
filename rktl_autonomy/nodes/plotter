@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Convenience node to plot training progress.
+"""Convenience node to plot training progress.
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -15,7 +14,7 @@ import matplotlib
 matplotlib.use('PS')
 import matplotlib.pyplot as plt
 from numpy import append
-from os.path import expanduser
+from os.path import expanduser, normpath
 
 class Plotter(object):
     """Plot progress during training."""
@@ -23,8 +22,8 @@ class Plotter(object):
         rospy.init_node('model_progress_plotter')
 
         # Constants
-        self.LOG_DIR = expanduser(rospy.get_param('~log_dir'))
-        self.PLOT_FREQ = rospy.get_param('~log/freq', 25)
+        self.LOG_DIR = normpath(expanduser(rospy.get_param('~log/base_dir')))
+        self.PLOT_FREQ = rospy.get_param('~log/plot_freq', 25)
         self.BASIC_VARS = rospy.get_param('~log/basic', ["duration"])
         self.ADVANCED_VARS = rospy.get_param('~log/advanced', ["net_reward"])
 
@@ -34,6 +33,7 @@ class Plotter(object):
         rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
 
         self.history = None
+        self.UUID = None
         self.next_plot_episode = self.PLOT_FREQ
         self.init_plot()
 
@@ -48,7 +48,7 @@ class Plotter(object):
         self.host = host_subplot(111, axes_class=AA.Axes)
 
         plt.title("Training Log")
-        self.host.set_xlabel("Episode")     
+        self.host.set_xlabel("Episode")
         self.host.set_ylabel(labels[0])
 
         self.axes = {labels[0]:self.host}
@@ -88,10 +88,14 @@ class Plotter(object):
         # color y axes
         for var, axis in self.axes.items():
             axis.axis["left"].label.set_color(self.lines[var].get_color())
-            axis.axis["right"].label.set_color(self.lines[var].get_color())          
+            axis.axis["right"].label.set_color(self.lines[var].get_color())
 
     def progress_cb(self, progress_msg):
         """Track training progress and save when configured to."""
+        if self.UUID is None and progress_msg.hardware_id:
+            self.UUID = progress_msg.hardware_id
+            self.LOG_DIR += "/" + self.UUID
+
         data = {}
 
         for item in progress_msg.values:
@@ -162,8 +166,8 @@ class Plotter(object):
         plt.draw()
 
         # update file
-        rospy.loginfo(f"Saving training progress to {self.LOG_DIR}plot.png")
-        plt.savefig(self.LOG_DIR + "plot.png")
+        rospy.loginfo(f"Saving training progress to {self.LOG_DIR}/plot.png")
+        plt.savefig(self.LOG_DIR + "/plot.png")
 
 if __name__ == "__main__":
     Plotter()

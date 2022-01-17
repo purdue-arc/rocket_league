@@ -1,5 +1,5 @@
 # steps to train
-training_steps: 5000
+training_steps: 500000
 
 reward:
   # reward to be given each frame
@@ -14,9 +14,14 @@ reward:
 max_episode_time: 30.0
 
 log:
-  freq: 25
+  base_dir: "~/catkin_ws/data/rocketleague/"
+  # frequency to save model weights. Unit is timesteps
+  model_freq: 2048
+  # frequency to save progress plot. Unit is episodes
+  plot_freq: 25
+  # variables to display in progress plot
   basic:
     - duration
   advanced:
-    - score
+    - goals
     - net_reward

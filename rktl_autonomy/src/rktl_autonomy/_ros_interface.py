@@ -8,7 +8,7 @@ License:
 from abc import abstractmethod
 # from typing import final
 from threading import Condition
-import time
+import time, uuid
 
 from gym import Env
 
@@ -43,6 +43,7 @@ class ROSInterface(Env):
 
     _node_name = "gym_interface"
     _cond = Condition()
+    __UUID = str(uuid.uuid4())
 
     def __init__(self):
         super().__init__()
@@ -126,8 +127,13 @@ class ROSInterface(Env):
         msg.level = DiagnosticStatus.OK
         msg.name = self._node_name
         msg.message = "logged data"
+        msg.hardware_id = self.__UUID
         msg.values = [KeyValue(key=key, value=str(value)) for key, value in data.items()]
         self.__log_pub.publish(msg)
+
+    def get_run_uuid(self):
+        """Get the uuid associated with this run."""
+        return self.__UUID
 
     # All the below abstract methods / properties must be implemented by subclasses
     @property

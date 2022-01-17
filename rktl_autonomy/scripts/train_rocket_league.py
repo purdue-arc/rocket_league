@@ -8,20 +8,28 @@ License:
 
 from rktl_autonomy import RocketLeagueInterface
 from stable_baselines3 import PPO
+from stable_baselines3.common.logger import configure
+from stable_baselines3.common.callbacks import CheckpointCallback
+from os.path import expanduser, normpath
 import time, rospy
 
 env = RocketLeagueInterface()
-model = PPO("MlpPolicy", env, verbose=1)
+model = PPO("MlpPolicy", env)
 
+# log training progress as CSV
+log_dir = normpath(expanduser(rospy.get_param('~log/base_dir'))) + "/" + env.get_run_uuid()
+logger = configure(log_dir, ["stdout", "csv", "log"])
+model.set_logger(logger)
+
+# log model weights
+freq = rospy.get_param('~log/model_freq', 2048)
+callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
+
+# run training
 steps = rospy.get_param('~training_steps', 5000)
 print(f"training on {steps} steps")
-model.learn(total_timesteps=steps)
+model.learn(total_timesteps=steps, callback=callback)
 
+# save final weights
 print("done training")
-obs = env.reset()
-while True:
-   action, __ = model.predict(obs, deterministic=True)
-   obs, __, done, __ = env.step(action)
-   time.sleep(0.01)
-   if done:
-      obs = env.reset()
+model.save(log_dir + "/final_weights")

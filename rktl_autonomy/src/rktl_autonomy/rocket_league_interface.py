@@ -107,7 +107,7 @@ class RocketLeagueInterface(ROSInterface):
         if self._has_state():
             self._log_data({
                 "episode" : self._episode,
-                "score" : self._won * 1.0,
+                "goals" : 1.0 if self._won else 0.0,
                 "duration" : (rospy.Time.now() - self._start_time).to_sec(),
                 "net_reward" : self._total_reward})
             self._episode += 1
