@@ -35,8 +35,8 @@ class RocketLeagueInterface(ROSInterface):
         self._MAX_STEERING_EFFORT = rospy.get_param('~effort/steering/max',  1.0)
 
         # Observations
-        self._FIELD_WIDTH = rospy.get_param('~field/width', 10)
-        self._FIELD_HEIGHT = rospy.get_param('~field/height', 15)
+        self._FIELD_WIDTH = rospy.get_param('~field/width', 3.5)
+        self._FIELD_HEIGHT = rospy.get_param('~field/height', 5)
         self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
         self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
 
