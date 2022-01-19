@@ -64,7 +64,7 @@ class SimulatorROS(object):
                         [spawn_height, spawn_height]]
 
         # Collecting private parameters
-        render_enabled = rospy.get_param('~PYBULLET_RENDER', False)
+        render_enabled = rospy.get_param('~RENDER_ENABLED', False)
         rate = rospy.Rate(rospy.get_param('~RATE', 30))
         self.frame_id = rospy.get_param('~FRAME_ID', 'map')
         self.timeout = rospy.get_param('~TIMEOUT', 10)

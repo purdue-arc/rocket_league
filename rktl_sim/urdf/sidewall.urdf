@@ -10,13 +10,13 @@
     <link name="base_link">
         <visual>
             <geometry> 
-                <box size="4.572 0.25 0.25"/>
+                <box size="5.0 0.25 0.25"/>
             </geometry>
             <material name="gray"/>
         </visual>
         <collision>
             <geometry>
-                <box size="4.572 0.25 0.25"/>
+                <box size="5.0 0.25 0.25"/>
             </geometry>
       </collision>
     </link> 
