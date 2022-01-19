@@ -45,6 +45,7 @@ class SimpleController:
         final_vec_x = self.goal_pos[0] - self.ball_odom.pose.pose.position.x
         final_vec_y = self.goal_pos[1] - self.ball_odom.pose.pose.position.y
         final_quat = quaternion_from_euler(0., 0., math.atan2(final_vec_y, final_vec_x))
+        final_vec_len = math.sqrt(final_vec_x ** 2 + final_vec_y ** 2)
 
         waypoint1 = Waypoint()
         waypoint1.target_pose.position.x = self.car_odom.pose.pose.position.x
@@ -65,8 +66,8 @@ class SimpleController:
         waypoint2.target_duration_prev.data = rospy.Duration(5)
 
         waypoint3 = Waypoint()
-        waypoint3.target_pose.position.x = waypoint2.target_pose.position.x + final_vec_x / 2
-        waypoint3.target_pose.position.y = waypoint2.target_pose.position.y + final_vec_y / 2
+        waypoint3.target_pose.position.x = waypoint2.target_pose.position.x + final_vec_x / final_vec_len / 2
+        waypoint3.target_pose.position.y = waypoint2.target_pose.position.y + final_vec_y / final_vec_len / 2
         waypoint3.target_pose.position.z = 0.0
         waypoint3.target_pose.orientation = waypoint2.target_pose.orientation
         waypoint3.target_speed = 0.0
@@ -74,7 +75,7 @@ class SimpleController:
         
         path_request = CreateBezierPathRequest()
         path_request.waypoints = [waypoint1, waypoint2, waypoint3]
-        path_request.max_segment_duration = Duration()
+        path_request.max_segment_duration.data = rospy.Duration(0.1)
         path_response = self.path_client(path_request)
         self.path = path_response.path
         print('-' * 64)

@@ -27,7 +27,7 @@ def line(p: Point, v: Vector3, t: float):
     point.z = p.z + t * v.z
     return point
 
-def create_segment(wp1: Waypoint, wp2: Waypoint):
+def create_segment(wp1: Waypoint, wp2: Waypoint, max_segment_duration: rospy.Duration):
     control_points = [wp1.target_pose.position, wp2.target_pose.position]
     start_vel, start_head = vel(wp1)
     end_vel, end_head = vel(wp2)
@@ -51,18 +51,25 @@ def create_segment(wp1: Waypoint, wp2: Waypoint):
                 control_points.insert(1, line(control_points[-1], end_head, -wp1.target_speed * t_val))
     control_points.insert(1, line(control_points[0], start_vel, t_val))
     control_points.insert(len(control_points) - 1, line(control_points[-1], end_vel, -t_val))
-    return [BezierPath(control_points, duration)]
-
-def create_bezier_path(waypoints):
+    path = BezierPath(control_points, duration)
+    num_segments = math.ceil(duration / max_segment_duration.to_sec())
+    segment_length = duration / num_segments
     segments = []
-    waypoint_pairs = [(waypoints[i], waypoints[i + 1]) for i in range(len(waypoints) - 1)]
-    for wp1, wp2 in waypoint_pairs:
-        segments.extend(create_segment(wp1, wp2))
-    path = MultiBezierPath([x.toMsg() for x in segments])
-    return CreateBezierPathResponse(path)
+    for i in range(num_segments - 1):
+        path0, path1 = path.split(segment_length)
+        segments.append(path0)
+        path = path1
+    segments.append(path)
+    return segments
 
 def bezier_path_server(req: CreateBezierPathRequest):
-        return create_bezier_path(req.waypoints)
+    segments = []
+    waypoint_pairs = [(req.waypoints[i], req.waypoints[i + 1]) for i in range(len(req.waypoints) - 1)]
+    for wp1, wp2 in waypoint_pairs:
+        segments.extend(create_segment(wp1, wp2, req.max_segment_duration.data))
+    
+    path = MultiBezierPath([x.to_msg() for x in segments])
+    return CreateBezierPathResponse(path)
 
 if __name__ == '__main__':
     rospy.init_node('bezier_path_server')

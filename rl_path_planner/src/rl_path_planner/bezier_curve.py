@@ -53,8 +53,8 @@ class BezierCurve:
             if type(p) is not Point:
                 raise ValueError(f'Element {i} of \'control_points\' must be {Point}, got {type(p)}')
 
-        self.myHodograph = self if self.order == 0 else None
-        self.coefficients = BezierCurve.calcCoefficients(self.order + 1)
+        self.my_hodograph = self if self.order == 0 else None
+        self.coefficients = BezierCurve.calc_coefficients(self.order + 1)
 
     def __repr__(self):
         point_str = lambda p: f'({p.x:.2f}, {p.y:.2f}, {p.z:.2f})'
@@ -69,10 +69,10 @@ class BezierCurve:
     def __str__(self):
         return f'{self.__class__.__name__}: order {self.order}'
 
-    def calcCoefficients(n):
+    def calc_coefficients(n):
         if len(BezierCurve._coefficients) >= n:
             return BezierCurve._coefficients[n - 1]
-        prevRow = [0] + BezierCurve.calcCoefficients(n - 1) + [0]
+        prevRow = [0] + BezierCurve.calc_coefficients(n - 1) + [0]
         row = [prevRow[i] + prevRow[i + 1] for i in range(n)]
         BezierCurve._coefficients += [row]
         return row
@@ -88,7 +88,7 @@ class BezierCurve:
         return point
 
     def hodograph(self):
-        if not self.myHodograph:
+        if not self.my_hodograph:
             control_points = []
             for i in range(self.order):
                 p = Point()
@@ -98,12 +98,27 @@ class BezierCurve:
                 p.y = self.order * (p1.y - p2.y)
                 p.z = self.order * (p1.z - p2.z)
                 control_points.append(p)
-            self.myHodograph = BezierCurve(order=self.order - 1, control_points=control_points)
-        return self.myHodograph
+            self.my_hodograph = BezierCurve(order=self.order - 1, control_points=control_points)
+        return self.my_hodograph
 
     def deriv(self, t):
         return self.hodograph().at(t)
 
-    def toMsg(self):
+    def to_msg(self):
         msg = BezierCurveMsg(order=self.order, control_points=self.control_points)
         return msg
+
+    def de_casteljau(self, t):
+        # b[j][i] = b_i^(j)
+        t0 = float(t)
+        t1 = 1 - t0
+        b = [self.control_points]
+        for j in range(self.order):
+            b.append([])
+            for i in range(self.order - j):
+                b[j + 1].append(Point())
+                b[j + 1][i].x = b[j][i].x * t1 + b[j][i + 1].x * t0
+                b[j + 1][i].y = b[j][i].y * t1 + b[j][i + 1].y * t0
+        points1 = [b[i][0] for i in range(self.order + 1)]
+        points2 = [b[self.order - i][i] for i in range(self.order + 1)]
+        return BezierCurve(points1), BezierCurve(points2)
