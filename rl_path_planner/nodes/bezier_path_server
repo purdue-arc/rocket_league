@@ -1,27 +1,70 @@
 #!/usr/bin/env python3
 
 import rospy
+import math
+from rospy import service
+from tf.transformations import euler_from_quaternion
 from rl_path_planner.srv import CreateBezierPath, CreateBezierPathRequest, CreateBezierPathResponse
 from rl_path_planner import BezierCurve, BezierPath
-from geometry_msgs.msg import Point
+from rl_path_planner.msg import Waypoint, MultiBezierPath
+from geometry_msgs.msg import Point, Vector3
 
-class BezierPathServer:
-    def __init__(self):
-        rospy.init_node('bezier_path_server')
-        self.create = rospy.Service('create_bezier_path', CreateBezierPath, self.create_bezier_path)
-        rospy.spin()
+def vel(wp: Waypoint):
+    q = wp.target_pose.orientation
+    angle = euler_from_quaternion([q.x, q.y, q.z, q.w])[2]
+    head = Vector3()
+    head.x = math.cos(angle)
+    head.y = math.sin(angle)
+    vel = Vector3()
+    vel.x = wp.target_speed * head.x
+    vel.y = wp.target_speed * head.y
+    return vel, head
 
-    def create_bezier_path(self, req: CreateBezierPathRequest):
-        res = CreateBezierPathResponse()
-        res.path.segments = []
-        for i, p1 in enumerate(req.waypoints[:-1]):
-            p2 = req.waypoints[i + 1]
-            control_points = [p1.target_pose.position, Point(), p2.target_pose.position]
-            curve = BezierCurve(control_points)
-            duration = rospy.Duration(1)
-            segment = BezierPath(curve, duration)
-            res.path.segments.append(segment.toMsg())
-        return res
+def line(p: Point, v: Vector3, t: float):
+    point = Point()
+    point.x = p.x + t * v.x
+    point.y = p.y + t * v.y
+    point.z = p.z + t * v.z
+    return point
+
+def create_segment(wp1: Waypoint, wp2: Waypoint):
+    control_points = [wp1.target_pose.position, wp2.target_pose.position]
+    start_vel, start_head = vel(wp1)
+    end_vel, end_head = vel(wp2)
+    duration = wp2.target_duration_prev.data.to_sec()
+    t_val = duration / 3
+
+    if wp1.target_speed == 0 or wp2.target_speed == 0:
+        if wp1.target_speed == 0 and wp2.target_speed == 0:
+            dist = math.sqrt((control_points[0].x - control_points[1].x) ** 2 + (control_points[0].y - control_points[1].y) ** 2)
+            control_points = [
+                control_points[0],
+                line(control_points[0], start_head, dist / 3),
+                line(control_points[1], end_head, -dist / 3),
+                control_points[1]
+            ]
+        else:
+            t_val = duration / 4
+            if wp1.target_speed == 0:
+                control_points.insert(1, line(control_points[0], start_head, wp2.target_speed * t_val))
+            else:
+                control_points.insert(1, line(control_points[-1], end_head, -wp1.target_speed * t_val))
+    control_points.insert(1, line(control_points[0], start_vel, t_val))
+    control_points.insert(len(control_points) - 1, line(control_points[-1], end_vel, -t_val))
+    return [BezierPath(control_points, duration)]
+
+def create_bezier_path(waypoints):
+    segments = []
+    waypoint_pairs = [(waypoints[i], waypoints[i + 1]) for i in range(len(waypoints) - 1)]
+    for wp1, wp2 in waypoint_pairs:
+        segments.extend(create_segment(wp1, wp2))
+    path = MultiBezierPath([x.toMsg() for x in segments])
+    return CreateBezierPathResponse(path)
+
+def bezier_path_server(req: CreateBezierPathRequest):
+        return create_bezier_path(req.waypoints)
 
 if __name__ == '__main__':
-    BezierPathServer()
+    rospy.init_node('bezier_path_server')
+    service = rospy.Service('create_bezier_path', CreateBezierPath, bezier_path_server)
+    rospy.spin()

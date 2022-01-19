@@ -17,9 +17,19 @@ class BezierPath:
             if len(args) == 1 and type(args[0]) is BezierPathMsg:
                 self.bezier_curve = BezierCurve(args[0].bezier_curve)
                 self.duration = args[0].duration.data
-            elif len(args) == 2 and type(args[0]) is BezierCurve and type(args[1]) is Duration:
-                self.bezier_curve = args[0]
-                self.duration = args[1]
+            elif len(args) == 2:
+                if type(args[0]) is BezierCurve:
+                    self.bezier_curve = args[0]
+                elif type(args[0]) is list:
+                    self.bezier_curve = BezierCurve(args[0])
+                else:
+                    raise ValueError(f'Unknown argument {args[0]!r}')
+                if type(args[1]) is Duration:
+                    self.duration = args[1]
+                elif type(args[1]) is float:
+                    self.duration = Duration(args[1 ])
+                else:
+                    raise ValueError(f'Unknown argument {args[1]!r}')
             else:
                 raise ValueError(f'Unknown arguments {args!r}')
         if kwargs:

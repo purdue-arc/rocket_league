@@ -1,5 +1,3 @@
 geometry_msgs/Pose target_pose
 float64 target_speed
 std_msgs/Duration target_duration_prev
-int32 use_target_speed
-int32 use_target_duration_prev

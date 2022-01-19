@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="rl_path_planner" type="bezier_path_server" name="bezier_path_server" />
+    <node pkg="rl_path_planner" type="simple_controller" name="simple_controller" />
+</launch>

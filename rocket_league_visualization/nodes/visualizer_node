@@ -188,8 +188,10 @@ class VisualizerROS(object):
         self.window.resetAssetLines(self.lines_id)
         paths = [BezierPath(x) for x in msg.segments]
         for path in paths:
-            times = np.arange(0.0, path.duration.to_sec(), 0.1)
-            for t in times:
+            #for point in path.bezier_curve.control_points:
+            #    self.window.updateAssetPos(self.lines_id, point.x, point.y)
+            sec = path.duration.to_sec()
+            for t in np.linspace(0., sec, int(50 * sec + 0.5)):
                 point = path.at(t)
                 self.window.updateAssetPos(self.lines_id, point.x, point.y)
 
