@@ -1,0 +1,16 @@
+<launch>
+  <test type="test_rktl_rewards.py" pkg="rktl_autonomy" name="test_rktl_rewards">
+    <!-- Use hardcoded values for the test -->
+    <rosparam>
+      reward:
+        constant: 1.0
+        ball_dist_sq: -0.1
+        goal_dist_sq: -0.5
+        win: 1000
+        reverse: -1
+        walls:
+          value: -5
+          threshold: 0.25
+    </rosparam>
+  </test>
+</launch>
