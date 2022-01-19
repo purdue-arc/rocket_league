@@ -3,7 +3,7 @@
   <arg name="render"        default="false"/>
 
   <!-- constants -->
-  <arg name="rate"          default="30.0"/>
+  <arg name="rate"          default="10.0"/>
 
   <param name="/use_sim_time" value="true"/>
 
