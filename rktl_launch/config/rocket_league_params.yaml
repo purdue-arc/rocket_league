@@ -2,10 +2,10 @@
 FRAME_ID: "map"
 
 # Bounding Boxes (Recorded from URDFs)
-FIELD_WIDTH: 3.048 # m (10 ft)
-FIELD_LENGTH: 4.572 # m (15 ft)
-WALL_THICKNESS: 0.25 # m (9.8 in)
-GOAL_WIDTH: 0.91435 # m (3 ft)
+FIELD_WIDTH: 3.5 # m
+FIELD_LENGTH: 5 # m
+WALL_THICKNESS: 0.25 #m
+GOAL_WIDTH: 1 # m
 BALL_RADIUS: 0.0508 # m (2 in)
 CAR_WIDTH: 0.0762 # m (3 in)
 CAR_LENGTH: 0.2032 # m (8 in)
