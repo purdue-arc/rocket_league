@@ -48,7 +48,7 @@ class RocketLeagueInterface(ROSInterface):
         self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)
         self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
         self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
-        self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.5)
+        self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
 
         # Publishers
         self._throttle_pub = rospy.Publisher('effort/throttle', Float32, queue_size=1)
