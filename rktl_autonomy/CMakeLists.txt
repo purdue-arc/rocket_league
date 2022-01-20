@@ -9,3 +9,9 @@ catkin_python_setup()
 
 # generates cmake config files and set variables for installation
 catkin_package()
+
+# Tests
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/test_step.test)
+endif()

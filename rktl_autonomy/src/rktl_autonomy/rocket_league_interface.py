@@ -35,17 +35,20 @@ class RocketLeagueInterface(ROSInterface):
         self._MAX_STEERING_EFFORT = rospy.get_param('~effort/steering/max',  1.0)
 
         # Observations
-        self._FIELD_WIDTH = rospy.get_param('~field/width', 10)
-        self._FIELD_HEIGHT = rospy.get_param('~field/height', 15)
+        self._FIELD_WIDTH = rospy.get_param('~field/width', 3.5)
+        self._FIELD_HEIGHT = rospy.get_param('~field/height', 5)
         self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
         self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
 
         # Learning
         self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
         self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
-        self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', -5.0)
-        self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', -10.0)
+        self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
+        self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
         self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)
+        self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
+        self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
+        self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
 
         # Publishers
         self._throttle_pub = rospy.Publisher('effort/throttle', Float32, queue_size=1)
@@ -116,7 +119,6 @@ class RocketLeagueInterface(ROSInterface):
         self._clear_state()
         self._won = None
         self._start_time = None
-        self._start_time = None
         self._total_reward = 0
 
     def _has_state(self):
@@ -136,12 +138,12 @@ class RocketLeagueInterface(ROSInterface):
         """Get state tuple (observation, reward, done, info)."""
         assert self._has_state()
 
-        # combine car / ball odomes for observation
+        # combine car / ball odoms for observation
         car = np.asarray(self._car_odom, dtype=np.float32)
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
         if not self.observation_space.contains(observation):
-            rospy.logerr("observation outside of valid bounds:\nObservation: %s", observation.tostring())
+            rospy.logerr("observation outside of valid bounds:\nObservation: %s", observation)
 
         # check if time exceeded
         if self._start_time is None:
@@ -151,15 +153,23 @@ class RocketLeagueInterface(ROSInterface):
         # Determine reward
         reward = self._CONSTANT_REWARD
 
-        ball_dist_sq = np.sum(np.square(ball[1:3] - car[1:3]))
+        ball_dist_sq = np.sum(np.square(ball[0:2] - car[0:2]))
         reward += self._BALL_DISTANCE_REWARD * ball_dist_sq
 
-        goal_dist_sq = np.sum(np.square(ball[1:3] - np.array([self._FIELD_HEIGHT, 0])))
+        goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_HEIGHT/2, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
 
         if self._won:
             reward += self._WIN_REWARD
             done = True
+
+        x, y, __, v, __ = self._car_odom
+        if v < 0:
+            reward += self._REVERSE_REWARD
+
+        if (abs(x) > self._FIELD_HEIGHT/2 - self._WALL_THRESHOLD or
+            abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
+            reward += self._WALL_REWARD
 
         self._total_reward += reward
 
