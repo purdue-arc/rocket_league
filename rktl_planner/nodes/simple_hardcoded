@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+"""Contains the TrajectoryPlannerROS Node.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+import rospy
+
+import pdb
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose, Twist
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float32, Empty, Float64
+import numpy as np
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from rktl_msgs.msg import Target, Path, PathError, Waypoint
+
+
+class HighLevelPlannerROS(object):
+    def __init__(self):
+        rospy.init_node('simple_hardcoded')
+
+        # Variables
+        self.target_pose = None
+        self.target_time = None
+        self.linear_vel = None
+        self.angular_vel = 0
+        self.goal0_pose = np.array(rospy.get_param(
+            '~GOAL0_POSE', [0.0, 0.0, 0.0]), dtype='float64')
+        self.final_speed = np.array(rospy.get_param('~FINAL_SPEED', 0.1))
+        self.car0_pose = None
+        self.target_orientation = None
+
+        # for backwards testing TODO: set false otherwise
+        self.backwards = True
+
+        # Subscribers
+        rospy.Subscriber("car0/odom", Odometry, self.car0_odom_cb)
+        rospy.Subscriber("ball/odom", Odometry, self.ball_odom_cb)
+        rospy.Subscriber("car0/path_error", PathError, self.path_error_cb)
+        rospy.Subscriber("car0/target_feasibility", Float32,
+                         self.target_feasibility_cb)
+        # rospy.Subscriber("car1/odom", Odometry, self.car1_odom_cb)   TODO add this
+
+        # TODO remove this subscriber and have better method for triggering
+        rospy.Subscriber("starter", Empty, self.starter_cb)
+
+        # Publishers
+        self.target_pub = rospy.Publisher("car0/target", Target, queue_size=1)
+
+        rospy.spin()
+
+    def starter_cb(self, starter_message):
+        if not rospy.is_shutdown():
+            self.goal0_pose = np.array(rospy.get_param(
+                '~GOAL0_POSE', [0.0, 0.0, 0.0]), dtype='float64')
+            self.final_speed = np.array(rospy.get_param('~FINAL_SPEED', 0.1))
+
+            # while True:
+            if (self.target_pose is not None) and (self.target_time is not None) and (self.linear_vel is not None)\
+               and (self.car0_pose is not None):
+
+                self.publish_stuff()
+                print("published")
+                # break
+            else:
+                print("not ready")
+                print("target_pose:" + str(self.target_pose))
+                print("target_time:" + str(self.target_time))
+                print("linear_vel:" + str(self.linear_vel))
+                # try:
+                #   rospy.Rate(1).sleep()
+                # except rospy.ROSInterruptException:
+                #  pass
+
+    def publish_stuff(self):
+        print("publishing")
+        # turn time into proper type
+        time_float = Float32()
+        time_float = self.target_time
+
+        # turn velocity into proper type
+        linear_x = Float64()
+        linear_y = Float64()
+        linear_z = Float64()
+        angular_x = Float64()
+        angular_y = Float64()
+        angular_z = Float64()
+
+        angular_x, angular_y, angular_z = [0.0, 0.0, 0.0]
+
+        # Note: Velocity is in reference to the frame of the car
+        twist = Twist()
+        twist.linear.x = self.linear_vel
+        if self.backwards:
+            twist.linear.x = -self.linear_vel
+        twist.linear.y = 0
+        twist.linear.z = 0
+        twist.angular.x = angular_x
+        twist.angular.y = angular_y
+        twist.angular.z = angular_z
+
+        target_message = Target()
+        # TODO add header info
+        target_message.delta_t = Float32(time_float)
+        target_message.pose = self.target_pose
+        target_message.twist = twist
+
+        self.target_pub.publish(target_message)
+        print("hello" + str(target_message))
+
+    def car0_odom_cb(self, car0_odom_message):
+        self.car0_pose = car0_odom_message.pose.pose.position
+        #car_pose = np.array(self.car0_pose)
+        car_pose = np.array(
+            [self.car0_pose.x, self.car0_pose.y, self.car0_pose.z], dtype='float64')
+
+        # calculate final time
+        distance = (car_pose[0] - self.goal0_pose[0])**2 + \
+            (car_pose[1] - self.goal0_pose[1])**2
+        distance = np.sqrt(distance)
+
+        # multiplying by 2 because path might not be direct
+        self.target_time = 2 * distance/self.final_speed
+
+    def ball_odom_cb(self, ball_odom_message):
+        #print("ball_odom_cb:" + str(ball_odom_message))
+        self.target_pose = ball_odom_message.pose.pose
+        pose = np.array(self.target_pose)
+        pose = np.array([self.target_pose.position.x, self.target_pose.position.y,
+                        self.target_pose.position.z], dtype='float64')
+
+        # find orientation
+        self.target_orientation = self.goal0_pose - pose
+
+        # add orientation to target pose
+        yaw = np.arctan2(
+            self.target_orientation[1], self.target_orientation[0])
+        if self.backwards:
+            yaw = yaw + np.pi
+        (self.target_pose.orientation.x, self.target_pose.orientation.y, self.target_pose.orientation.z,
+         self.target_pose.orientation.w) = quaternion_from_euler(0, 0, yaw)
+
+        # calculate target linear velocity
+        self.linear_vel = self.final_speed
+
+    def path_error_cb(self, path_error_message):
+        pass
+
+    def target_feasibility_cb(self, possible_message):
+        pass
+
+
+def normalize(v):
+    norm = np.linalg.norm(v)
+    if norm == 0:
+        return v
+    return v / norm
+
+
+if __name__ == '__main__':
+    HighLevelPlannerROS()

@@ -1,5 +1,0 @@
-<!-- Launches system in simulation for basic testing. -->
-
-<launch>
-  <node type="simple_drive_node" pkg="local_planner" name="simple_drive" output="screen" />
-</launch>

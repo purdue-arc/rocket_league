@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="render" default="true"/>
+    <arg name="pybullet_render" default="false"/>
+
+    <rosparam command="load" file="$(find rktl_launch)/config/rocket_league_params.yaml"/>
+
+    <include file="$(find rktl_sim)/launch/visualizer.launch" pass_all_args="true" if="$(arg render)"/>
+    <include file="$(find rktl_sim)/launch/simulator.launch" pass_all_args="true"/>
+</launch>

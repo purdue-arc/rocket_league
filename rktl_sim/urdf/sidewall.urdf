@@ -1,0 +1,24 @@
+<?xml version="1.0"?> 
+<robot name="sidewall">
+    <!-- Colors --> 
+    <material name="gray"> 
+        <color rgba="0.1 0.1 0.1 1"/>
+    </material>
+
+
+    <!-- Base Frame of Sidewall --> 
+    <link name="base_link">
+        <visual>
+            <geometry> 
+                <box size="5.0 0.25 0.25"/>
+            </geometry>
+            <material name="gray"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="5.0 0.25 0.25"/>
+            </geometry>
+      </collision>
+    </link> 
+    
+</robot>

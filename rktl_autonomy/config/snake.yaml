@@ -1,0 +1,37 @@
+# steps to train
+training_steps: 50000
+
+reward:
+  # reward to be given when the snake dies. This should be zero or negative
+  death: 0.0
+  # reward to be given for each goal achieved. This should be positive
+  goal: 50.0
+  # reward to be given based off squared distance to goal.
+  # - normalized for field length
+  # - normalized for each second of gameplay
+  # - should be zero or negative (to promote being close to goal)
+  distance: 0.0
+  # reward to be given each frame
+  # - normalized for each second of gameplay
+  # - could be negative to promote getting goals quickly
+  # - could be positive to offset distance penalty
+  constant: 0.0
+
+max_episode_time: 30.0
+
+control:
+  max_linear_velocity: 3.0
+  max_angular_velocity: 3.0
+
+log:
+  base_dir: "~/catkin_ws/data/snakesim/"
+  # frequency to save model weights. Unit is timesteps
+  model_freq: 2048
+  # frequency to save progress plot. Unit is episodes
+  plot_freq: 25
+  # variables to include in progress plot
+  basic:
+    - duration
+  advanced:
+    - score
+    - net_reward
