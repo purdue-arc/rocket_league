@@ -8,15 +8,11 @@ License:
 """
 
 # ROS
-from http.client import SWITCHING_PROTOCOLS
 import rospy
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import MatchStatus
 from std_srvs.srv import Empty, EmptyResponse
 from rosgraph_msgs.msg import Clock
-
-import gym
-from threading import Lock
 
 def easy_odom(x, y, v):
     """Helper to construct Odom msgs."""

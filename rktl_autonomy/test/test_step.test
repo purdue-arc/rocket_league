@@ -1,5 +1,5 @@
 <launch>
-  <test type="test_rktl_rewards.py" pkg="rktl_autonomy" name="test_rktl_rewards">
+  <test type="test_step_owner.py" pkg="rktl_autonomy" test-name="test_step_owner">
     <!-- Use hardcoded values for the test -->
     <rosparam>
       reward:
@@ -13,4 +13,5 @@
           threshold: 0.25
     </rosparam>
   </test>
+  <node type="test_step_echo.py" pkg="rktl_autonomy" name="test_step_echo"/>
 </launch>

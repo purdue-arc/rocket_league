@@ -18,4 +18,5 @@
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>std_srvs</exec_depend>
   <exec_depend>arc_tutorials</exec_depend>
+  <exec_depend>rktl_msgs</exec_depend>
 </package>
