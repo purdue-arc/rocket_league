@@ -143,7 +143,7 @@ class RocketLeagueInterface(ROSInterface):
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
         if not self.observation_space.contains(observation):
-            rospy.logerr("observation outside of valid bounds:\nObservation: %s", observation.tostring())
+            rospy.logerr("observation outside of valid bounds:\nObservation: %s", observation)
 
         # check if time exceeded
         if self._start_time is None:
@@ -153,10 +153,10 @@ class RocketLeagueInterface(ROSInterface):
         # Determine reward
         reward = self._CONSTANT_REWARD
 
-        ball_dist_sq = np.sum(np.square(ball[1:3] - car[1:3]))
+        ball_dist_sq = np.sum(np.square(ball[0:2] - car[0:2]))
         reward += self._BALL_DISTANCE_REWARD * ball_dist_sq
 
-        goal_dist_sq = np.sum(np.square(ball[1:3] - np.array([self._FIELD_HEIGHT/2, 0])))
+        goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_HEIGHT/2, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
 
         if self._won:
@@ -167,8 +167,8 @@ class RocketLeagueInterface(ROSInterface):
         if v < 0:
             reward += self._REVERSE_REWARD
 
-        if (abs(y) > self._FIELD_HEIGHT/2 - self._WALL_THRESHOLD or
-            abs(x) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
+        if (abs(x) > self._FIELD_HEIGHT/2 - self._WALL_THRESHOLD or
+            abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
 
         self._total_reward += reward

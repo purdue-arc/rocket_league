@@ -50,7 +50,7 @@ class ROSInterface(Env):
 
         rospy.init_node(self._node_name)
         self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
-        self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1)
+        self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
         self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
 
         self.__time = rospy.Time.from_sec(time.time())
