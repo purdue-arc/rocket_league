@@ -1,0 +1,4 @@
+rktl_planner/Waypoint[] waypoints
+std_msgs/Duration max_segment_duration
+---
+rktl_planner/MultiBezierPath path

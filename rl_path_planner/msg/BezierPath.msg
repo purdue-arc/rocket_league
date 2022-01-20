@@ -1,2 +1,0 @@
-rl_path_planner/BezierCurve bezier_curve
-std_msgs/Duration duration

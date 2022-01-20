@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from rl_path_planner import BezierCurve
-from rl_path_planner.msg import BezierPath as BezierPathMsg
+from rktl_planner import BezierCurve
+from rktl_planner.msg import BezierPath as BezierPathMsg
 from rospy import Duration
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import Duration as DurationMsg

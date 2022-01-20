@@ -24,8 +24,8 @@ import numpy as np
 import visualizer
 from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
 from rktl_msgs.msg import Target, Path, PathError, Waypoint, MatchStatus
-from rl_path_planner.msg import MultiBezierPath
-from rl_path_planner import BezierPath
+from rktl_planner.msg import MultiBezierPath
+from rktl_planner import BezierPath
 
 
 class VisualizerROS(object):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from rl_path_planner.msg import BezierCurve as BezierCurveMsg
+from rktl_planner.msg import BezierCurve as BezierCurveMsg
 from geometry_msgs.msg import Point
 from math import pow
 

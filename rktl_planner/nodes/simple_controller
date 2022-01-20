@@ -2,13 +2,13 @@
 
 import math
 import rospy
-from rl_path_planner import BezierPath
+from rktl_planner import BezierPath
 from tf.transformations import quaternion_from_euler
 from std_msgs.msg import Duration
 from nav_msgs.msg import Odometry
-from rl_path_planner.msg import Waypoint, MultiBezierPath
+from rktl_planner.msg import Waypoint, MultiBezierPath
 from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
-from rl_path_planner.srv import CreateBezierPath, CreateBezierPathRequest
+from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest
 
 class SimpleController:
     def __init__(self):

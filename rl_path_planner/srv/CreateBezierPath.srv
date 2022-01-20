@@ -1,4 +1,0 @@
-rl_path_planner/Waypoint[] waypoints
-std_msgs/Duration max_segment_duration
----
-rl_path_planner/MultiBezierPath path
