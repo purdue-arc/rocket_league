@@ -45,18 +45,30 @@ class Echo(object):
     def clock_cb(self, __):
         """Callback for clock signal."""
         if self.ticks == 0:
+            # initial time
+            pass
+        elif self.ticks == 1:
+            # reset call
+            self.car_pub.publish(easy_odom(2, 1, 2.5))
+            self.ball_pub.publish(easy_odom(-2, -1, -2.5))
+            self.stat_pub.publish(MatchStatus(status=MatchStatus.ONGOING))
+        elif self.ticks == 2:
+            # step 1
             self.car_pub.publish(easy_odom(0, 0, 1))
             self.ball_pub.publish(easy_odom(0, 0, 0))
             self.stat_pub.publish(MatchStatus(status=MatchStatus.ONGOING))
-        elif self.ticks == 1:
+        elif self.ticks == 3:
+            # step 2
             self.car_pub.publish(easy_odom(0, 0, -1))
             self.ball_pub.publish(easy_odom(1, 0, 0))
             self.stat_pub.publish(MatchStatus(status=MatchStatus.VICTORY_TEAM_A))
-        elif self.ticks == 2:
+        elif self.ticks == 4:
+            # step 3
             self.car_pub.publish(easy_odom(2.3, 0, 0))
             self.ball_pub.publish(easy_odom(0, 0, 0))
             self.stat_pub.publish(MatchStatus(status=MatchStatus.ONGOING))
-        elif self.ticks == 3:
+        elif self.ticks == 5:
+            # step 4
             self.car_pub.publish(easy_odom(0, -1.65, 1))
             self.ball_pub.publish(easy_odom(0, 0, 0))
             self.stat_pub.publish(MatchStatus(status=MatchStatus.VICTORY_TEAM_A))

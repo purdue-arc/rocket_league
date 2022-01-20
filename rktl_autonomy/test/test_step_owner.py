@@ -15,31 +15,33 @@ class TestStep(unittest.TestCase):
     def test_all(self):
         env = RocketLeagueInterface()
 
-        # case 0
-        obs, reward, done, __ = env.step(env.action_space.sample())
-        self.assertTrue(np.allclose(obs, [0, 0, 0, 1, 0, 0, 0, 0, 0]), 'observation vector is incorrect')
-        self.assertAlmostEqual(reward, -2.125, 'reward is incorrect')
-        self.assertFalse(done, 'done is incorrect')
+        # reset
+        obs = env.reset()
+        self.assertTrue(np.allclose(obs, [2, 1, 0, 2.5, 0, -2, -1, -2.5, 0]), msg='observation vector is incorrect')
 
-        # case 1
+        # step 1
         obs, reward, done, __ = env.step(env.action_space.sample())
-        self.assertTrue(np.allclose(obs, [0, 0, 0, -1, 0, 1, 0, 0, 0]), 'observation vector is incorrect')
-        self.assertAlmostEqual(reward, 998.775, 'reward is incorrect')
-        self.assertTrue(done, 'done is incorrect')
+        self.assertTrue(np.allclose(obs, [0, 0, 0, 1, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, -2.125, msg='reward is incorrect')
+        self.assertFalse(done, msg='done is incorrect')
 
-        # case 2
+        # step 2
         obs, reward, done, __ = env.step(env.action_space.sample())
-        self.assertTrue(np.allclose(obs, [2.3, 0, 0, 0, 0, 0, 0, 0, 0]), 'observation vector is incorrect')
-        self.assertAlmostEqual(reward, -7.654, 'reward is incorrect')
-        self.assertFalse(done, 'done is incorrect')
+        self.assertTrue(np.allclose(obs, [0, 0, 0, -1, 0, 1, 0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, 998.775, msg=f'reward is incorrect')
+        self.assertTrue(done, msg='done is incorrect')
 
-        # case 3
+        # step 3
         obs, reward, done, __ = env.step(env.action_space.sample())
-        self.assertTrue(np.allclose(obs, [0, -1.65, 0, 1, 0, 0, 0, 0, 0]), 'observation vector is incorrect')
-        self.assertAlmostEqual(reward, 994.50275, 'reward is incorrect')
-        self.assertTrue(done, 'done is incorrect')
+        self.assertTrue(np.allclose(obs, [2.3, 0, 0, 0, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, -7.654, msg='reward is incorrect')
+        self.assertFalse(done, msg='done is incorrect')
 
-        self.assertTrue(False, 'this is a test')
+        # step 4
+        obs, reward, done, __ = env.step(env.action_space.sample())
+        self.assertTrue(np.allclose(obs, [0, -1.65, 0, 1, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, 992.60275, msg='reward is incorrect')
+        self.assertTrue(done, msg='done is incorrect')
 
 if __name__ == '__main__':
     rostest.rosrun('rktl_autonomy', 'test_rktl_rewards', TestStep)
