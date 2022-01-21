@@ -22,4 +22,5 @@ then run 'docker commit <container-id>' in a new terminal to make persistent"
 else
 echo "
 Error building image, see above messages" >&2
+exit 1
 fi
