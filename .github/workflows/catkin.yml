@@ -14,7 +14,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        path: src
     - name: Build the local Docker image
       run: ./docker/docker-build.sh
     - name: Run `catkin build` and `catkin test` inside the Docker image
-      run: './docker/docker-run.sh'
+      run: ./docker/docker-run.sh
