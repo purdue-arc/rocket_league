@@ -71,7 +71,7 @@ class TestStep(unittest.TestCase):
         obs, reward, done, __ = env.step(env.action_space.sample())
 
         self.assertTrue(np.allclose(obs, [0, 0, 0, 1, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
-        self.assertAlmostEqual(reward, -2.125, msg='reward is incorrect')
+        self.assertAlmostEqual(reward, -2.125, places=4, msg='reward is incorrect')
         self.assertFalse(done, msg='done is incorrect')
         self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
 
@@ -85,7 +85,7 @@ class TestStep(unittest.TestCase):
         obs, reward, done, __ = env.step(env.action_space.sample())
 
         self.assertTrue(np.allclose(obs, [0, 0, 0, -1, 0, 1, 0, 0, 0]), msg='observation vector is incorrect')
-        self.assertAlmostEqual(reward, 998.775, msg=f'reward is incorrect')
+        self.assertAlmostEqual(reward, 998.775, places=4, msg=f'reward is incorrect')
         self.assertTrue(done, msg='done is incorrect')
         self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
 
@@ -99,7 +99,7 @@ class TestStep(unittest.TestCase):
         obs, reward, done, __ = env.step(env.action_space.sample())
 
         self.assertTrue(np.allclose(obs, [2.3, 0, 0, 0, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
-        self.assertAlmostEqual(reward, -7.654, msg='reward is incorrect')
+        self.assertAlmostEqual(reward, -7.654, places=4, msg='reward is incorrect')
         self.assertFalse(done, msg='done is incorrect')
         self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
 
@@ -113,7 +113,21 @@ class TestStep(unittest.TestCase):
         obs, reward, done, __ = env.step(env.action_space.sample())
 
         self.assertTrue(np.allclose(obs, [0, -1.65, 0, 1, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
-        self.assertAlmostEqual(reward, 992.60275, msg='reward is incorrect')
+        self.assertAlmostEqual(reward, 992.60275, places=4, msg='reward is incorrect')
+        self.assertTrue(done, msg='done is incorrect')
+        self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
+
+        # step 5
+        self.send_car = easy_odom(1, 0.5, 0)
+        self.send_ball = easy_odom(-2.3, 1.0, 0)
+        self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_B)
+        self.want_reset = False
+        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+
+        obs, reward, done, __ = env.step(env.action_space.sample())
+
+        self.assertTrue(np.allclose(obs, [1, 0.5, 0, 0, 0, -2.3, 1.0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, -512.134, places=4, msg='reward is incorrect')
         self.assertTrue(done, msg='done is incorrect')
         self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
 
