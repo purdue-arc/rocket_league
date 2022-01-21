@@ -19,7 +19,7 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled, field_length):
+    def __init__(self, urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, field_length):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
@@ -41,6 +41,7 @@ class Sim(object):
                        random.uniform(spawn_bounds[2][0], spawn_bounds[2][1])]
         self._ballID = p.loadURDF(
             urdf_paths["ball"], ballPos, zeroOrient)
+        p.changeDynamics(self._ballID,-1,linearDamping=0, angularDamping=0, rollingFriction=0.001, spinningFriction=0.001)
 
         self._goalAID = p.loadURDF(
             urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
@@ -50,18 +51,25 @@ class Sim(object):
             urdf_paths["goal"], field_setup["goalB"], zeroOrient, useFixedBase=1
         )
 
-        p.loadURDF(
+        lSidewallID = p.loadURDF(
             urdf_paths["sidewall"],
             field_setup["lsidewall"],
             zeroOrient,
             useFixedBase=1,
         )
-        p.loadURDF(
+        p.changeDynamics(bodyUniqueId=lSidewallID,
+            linkIndex=-1,
+            restitution=1.0)
+
+        rSidewallId = p.loadURDF(
             urdf_paths["sidewall"],
             field_setup["rsidewall"],
             zeroOrient,
-            useFixedBase=1,
+            useFixedBase=0,
         )
+        p.changeDynamics(bodyUniqueId=rSidewallId,
+            linkIndex=-1,
+            restitution=1.0)
 
         # TODO: Improve handling of split walls
         p.loadURDF(
@@ -112,7 +120,14 @@ class Sim(object):
         self.scored = False
         self.winner = None
 
+        p.setPhysicsEngineParameter(restitutionVelocityThreshold=0.0)
         p.setGravity(0, 0, -10)
+        
+        # Initialize ball with some speed
+        speed_bound = math.sqrt(2.) * speed_init 
+        ballVel = [random.uniform(-speed_bound, speed_bound),
+                   random.uniform(-speed_bound, speed_bound), 0.]
+        p.resetBaseVelocity(self._ballID, ballVel, zeroOrient)
 
     def step(self, throttle_cmd, steering_cmd, dt):
         """Advance one time-step in the sim."""

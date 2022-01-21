@@ -51,24 +51,24 @@ class VisualizerROS(object):
 
         # Setup field assets
         self.window.createAsset(
-            1, wall_thickness, field_length, color=(0, 0, 0),
+            1, wall_thickness/2., field_length, color=(0, 0, 0),
             initPos=(0., (field_width + (wall_thickness / 2.)) / 2.))
         self.window.createAsset(
-            2, wall_thickness, field_length, color=(0, 0, 0),
+            2, wall_thickness/2., field_length, color=(0, 0, 0),
             initPos=(0., -(field_width + (wall_thickness / 2.)) / 2.))
 
         backwall_width = (field_width - goal_width) / 2.
         self.window.createAsset(
-            3, backwall_width, wall_thickness, color=(0, 0, 0),
+            3, backwall_width, wall_thickness/2., color=(0, 0, 0),
             initPos=((field_length + (wall_thickness / 2.)) / 2., (field_width / 2.) - (backwall_width / 2.)))
         self.window.createAsset(
-            4, backwall_width, wall_thickness, color=(0, 0, 0),
+            4, backwall_width, wall_thickness/2., color=(0, 0, 0),
             initPos=((field_length + (wall_thickness / 2.)) / 2., -(field_width / 2.) + (backwall_width / 2.)))
         self.window.createAsset(
-            5, backwall_width, wall_thickness, color=(0, 0, 0),
+            5, backwall_width, wall_thickness/2., color=(0, 0, 0),
             initPos=(-(field_length + (wall_thickness / 2.)) / 2., (field_width / 2.) - (backwall_width / 2.)))
         self.window.createAsset(
-            6, backwall_width, wall_thickness, color=(0, 0, 0),
+            6, backwall_width, wall_thickness/2., color=(0, 0, 0),
             initPos=(-(field_length + (wall_thickness / 2.)) / 2., -(field_width / 2.) + (backwall_width / 2.)))
 
         car_img_path = rospy.get_param("~CAR_IMG_PATH", None)
@@ -89,14 +89,14 @@ class VisualizerROS(object):
             # Top Goal:
             self.goal1_id = 9
             self.window.createAsset(
-                self.goal1_id, goal_width, wall_thickness, imgPath=goal_img_path
+                self.goal1_id, goal_width, wall_thickness/2., imgPath=goal_img_path
             )
             self.window.updateAssetPos(
                 self.goal1_id, (field_length / 2) + (wall_thickness / 4), 0)
             # Bottom Goal:
             self.goal2_id = 10
             self.window.createAsset(
-                self.goal2_id, goal_width, wall_thickness, imgPath=goal_img_path
+                self.goal2_id, goal_width, wall_thickness/2., imgPath=goal_img_path
             )
             self.window.updateAssetPos(
                 self.goal2_id, -((field_length / 2) + (wall_thickness / 4)), 0)

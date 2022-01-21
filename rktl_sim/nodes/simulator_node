@@ -68,6 +68,7 @@ class SimulatorROS(object):
         rate = rospy.Rate(rospy.get_param('~RATE', 30))
         self.frame_id = rospy.get_param('~FRAME_ID', 'map')
         self.timeout = rospy.get_param('~TIMEOUT', 10)
+        speed_init = rospy.get_param('~SPEED_INIT', 0.0)
 
         urdf_paths = {}
         urdf_paths["ball"] = rospy.get_param('~BALL_URDF_PATH')
@@ -85,7 +86,7 @@ class SimulatorROS(object):
 
         # Creating physics simulator
         self.sim = simulator.Sim(
-            urdf_paths, field_setup, spawn_bounds, render_enabled, fl)
+            urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, fl)
 
         self.lock = Lock()
         self.throttle_cmd = 0.
