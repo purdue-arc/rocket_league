@@ -1,0 +1,20 @@
+name: Catkin Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build the local Docker image
+      run: ./docker/docker-build.sh
+    - name: Run `catkin build` inside the Docker image
+      run: DOCKER_CMD="catkin build" ./docker/docker-run.sh
+    - name: Run `catkin test` inside the Docker image
+      run: DOCKER_CMD="catkin test" ./docker/docker-run.sh
