@@ -8,8 +8,10 @@ reward:
   ball_dist_sq: -0.1
   # reward as a function of squared distance from the ball to the goal
   goal_dist_sq: -0.5
-  # reward given when the episode ends with the car scoring a goal
+  # reward given when the episode ends with the car scoring the proper goal
   win: 1000
+  # reward given when the episode ends with the car scoring on the wrong goal
+  loss: -1000
   # reward given each frame when the car is in reverse
   reverse: -1
   # reward given each frame when the car is near the walls

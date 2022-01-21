@@ -6,6 +6,7 @@ License:
 """
 
 # package
+from difflib import Match
 from rktl_autonomy import ROSInterface
 from gym.spaces import Box
 
@@ -46,6 +47,7 @@ class RocketLeagueInterface(ROSInterface):
         self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
         self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
         self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)
+        self._LOSS_REWARD = rospy.get_param('~reward/loss', 0.0)
         self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
         self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
@@ -58,7 +60,7 @@ class RocketLeagueInterface(ROSInterface):
         # State variables
         self._car_odom = None
         self._ball_odom = None
-        self._won = None
+        self._score = None
         self._start_time = None
         self._total_reward = 0
         self._episode = 0
@@ -110,14 +112,13 @@ class RocketLeagueInterface(ROSInterface):
         if self._has_state():
             self._log_data({
                 "episode" : self._episode,
-                "goals" : 1.0 if self._won else 0.0,
+                "goals" : self._score,
                 "duration" : (rospy.Time.now() - self._start_time).to_sec(),
                 "net_reward" : self._total_reward})
             self._episode += 1
 
         # reset
         self._clear_state()
-        self._won = None
         self._start_time = None
         self._total_reward = 0
 
@@ -126,13 +127,13 @@ class RocketLeagueInterface(ROSInterface):
         return (
             self._car_odom is not None and
             self._ball_odom is not None and
-            self._won is not None)
+            self._score is not None)
 
     def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
         self._car_odom = None
         self._ball_odom = None
-        self._won = None
+        self._score = None
 
     def _get_state(self):
         """Get state tuple (observation, reward, done, info)."""
@@ -159,9 +160,12 @@ class RocketLeagueInterface(ROSInterface):
         goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_HEIGHT/2, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
 
-        if self._won:
-            reward += self._WIN_REWARD
+        if self._score != 0:
             done = True
+            if self._score > 0:
+                reward += self._WIN_REWARD
+            else:
+                reward += self._LOSS_REWARD
 
         x, y, __, v, __ = self._car_odom
         if v < 0:
@@ -218,6 +222,11 @@ class RocketLeagueInterface(ROSInterface):
 
     def _score_cb(self, score_msg):
         """Callback for score of game."""
-        self._won = score_msg.status == MatchStatus.VICTORY_TEAM_A
+        if score_msg.status == MatchStatus.VICTORY_TEAM_A:
+            self._score = 1
+        elif score_msg.status == MatchStatus.VICTORY_TEAM_B:
+            self._score = -1
+        else:
+            self._score = 0
         with self._cond:
             self._cond.notify_all()
