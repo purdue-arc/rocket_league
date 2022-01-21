@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DOCKER_CMD: cd catkin_ws && catkin build --no-status && catkin test --no-status
+      DOCKER_CMD: . /opt/ros/noetic/setup.zsh && cd catkin_ws && catkin build --no-status && catkin test --no-status
     steps:
     - name: Checkout
       uses: actions/checkout@v2
