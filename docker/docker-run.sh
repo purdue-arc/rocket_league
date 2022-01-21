@@ -24,4 +24,4 @@ docker run --rm \
     --name $CONTAINER_NAME \
     $@ \
     $REPO_NAME:local \
-    $DOCKER_CMD
+    ${DOCKER_CMD:+/bin/zsh -c "$DOCKER_CMD"}
