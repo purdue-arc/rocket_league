@@ -9,12 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_CMD: catkin build --no-color --workspace catkin_ws && catkin test --no-color --workspace catkin_ws
     steps:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Build the local Docker image
       run: ./docker/docker-build.sh
-    - name: Run `catkin build` inside the Docker image
-      run: 'DOCKER_CMD="catkin build --no-color --workspace catkin_ws" ./docker/docker-run.sh | egrep "\[build\] Summary: All [0-9]+ packages succeeded!"'
-    - name: Run `catkin test` inside the Docker image
-      run: 'DOCKER_CMD="catkin test --no-color --workspace catkin_ws" ./docker/docker-run.sh | egrep "\[build\] Summary: All [0-9]+ packages succeeded!"'
+    - name: Run `catkin build` and `catkin test` inside the Docker image
+      run: './docker/docker-run.sh'

@@ -5,7 +5,14 @@ REPO_NAME="purduearc/rocket-league"
 CONTAINER_NAME="${CONTAINER_NAME:-arc-rocket-league-dev}"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
-docker run --rm -it \
+# tty-specific options
+if [ -t 0 -a -t 1 ]
+then
+    TTY_OPTS="-it"
+fi
+
+docker run --rm \
+    $TTY_OPTS \
     -e USER \
     -e DISPLAY \
     -e NVIDIA_DRIVER_CAPABILITIES=all \
