@@ -10,13 +10,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DOCKER_CMD: . /opt/ros/noetic/setup.zsh && cd catkin_ws && catkin build --no-status && catkin test --no-status
+      DOCKER_CMD: >-
+        . /opt/ros/noetic/setup.zsh &&
+        cd catkin_ws &&
+        catkin build --no-status --force-color &&
+        catkin test --no-status --force-color
     steps:
     - name: Checkout
       uses: actions/checkout@v2
       with:
         path: src/rocket_league
     - name: Build the local Docker image
-      run: ./src/rocket_league/docker/docker-build.sh
+      run: ./src/rocket_league/docker/docker-build.sh --build-arg TAG=${{ env.PR_NUMBER }}
     - name: Run `catkin build` and `catkin test` inside the Docker image
       run: ./src/rocket_league/docker/docker-run.sh
