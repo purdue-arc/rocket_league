@@ -45,7 +45,7 @@ class Sim(object):
             urdf_paths["ball"], ballPos, zeroOrient)
         p.changeDynamics(bodyUniqueId=self._ballID,
             linkIndex=-1,
-            restitution=0.775)
+            restitution=0.9)
 
         self._goalAID = p.loadURDF(
             urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
@@ -55,64 +55,67 @@ class Sim(object):
             urdf_paths["goal"], field_setup["goalB"], zeroOrient, useFixedBase=1
         )
 
+        self._walls = {}  
         lSidewallID = p.loadURDF(
             urdf_paths["sidewall"],
             field_setup["lsidewall"],
-            zeroOrient,
+            zeroOrient, useFixedBase=1,
         )
         p.changeDynamics(bodyUniqueId=lSidewallID,
             linkIndex=-1,
-            restitution=0.9)
+            restitution=1.0)
+        self._walls[lSidewallID] = True
 
         rSidewallId = p.loadURDF(
             urdf_paths["sidewall"],
             field_setup["rsidewall"],
-            zeroOrient,
+            zeroOrient, useFixedBase=1,
         )
         p.changeDynamics(bodyUniqueId=rSidewallId,
             linkIndex=-1,
             restitution=1.0)
+        self._walls[rSidewallId] = True
 
         # TODO: Improve handling of split walls
         flBackwallID = p.loadURDF(
             urdf_paths["backwall"],
             field_setup["flbackwall"],
-            zeroOrient,
-            useFixedBase=1,
+            zeroOrient, useFixedBase=1,
         )
         p.changeDynamics(bodyUniqueId=flBackwallID,
             linkIndex=-1,
-            restitution=0.9)
+            restitution=1.0)
+        self._walls[flBackwallID] = True
 
         frBackwallID = p.loadURDF(
             urdf_paths["backwall"],
             field_setup["frbackwall"],
-            zeroOrient,
-            useFixedBase=1,
+            zeroOrient, useFixedBase=1,
         )
         p.changeDynamics(bodyUniqueId=frBackwallID,
             linkIndex=-1,
-            restitution=0.9)
+            restitution=1.0)
+        self._walls[frBackwallID] = True
 
         blBackwallID = p.loadURDF(
             urdf_paths["backwall"],
             field_setup["blbackwall"],
-            zeroOrient,
-            useFixedBase=1,
+            zeroOrient, useFixedBase=1,
         )
         p.changeDynamics(bodyUniqueId=blBackwallID,
             linkIndex=-1,
-            restitution=0.9)
+            restitution=1.0)
+        self._walls[blBackwallID] = True
 
         brBackwallID = p.loadURDF(
             urdf_paths["backwall"],
             field_setup["brbackwall"],
-            zeroOrient,
-            useFixedBase=1,
+            zeroOrient, useFixedBase=1,
         )
         p.changeDynamics(bodyUniqueId=brBackwallID,
             linkIndex=-1,
-            restitution=0.9)
+            restitution=1.0)
+        self._walls[brBackwallID] = True
 
         self._cars = {}
         if 'car' in field_setup:
@@ -148,8 +151,8 @@ class Sim(object):
 
     def step(self, throttle_cmd, steering_cmd, dt):
         """Advance one time-step in the sim."""
-        contacts = p.getContactPoints(bodyA=self._ballID)
-        for contact in contacts:
+        ballContacts = p.getContactPoints(bodyA=self._ballID)
+        for contact in ballContacts:
             if contact[2] in self._cars:
                 self.touchedLast = contact[2]
             elif contact[2] == self._goalAID:
@@ -161,7 +164,13 @@ class Sim(object):
 
         # PyBullet steps at 240hz
         for car in self._cars.values():
-            car.step((throttle_cmd, steering_cmd), dt)
+            wallContact = False
+            carContacts = p.getContactPoints(bodyA=car.id)
+            for contact in carContacts:
+                if contact[2] in self._walls:
+                    wallContact = True
+                    break
+            car.step((throttle_cmd, steering_cmd), wallContact, dt)
 
         for _ in range(int(dt * 240.)):
             p.stepSimulation()

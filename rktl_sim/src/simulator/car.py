@@ -32,8 +32,11 @@ class Car(object):
         p.resetBasePositionAndOrientation(
             self.id, pos, p.getQuaternionFromEuler(orient))
 
-    def step(self, cmd, dt):
+    def step(self, cmd, contact, dt):
         des_throttle = cmd[0]
+        if contact:
+            des_throttle *= 0.10
+
         steering = cmd[1]
 
         # Compute 2nd-order response of throttle
