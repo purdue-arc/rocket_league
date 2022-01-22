@@ -30,7 +30,7 @@ jobs:
   catkin_tag:
     needs: changes, docker
     if: needs.changes.outputs.docker == 'true'
-    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
+    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@ci
     with:
       tag: ${{ env.PR_NUMBER }}
   catkin_latest:
