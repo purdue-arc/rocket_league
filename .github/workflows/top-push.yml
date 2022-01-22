@@ -5,24 +5,23 @@ on:
     branches: ['main']
 
 jobs:
-  docker:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      docker: ${{ steps.changes.outputs.docker }}
     steps:
-      - name: Check for Docker updates
-        id: changes
+      - id: changes
         uses: dorny/paths-filter@v2
         with:
           filters: |
             docker: ['docker/**']
-      - name: Call Docker workflow
-        if: steps.changes.outputs.docker == 'true'
-        uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
-        secrets:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+  docker:
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
+    secrets:
+      username: ${{ secrets.DOCKERHUB_USERNAME }}
+      password: ${{ secrets.DOCKERHUB_PASSWORD }}
   catkin:
     needs: docker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Call catkin workflow
-        uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
+    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
