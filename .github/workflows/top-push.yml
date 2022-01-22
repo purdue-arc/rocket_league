@@ -15,7 +15,8 @@ jobs:
         id: changes
         uses: dorny/paths-filter@v2
         with:
-          filters: docker: ['docker/**']
+          filters: |
+            docker: ['docker/**']
       - name: Call Docker workflow
         if: steps.changes.outputs.docker == 'true'
         uses: ${{ env.REPO_NAME }}/.github/workflows/docker-build-push.yml

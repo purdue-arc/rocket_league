@@ -11,12 +11,15 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    outputs:
+      docker: ${{ steps.changes.outputs.docker }}
     steps:
       - name: Check for Docker updates
         id: changes
         uses: dorny/paths-filter@v2
         with:
-          filters: docker: ['docker/**']
+          filters: |
+            docker: ['docker/**']
       - name: Call Docker workflow
         if: steps.changes.outputs.docker == 'true'
         uses: ${{ env.REPO_NAME }}/.github/workflows/docker-build-push.yml
@@ -29,16 +32,11 @@ jobs:
     needs: docker
     runs-on: ubuntu-latest
     steps:
-      - name: Check for Docker updates
-        id: changes
-        uses: dorny/paths-filter@v2
-        with:
-          filters: docker: ['docker/**']
       - name: Call catkin workflow (tag)
-        if: steps.changes.outputs.docker == 'true'
+        if: needs.docker.outputs.docker == 'true'
         uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml
         with:
           tag: ${{ env.PR_NUMBER }}
       - name: Call catkin workflow (latest)
-      if: steps.changes.outputs.docker == 'false'
+        if: needs.docker.outputs.docker == 'false'
         uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml
