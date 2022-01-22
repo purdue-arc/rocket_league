@@ -26,7 +26,7 @@ class Window(object):
 
     def __init__(self, map_width, map_length, wall_thickness):
         # Support for 1080p monitors
-        self.scaling = 1080 * 0.7 / (map_length + wall_thickness)
+        self.scaling = 1080 * 0.5 / (map_length + wall_thickness)
 
         self.window_length = int(
             (map_length + wall_thickness) * self.scaling)

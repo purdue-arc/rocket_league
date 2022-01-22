@@ -9,7 +9,6 @@ License:
 import math
 import os
 import pybullet as p
-import pybullet_data as p_data
 import random
 
 # Local modules
@@ -28,10 +27,13 @@ class Sim(object):
         self.field_length = field_length
 
         self.spawn_bounds = spawn_bounds
-        p.setAdditionalSearchPath(p_data.getDataPath())
-        self._planeID = p.loadURDF(urdf_paths["plane"], [0, 0, 0])
 
         zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
+        self._planeID = p.loadURDF(urdf_paths["plane"], [0, 0, 0],
+            zeroOrient, useFixedBase=1)
+        p.changeDynamics(bodyUniqueId=self._planeID,
+            linkIndex=-1,
+            restitution=0.9)
 
         if 'ball' in field_setup:
             ballPos = field_setup['ball']
@@ -41,7 +43,9 @@ class Sim(object):
                        random.uniform(spawn_bounds[2][0], spawn_bounds[2][1])]
         self._ballID = p.loadURDF(
             urdf_paths["ball"], ballPos, zeroOrient)
-        p.changeDynamics(self._ballID,-1,linearDamping=0, angularDamping=0, rollingFriction=0.001, spinningFriction=0.001)
+        p.changeDynamics(bodyUniqueId=self._ballID,
+            linkIndex=-1,
+            restitution=0.775)
 
         self._goalAID = p.loadURDF(
             urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
@@ -55,47 +59,60 @@ class Sim(object):
             urdf_paths["sidewall"],
             field_setup["lsidewall"],
             zeroOrient,
-            useFixedBase=1,
         )
         p.changeDynamics(bodyUniqueId=lSidewallID,
             linkIndex=-1,
-            restitution=1.0)
+            restitution=0.9)
 
         rSidewallId = p.loadURDF(
             urdf_paths["sidewall"],
             field_setup["rsidewall"],
             zeroOrient,
-            useFixedBase=0,
         )
         p.changeDynamics(bodyUniqueId=rSidewallId,
             linkIndex=-1,
             restitution=1.0)
 
         # TODO: Improve handling of split walls
-        p.loadURDF(
+        flBackwallID = p.loadURDF(
             urdf_paths["backwall"],
             field_setup["flbackwall"],
             zeroOrient,
             useFixedBase=1,
         )
-        p.loadURDF(
+        p.changeDynamics(bodyUniqueId=flBackwallID,
+            linkIndex=-1,
+            restitution=0.9)
+
+        frBackwallID = p.loadURDF(
             urdf_paths["backwall"],
             field_setup["frbackwall"],
             zeroOrient,
             useFixedBase=1,
         )
-        p.loadURDF(
+        p.changeDynamics(bodyUniqueId=frBackwallID,
+            linkIndex=-1,
+            restitution=0.9)
+
+        blBackwallID = p.loadURDF(
             urdf_paths["backwall"],
             field_setup["blbackwall"],
             zeroOrient,
             useFixedBase=1,
         )
-        p.loadURDF(
+        p.changeDynamics(bodyUniqueId=blBackwallID,
+            linkIndex=-1,
+            restitution=0.9)
+
+        brBackwallID = p.loadURDF(
             urdf_paths["backwall"],
             field_setup["brbackwall"],
             zeroOrient,
             useFixedBase=1,
         )
+        p.changeDynamics(bodyUniqueId=brBackwallID,
+            linkIndex=-1,
+            restitution=0.9)
 
         self._cars = {}
         if 'car' in field_setup:

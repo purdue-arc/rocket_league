@@ -5,7 +5,6 @@
         <color rgba="0.1 0.1 0.1 1"/>
     </material>
 
-
     <!-- Base Frame of Sidewall --> 
     <link name="base_link">
         <visual>
@@ -19,6 +18,9 @@
                 <box size="5.0 0.25 0.25"/>
             </geometry>
       </collision>
-    </link> 
-    
+      <inertial>
+            <mass value="1.0" />
+            <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="1.0"  iyz="0.0"  izz="1.0" />
+        </inertial>
+    </link>
 </robot>
