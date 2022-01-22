@@ -19,7 +19,7 @@ jobs:
             docker: ['docker/**']
       - name: Call Docker workflow
         if: steps.changes.outputs.docker == 'true'
-        uses: ${{ env.REPO_NAME }}/.github/workflows/docker-build-push.yml
+        uses: ${{ env.REPO_NAME }}/.github/workflows/docker-build-push.yml@main
         secrets:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -28,4 +28,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Call catkin workflow
-        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml
+        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml@main

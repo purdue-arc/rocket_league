@@ -22,7 +22,7 @@ jobs:
             docker: ['docker/**']
       - name: Call Docker workflow
         if: steps.changes.outputs.docker == 'true'
-        uses: ${{ env.REPO_NAME }}/.github/workflows/docker-build-push.yml
+        uses: ${{ env.REPO_NAME }}/.github/workflows/docker-build-push.yml@main
         with:
           tag: ${{ env.PR_NUMBER }}
         secrets:
@@ -34,9 +34,9 @@ jobs:
     steps:
       - name: Call catkin workflow (tag)
         if: needs.docker.outputs.docker == 'true'
-        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml
+        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml@main
         with:
           tag: ${{ env.PR_NUMBER }}
       - name: Call catkin workflow (latest)
         if: needs.docker.outputs.docker == 'false'
-        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml
+        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml@main
