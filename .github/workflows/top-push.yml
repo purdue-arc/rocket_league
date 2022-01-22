@@ -21,7 +21,7 @@ jobs:
     uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
     secrets:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
-      password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      password: ${{ secrets.DOCKERHUB_TOKEN }}
   catkin:
     needs: docker
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
