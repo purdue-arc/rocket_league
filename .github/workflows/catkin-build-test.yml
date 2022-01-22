@@ -3,7 +3,7 @@ name: Re-usable Catkin Build and Test
 on:
   workflow_call:
     inputs:
-      TAG:
+      tag:
         default: "latest"
         required: false
         type: string
@@ -21,6 +21,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Build the local Docker image
-      run: ./docker/docker-build.sh --build-arg TAG=${{ inputs.TAG }}
+      run: ./docker/docker-build.sh --build-arg tag=${{ inputs.tag }}
     - name: Catkin build and test
       run: ./docker/docker-run.sh
