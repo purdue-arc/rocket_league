@@ -1,0 +1,26 @@
+name: Re-usable Catkin Build and Test
+
+on:
+  workflow-call:
+    inputs:
+      TAG:
+        default: "latest"
+        required: false
+        type: string
+
+jobs:
+  catkin:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_CMD: >-
+        . /opt/ros/noetic/setup.zsh &&
+        cd catkin_ws &&
+        catkin build --no-status --force-color &&
+        catkin test --no-status --force-color
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build the local Docker image
+      run: ./docker/docker-build.sh --build-arg TAG=${{ inputs.TAG }}
+    - name: Catkin build and test
+      run: ./docker/docker-run.sh

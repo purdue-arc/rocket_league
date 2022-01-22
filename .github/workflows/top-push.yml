@@ -1,0 +1,30 @@
+name: Top level push workflow
+
+env:
+  REPO_NAME: purdue-arc/rocket_league
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Docker updates
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: docker: ['docker/**']
+      - name: Call Docker workflow
+        if: steps.changes.outputs.docker == 'true'
+        uses: ${{ env.REPO_NAME }}/.github/workflows/docker-build-push.yml
+        secrets:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+  catkin:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call catkin workflow
+        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml

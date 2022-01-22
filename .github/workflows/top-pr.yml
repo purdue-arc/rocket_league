@@ -1,0 +1,44 @@
+name: Top level PR workflow
+
+env:
+  PR_NUMBER: ${{ github.event.number }}
+  REPO_NAME: purdue-arc/rocket_league
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Docker updates
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: docker: ['docker/**']
+      - name: Call Docker workflow
+        if: steps.changes.outputs.docker == 'true'
+        uses: ${{ env.REPO_NAME }}/.github/workflows/docker-build-push.yml
+        with:
+          tag: ${{ env.PR_NUMBER }}
+        secrets:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+  catkin:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for Docker updates
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: docker: ['docker/**']
+      - name: Call catkin workflow (tag)
+        if: steps.changes.outputs.docker == 'true'
+        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml
+        with:
+          tag: ${{ env.PR_NUMBER }}
+      - name: Call catkin workflow (latest)
+      if: steps.changes.outputs.docker == 'false'
+        uses: ${{ env.REPO_NAME }}/.github/workflows/catkin-build-test.yml
