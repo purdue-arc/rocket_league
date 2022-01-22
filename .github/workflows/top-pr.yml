@@ -25,12 +25,12 @@ jobs:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
       password: ${{ secrets.DOCKERHUB_PASSWORD }}
   catkin_tag:
-    needs: changes, docker
+    needs: [changes, docker]
     if: needs.changes.outputs.docker == 'true'
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@ci
     with:
       tag: ${{ github.event.number }}
   catkin_latest:
-    needs: changes, docker
+    needs: [changes, docker]
     if: needs.changes.outputs.docker == 'false'
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@ci
