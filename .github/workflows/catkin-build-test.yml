@@ -1,7 +1,7 @@
 name: Re-usable Catkin Build and Test
 
 on:
-  workflow-call:
+  workflow_call:
     inputs:
       TAG:
         default: "latest"
