@@ -21,7 +21,7 @@ jobs:
   docker:
     needs: changes
     if: needs.changes.outputs.docker == 'true'
-    uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
+    uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@ci
     with:
       tag: ${{ env.PR_NUMBER }}
     secrets:
@@ -36,4 +36,4 @@ jobs:
   catkin_latest:
     needs: changes, docker
     if: needs.changes.outputs.docker == 'false'
-    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
+    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@ci
