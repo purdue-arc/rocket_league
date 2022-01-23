@@ -20,7 +20,7 @@ jobs:
     name: Rebuild Docker image and push to PR tag
     needs: changes
     if: needs.changes.outputs.docker == 'true'
-    uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@ci
+    uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
     with:
       tag: ${{ github.event.number }}
     secrets:
@@ -30,11 +30,11 @@ jobs:
     name: Catkin build and test using PR tagged Docker image
     needs: [changes, docker]
     if: needs.changes.outputs.docker == 'true'
-    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@ci
+    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
     with:
       tag: ${{ github.event.number }}
   catkin_latest:
     name: Catkin build and test using latest Docker image
     needs: [changes, docker]
     if: needs.changes.outputs.docker == 'false'
-    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@ci
+    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
