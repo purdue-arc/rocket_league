@@ -29,4 +29,5 @@ jobs:
   catkin:
     name: Catkin build and test using latest Docker image
     needs: docker
+    if: always()
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
