@@ -1,17 +1,18 @@
 <launch>
-  <test type="test_step_owner.py" pkg="rktl_autonomy" test-name="test_step_owner">
+  <test type="test_step_node" pkg="rktl_autonomy" test-name="test_step_node">
     <!-- Use hardcoded values for the test -->
     <rosparam>
+      rate: 10
       reward:
         constant: 1.0
         ball_dist_sq: -0.1
         goal_dist_sq: -0.5
         win: 1000
+        loss: -500
         reverse: -1
         walls:
           value: -5
           threshold: 0.25
     </rosparam>
   </test>
-  <node type="test_step_echo.py" pkg="rktl_autonomy" name="test_step_echo"/>
 </launch>
