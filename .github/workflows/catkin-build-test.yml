@@ -20,7 +20,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        path: src/rocket_league
     - name: Build the local Docker image
-      run: ./docker/docker-build.sh --build-arg tag=${{ inputs.tag }}
+      run: .src/rocket_league/docker/docker-build.sh --build-arg tag=${{ inputs.tag }}
     - name: Catkin build and test
-      run: ./docker/docker-run.sh
+      run: .src/rocket_league/docker/docker-run.sh
