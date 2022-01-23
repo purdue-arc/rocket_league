@@ -35,6 +35,6 @@ jobs:
       tag: ${{ github.event.number }}
   catkin_latest:
     name: Catkin build and test using latest Docker image
-    needs: [changes, docker]
+    needs: changes
     if: needs.changes.outputs.docker == 'false'
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
