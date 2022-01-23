@@ -1,4 +1,4 @@
-name: Top level PR workflow
+name: Top-level PR workflow
 
 on:
   pull_request:
@@ -6,6 +6,7 @@ on:
 
 jobs:
   changes:
+    name: Check for changes to files in docker directory
     runs-on: ubuntu-latest
     outputs:
       docker: ${{ steps.changes.outputs.docker }}
@@ -16,6 +17,7 @@ jobs:
           filters: |
             docker: ['docker/**']
   docker:
+    name: Rebuild Docker image and push to PR tag
     needs: changes
     if: needs.changes.outputs.docker == 'true'
     uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@ci
@@ -25,12 +27,14 @@ jobs:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
       password: ${{ secrets.DOCKERHUB_TOKEN }}
   catkin_tag:
+    name: Catkin build and test using PR tagged Docker image
     needs: [changes, docker]
     if: needs.changes.outputs.docker == 'true'
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@ci
     with:
       tag: ${{ github.event.number }}
   catkin_latest:
+    name: Catkin build and test using latest Docker image
     needs: [changes, docker]
     if: needs.changes.outputs.docker == 'false'
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@ci

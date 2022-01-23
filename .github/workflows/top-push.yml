@@ -1,4 +1,4 @@
-name: Top level push workflow
+name: Top-level push workflow
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
 
 jobs:
   changes:
+    name: Check for changes to files in docker directory
     runs-on: ubuntu-latest
     outputs:
       docker: ${{ steps.changes.outputs.docker }}
@@ -16,6 +17,7 @@ jobs:
           filters: |
             docker: ['docker/**']
   docker:
+    name: Rebuild Docker image and push to latest
     needs: changes
     if: needs.changes.outputs.docker == 'true'
     uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
@@ -23,5 +25,6 @@ jobs:
       username: ${{ secrets.DOCKERHUB_USERNAME }}
       password: ${{ secrets.DOCKERHUB_TOKEN }}
   catkin:
+    name: Catkin build and test using latest Docker image
     needs: docker
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
