@@ -33,7 +33,7 @@ class Sim(object):
             zeroOrient, useFixedBase=1)
         p.changeDynamics(bodyUniqueId=self._planeID,
             linkIndex=-1,
-            restitution=0.9)
+            restitution=1.0)
 
         if 'ball' in field_setup:
             ballPos = field_setup['ball']
@@ -45,7 +45,9 @@ class Sim(object):
             urdf_paths["ball"], ballPos, zeroOrient)
         p.changeDynamics(bodyUniqueId=self._ballID,
             linkIndex=-1,
-            restitution=1.0)
+            restitution=0.7, 
+            linearDamping=0, angularDamping=0,
+            rollingFriction=0.0001, spinningFriction=0.001)
 
         # Initialize ball with some speed
         self._speed_bound = math.sqrt(2.) * speed_init 
@@ -146,7 +148,7 @@ class Sim(object):
         self.scored = False
         self.winner = None
 
-        p.setPhysicsEngineParameter(useSplitImpulse=1)
+        p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
         p.setGravity(0, 0, -10)
 
     def step(self, throttle_cmd, steering_cmd, dt):
