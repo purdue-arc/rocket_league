@@ -49,12 +49,19 @@ class ROSInterface(Env):
         super().__init__()
 
         rospy.init_node(self._node_name)
-        self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
-        self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
-        self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
+        self.__EVAL_MODE = rospy.get_param('~eval_mode', False)
 
-        self.__time = rospy.Time.from_sec(time.time())
-        self.__clock_pub.publish(self.__time)
+        if not self.__EVAL_MODE:
+            # constants for training
+            self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
+
+            # publishers for training
+            self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
+            self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
+
+            # initialize sim time
+            self.__time = rospy.Time.from_sec(time.time())
+            self.__clock_pub.publish(self.__time)
 
     # @final
     def step(self, action):
@@ -91,16 +98,17 @@ class ROSInterface(Env):
         Returns:
             observation (object): the initial observation.
         """
-        self._reset_env()
+        if not self.__EVAL_MODE:
+            self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
         return self._get_state()[0]
 
     def __step_time_and_wait_for_state(self, max_retries=1):
         """Step time until a state is known."""
-        self.__time += self.__DELTA_T
-        self.__clock_pub.publish(self.__time)
-        try:
+        if not self.__EVAL_MODE:
+            self.__time += self.__DELTA_T
+            self.__clock_pub.publish(self.__time)
             retries = 0
             while not self.__wait_once_for_state():
                 self.__time += self.__DELTA_T
@@ -109,8 +117,10 @@ class ROSInterface(Env):
                 if retries >= max_retries:
                     rospy.logerr("Failed to get new state.")
                     raise SimTimeException
-        except rospy.ROSInterruptException:
-            raise SimTimeException
+        else:
+            while not self.__wait_once_for_state():
+                # idle wait
+                pass
 
     def __wait_once_for_state(self):
         """Wait and allow other threads to run."""
@@ -118,8 +128,7 @@ class ROSInterface(Env):
             has_state = self._cond.wait_for(self._has_state, 0.25)
         if rospy.is_shutdown():
             raise rospy.ROSInterruptException()
-        else:
-            return has_state
+        return has_state
 
     def _log_data(self, data):
         """Log data to ROS logging topic. data input is a dictionary"""

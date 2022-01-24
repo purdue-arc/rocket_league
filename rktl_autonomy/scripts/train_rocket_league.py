@@ -11,7 +11,7 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.logger import configure
 from stable_baselines3.common.callbacks import CheckpointCallback
 from os.path import expanduser, normpath
-import time, rospy
+import rospy
 
 env = RocketLeagueInterface()
 model = PPO("MlpPolicy", env)
