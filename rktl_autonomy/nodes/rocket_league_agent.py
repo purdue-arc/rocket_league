@@ -11,7 +11,7 @@ from stable_baselines3 import PPO
 from os.path import expanduser
 import rospy
 
-# create interface
+# create interface (and init ROS)
 env = RocketLeagueInterface()
 
 # load the model
@@ -19,8 +19,10 @@ weights = expanduser(rospy.get_param('~weights'))
 model = PPO.load(weights)
 
 # evaluate in real-time
-env.registercallback(model.predict)
 obs = env.reset()
-while not rospy.is_shutdown():
+while True:
     action, __ = model.predict(obs)
-    obs, __, __, __ = env.step(action)
+    try:
+        obs, __, __, __ = env.step(action)
+    except rospy.ROSInterruptException:
+        exit()

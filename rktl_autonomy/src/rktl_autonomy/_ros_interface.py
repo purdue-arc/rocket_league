@@ -50,14 +50,11 @@ class ROSInterface(Env):
 
         rospy.init_node(self._node_name)
         self.__EVAL_MODE = rospy.get_param('~eval_mode', False)
+        self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
 
         if not self.__EVAL_MODE:
-            # constants for training
             self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
-
-            # publishers for training
             self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
-            self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
 
             # initialize sim time
             self.__time = rospy.Time.from_sec(time.time())
@@ -119,8 +116,7 @@ class ROSInterface(Env):
                     raise SimTimeException
         else:
             while not self.__wait_once_for_state():
-                # idle wait
-                pass
+                pass    # idle wait
 
     def __wait_once_for_state(self):
         """Wait and allow other threads to run."""
