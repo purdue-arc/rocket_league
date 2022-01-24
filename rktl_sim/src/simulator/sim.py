@@ -45,7 +45,13 @@ class Sim(object):
             urdf_paths["ball"], ballPos, zeroOrient)
         p.changeDynamics(bodyUniqueId=self._ballID,
             linkIndex=-1,
-            restitution=0.9)
+            restitution=1.0)
+
+        # Initialize ball with some speed
+        self._speed_bound = math.sqrt(2.) * speed_init 
+        ballVel = [random.uniform(-self._speed_bound, self._speed_bound),
+                   random.uniform(-self._speed_bound, self._speed_bound), 0.]
+        p.resetBaseVelocity(self._ballID, ballVel, zeroOrient)
 
         self._goalAID = p.loadURDF(
             urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
@@ -140,14 +146,8 @@ class Sim(object):
         self.scored = False
         self.winner = None
 
-        p.setPhysicsEngineParameter(restitutionVelocityThreshold=0.0)
+        p.setPhysicsEngineParameter(useSplitImpulse=1)
         p.setGravity(0, 0, -10)
-        
-        # Initialize ball with some speed
-        speed_bound = math.sqrt(2.) * speed_init 
-        ballVel = [random.uniform(-speed_bound, speed_bound),
-                   random.uniform(-speed_bound, speed_bound), 0.]
-        p.resetBaseVelocity(self._ballID, ballVel, zeroOrient)
 
     def step(self, throttle_cmd, steering_cmd, dt):
         """Advance one time-step in the sim."""
@@ -202,6 +202,10 @@ class Sim(object):
         p.resetBasePositionAndOrientation(
             self._ballID, randBallPos, p.getQuaternionFromEuler([0, 0, 0])
         )
+
+        ballVel = [random.uniform(-self._speed_bound, self._speed_bound),
+                   random.uniform(-self._speed_bound, self._speed_bound), 0.]
+        p.resetBaseVelocity(self._ballID, ballVel, [0, 0, 0])
 
         for car in self._cars.values():
             carPos = self.initCarPos
