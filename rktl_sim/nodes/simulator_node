@@ -147,7 +147,10 @@ class SimulatorROS(object):
 
             status = MatchStatus()
             if self.sim.scored:
-                status.status = MatchStatus.VICTORY_TEAM_A
+                if self.sim.winner == "A":
+                    status.status = MatchStatus.VICTORY_TEAM_A
+                elif self.sim.winner == "B":
+                    status.status = MatchStatus.VICTORY_TEAM_B
             else:
                 status.status = MatchStatus.ONGOING
             self.status_pub.publish(status)
