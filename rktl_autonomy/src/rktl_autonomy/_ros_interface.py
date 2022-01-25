@@ -6,7 +6,6 @@ License:
 """
 
 from abc import abstractmethod
-# from typing import final
 from threading import Condition
 import time, uuid
 
