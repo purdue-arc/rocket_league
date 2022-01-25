@@ -19,7 +19,7 @@ from std_srvs.srv import Empty
 
 # System
 import numpy as np
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from tf.transformations import euler_from_quaternion
 from math import pi
 
 class RocketLeagueInterface(ROSInterface):
@@ -62,8 +62,6 @@ class RocketLeagueInterface(ROSInterface):
         self._ball_odom = None
         self._score = None
         self._start_time = None
-        self._total_reward = 0
-        self._episode = 0
 
         # Subscribers
         rospy.Subscriber('car0/odom', Odometry, self._car_odom_cb)
@@ -108,19 +106,8 @@ class RocketLeagueInterface(ROSInterface):
 
     def _reset_self(self):
         """Reset internally for a new episode."""
-        # log data
-        if self._has_state():
-            self._log_data({
-                "episode" : self._episode,
-                "goals" : self._score,
-                "duration" : (rospy.Time.now() - self._start_time).to_sec(),
-                "net_reward" : self._total_reward})
-            self._episode += 1
-
-        # reset
         self._clear_state()
         self._start_time = None
-        self._total_reward = 0
 
     def _has_state(self):
         """Determine if the new state is ready."""
@@ -175,9 +162,10 @@ class RocketLeagueInterface(ROSInterface):
             abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
 
-        self._total_reward += reward
+        # info dict
+        info = {"goals" : self._score}
 
-        return (observation, reward, done, {})
+        return (observation, reward, done, info)
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
