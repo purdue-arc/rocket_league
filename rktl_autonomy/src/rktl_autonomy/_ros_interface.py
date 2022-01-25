@@ -107,7 +107,7 @@ class ROSInterface(Env):
                 "net_reward" : self.__net_reward,
                 "duration"   : (rospy.Time.now() - self.__start_time).to_sec()
             }
-            info.update(self._get_state[3])
+            info.update(self._get_state()[3])
             # send message
             msg = DiagnosticStatus()
             msg.level = DiagnosticStatus.OK
