@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Very simple node to estimate odometry from poses over time.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+# ROS
+import rospy
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
+from collections import deque
+from threading import Lock
+
+class OdomEstimator(object):
+    """Class to smooth pose estimations and predict velocity."""
+    def __init__(self):
+        rospy.init_node('odom_generator')
+
+        # constants
+        self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
+        self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
+
+        # variables
+        self.buffer = deque(maxlen=rospy.get_param('buffer_size'))
+        self.lock = Lock()
+
+        # pubs / subs
+        self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
+        rospy.Subscriber('pose', PoseWithCovarianceStamped, self.pose_cb)
+
+        # main loop
+        rate = rospy.Rate(rospy.get_param('~rate', 10.0))
+        while not rospy.is_shutdown():
+            self.sample()
+            try:
+                rate.sleep()
+            except rospy.ROSInterruptException:
+                pass
+
+    def pose_cb(self, pose):
+        """Callback for new poses."""
+        assert(pose.header.frame_id == self.MAP_FRAME)
+        time = pose.header.stamp
+        x = pose.pose.pose.position.x
+        y = pose.pose.pose.position.y
+        __, __, yaw = euler_from_quaternion([
+            pose.pose.pose.orientation.x,
+            pose.pose.pose.orientation.y,
+            pose.pose.pose.orientation.z,
+            pose.pose.pose.orientation.w
+        ])
+        sample = (time, x, y, yaw)
+        with self.lock:
+            self.buffer.append(sample)
+
+    def sample_buffer(self):
+        """Sample the buffer and publish an estimated Odometry."""
+        with self.lock:
+            if len(self.buffer) == 0:
+                return
+
+        temp_x = 0
+        temp_y = 0
+        temp_yaw = 0
+
+        with self.lock:
+            for __, x, y, yaw in self.buffer:
+                temp_x += x
+                temp_y += y
+                temp_yaw += yaw
+
+            if (len(self.buffer) != 0):
+                temp_x /= len(self.buffer)
+                temp_y /= len(self.buffer)
+                temp_yaw /= len(self.buffer)
+
+        odom = Odometry()
+        odom.header.stamp = rospy.Time.now()
+        odom.header.frame_id = self.MAP_FRAME
+        odom.pose.pose.position.x = temp_x
+        odom.pose.pose.position.y = temp_y
+        x, y, z, w = quaternion_from_euler(0, 0, temp_yaw)
+        odom.pose.pose.orientation.x = x
+        odom.pose.pose.orientation.y = y
+        odom.pose.pose.orientation.z = z
+        odom.pose.pose.orientation.w = w
+        odom.twist.twist.linear.x = 0
+        odom.twist.twist.linear.y = 0
+        odom.twist.twist.linear.z = 0
+        odom.twist.twist.angular.x = 0
+        odom.twist.twist.angular.y = 0
+        odom.twist.twist.angular.z = 0
+        self.odom_pub.publish(odom)
