@@ -10,12 +10,6 @@
   <!-- environment -->
   <include file="$(find rktl_launch)/launch/rocket_league_sim.launch"/>
 
-  <!-- agent -->
-  <node type="train_rocket_league.py" pkg="rktl_autonomy" name="rocket_league_agent" output="screen" required="true">
-    <rosparam command="load" file="$(find rktl_autonomy)/config/rocket_league.yaml"/>
-    <param name="rate"       value="$(arg rate)"/>
-  </node>
-
 <!-- plot performance -->
   <node type="plotter" pkg="rktl_autonomy" name="plotter" output="screen">
     <rosparam command="load" file="$(find rktl_autonomy)/config/rocket_league.yaml"/>

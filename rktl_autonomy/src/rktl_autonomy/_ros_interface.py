@@ -6,12 +6,12 @@ License:
 """
 
 from abc import abstractmethod
-from threading import Condition
-import time, uuid
+from threading import Condition, Lock
+import time, uuid, socket
 
 from gym import Env
 
-import rospy
+import rospy, roslaunch
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
@@ -41,16 +41,38 @@ class ROSInterface(Env):
     """
 
     _node_name = "gym_interface"
-    _cond = Condition()
-    __UUID = str(uuid.uuid4())
+
+    # static vars to allow simultaneous environments
+    __init_lock = Lock()
+    __env_count = 0
 
     def __init__(self):
         super().__init__()
 
-        rospy.init_node(self._node_name)
-        self.__EVAL_MODE = rospy.get_param('~eval_mode', False)
+        # rospy.init_node(self._node_name)
+        # self.__EVAL_MODE = rospy.get_param('~eval_mode', False)
+        self.__EVAL_MODE = False
+        self._cond = Condition()
 
         if not self.__EVAL_MODE:
+            # launch ROS network
+            with ROSInterface.__init_lock:
+                ROSInterface.__env_count += 1
+                port = 11311
+                if self.__env_count > 1:
+                    # find a free port for the ROS master
+                    with socket.socket() as sock:
+                        sock.bind(('localhost', 0))
+                        port = sock.getsockname()[1]
+                # roslaunch
+                ros_uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+                roslaunch.configure_logging(ros_uuid)
+                cli_args = ['rktl_autonomy', 'rocket_league_train.launch', f'--port {port}']
+                file = roslaunch.rlutil.resolve_launch_arguments(cli_args)[0]
+                args = cli_args[2:]
+                launch = roslaunch.parent.ROSLaunchParent(ros_uuid, [(file, args)])
+                launch.start()
+
             self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
             self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
 
@@ -59,6 +81,7 @@ class ROSInterface(Env):
             self.__clock_pub.publish(self.__time)
 
         # logging
+        self.__UUID = str(uuid.uuid4())
         self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
         self.__episode = 0
         self.__net_reward = 0
