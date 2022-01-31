@@ -60,14 +60,18 @@ class ROSInterface(Env):
         # ROS initialization
         if not self.__EVAL_MODE:
             assert launch_file is not None
-            # find a free port for the ROS master
-            with socket.socket() as sock:
-                sock.bind(('localhost', 0))
-                port = sock.getsockname()[1]
-            print(f'running on port {port}')
+            # use a file to avoid crash caused by race condition for default port
+            try:
+                open(f'/tmp/{run_id}', mode='x')
+                # use the default port since we were first
+                port = 11311
+            except FileExistsError:
+                # find a random free port for the ROS master
+                with socket.socket() as sock:
+                    sock.bind(('localhost', 0))
+                    port = sock.getsockname()[1]
             # launch the training ROS network
             ros_uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-            print(f'using ros uuid {ros_uuid}')
             roslaunch.configure_logging(ros_uuid)
             launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
             launch_args += [f'agent_name:={node_name}', f'plot_log:={self.__LOG}']
