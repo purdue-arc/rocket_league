@@ -24,9 +24,8 @@ from math import pi
 
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
-    _node_name = "rocket_league_autonomy"
     def __init__(self, eval=False, launch_file=['rktl_autonomy', 'rocket_league_train.launch'], launch_args=[]):
-        super().__init__(eval=eval, launch_file=launch_file, launch_args=launch_args)
+        super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args)
 
         ## Constants
         # Actions
@@ -163,7 +162,7 @@ class RocketLeagueInterface(ROSInterface):
             reward += self._WALL_REWARD
 
         # info dict
-        info = {"goals" : self._score}
+        info = {'goals' : self._score}
 
         return (observation, reward, done, info)
 
