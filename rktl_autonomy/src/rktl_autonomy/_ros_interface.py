@@ -179,12 +179,13 @@ class ROSInterface(Env):
             self.__clock_pub.publish(self.__time)
             retries = 0
             while not self.__wait_once_for_state():
-                self.__time += self.__DELTA_T
-                self.__clock_pub.publish(self.__time)
-                retries += 1
                 if retries >= max_retries:
                     rospy.logerr("Failed to get new state.")
                     raise SimTimeException
+                else:
+                    self.__time += self.__DELTA_T
+                    self.__clock_pub.publish(self.__time)
+                    retries += 1
         else:
             while not self.__wait_once_for_state():
                 pass    # idle wait
