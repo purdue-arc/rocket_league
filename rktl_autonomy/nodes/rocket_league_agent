@@ -12,7 +12,7 @@ from os.path import expanduser
 import rospy
 
 # create interface (and init ROS)
-env = RocketLeagueInterface()
+env = RocketLeagueInterface(eval=True)
 
 # load the model
 weights = expanduser(rospy.get_param('~weights'))

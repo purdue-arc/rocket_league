@@ -7,7 +7,7 @@ License:
 
 from abc import abstractmethod
 from threading import Condition, Lock
-import time, uuid, socket
+import time, uuid, socket, os
 
 from gym import Env
 
@@ -37,42 +37,60 @@ class ROSInterface(Env):
             - _get_state()
             - _publish_action()
         - notify _cond when _has_state() may have turned true
-        - optionally override _node_name
     """
-
-    _node_name = "gym_interface"
-
-    # static vars to allow simultaneous environments
-    __init_lock = Lock()
+    # static vars to coordinate simultaneous environments
+    __roslaunch_lock = Lock()
     __env_count = 0
 
-    def __init__(self):
+    def __init__(self, node_name='gym_interface', eval=False, log=None, launch_file=None, launch_args=[]):
+        """init function
+        Params:
+            node_name: desired name of this node in the ROS network
+            eval: set true if evaluating an agent in an existing ROS env, set false if training an agent
+            log: set to true if environment logs are desired. Default is opposite of eval
+            launch_file: if training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch'])
+            launch_args: if training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10])
+        """
         super().__init__()
+        self.__EVAL_MODE = eval
+        if log is None:
+            self.__LOG = not self.__EVAL_MODE
+        else:
+            self.__LOG = log
 
-        # rospy.init_node(self._node_name)
-        # self.__EVAL_MODE = rospy.get_param('~eval_mode', False)
-        self.__EVAL_MODE = False
-        self._cond = Condition()
-
+        # ROS initialization
         if not self.__EVAL_MODE:
-            # launch ROS network
-            with ROSInterface.__init_lock:
-                ROSInterface.__env_count += 1
+            # launch the training ROS network
+            assert launch_file is not None
+            with ROSInterface.__roslaunch_lock:
+                # default port
                 port = 11311
+                # determine the number of simultaneously running interfaces
+                ROSInterface.__env_count += 1
                 if self.__env_count > 1:
                     # find a free port for the ROS master
                     with socket.socket() as sock:
                         sock.bind(('localhost', 0))
                         port = sock.getsockname()[1]
-                # roslaunch
+                # roslaunch the environment
                 ros_uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
                 roslaunch.configure_logging(ros_uuid)
-                cli_args = ['rktl_autonomy', 'rocket_league_train.launch', f'--port {port}']
-                file = roslaunch.rlutil.resolve_launch_arguments(cli_args)[0]
-                args = cli_args[2:]
-                launch = roslaunch.parent.ROSLaunchParent(ros_uuid, [(file, args)])
+                launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
+                launch = roslaunch.parent.ROSLaunchParent(ros_uuid, [(launch_file, launch_args)], port=port)
                 launch.start()
+                # initialize self
+                os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
+                rospy.init_node(node_name)
+                os.environ['ROS_MASTER_URI'] = f'http://localhost:11311'
+        else:
+            # use an existing ROS network
+            rospy.init_node(node_name)
 
+        # private variables
+        self._cond = Condition()
+
+        # additional set up for training
+        if not self.__EVAL_MODE:
             self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
             self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
 
@@ -80,12 +98,13 @@ class ROSInterface(Env):
             self.__time = rospy.Time.from_sec(time.time())
             self.__clock_pub.publish(self.__time)
 
-        # logging
-        self.__UUID = str(uuid.uuid4())
-        self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
-        self.__episode = 0
-        self.__net_reward = 0
-        self.__start_time = rospy.Time.now()
+        # additional set up for logging
+        if self.__LOG:
+            self.__UUID = str(uuid.uuid4())
+            self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
+            self.__episode = 0
+            self.__net_reward = 0
+            self.__start_time = rospy.Time.now()
 
     def step(self, action):
         """
@@ -108,7 +127,8 @@ class ROSInterface(Env):
         self._publish_action(action)
         self.__step_time_and_wait_for_state()
         state = self._get_state()
-        self.__net_reward += state[1]   # logging
+        if self.__LOG:
+            self.__net_reward += state[1]
         return state
 
     def reset(self):
@@ -122,20 +142,19 @@ class ROSInterface(Env):
         Returns:
             observation (object): the initial observation.
         """
-        # logging
-        if self._has_state():
+        if self.__LOG and self._has_state():
             # generate log
             info = {
-                "episode"    : self.__episode,
-                "net_reward" : self.__net_reward,
-                "duration"   : (rospy.Time.now() - self.__start_time).to_sec()
+                'episode'    : self.__episode,
+                'net_reward' : self.__net_reward,
+                'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
             }
             info.update(self._get_state()[3])
             # send message
             msg = DiagnosticStatus()
             msg.level = DiagnosticStatus.OK
-            msg.name = self._node_name
-            msg.message = "logged data"
+            msg.name = 'ROS-Gym Interface'
+            msg.message = 'log of episode data'
             msg.hardware_id = self.__UUID
             msg.values = [KeyValue(key=key, value=str(value)) for key, value in info.items()]
             self.__log_pub.publish(msg)
@@ -148,7 +167,8 @@ class ROSInterface(Env):
             self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
-        self.__start_time = rospy.Time.now()    # logging
+        if self.__LOG:
+            self.__start_time = rospy.Time.now()
         return self._get_state()[0]
 
     def __step_time_and_wait_for_state(self, max_retries=1):
