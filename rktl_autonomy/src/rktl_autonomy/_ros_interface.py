@@ -101,6 +101,7 @@ class ROSInterface(Env):
         # additional set up for logging
         if self.__LOG:
             self.__UUID = str(uuid.uuid4())
+            rospy.set_param('~log/uuid', self.__UUID)
             self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
             self.__episode = 0
             self.__net_reward = 0
@@ -196,10 +197,6 @@ class ROSInterface(Env):
         if rospy.is_shutdown():
             raise rospy.ROSInterruptException()
         return has_state
-
-    def get_run_uuid(self):
-        """Get the uuid associated with this run."""
-        return self.__UUID
 
     # All the below abstract methods / properties must be implemented by subclasses
     @property
