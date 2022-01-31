@@ -82,7 +82,6 @@ class ROSInterface(Env):
                 # initialize self
                 os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
                 rospy.init_node(node_name)
-                os.environ['ROS_MASTER_URI'] = f'http://localhost:11311'
         else:
             # use an existing ROS network
             rospy.init_node(node_name)
