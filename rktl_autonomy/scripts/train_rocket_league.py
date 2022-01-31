@@ -13,14 +13,18 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.logger import configure
 from stable_baselines3.common.callbacks import CheckpointCallback
 from os.path import expanduser
-# from rospy import get_param
+import uuid
 
-# env = RocketLeagueInterface()
-env = make_vec_env(RocketLeagueInterface, n_envs=4, vec_env_cls=SubprocVecEnv, vec_env_kwargs={'start_method':'fork'})
+run_id = str(uuid.uuid4())
+
+# env = RocketLeagueInterface(run_id=run_id)
+env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id}, n_envs=4,
+        vec_env_cls=SubprocVecEnv, vec_env_kwargs={'start_method':'fork'})
+
 model = PPO("MlpPolicy", env)
 
 # log training progress as CSV
-log_dir = expanduser('~/catkin_ws/data/rocket_league/latest')
+log_dir = expanduser(f'~/catkin_ws/data/rocket_league/{run_id}')
 logger = configure(log_dir, ["stdout", "csv", "log"])
 model.set_logger(logger)
 

@@ -24,8 +24,8 @@ from math import pi
 
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
-    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'rocket_league_train.launch'], launch_args=[]):
-        super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args)
+    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'rocket_league_train.launch'], launch_args=[], run_id=None):
+        super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
         ## Constants
         # Actions

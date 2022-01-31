@@ -6,7 +6,8 @@ License:
 """
 
 from abc import abstractmethod
-from threading import Condition, Lock
+from cProfile import run
+from threading import Condition
 import time, uuid, socket, os
 
 from gym import Env
@@ -39,14 +40,15 @@ class ROSInterface(Env):
         - notify _cond when _has_state() may have turned true
     """
 
-    def __init__(self, node_name='gym_interface', eval=False, log=None, launch_file=None, launch_args=[]):
+    def __init__(self, node_name='gym_interface', eval=False, log=None, launch_file=None, launch_args=[], run_id=None):
         """init function
         Params:
             node_name: desired name of this node in the ROS network
             eval: set true if evaluating an agent in an existing ROS env, set false if training an agent
-            log: set to true if environment logs are desired. Default is opposite of eval
+            log: set to true if environment logs are desired. Default is opposite of eval.
             launch_file: if training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch'])
             launch_args: if training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10])
+            run_id: if logging, run_id describes where to save files. Default is randomly generated
         """
         super().__init__()
         self.__EVAL_MODE = eval
@@ -92,8 +94,9 @@ class ROSInterface(Env):
 
         # additional set up for logging
         if self.__LOG:
-            self.__UUID = str(uuid.uuid4())
-            rospy.set_param('~log/uuid', self.__UUID)
+            if run_id is None:
+                run_id = uuid.uuid4()
+            self.__LOG_ID = f'{run_id}:{port}'
             self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
             self.__episode = 0
             self.__net_reward = 0
@@ -148,7 +151,7 @@ class ROSInterface(Env):
             msg.level = DiagnosticStatus.OK
             msg.name = 'ROS-Gym Interface'
             msg.message = 'log of episode data'
-            msg.hardware_id = self.__UUID
+            msg.hardware_id = self.__LOG_ID
             msg.values = [KeyValue(key=key, value=str(value)) for key, value in info.items()]
             self.__log_pub.publish(msg)
             # update variables (update time after reset)
