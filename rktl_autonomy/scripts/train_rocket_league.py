@@ -8,27 +8,28 @@ License:
 
 from rktl_autonomy import RocketLeagueInterface
 from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.logger import configure
 from stable_baselines3.common.callbacks import CheckpointCallback
-from os.path import expanduser, normpath
-from rospy import get_param
+from os.path import expanduser
+# from rospy import get_param
 
-env = RocketLeagueInterface()
-# env = make_vec_env(RocketLeagueInterface, n_envs=4)
+# env = RocketLeagueInterface()
+env = make_vec_env(RocketLeagueInterface, n_envs=4, vec_env_cls=SubprocVecEnv, vec_env_kwargs={'start_method':'fork'})
 model = PPO("MlpPolicy", env)
 
 # log training progress as CSV
-log_dir = normpath(expanduser(get_param('~log/base_dir'))) + "/" + get_param('~log/uuid')
+log_dir = expanduser('~/catkin_ws/data/rocket_league/latest')
 logger = configure(log_dir, ["stdout", "csv", "log"])
 model.set_logger(logger)
 
 # log model weights
-freq = get_param('~log/model_freq', 2048)
+freq = 25000
 callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
 # run training
-steps = get_param('~training_steps', 5000)
+steps = 100000
 print(f"training on {steps} steps")
 model.learn(total_timesteps=steps, callback=callback)
 

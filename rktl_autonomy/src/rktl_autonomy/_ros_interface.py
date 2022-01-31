@@ -38,9 +38,6 @@ class ROSInterface(Env):
             - _publish_action()
         - notify _cond when _has_state() may have turned true
     """
-    # static vars to coordinate simultaneous environments
-    __roslaunch_lock = Lock()
-    __env_count = 0
 
     def __init__(self, node_name='gym_interface', eval=False, log=None, launch_file=None, launch_args=[]):
         """init function
@@ -60,28 +57,23 @@ class ROSInterface(Env):
 
         # ROS initialization
         if not self.__EVAL_MODE:
-            # launch the training ROS network
             assert launch_file is not None
-            with ROSInterface.__roslaunch_lock:
-                # default port
-                port = 11311
-                # determine the number of simultaneously running interfaces
-                ROSInterface.__env_count += 1
-                if self.__env_count > 1:
-                    # find a free port for the ROS master
-                    with socket.socket() as sock:
-                        sock.bind(('localhost', 0))
-                        port = sock.getsockname()[1]
-                # roslaunch the environment
-                ros_uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-                roslaunch.configure_logging(ros_uuid)
-                launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
-                launch_args = [f'agent_name:={node_name}', f'plot_log:={self.__LOG}'] + launch_args
-                launch = roslaunch.parent.ROSLaunchParent(ros_uuid, [(launch_file, launch_args)], port=port)
-                launch.start()
-                # initialize self
-                os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
-                rospy.init_node(node_name)
+            # find a free port for the ROS master
+            with socket.socket() as sock:
+                sock.bind(('localhost', 0))
+                port = sock.getsockname()[1]
+            print(f'running on port {port}')
+            # launch the training ROS network
+            ros_uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+            print(f'using ros uuid {ros_uuid}')
+            roslaunch.configure_logging(ros_uuid)
+            launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
+            launch_args += [f'agent_name:={node_name}', f'plot_log:={self.__LOG}']
+            launch = roslaunch.parent.ROSLaunchParent(ros_uuid, [(launch_file, launch_args)], port=port)
+            launch.start()
+            # initialize self
+            os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
+            rospy.init_node(node_name)
         else:
             # use an existing ROS network
             rospy.init_node(node_name)
