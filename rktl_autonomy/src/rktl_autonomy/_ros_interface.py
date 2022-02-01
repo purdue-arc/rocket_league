@@ -7,7 +7,7 @@ License:
 
 from abc import abstractmethod
 from threading import Condition
-import time, uuid, socket, os, atexit
+import time, uuid, socket, os
 
 from gym import Env
 
@@ -76,10 +76,10 @@ class ROSInterface(Env):
             launch_args += [f'agent_name:={node_name}', f'plot_log:={self.__LOG}', f'render:={port==11311}']
             launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
             launch.start()
+            self.close = lambda : launch.shutdown()
             # initialize self
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
             rospy.init_node(node_name)
-            atexit.register(launch.shutdown)
         else:
             # use an existing ROS network
             rospy.init_node(node_name)
