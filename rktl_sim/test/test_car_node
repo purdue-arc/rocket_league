@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Tests control of the car matches expected model.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+import unittest
+import rospy
+import sys
+import time
+from nav_msgs.msg import Odometry
+from std_msgs.msg import *
+from std_srvs.srv import Empty
+
+class TestCar(unittest.TestCase):
+
+  def test_all(self):
+    rospy.init_node('test_car_node')
+
+    rospy.wait_for_service('sim_reset')
+    sim_reset = rospy.ServiceProxy('sim_reset', Empty)
+
+    rospy.Subscriber("car0/odom", Odometry, self.car_odom_cb)
+    pub = rospy.Publisher("effort/throttle", Float32, latch=True)
+    pub.publish(Float32(0.25))
+
+    rospy.sleep(rospy.Duration.from_sec(5.0))
+
+    pub.publish(Float32(0.0))
+    try:
+      resp = sim_reset()
+    except rospy.ServiceException as exc:
+      rospy.logfatal("Failed to reset sim: " + str(exc))
+    rospy.sleep(rospy.Duration.from_sec(1.0))
+  
+  def car_odom_cb(self, msg):
+    print(msg)
+    pass
+    
+
+if __name__ == '__main__':
+  import rostest
+  rostest.run('rktl_sim', 'test_all', TestCar)

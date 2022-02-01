@@ -11,3 +11,9 @@ catkin_python_setup()
 
 # generate variables for installation
 catkin_package()
+
+# Tests
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest(test/test_car.test)
+endif()
