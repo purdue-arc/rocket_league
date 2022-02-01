@@ -60,16 +60,16 @@ class ROSInterface(Env):
         # ROS initialization
         if not self.__EVAL_MODE:
             assert launch_file is not None
-            # use a file to avoid crash caused by race condition for default port
-            try:
-                open(f'/tmp/{run_id}', mode='x')
-                # use the default port since we were first
-                port = 11311
-            except FileExistsError:
-                # find a random free port for the ROS master
-                with socket.socket() as sock:
-                    sock.bind(('localhost', 0))
-                    port = sock.getsockname()[1]
+            # use temp files to avoid crash caused by race condition for ports
+            port = 11311    # default port
+            while True:
+                try:
+                    open(f'/tmp/{run_id}_{port}', mode='x')
+                    break
+                except FileExistsError:
+                    with socket.socket() as sock:
+                        sock.bind(('localhost', 0))
+                        port = sock.getsockname()[1]
             # launch the training ROS network
             ros_uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_uuid)
