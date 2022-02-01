@@ -28,6 +28,6 @@ log:
   # variables to display in progress plot
   basic:
     - "duration"
-  advanced:
     - "goals"
+  advanced:
     - "net_reward"
