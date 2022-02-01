@@ -37,10 +37,12 @@ class Sim(object):
 
         if 'ball' in field_setup:
             ballPos = field_setup['ball']
+            self.initBallPos = ballPos
         else:
             ballPos = [random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
                        random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]),
                        random.uniform(spawn_bounds[2][0], spawn_bounds[2][1])]
+            self.initBallPos = None
         self._ballID = p.loadURDF(
             urdf_paths["ball"], ballPos, zeroOrient)
         p.changeDynamics(bodyUniqueId=self._ballID,
@@ -197,12 +199,14 @@ class Sim(object):
         self.winner = None
         self.touched_last = None
 
-        randBallPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                       random.uniform(
-            self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-            random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
+        ballPos = self.initBallPos
+        if ballPos is None:
+            ballPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                        random.uniform(
+                self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
         p.resetBasePositionAndOrientation(
-            self._ballID, randBallPos, p.getQuaternionFromEuler([0, 0, 0])
+            self._ballID, ballPos, p.getQuaternionFromEuler([0, 0, 0])
         )
 
         ballVel = [random.uniform(-self._speed_bound, self._speed_bound),
