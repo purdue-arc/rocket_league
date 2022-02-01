@@ -71,11 +71,11 @@ class ROSInterface(Env):
                         sock.bind(('localhost', 0))
                         port = sock.getsockname()[1]
             # launch the training ROS network
-            ros_uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-            roslaunch.configure_logging(ros_uuid)
+            ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
+            roslaunch.configure_logging(ros_id)
             launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
             launch_args += [f'agent_name:={node_name}', f'plot_log:={self.__LOG}']
-            launch = roslaunch.parent.ROSLaunchParent(ros_uuid, [(launch_file, launch_args)], port=port)
+            launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
             launch.start()
             # initialize self
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
