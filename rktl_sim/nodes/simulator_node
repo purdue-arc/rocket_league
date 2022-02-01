@@ -36,14 +36,14 @@ class SimulatorROS(object):
         gw = rospy.get_param('GOAL_WIDTH')
         car_init = rospy.get_param('CAR_INIT', None)
         ball_init = rospy.get_param('BALL_INIT', None)
+        speed_init = rospy.get_param('SPEED_INIT', 0.0)
+        spawn_height = rospy.get_param('SPAWN_HEIGHT', 0.06)
 
         # Collecting private parameters
         render_enabled = rospy.get_param('~RENDER_ENABLED', False)
         rate = rospy.Rate(rospy.get_param('~RATE', 30))
         self.frame_id = rospy.get_param('~FRAME_ID', 'map')
         self.timeout = rospy.get_param('~TIMEOUT', 10)
-        speed_init = rospy.get_param('~SPEED_INIT', 0.0)
-        spawn_height = rospy.get_param('~SPAWN_HEIGHT', 0.5)
 
         field_setup = {}
 
