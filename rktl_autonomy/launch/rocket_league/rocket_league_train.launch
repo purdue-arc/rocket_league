@@ -2,6 +2,7 @@
   <!-- arguments -->
   <arg name="plot_log"      default="false"/>
   <arg name="agent_name"    default="rocket_league_agent"/>
+  <arg name="render"        default="true"/>
 
   <!-- constants -->
   <arg name="rate"          default="10.0"/>
@@ -15,7 +16,7 @@
   </group>
 
   <!-- environment -->
-  <include file="$(find rktl_launch)/launch/rocket_league_sim.launch"/>
+  <include file="$(find rktl_launch)/launch/rocket_league_sim.launch" pass_all_args="true"/>
 
   <!-- plot performance -->
   <node if="$(arg plot_log)" type="plotter" pkg="rktl_autonomy" name="plotter" output="screen">
