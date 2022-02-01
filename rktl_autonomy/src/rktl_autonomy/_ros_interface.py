@@ -6,9 +6,8 @@ License:
 """
 
 from abc import abstractmethod
-from cProfile import run
 from threading import Condition
-import time, uuid, socket, os
+import time, uuid, socket, os, atexit
 
 from gym import Env
 
@@ -80,6 +79,7 @@ class ROSInterface(Env):
             # initialize self
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
             rospy.init_node(node_name)
+            atexit.register(launch.shutdown)
         else:
             # use an existing ROS network
             rospy.init_node(node_name)
