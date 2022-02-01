@@ -6,7 +6,6 @@ License:
 """
 
 # package
-from difflib import Match
 from rktl_autonomy import ROSInterface
 from gym.spaces import Box
 
@@ -76,10 +75,11 @@ class RocketLeagueInterface(ROSInterface):
         return Box(
             # throttle, steering
             low=np.array([
-                self._MIN_THROTTLE_EFFORT, self._MIN_STEERING_EFFORT]),
+                self._MIN_THROTTLE_EFFORT, self._MIN_STEERING_EFFORT],
+                dtype=np.float32),
             high=np.array([
-                self._MAX_THROTTLE_EFFORT, self._MAX_STEERING_EFFORT]),
-            dtype=np.float32)
+                self._MAX_THROTTLE_EFFORT, self._MAX_STEERING_EFFORT],
+                dtype=np.float32))
 
     @property
     def observation_space(self):
@@ -91,13 +91,14 @@ class RocketLeagueInterface(ROSInterface):
                 -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
                 -pi, -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
                 -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
-                -self._MAX_OBS_VEL, -self._MAX_OBS_VEL]),
+                -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
+                dtype=np.float32),
             high=np.array([
                 self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
                 pi, self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
                 self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
-                self._MAX_OBS_VEL, self._MAX_OBS_VEL]),
-            dtype=np.float32)
+                self._MAX_OBS_VEL, self._MAX_OBS_VEL],
+                dtype=np.float32))
 
     def _reset_env(self):
         """Reset environment for a new training episode."""
