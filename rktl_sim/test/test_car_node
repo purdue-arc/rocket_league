@@ -15,31 +15,43 @@ from std_msgs.msg import *
 from std_srvs.srv import Empty
 
 class TestCar(unittest.TestCase):
+  sim_reset = None
+  pos = 0.0
+  throttle_pub = None
 
-  def test_all(self):
+  @classmethod
+  def setUpClass(cls):
     rospy.init_node('test_car_node')
 
     rospy.wait_for_service('sim_reset')
-    sim_reset = rospy.ServiceProxy('sim_reset', Empty)
-
-    rospy.Subscriber("car0/odom", Odometry, self.car_odom_cb)
-    pub = rospy.Publisher("effort/throttle", Float32, latch=True)
-    pub.publish(Float32(0.25))
-
-    rospy.sleep(rospy.Duration.from_sec(5.0))
-
-    pub.publish(Float32(0.0))
-    try:
-      resp = sim_reset()
-    except rospy.ServiceException as exc:
-      rospy.logfatal("Failed to reset sim: " + str(exc))
-    rospy.sleep(rospy.Duration.from_sec(1.0))
+    cls.sim_reset = rospy.ServiceProxy('sim_reset', Empty)
   
+    rospy.Subscriber('car0/odom', Odometry, cls.car_odom_cb)
+    rospy.wait_for_message('car0/odom', Odometry)
+
+    cls.throttle_pub = rospy.Publisher('effort/throttle',
+      Float32, latch=True)
+
   def car_odom_cb(self, msg):
-    print(msg)
-    pass
+    self.pos = msg.pose.pose.position.x
+
+  def test_throttle_resp_1(self):
+    try:
+      self.sim_reset()
+    except rospy.ServiceException as exc:
+      self.fail('failed to reset sim')
     
+    rospy.sleep(rospy.Duration.from_sec(1.0))
+    self.throttle_pub.publish(Float32(0.25))
+    rospy.sleep(rospy.Duration.from_sec(1.25))
+    pos = self.pos
+    
+    self.assertLess(pos, 0.2, 'car moving too fast: ' +
+      f'expected distance {0.185}, actual distance {pos}')
+  
+    self.assertGreater(pos, 0.18, f'car moving too slow: ' +
+      f'expected distance {0.185}, actual distance {pos}')
 
 if __name__ == '__main__':
   import rostest
-  rostest.run('rktl_sim', 'test_all', TestCar)
+  rostest.run('rktl_sim', 'test_car_node', TestCar)
