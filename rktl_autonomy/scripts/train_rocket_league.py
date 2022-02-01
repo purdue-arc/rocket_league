@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     # env = RocketLeagueInterface(run_id=run_id)
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
-            n_envs=4, vec_env_cls=SubprocVecEnv)
+            n_envs=64, vec_env_cls=SubprocVecEnv)
 
     model = PPO("MlpPolicy", env)
 
@@ -30,11 +30,11 @@ if __name__ == '__main__':
     model.set_logger(logger)
 
     # log model weights
-    freq = 25000
+    freq = 100000 #100k
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 10000
+    steps = 10000000 # 10M
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 
