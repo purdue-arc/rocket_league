@@ -39,22 +39,17 @@ class ROSInterface(Env):
         - notify _cond when _has_state() may have turned true
     """
 
-    def __init__(self, node_name='gym_interface', eval=False, log=None, launch_file=None, launch_args=[], run_id=None):
+    def __init__(self, node_name='gym_interface', eval=False, launch_file=None, launch_args=[], run_id=None):
         """init function
         Params:
             node_name: desired name of this node in the ROS network
             eval: set true if evaluating an agent in an existing ROS env, set false if training an agent
-            log: set to true if environment logs are desired. Default is opposite of eval.
             launch_file: if training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch'])
             launch_args: if training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10])
             run_id: if logging, run_id describes where to save files. Default is randomly generated
         """
         super().__init__()
         self.__EVAL_MODE = eval
-        if log is None:
-            self.__LOG = not self.__EVAL_MODE
-        else:
-            self.__LOG = log
 
         # ROS initialization
         if not self.__EVAL_MODE:
@@ -73,7 +68,7 @@ class ROSInterface(Env):
             ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_id)
             launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
-            launch_args += [f'agent_name:={node_name}', f'plot_log:={self.__LOG}', f'render:={port==11311}']
+            launch_args = [f'render:={port==11311}'] + launch_args + [f'agent_name:={node_name}']
             launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
             launch.start()
             self.close = lambda : launch.shutdown()
@@ -97,14 +92,13 @@ class ROSInterface(Env):
             self.__clock_pub.publish(self.__time)
 
         # additional set up for logging
-        if self.__LOG:
-            if run_id is None:
-                run_id = uuid.uuid4()
-            self.__LOG_ID = f'{run_id}:{port}'
-            self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
-            self.__episode = 0
-            self.__net_reward = 0
-            self.__start_time = rospy.Time.now()
+        if run_id is None:
+            run_id = uuid.uuid4()
+        self.__LOG_ID = f'{run_id}:{port}'
+        self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
+        self.__episode = 0
+        self.__net_reward = 0
+        self.__start_time = rospy.Time.now()
 
     def step(self, action):
         """
@@ -127,8 +121,7 @@ class ROSInterface(Env):
         self._publish_action(action)
         self.__step_time_and_wait_for_state()
         state = self._get_state()
-        if self.__LOG:
-            self.__net_reward += state[1]
+        self.__net_reward += state[1]   # logging
         return state
 
     def reset(self):
@@ -142,7 +135,7 @@ class ROSInterface(Env):
         Returns:
             observation (object): the initial observation.
         """
-        if self.__LOG and self._has_state():
+        if self._has_state():
             # generate log
             info = {
                 'episode'    : self.__episode,
@@ -167,8 +160,7 @@ class ROSInterface(Env):
             self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
-        if self.__LOG:
-            self.__start_time = rospy.Time.now()
+        self.__start_time = rospy.Time.now()    # logging
         return self._get_state()[0]
 
     def __step_time_and_wait_for_state(self, max_retries=1):

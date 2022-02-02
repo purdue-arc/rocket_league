@@ -1,7 +1,8 @@
 <launch>
   <!-- arguments -->
-  <arg name="render"        default="false"/>
+  <arg name="plot_log"      default="false"/>
   <arg name="agent_name"    default="snake_agent"/>
+  <arg name="render"        default="false"/>
 
   <!-- constants -->
   <arg name="rate"          value="10.0"/>
@@ -28,7 +29,7 @@
   </node>
 
   <!-- plot performance -->
-  <node type="plotter" pkg="rktl_autonomy" name="plotter" output="screen">
+  <node if="$(arg plot_log)" type="plotter" pkg="rktl_autonomy" name="plotter" output="screen">
     <rosparam command="load" file="$(find rktl_autonomy)/config/snake.yaml"/>
     <remap from="~log" to="$(arg agent_name)/log"/>
   </node>
