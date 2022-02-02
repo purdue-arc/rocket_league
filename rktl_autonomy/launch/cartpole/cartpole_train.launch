@@ -14,7 +14,7 @@
   </group>
 
   <!-- environment -->
-  <node type="cart_pole_env" pkg="rktl_autonomy" name="cart_pole_env" output="screen">
+  <node type="cartpole_env" pkg="rktl_autonomy" name="cartpole_env" output="screen">
     <param name="frequency" value="$(eval 1/rate)"/>
     <param name="render"    value="$(arg render)"/>
   </node>
