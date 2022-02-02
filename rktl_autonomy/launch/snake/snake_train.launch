@@ -1,6 +1,7 @@
 <launch>
   <!-- arguments -->
   <arg name="render"        default="false"/>
+  <arg name="agent_name"    default="snake_agent"/>
 
   <!-- constants -->
   <arg name="rate"          value="10.0"/>
@@ -8,6 +9,14 @@
   <arg name="arena_size"    value="10"/>
 
   <param name="/use_sim_time" value="true"/>
+
+  <!-- agent -->
+  <group ns="$(arg agent_name)">
+    <rosparam command="load" file="$(find rktl_autonomy)/config/snake.yaml"/>
+    <param name="num_segments"            value="$(arg snake_size)"/>
+    <param name="field_size"              value="$(arg arena_size)"/>
+    <param name="rate"                    value="$(arg rate)"/>
+  </group>
 
   <!-- environment -->
   <node type="snake_node" pkg="snakesim" name="snake_env" output="screen">
@@ -18,17 +27,9 @@
     <param name="rate"                    value="$(arg rate)"/>
   </node>
 
-  <!-- agent -->
-  <node type="train_snake.py" pkg="rktl_autonomy" name="snake_agent" output="screen" required="true">
-    <rosparam command="load" file="$(find rktl_autonomy)/config/snake.yaml"/>
-    <param name="num_segments"            value="$(arg snake_size)"/>
-    <param name="field_size"              value="$(arg arena_size)"/>
-    <param name="rate"                    value="$(arg rate)"/>
-  </node>
-
   <!-- plot performance -->
   <node type="plotter" pkg="rktl_autonomy" name="plotter" output="screen">
     <rosparam command="load" file="$(find rktl_autonomy)/config/snake.yaml"/>
-    <remap from="~log" to="snake_agent/log"/>
+    <remap from="~log" to="$(arg agent_name)/log"/>
   </node>
 </launch>
