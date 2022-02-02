@@ -21,16 +21,15 @@ from math import pi
 
 @unique
 class CartpoleActions(IntEnum):
-    """Possible actions for deep learner."""     
+    """Possible actions for deep learner."""
     LEFT = 0
     RIGHT = auto()
     SIZE = auto()
 
 class CartpoleInterface(ROSInterface):
     """ROS interface for the cartpole game."""
-    _node_name = "cartpole_ros"
-    def __init__(self):
-        super().__init__()
+    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'cartpole_train.launch'], launch_args=[], run_id=None):
+        super().__init__(node_name='cartpole_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
         # Publishers
         self._action_pub = rospy.Publisher('cartpole/action', Int32, queue_size=1)
