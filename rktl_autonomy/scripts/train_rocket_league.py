@@ -15,12 +15,11 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from os.path import expanduser
 import uuid
 
-if __name__ == '__main__':
-    run_id = str(uuid.uuid4())
+if __name__ == '__main__':      # this is required due to forking processes
+    run_id = str(uuid.uuid4())  # ALL running environments must share this
 
-    # env = RocketLeagueInterface(run_id=run_id)
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
-            n_envs=64, vec_env_cls=SubprocVecEnv)
+            n_envs=16, vec_env_cls=SubprocVecEnv)
 
     model = PPO("MlpPolicy", env)
 
@@ -30,15 +29,15 @@ if __name__ == '__main__':
     model.set_logger(logger)
 
     # log model weights
-    freq = 100000 #100k
+    freq = 12500 # (time steps in a SINGLE environment)
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 10000000 # 10M
+    steps = 10000000 # 10M (timesteps accross ALL environments)
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 
     # save final weights
     print("done training")
     model.save(log_dir + "/final_weights")
-    env.close()
+    env.close() # this must be done to clean up other processes
