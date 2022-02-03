@@ -166,7 +166,7 @@ class Sim(object):
                 self.scored = True
                 self.winner = "B"
 
-        # PyBullet steps at 240hz
+        # Step kinematic objects independently
         for car in self._cars.values():
             wallContact = False
             carContacts = p.getContactPoints(bodyA=car.id)
@@ -175,7 +175,8 @@ class Sim(object):
                     wallContact = True
                     break
             car.step((throttle_cmd, steering_cmd), wallContact, dt)
-
+    
+        # PyBullet steps at 240hz
         for _ in range(int(dt * 240.)):
             p.stepSimulation()
 

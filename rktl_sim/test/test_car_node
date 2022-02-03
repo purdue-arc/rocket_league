@@ -21,6 +21,7 @@ class TestCar(unittest.TestCase):
 
   @classmethod
   def car_odom_cb(cls, msg):
+    print(msg.pose.pose.position.x, time.time())
     cls.pos = msg.pose.pose.position.x
 
   @classmethod
@@ -41,19 +42,23 @@ class TestCar(unittest.TestCase):
       self.sim_reset()
     except rospy.ServiceException as exc:
       self.fail('failed to reset sim')
-    
-    rospy.sleep(rospy.Duration.from_sec(1.0))
-    self.throttle_pub.publish(Float32(0.25))
-    start_pos = self.pos
-    rospy.sleep(rospy.Duration.from_sec(1.0))
-    end_pos = self.pos
 
-    dist = end_pos - start_pos
-    self.assertLess(dist, 0.2, 'car moving too fast: ' +
-      f'expected distance {0.185}, actual distance {dist}')
+    self.throttle_pub.publish(Float32(0.25))
+    start_msg = rospy.wait_for_message('car0/odom', Odometry)
+    start_stamp = start_msg.header.stamp
+    end_msg = rospy.wait_for_message('car0/odom', Odometry)
+    dur = rospy.Duration.from_sec(1.0)
+    while (end_msg.header.stamp - start_stamp) < dur:
+      end_msg = rospy.wait_for_message('car0/odom', Odometry)
+
+    print("start msg", start_msg.pose.pose.position.x)
+    print("end msg", end_msg.pose.pose.position.x)
+    dist = end_msg.pose.pose.position.x - start_msg.pose.pose.position.x
+    self.assertLess(dist, 1.2, 'car moving too fast: ' +
+      f'expected distance {1.12}, actual distance {dist}')
   
-    self.assertGreater(dist, 0.18, f'car moving too slow: ' +
-      f'expected distance {0.185}, actual distance {dist}')
+    self.assertGreater(dist, 1.0, f'car moving too slow: ' +
+      f'expected distance {1.12}, actual distance {dist}')
 
 if __name__ == '__main__':
   import rostest
