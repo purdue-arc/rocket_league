@@ -13,7 +13,7 @@ RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt upgrade -y && \
     DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
     # Basics
-    sudo tmux nano vim git wget net-tools iputils-ping x11-apps \
+    sudo tmux nano vim git wget net-tools iputils-ping x11-apps htop \
     mesa-utils python3-dev python3-pip python3-tk software-properties-common \
     pylint clang-format jq swig zsh libeigen3-dev \
     # ROS

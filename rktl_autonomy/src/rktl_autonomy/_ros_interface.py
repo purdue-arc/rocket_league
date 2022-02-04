@@ -7,11 +7,11 @@ License:
 
 from abc import abstractmethod
 from threading import Condition
-import time, uuid
+import time, uuid, socket, os
 
 from gym import Env
 
-import rospy
+import rospy, roslaunch
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
@@ -37,19 +37,52 @@ class ROSInterface(Env):
             - _get_state()
             - _publish_action()
         - notify _cond when _has_state() may have turned true
-        - optionally override _node_name
     """
 
-    _node_name = "gym_interface"
-    _cond = Condition()
-    __UUID = str(uuid.uuid4())
-
-    def __init__(self):
+    def __init__(self, node_name='gym_interface', eval=False, launch_file=None, launch_args=[], run_id=None):
+        """init function
+        Params:
+            node_name: desired name of this node in the ROS network
+            eval: set true if evaluating an agent in an existing ROS env, set false if training an agent
+            launch_file: if training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch'])
+            launch_args: if training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10])
+            run_id: if logging, run_id describes where to save files. Default is randomly generated
+        """
         super().__init__()
+        self.__EVAL_MODE = eval
 
-        rospy.init_node(self._node_name)
-        self.__EVAL_MODE = rospy.get_param('~eval_mode', False)
+        # ROS initialization
+        if not self.__EVAL_MODE:
+            assert launch_file is not None
+            # use temp files to avoid crash caused by race condition for ports
+            port = 11311    # default port
+            while True:
+                try:
+                    open(f'/tmp/{run_id}_{port}', mode='x')
+                    break
+                except FileExistsError:
+                    with socket.socket() as sock:
+                        sock.bind(('localhost', 0))
+                        port = sock.getsockname()[1]
+            # launch the training ROS network
+            ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
+            roslaunch.configure_logging(ros_id)
+            launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
+            launch_args = [f'render:={port==11311}', f'plot_log:={port==11311}'] + launch_args + [f'agent_name:={node_name}']
+            launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
+            launch.start()
+            self.close = lambda : launch.shutdown()
+            # initialize self
+            os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
+            rospy.init_node(node_name)
+        else:
+            # use an existing ROS network
+            rospy.init_node(node_name)
 
+        # private variables
+        self._cond = Condition()
+
+        # additional set up for training
         if not self.__EVAL_MODE:
             self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
             self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
@@ -58,7 +91,10 @@ class ROSInterface(Env):
             self.__time = rospy.Time.from_sec(time.time())
             self.__clock_pub.publish(self.__time)
 
-        # logging
+        # additional set up for logging
+        if run_id is None:
+            run_id = uuid.uuid4()
+        self.__LOG_ID = f'{run_id}:{port}'
         self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
         self.__episode = 0
         self.__net_reward = 0
@@ -99,21 +135,20 @@ class ROSInterface(Env):
         Returns:
             observation (object): the initial observation.
         """
-        # logging
         if self._has_state():
             # generate log
             info = {
-                "episode"    : self.__episode,
-                "net_reward" : self.__net_reward,
-                "duration"   : (rospy.Time.now() - self.__start_time).to_sec()
+                'episode'    : self.__episode,
+                'net_reward' : self.__net_reward,
+                'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
             }
             info.update(self._get_state()[3])
             # send message
             msg = DiagnosticStatus()
             msg.level = DiagnosticStatus.OK
-            msg.name = self._node_name
-            msg.message = "logged data"
-            msg.hardware_id = self.__UUID
+            msg.name = 'ROS-Gym Interface'
+            msg.message = 'log of episode data'
+            msg.hardware_id = self.__LOG_ID
             msg.values = [KeyValue(key=key, value=str(value)) for key, value in info.items()]
             self.__log_pub.publish(msg)
             # update variables (update time after reset)
@@ -135,12 +170,13 @@ class ROSInterface(Env):
             self.__clock_pub.publish(self.__time)
             retries = 0
             while not self.__wait_once_for_state():
-                self.__time += self.__DELTA_T
-                self.__clock_pub.publish(self.__time)
-                retries += 1
                 if retries >= max_retries:
                     rospy.logerr("Failed to get new state.")
                     raise SimTimeException
+                else:
+                    self.__time += self.__DELTA_T
+                    self.__clock_pub.publish(self.__time)
+                    retries += 1
         else:
             while not self.__wait_once_for_state():
                 pass    # idle wait
@@ -152,10 +188,6 @@ class ROSInterface(Env):
         if rospy.is_shutdown():
             raise rospy.ROSInterruptException()
         return has_state
-
-    def get_run_uuid(self):
-        """Get the uuid associated with this run."""
-        return self.__UUID
 
     # All the below abstract methods / properties must be implemented by subclasses
     @property

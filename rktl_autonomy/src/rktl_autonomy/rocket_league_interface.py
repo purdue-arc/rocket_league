@@ -6,7 +6,6 @@ License:
 """
 
 # package
-from difflib import Match
 from rktl_autonomy import ROSInterface
 from gym.spaces import Box
 
@@ -24,9 +23,8 @@ from math import pi
 
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
-    _node_name = "rocket_league_autonomy"
-    def __init__(self):
-        super().__init__()
+    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'rocket_league_train.launch'], launch_args=[], run_id=None):
+        super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
         ## Constants
         # Actions
@@ -77,10 +75,11 @@ class RocketLeagueInterface(ROSInterface):
         return Box(
             # throttle, steering
             low=np.array([
-                self._MIN_THROTTLE_EFFORT, self._MIN_STEERING_EFFORT]),
+                self._MIN_THROTTLE_EFFORT, self._MIN_STEERING_EFFORT],
+                dtype=np.float32),
             high=np.array([
-                self._MAX_THROTTLE_EFFORT, self._MAX_STEERING_EFFORT]),
-            dtype=np.float32)
+                self._MAX_THROTTLE_EFFORT, self._MAX_STEERING_EFFORT],
+                dtype=np.float32))
 
     @property
     def observation_space(self):
@@ -92,13 +91,14 @@ class RocketLeagueInterface(ROSInterface):
                 -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
                 -pi, -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
                 -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
-                -self._MAX_OBS_VEL, -self._MAX_OBS_VEL]),
+                -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
+                dtype=np.float32),
             high=np.array([
                 self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
                 pi, self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
                 self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
-                self._MAX_OBS_VEL, self._MAX_OBS_VEL]),
-            dtype=np.float32)
+                self._MAX_OBS_VEL, self._MAX_OBS_VEL],
+                dtype=np.float32))
 
     def _reset_env(self):
         """Reset environment for a new training episode."""
@@ -163,7 +163,7 @@ class RocketLeagueInterface(ROSInterface):
             reward += self._WALL_REWARD
 
         # info dict
-        info = {"goals" : self._score}
+        info = {'goals' : self._score}
 
         return (observation, reward, done, info)
 
