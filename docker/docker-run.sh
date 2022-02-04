@@ -22,8 +22,6 @@ docker run --rm \
     -v ~/.gitconfig:/home/$USER/.gitconfig:ro \
     -v ~/.ssh:/home/$USER/.ssh:ro \
     --name $CONTAINER_NAME \
-    --network=host \
-    --gpus all \
     $@ \
     $REPO_NAME:local \
     ${DOCKER_CMD:+/bin/zsh -c "$DOCKER_CMD"}

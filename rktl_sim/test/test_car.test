@@ -41,7 +41,7 @@
     </node>
 
     <!-- Test Cases -->
-    <test test-name="test_car_name" name="test_car_node" pkg="rktl_sim" type="test_car_node">
+    <test test-name="test_car" name="test_car_node" pkg="rktl_sim" type="test_car_node">
         <rosparam>
 
         </rosparam>

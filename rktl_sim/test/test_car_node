@@ -13,20 +13,23 @@ import time
 from nav_msgs.msg import Odometry
 from std_msgs.msg import *
 from std_srvs.srv import Empty
+from rktl_sim.srv import SetSimThrottle, SetSimThrottleRequest
 
 class TestCar(unittest.TestCase):
+  set_throttle = None
   sim_reset = None
-  pos = 0.0
   throttle_pub = None
 
   @classmethod
   def car_odom_cb(cls, msg):
     print(msg.pose.pose.position.x, time.time())
-    cls.pos = msg.pose.pose.position.x
 
   @classmethod
   def setUpClass(cls):
     rospy.init_node('test_car_node')
+
+    rospy.wait_for_service('set_sim_throttle')
+    cls.set_throttle = rospy.ServiceProxy('set_sim_throttle', SetSimThrottle)
 
     rospy.wait_for_service('sim_reset')
     cls.sim_reset = rospy.ServiceProxy('sim_reset', Empty)
@@ -40,25 +43,33 @@ class TestCar(unittest.TestCase):
   def test_throttle_resp_1(self):
     try:
       self.sim_reset()
-    except rospy.ServiceException as exc:
+    except rospy.ServiceException as _:
       self.fail('failed to reset sim')
 
-    self.throttle_pub.publish(Float32(0.25))
-    start_msg = rospy.wait_for_message('car0/odom', Odometry)
-    start_stamp = start_msg.header.stamp
-    end_msg = rospy.wait_for_message('car0/odom', Odometry)
-    dur = rospy.Duration.from_sec(1.0)
-    while (end_msg.header.stamp - start_stamp) < dur:
-      end_msg = rospy.wait_for_message('car0/odom', Odometry)
+    try:
+      resp = self.set_throttle(SetSimThrottleRequest(0.25))
+      start_msg = rospy.wait_for_message('car0/odom', Odometry)
+      while (start_msg.header.stamp - resp.stamp) < rospy.Duration(0.0):
+        start_msg = rospy.wait_for_message('car0/odom', Odometry)
+      print("accepted mesg")
 
-    print("start msg", start_msg.pose.pose.position.x)
-    print("end msg", end_msg.pose.pose.position.x)
-    dist = end_msg.pose.pose.position.x - start_msg.pose.pose.position.x
-    self.assertLess(dist, 1.2, 'car moving too fast: ' +
-      f'expected distance {1.12}, actual distance {dist}')
+      start_stamp = start_msg.header.stamp
+      end_msg = rospy.wait_for_message('car0/odom', Odometry)
+      dur = rospy.Duration.from_sec(1.0)
+      while (end_msg.header.stamp - start_stamp) < dur:
+        end_msg = rospy.wait_for_message('car0/odom', Odometry)
+
+      print("start msg", start_msg.pose.pose.position.x)
+      print("end msg", end_msg.pose.pose.position.x)
+      dist = end_msg.pose.pose.position.x - start_msg.pose.pose.position.x
+      self.assertLess(dist, 1.2, 'car moving too fast: ' +
+        f'expected distance {1.12}, actual distance {dist}')
+    
+      self.assertGreater(dist, 1.0, f'car moving too slow: ' +
+        f'expected distance {1.12}, actual distance {dist}')
   
-    self.assertGreater(dist, 1.0, f'car moving too slow: ' +
-      f'expected distance {1.12}, actual distance {dist}')
+    except rospy.ServiceException as _:
+      self.fail('failed to set throttle')
 
 if __name__ == '__main__':
   import rostest

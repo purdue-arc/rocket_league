@@ -55,6 +55,7 @@ class Car(object):
         throttle_dt = self._A @ self._throttle_state + \
             self._B @ np.array([des_throttle])
         self._throttle_state += throttle_dt * dt
+        print("Car", dt, throttle)
 
         # Compute 0th-order response of steering
         steering = max(min(steering, self._steering_limit), -

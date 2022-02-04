@@ -21,7 +21,7 @@ from threading import Lock
 # Local library
 import simulator
 from rktl_msgs.msg import MatchStatus
-
+from rktl_sim.srv import SetSimThrottle, SetSimThrottleResponse
 
 class SimulatorROS(object):
     """ROS wrapper for the simulator."""
@@ -105,7 +105,7 @@ class SimulatorROS(object):
         rospy.Subscriber('effort/steering', Float32, self.steering_cb)
 
         # Services
-        rospy.Service('sim_set_throttle', self.set_throttle)
+        rospy.Service('set_sim_throttle', SetSimThrottle, self.set_throttle)
         rospy.Service('sim_reset', Empty, self.reset_cb)
 
         while not rospy.is_shutdown():
@@ -124,11 +124,14 @@ class SimulatorROS(object):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
 
+    def set_throttle(self, throttle_req):
+        self.throttle_cmd = throttle_req.data
+        resp = SetSimThrottleResponse()
+        resp.ok = True
+        return resp
+
     def throttle_cb(self, throttle_msg):
         self.throttle_cmd = throttle_msg.data
-
-    def set_throttle(self, throttle):
-        self.throttle_cmd = 
 
     def steering_cb(self, steering_msg):
         self.steering_cmd = steering_msg.data
@@ -160,7 +163,6 @@ class SimulatorROS(object):
             self.status_pub.publish(status)
 
             self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
-            throttle = (self.throttle_cmd,)
 
             # Publish ball odometry
             ball_msg = Odometry()
@@ -189,11 +191,6 @@ class SimulatorROS(object):
             car_msg.header.frame_id = self.frame_id
             car_pos, car_quat = self.sim.getCarPose()
             car_msg.pose.pose.position.x = car_pos[0]
-
-            if throttle[0] == 0.0:
-                print("still nothing", car_pos[0])
-            else:
-                print("got something", car_pos[0])
             car_msg.pose.pose.position.y = car_pos[1]
             car_msg.pose.pose.position.z = car_pos[2]
             car_msg.pose.pose.orientation.x = car_quat[0]
