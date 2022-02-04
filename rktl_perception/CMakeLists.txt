@@ -88,16 +88,36 @@ add_executable(${PROJECT_NAME}_ball_detection_node
   src/ball_detection.cpp
   src/ball_detection_node.cpp
 )
+
+
 set_target_properties(${PROJECT_NAME}_ball_detection_node PROPERTIES
   OUTPUT_NAME ball_detection
   PREFIX ""
-)
-add_dependencies(${PROJECT_NAME}_ball_detection_node
+  )
+  add_dependencies(${PROJECT_NAME}_ball_detection_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${OpenCV_EXPORTED_TARGETS}
-)
-target_link_libraries(${PROJECT_NAME}_ball_detection_node
+  )
+  target_link_libraries(${PROJECT_NAME}_ball_detection_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
-)
+  )
+
+  add_executable(${PROJECT_NAME}_focus_vis_node
+  src/focus_vis.cpp
+  src/focus_vis_node.cpp
+  )
+  set_target_properties(${PROJECT_NAME}_focus_vis_node PROPERTIES
+  OUTPUT_NAME focus_vis
+  PREFIX ""
+  )
+  add_dependencies(${PROJECT_NAME}_focus_vis_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  ${OpenCV_EXPORTED_TARGETS}
+  )
+  target_link_libraries(${PROJECT_NAME}_focus_vis_node
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBRARIES}
+  )
