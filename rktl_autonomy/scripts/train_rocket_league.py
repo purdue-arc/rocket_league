@@ -18,6 +18,7 @@ import uuid
 if __name__ == '__main__':      # this is required due to forking processes
     run_id = str(uuid.uuid4())  # ALL running environments must share this
 
+    # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
             n_envs=16, vec_env_cls=SubprocVecEnv)
 
