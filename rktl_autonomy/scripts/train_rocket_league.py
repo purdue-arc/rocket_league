@@ -30,6 +30,7 @@ if __name__ == '__main__':      # this is required due to forking processes
 
     # log model weights
     freq = 12500 # (time steps in a SINGLE environment)
+    # ex. To save 20 times with 10M timesteps on 10 vec_envs, set to 50k
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
