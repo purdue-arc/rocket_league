@@ -1,4 +1,4 @@
-/* Node to detect the ball's position on the field.
+/* Node to help focus
  * License:
  *   BSD 3-Clause License
  *   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -22,13 +22,8 @@ void FocusNode::FocusCallback(const sensor_msgs::ImageConstPtr& msg, const senso
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
         cv::Mat current_frame = cv_ptr->image;
         cv::Mat frame_gray, frame_blurred, frame_edge;
-        
-        #if false /* shouldn't be necessary on the new computers */
-        /* resize image for performance */
-        cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
-        #endif
 
-        /* Convert from BGR to HSV colorspace */
+        /* Convert from BGR to grey scale colorspace */
         cvtColor(current_frame, frame_gray, cv::COLOR_BGR2GRAY);
 
         cv::GaussianBlur(frame_gray, frame_blurred, cv::Size(5, 5), 1.5);
