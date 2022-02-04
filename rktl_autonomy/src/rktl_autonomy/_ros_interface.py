@@ -68,7 +68,7 @@ class ROSInterface(Env):
             ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_id)
             launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
-            launch_args = [f'render:={port==11311}'] + launch_args + [f'agent_name:={node_name}']
+            launch_args = [f'render:={port==11311}', f'plot_log:={port==11311}'] + launch_args + [f'agent_name:={node_name}']
             launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
             launch.start()
             self.close = lambda : launch.shutdown()
