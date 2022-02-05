@@ -12,8 +12,7 @@ from gym.spaces import Box
 # ROS
 import rospy
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float32
-from rktl_msgs.msg import MatchStatus
+from rktl_msgs.msg import ControlEffort, MatchStatus
 from std_srvs.srv import Empty
 
 # System
@@ -51,8 +50,7 @@ class RocketLeagueInterface(ROSInterface):
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
 
         # Publishers
-        self._throttle_pub = rospy.Publisher('effort/throttle', Float32, queue_size=1)
-        self._steering_pub = rospy.Publisher('effort/steering', Float32, queue_size=1)
+        self._effort_pub = rospy.Publisher('car0/effort', ControlEffort, queue_size=1)
         self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
         # State variables
@@ -173,8 +171,11 @@ class RocketLeagueInterface(ROSInterface):
 
         throttle, steering = np.split(action, action.size)
 
-        self._throttle_pub.publish(throttle)
-        self._steering_pub.publish(steering)
+        msg = ControlEffort()
+        msg.header.stamp = rospy.Time.now()
+        msg.throttle = throttle
+        msg.steering = steering
+        self._effort_pub.publish(msg)
 
     def _car_odom_cb(self, odom_msg):
         """Callback for odometry of car."""

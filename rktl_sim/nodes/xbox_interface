@@ -7,32 +7,21 @@ License:
 """
 
 import rospy
-
-from std_msgs.msg import Float32
+from rktl_msgs.msg import ControlEffort
 from std_srvs.srv import Empty
 from sensor_msgs.msg import Joy
 
 def callback(joy):
-    pub_steer = Float32()
-    pub_thot = Float32()
-
-    pub_steer.data = joy.axes[0] * 4
-    pub_thot.data = (joy.axes[5] - joy.axes[2]) / -8
-
+    msg = ControlEffort()
+    msg.header.stamp = rospy.Time.now()
     if (joy.buttons[6] == 1):
         rospy.ServiceProxy('/sim_reset', Empty)()
-        pub_steer.data = 0
-        pub_thot.data = 0
-
-    pub_steer_pub.publish(pub_steer)
-    pub_thot_pub.publish(pub_thot)
+    else:
+        msg.throttle = (joy.axes[5] - joy.axes[2]) / -8
+        msg.steering = joy.axes[0] * 4
+    effort_pub.publish(msg)
 
 rospy.init_node('xbox')
-
-pub_thot_pub = rospy.Publisher('/effort/throttle', Float32, queue_size=1)
-pub_steer_pub = rospy.Publisher('/effort/steering', Float32, queue_size=1)
-
-rospy.Subscriber("/joy", Joy, callback)
-
-
+effort_pub = rospy.Publisher('car0/effort', ControlEffort, queue_size=1)
+rospy.Subscriber('joy', Joy, callback)
 rospy.spin()
