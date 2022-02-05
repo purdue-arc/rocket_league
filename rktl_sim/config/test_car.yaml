@@ -11,6 +11,6 @@ CAR_WIDTH: 0.0762 # m (3 in)
 CAR_LENGTH: 0.2032 # m (8 in)
 
 # Object Inits
-CAR_INIT: {"pos": [-2.4, 0.0, 0.06], "orient": [0.0, 0.0, 1.5707963] }
+CAR_INIT: {"pos": [-2.3, 0.0, 0.06], "orient": [0.0, 0.0, 1.5707963] }
 BALL_INIT: [1.0, 1.0, 0.06] # Out of the way
 SPEED_INIT: 0.0

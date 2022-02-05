@@ -11,18 +11,6 @@
     <!-- Base frame of car --> 
     <!-- Local frame is X up, Y left, and Z out -->
     <link name="base_link">
-        <inertial> 
-            <mass value="6"/>
-            <inertia ixx="0.2" ixy="0" ixz="0" iyy="0.2" iyz="0.0" izz="0.2"/>
-        </inertial> 
-    </link>
-
-    <link name="chassis">
-        <inertial>
-            <origin rpy="0 0 0" xyz="0 0 0"/>
-            <mass value=".1"/>
-            <inertia ixx="0.010609" ixy="0" ixz="0" iyy="0.050409" iyz="0" izz="0.05865"/>
-        </inertial>
         <visual> 
             <geometry> 
                 <box size="0.13 0.28 0.1"/>
@@ -34,14 +22,9 @@
                 <box size="0.13 0.28 0.1"/>
             </geometry>
         </collision>
+        <inertial> 
+            <mass value="6"/>
+            <inertia ixx="0.2" ixy="0" ixz="0" iyy="0.2" iyz="0.0" izz="0.2"/>
+        </inertial> 
     </link>
-
-    <joint name="base_link_joint" type="prismatic">
-        <origin rpy="0 0 0" xyz="0 0 0.5"/>
-        <parent link="base_link"/>
-        <child link="chassis"/>
-        <axis xyz="1 0 0"/>
-        <limit effort="100" velocity="10"/>
-    </joint>
-    
 </robot>

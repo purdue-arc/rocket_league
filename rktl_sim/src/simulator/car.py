@@ -31,8 +31,8 @@ class Car(object):
         self._B = np.array([[2], [0]])
         self._C = np.array([[0, 12.6]])
 
-        # self._car_handle = p.createConstraint(
-        #     self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
+        self._car_handle = p.createConstraint(
+            self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
 
         p.resetBasePositionAndOrientation(
             self.id, pos, p.getQuaternionFromEuler(orient))
@@ -103,11 +103,7 @@ class Car(object):
             self.start_pos = None
             self.start_time = None
 
-        # p.changeConstraint(self._car_handle, pos, orient, maxForce=450)
-        p.setJointMotorControl2(self.id, 0,
-            controlMode=p.VELOCITY_CONTROL,
-            targetVelocity = x_vel,
-            force = 500)
+        p.changeConstraint(self._car_handle, pos, orient, maxForce=450)
 
     def orientToLocal(self, orient):
         orient = p.getEulerFromQuaternion(orient)
