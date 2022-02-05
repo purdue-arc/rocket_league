@@ -131,15 +131,21 @@ class SimulatorROS(object):
         return resp
 
     def throttle_cb(self, throttle_msg):
+        self.lock.acquire()
         self.throttle_cmd = throttle_msg.data
+        self.lock.release()
 
     def steering_cb(self, steering_msg):
+        self.lock.acquire()
         self.steering_cmd = steering_msg.data
+        self.lock.release()
 
     def reset_cb(self, _):
         """Resets simulator."""
         self.lock.acquire()
         self.sim.reset()
+        self.throttle_cmd = 0.
+        self.steering_cmd = 0.
         self.last_time = None
         self.lock.release()
         return EmptyResponse()

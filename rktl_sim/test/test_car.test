@@ -3,7 +3,7 @@
     <rosparam command="load" file="$(find rktl_sim)/config/test_car.yaml" />
 
     <!-- Simulation -->
-    <arg name="pybullet_render" default="false"/>
+    <arg name="pybullet_render" default="true"/>
 
     <!-- URDF paths -->
     <arg name="ball_urdf_path" default="$(find rktl_sim)/urdf/ball.urdf" />
@@ -15,7 +15,7 @@
 
     <!-- Launch simulation node -->
     <node pkg="rktl_sim" type="simulator_node" name="simulator_node" output="screen" required="true">
-        <rosparam command="load" file="$(find rktl_sim)/config/simulation.yaml" />
+        <param name="RATE" value="35" />
         <param name="RENDER_ENABLED" value="$(arg pybullet_render)" />
         <param name="BALL_URDF_PATH" value="$(arg ball_urdf_path)" />
         <param name="CAR_URDF_PATH" value="$(arg car_urdf_path)" />
@@ -23,21 +23,6 @@
         <param name="SIDEWALL_URDF_PATH" value="$(arg sidewall_urdf_path)" />
         <param name="BACKWALL_URDF_PATH" value="$(arg backwall_urdf_path)" />
         <param name="FLOOR_URDF" value="$(arg floor_urdf_path)" />
-    </node>
-
-    <!-- Visualization -->
-    <arg name="render" default="true"/>
-    <arg name="ball_img_path" default="$(find rktl_sim)/media/ball.png" />
-    <arg name="car_img_path" default="$(find rktl_sim)/media/car.png" />
-    <arg name="goal_img_path" default="$(find rktl_sim)/media/goal.png" />
-    <arg name="field_img_path" default="$(find rktl_sim)/media/field.jpg" />
-
-    <node pkg="rktl_sim" type="visualizer_node" name="visualizer_node" output="screen" required="true">
-        <rosparam command="load" file="$(find rktl_sim)/config/visualization.yaml" />
-        <param name="BALL_IMG_PATH" value="$(arg ball_img_path)" />
-        <param name="CAR_IMG_PATH" value="$(arg car_img_path)" />
-        <param name="GOAL_IMG_PATH" value="$(arg goal_img_path)" />
-        <param name="FIELD_IMG_PATH" value="$(arg field_img_path)" />
     </node>
 
     <!-- Test Cases -->

@@ -9,7 +9,7 @@ License:
 import pybullet as p
 import math
 import numpy as np
-
+import time
 
 class Car(object):
     def __init__(self, carID, length, pos, orient):
@@ -19,6 +19,7 @@ class Car(object):
         self._length = length
         self._length_r = self._length / 2.
         self._steering_rate = 2*self._steering_limit / 0.25
+        self._velocity_coeff = 1.42
 
         # Collision handling
         self._collision_started = False
@@ -35,6 +36,10 @@ class Car(object):
 
         p.resetBasePositionAndOrientation(
             self.id, pos, p.getQuaternionFromEuler(orient))
+
+        # Testing
+        self.start_pos = None
+        self.start_time = None
 
     def step(self, cmd, contact, dt):
         des_throttle = cmd[0]
@@ -55,7 +60,6 @@ class Car(object):
         throttle_dt = self._A @ self._throttle_state + \
             self._B @ np.array([des_throttle])
         self._throttle_state += throttle_dt * dt
-        print("Car", dt, throttle)
 
         # Compute 0th-order response of steering
         steering = max(min(steering, self._steering_limit), -
@@ -71,16 +75,39 @@ class Car(object):
 
         beta = math.atan(
             (self._length_r) * math.tan(self._steering_angle) / self._length)
-        x_vel = throttle * math.cos(heading + beta)
-        y_vel = throttle * math.sin(heading + beta)
+        x_vel = throttle * math.cos(heading + beta) * self._velocity_coeff
+        y_vel = throttle * math.sin(heading + beta) * self._velocity_coeff
         w = throttle * math.tan(self._steering_angle) * \
-            math.cos(beta) / self._length
+            math.cos(beta) / self._length * self._velocity_coeff
 
         pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
         orient = p.getQuaternionFromEuler([0., 0., heading + w * dt])
         orient = self.orientToGlobal(orient)
 
-        p.changeConstraint(self._car_handle, pos, orient, maxForce=50)
+        if des_throttle != 0:
+            time_diff = 0.0
+            if self.start_time is None:
+                self.start_time = time.time()
+            else:
+                time_diff = time.time() - self.start_time
+
+            pos_diff = 0.0
+            if self.start_pos is None:
+                self.start_pos = pos[0][0]
+            else:
+                pos_diff = pos[0][0] - self.start_pos
+
+            linear, _ = p.getBaseVelocity(self.id)
+            print(time_diff, pos_diff, throttle[0], x_vel[0], linear[0])
+        else:
+            self.start_pos = None
+            self.start_time = None
+
+        # p.changeConstraint(self._car_handle, pos, orient, maxForce=450)
+        p.setJointMotorControl2(self.id, 0,
+            controlMode=p.VELOCITY_CONTROL,
+            targetVelocity = x_vel,
+            force = 500)
 
     def orientToLocal(self, orient):
         orient = p.getEulerFromQuaternion(orient)
