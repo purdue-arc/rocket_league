@@ -31,8 +31,8 @@ class Car(object):
         self._B = np.array([[2], [0]])
         self._C = np.array([[0, 12.6]])
 
-        self._car_handle = p.createConstraint(
-            self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
+        # self._car_handle = p.createConstraint(
+        #     self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
 
         p.resetBasePositionAndOrientation(
             self.id, pos, p.getQuaternionFromEuler(orient))
