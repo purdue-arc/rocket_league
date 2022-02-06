@@ -17,7 +17,7 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>std_srvs</exec_depend>
-  <exec_depend>arc_tutorials</exec_depend>
+  <exec_depend>snakesim</exec_depend>
   <exec_depend>rktl_msgs</exec_depend>
   <exec_depend>rktl_launch</exec_depend>
 </package>
