@@ -47,6 +47,8 @@ RUN pip3 install pybullet stable-baselines3 && \
     apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
     python3-pygame \
+    ros-${ROS_DISTRO}-rosserial-arduino \
+    ros-${ROS_DISTRO}-rosserial \
     ros-${ROS_DISTRO}-apriltag-ros \
     ros-${ROS_DISTRO}-pointgrey-camera-driver \
     ros-${ROS_DISTRO}-usb-cam \
