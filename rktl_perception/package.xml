@@ -19,4 +19,5 @@
   <depend>tf2_ros</depend>
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
+  <depend>nodelet</depend>
 </package>

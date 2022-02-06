@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   apriltag_ros
   geometry_msgs
   image_geometry
+  nodelet
 )
 
 ## System dependencies
@@ -37,6 +38,7 @@ catkin_package(
     image_transport
     cv_bridge
     apriltag_ros
+    nodelet
   DEPENDS OpenCV
 )
 
