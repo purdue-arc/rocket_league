@@ -11,7 +11,7 @@ TODO:
 """
 
 # 3rd party modules
-from std_msgs.msg import Float32
+from rktl_msgs.msg import ControlEffort
 from nav_msgs.msg import Odometry
 import os
 import rospy
@@ -101,8 +101,7 @@ class SimulatorROS(object):
             'match_status', MatchStatus, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('effort/throttle', Float32, self.throttle_cb)
-        rospy.Subscriber('effort/steering', Float32, self.steering_cb)
+        rospy.Subscriber('car0/effort', ControlEffort, self.effort_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -123,11 +122,9 @@ class SimulatorROS(object):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
 
-    def throttle_cb(self, throttle_msg):
-        self.throttle_cmd = throttle_msg.data
-
-    def steering_cb(self, steering_msg):
-        self.steering_cmd = steering_msg.data
+    def effort_cb(self, effort_msg):
+        self.throttle_cmd = effort_msg.throttle
+        self.steering_cmd = effort_msg.steering
 
     def reset_cb(self, _):
         """Resets simulator."""
