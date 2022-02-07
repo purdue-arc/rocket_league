@@ -1,4 +1,5 @@
 <launch>
-    <include file="$(find rktl_launch)/launch/rocket_league_sim.launch" />
+    <arg name="render" value="false"/>
+    <include file="$(find rktl_launch)/launch/rocket_league_sim.launch" pass_all_args="true"/>
     <test test-name="test_simulation" pkg="rktl_test" type="test_simulation.py"/>
 </launch>
