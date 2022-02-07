@@ -23,7 +23,7 @@ RUN apt update && \
     ros-$ROS_DISTRO-pointgrey-camera-driver \
     ros-$ROS_DISTRO-usb-cam \
     ros-$ROS_DISTRO-joy \
-    ros-${ROS_DISTRO}-rosserial-arduino \
+    ros-$ROS_DISTRO-rosserial-arduino \
     ros-$ROS_DISTRO-rosbridge-server && \
     # pip
     pip3 install pybullet gym[box2d] stable-baselines3 && \
