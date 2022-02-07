@@ -34,7 +34,7 @@ class Car(object):
         self._B = np.array([[2], [0]])
         self._C = np.array([[0, 12.6]])
 
-
+        # Model configuration
         p.resetBasePositionAndOrientation(
             self.id, [0., 0., pos[2]], p.getQuaternionFromEuler([0., 0., 0.]))
 
@@ -92,33 +92,12 @@ class Car(object):
         w = throttle * math.tan(self._steering_angle) * \
             math.cos(beta) / self._length
 
-        p.setJointMotorControl2(self.id, self.x_joint_id, controlMode=p.VELOCITY_CONTROL, targetVelocity=-x_vel, force=5000)
-        p.setJointMotorControl2(self.id, self.y_joint_id, controlMode=p.VELOCITY_CONTROL, targetVelocity=-y_vel, force=5000)
-        p.setJointMotorControl2(self.id, self.w_joint_id, controlMode=p.VELOCITY_CONTROL, targetVelocity=w, force=5000)
-
-        pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
-        orient = p.getQuaternionFromEuler([0., 0., heading + w * dt])
-        orient = self.orientToGlobal(orient)
-
-        if des_throttle != 0:
-            time_diff = 0.0
-            if self.start_time is None:
-                self.start_time = time.time()
-            else:
-                time_diff = time.time() - self.start_time
-
-            pos_diff = 0.0
-            if self.start_pos is None:
-                self.start_pos = pos[0][0]
-            else:
-                pos_diff = pos[0][0] - self.start_pos
-
-            linkState = p.getLinkState(self.id, 0, computeLinkVelocity=1)
-            linear = linkState[6]
-            print(time_diff, pos_diff, throttle[0], x_vel[0], linear[0])
-        else:
-            self.start_pos = None
-            self.start_time = None
+        p.setJointMotorControl2(self.id, self.x_joint_id,
+            controlMode=p.VELOCITY_CONTROL, targetVelocity=-x_vel, force=5000)
+        p.setJointMotorControl2(self.id, self.y_joint_id,
+            controlMode=p.VELOCITY_CONTROL, targetVelocity=-y_vel, force=5000)
+        p.setJointMotorControl2(self.id, self.w_joint_id,
+            controlMode=p.VELOCITY_CONTROL, targetVelocity=w, force=5000)
 
     def orientToLocal(self, orient):
         orient = p.getEulerFromQuaternion(orient)

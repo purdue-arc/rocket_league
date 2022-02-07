@@ -30,10 +30,10 @@ class TestCar(unittest.TestCase):
     cls.sim_reset = rospy.ServiceProxy('sim_reset', Empty)
 
   def test_throttle_resp_1(self):
-    self.run_throttle_resp(0.25, 1.0, 1.1431, 0.075)
+    self.run_throttle_resp(0.25, 1.0, 1.1431, 0.15)
 
   def test_throttle_resp_2(self):
-    self.run_throttle_resp(0.5, 1.0, 2.2862, 0.075)
+    self.run_throttle_resp(0.5, 1.0, 2.2862, 0.15)
 
   def run_throttle_resp(self, i_throttle, i_wait, e_dist, e_err):
     try:
