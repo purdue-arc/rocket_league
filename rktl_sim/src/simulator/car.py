@@ -38,9 +38,6 @@ class Car(object):
         p.resetBasePositionAndOrientation(
             self.id, [0., 0., pos[2]], p.getQuaternionFromEuler([0., 0., 0.]))
 
-        for i in range(p.getNumJoints(self.id)):
-            print(p.getJointInfo(self.id, i))
-
         self.y_joint_id = 0
         self.x_joint_id = 1
         self.w_joint_id = 2
