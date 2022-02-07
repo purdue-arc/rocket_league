@@ -1,0 +1,5 @@
+<launch>
+  <node type="controller" pkg="rktl_control" name="controller" output="screen">
+    <rosparam command="load" file="$(find rktl_control)/config/controller.yaml"/>
+  </node>
+</launch>

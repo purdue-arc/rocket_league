@@ -89,13 +89,15 @@ class Controller(object):
                 rospy.get_param('~lead/beta'),
                 rospy.get_param('~lag/alpha'),
                 rospy.get_param('~lag/beta'))
-        else:
+        elif rospy.get_param('controller_type') == 'pid':
             self.controller = PIDController(
                 rospy.get_param('~pid/kp'),
                 rospy.get_param('~pid/ki'),
                 rospy.get_param('~pid/kd'),
                 rospy.get_param('~pid/anti_windup'),
                 rospy.get_param('~pid/deadband'))
+        else:
+            raise NotImplementedError(f"unrecognized controller type: {rospy.get_param('controller_type')}")
 
         # Constants
         self.STATIC_GAIN = rospy.get_param('~static_gain')
