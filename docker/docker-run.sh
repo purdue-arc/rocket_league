@@ -14,7 +14,7 @@ fi
 docker run --rm \
     $TTY_OPTS \
     -e USER \
-    -e DISPLAY \
+    -e DISPLAY=unix$DISPLAY \
     -e NVIDIA_DRIVER_CAPABILITIES=all \
     -v $XAUTHORITY:/home/$USER/.Xauthority \
     -v $WS_DIR:/home/$USER/catkin_ws \

@@ -21,6 +21,9 @@ class Car(object):
         self._steering_rate = 2*self._steering_limit / 0.25
         self._velocity_coeff = 1.42
 
+        # URDF Configuration
+        self.body_link_id = 1
+
         # Collision handling
         self._collision_started = False
         self._collision_friction = 0.05
@@ -31,11 +34,20 @@ class Car(object):
         self._B = np.array([[2], [0]])
         self._C = np.array([[0, 12.6]])
 
-        self._car_handle = p.createConstraint(
-            self.id, -1, -1, -1, p.JOINT_FIXED, [0, 0, 0], [0, 0, 0], [0, 0, 1])
 
         p.resetBasePositionAndOrientation(
-            self.id, pos, p.getQuaternionFromEuler(orient))
+            self.id, [0., 0., pos[2]], p.getQuaternionFromEuler([0., 0., 0.]))
+
+        for i in range(p.getNumJoints(self.id)):
+            print(p.getJointInfo(self.id, i))
+
+        self.y_joint_id = 0
+        self.x_joint_id = 1
+        self.w_joint_id = 2
+
+        p.resetJointState(self.id, self.x_joint_id, targetValue=pos[1])
+        p.resetJointState(self.id, self.y_joint_id, targetValue=pos[0])
+        p.resetJointState(self.id, self.w_joint_id, targetValue=orient[2])
 
         # Testing
         self.start_pos = None
@@ -75,10 +87,14 @@ class Car(object):
 
         beta = math.atan(
             (self._length_r) * math.tan(self._steering_angle) / self._length)
-        x_vel = throttle * math.cos(heading + beta) * self._velocity_coeff
-        y_vel = throttle * math.sin(heading + beta) * self._velocity_coeff
+        x_vel = throttle * math.cos(heading + beta)
+        y_vel = throttle * math.sin(heading + beta)
         w = throttle * math.tan(self._steering_angle) * \
-            math.cos(beta) / self._length * self._velocity_coeff
+            math.cos(beta) / self._length
+
+        p.setJointMotorControl2(self.id, self.x_joint_id, controlMode=p.VELOCITY_CONTROL, targetVelocity=-x_vel, force=5000)
+        p.setJointMotorControl2(self.id, self.y_joint_id, controlMode=p.VELOCITY_CONTROL, targetVelocity=-y_vel, force=5000)
+        p.setJointMotorControl2(self.id, self.w_joint_id, controlMode=p.VELOCITY_CONTROL, targetVelocity=w, force=5000)
 
         pos = (pos[0] + x_vel*dt, pos[1] + y_vel*dt, pos[2])
         orient = p.getQuaternionFromEuler([0., 0., heading + w * dt])
@@ -97,13 +113,12 @@ class Car(object):
             else:
                 pos_diff = pos[0][0] - self.start_pos
 
-            linear, _ = p.getBaseVelocity(self.id)
+            linkState = p.getLinkState(self.id, 0, computeLinkVelocity=1)
+            linear = linkState[6]
             print(time_diff, pos_diff, throttle[0], x_vel[0], linear[0])
         else:
             self.start_pos = None
             self.start_time = None
-
-        p.changeConstraint(self._car_handle, pos, orient, maxForce=450)
 
     def orientToLocal(self, orient):
         orient = p.getEulerFromQuaternion(orient)
@@ -116,17 +131,19 @@ class Car(object):
         return p.getQuaternionFromEuler(orient)
 
     def getPose(self):
-        position, orient = p.getBasePositionAndOrientation(self.id)
+        pos, orient = p.getLinkState(self.id, self.body_link_id)[0:2]
         orient = self.orientToLocal(orient)
-        return (position, orient)
+        return (pos, orient)
 
     def getVelocity(self):
-        _, orientation = p.getBasePositionAndOrientation(self.id)
-        heading = p.getEulerFromQuaternion(orientation)[2]
+        link_state = p.getLinkState(self.id, self.body_link_id,
+            computeLinkVelocity=1)
+        orient = link_state[1]
+        linear, angular = link_state[6:8]
+        heading = p.getEulerFromQuaternion(orient)[2]
         r_inv = np.array([[math.cos(heading), -math.sin(heading), 0.],
                           [math.sin(heading), math.cos(heading), 0.],
                          [0., 0., 1.]], dtype=np.float)
-        linear, angular = p.getBaseVelocity(self.id)
         linear = r_inv @ linear
         return (linear, angular)
 
@@ -134,5 +151,6 @@ class Car(object):
         self._steering_angle = 0
         self._throttle_state = np.zeros((2,), dtype=np.float)
 
-        p.resetBasePositionAndOrientation(
-            self.id, pos, p.getQuaternionFromEuler(orient))
+        p.resetJointState(self.id, self.x_joint_id, targetValue=pos[1])
+        p.resetJointState(self.id, self.y_joint_id, targetValue=pos[0])
+        p.resetJointState(self.id, self.w_joint_id, targetValue=orient[2])

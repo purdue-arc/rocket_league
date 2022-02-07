@@ -18,7 +18,6 @@ from rktl_sim.srv import SetSimThrottle, SetSimThrottleRequest
 class TestCar(unittest.TestCase):
   set_throttle = None
   sim_reset = None
-  throttle_pub = None
 
   @classmethod
   def setUpClass(cls):
@@ -30,38 +29,13 @@ class TestCar(unittest.TestCase):
     rospy.wait_for_service('sim_reset')
     cls.sim_reset = rospy.ServiceProxy('sim_reset', Empty)
 
-    cls.throttle_pub = rospy.Publisher('effort/throttle',
-      Float32, latch=True)
-
   def test_throttle_resp_1(self):
-    try:
-      self.sim_reset()
-    except rospy.ServiceException as _:
-      self.fail('failed to reset sim')
-
-    try:
-      resp = self.set_throttle(SetSimThrottleRequest(0.25))
-      start_msg = rospy.wait_for_message('car0/odom', Odometry)
-      while (start_msg.header.stamp - resp.stamp) < rospy.Duration(0.0):
-        start_msg = rospy.wait_for_message('car0/odom', Odometry)
-
-      start_stamp = start_msg.header.stamp
-      end_msg = rospy.wait_for_message('car0/odom', Odometry)
-      dur = rospy.Duration.from_sec(1.0)
-      while (end_msg.header.stamp - start_stamp) < dur:
-        end_msg = rospy.wait_for_message('car0/odom', Odometry)
-
-      dist = end_msg.pose.pose.position.x - start_msg.pose.pose.position.x
-      self.assertLess(dist, 1.2, 'car moving too fast: ' +
-        f'expected distance {1.12}, actual distance {dist}')
-    
-      self.assertGreater(dist, 1.0, f'car moving too slow: ' +
-        f'expected distance {1.12}, actual distance {dist}')
-  
-    except rospy.ServiceException as _:
-      self.fail('failed to set throttle')
+    self.run_throttle_resp(0.25, 1.0, 1.1431, 0.075)
 
   def test_throttle_resp_2(self):
+    self.run_throttle_resp(0.5, 1.0, 2.2862, 0.075)
+
+  def run_throttle_resp(self, i_throttle, i_wait, e_dist, e_err):
     try:
       self.sim_reset()
     except rospy.ServiceException as _:
@@ -73,23 +47,23 @@ class TestCar(unittest.TestCase):
       self.fail('failed to set throttle')
 
     try:
-      resp = self.set_throttle(SetSimThrottleRequest(0.5))
+      resp = self.set_throttle(SetSimThrottleRequest(i_throttle))
       start_msg = rospy.wait_for_message('car0/odom', Odometry)
       while (start_msg.header.stamp - resp.stamp) < rospy.Duration(0.0):
         start_msg = rospy.wait_for_message('car0/odom', Odometry)
 
       start_stamp = start_msg.header.stamp
       end_msg = rospy.wait_for_message('car0/odom', Odometry)
-      dur = rospy.Duration.from_sec(1.0)
+      dur = rospy.Duration.from_sec(i_wait)
       while (end_msg.header.stamp - start_stamp) < dur:
         end_msg = rospy.wait_for_message('car0/odom', Odometry)
 
       dist = end_msg.pose.pose.position.x - start_msg.pose.pose.position.x
-      self.assertLess(dist, 4.6, 'car moving too fast: ' +
-        f'expected distance {4.5}, actual distance {dist}')
+      self.assertLess(dist, e_dist + e_err, 'car moving too fast: ' +
+        f'expected distance {e_dist}, actual distance {dist}')
     
-      self.assertGreater(dist, 4.4, f'car moving too slow: ' +
-        f'expected distance {4.5}, actual distance {dist}')
+      self.assertGreater(dist, e_dist - e_err, f'car moving too slow: ' +
+        f'expected distance {e_dist}, actual distance {dist}')
   
     except rospy.ServiceException as _:
       self.fail('failed to set throttle')

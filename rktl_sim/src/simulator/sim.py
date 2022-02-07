@@ -28,7 +28,8 @@ class Sim(object):
 
         self.spawn_bounds = spawn_bounds
 
-        zeroOrient = p.getQuaternionFromEuler([0, 0, 0])
+        zeroPos = [0., 0., 0.]
+        zeroOrient = p.getQuaternionFromEuler([0., 0., 0.])
         self._planeID = p.loadURDF(urdf_paths["plane"], [0, 0, 0],
             zeroOrient, useFixedBase=1)
         p.changeDynamics(bodyUniqueId=self._planeID,
@@ -128,6 +129,9 @@ class Sim(object):
         self._walls[brBackwallID] = True
 
         self._cars = {}
+
+        self._carID = p.loadURDF(
+            urdf_paths["car"], zeroPos, zeroOrient)
         if 'car' in field_setup:
             carPos = field_setup['car']['pos']
             carOrient = field_setup['car']['orient']
@@ -140,8 +144,6 @@ class Sim(object):
             carOrient = [0., 0., random.uniform(0, 2 * math.pi)]
             self.initCarPos = None
             self.initCarOrient = None
-        self._carID = p.loadURDF(
-            urdf_paths["car"], carPos, p.getQuaternionFromEuler(carOrient))
         self._cars[self._carID] = Car(
             self._carID, 0.5, carPos, carOrient,
         )

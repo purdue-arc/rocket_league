@@ -1,6 +1,20 @@
 <launch>
     <!-- Testing Params -->
-    <rosparam command="load" file="$(find rktl_sim)/config/test_car.yaml" />
+    <rosparam>
+        FRAME_ID: "map"
+
+        FIELD_WIDTH: 3.5
+        FIELD_LENGTH: 5
+        WALL_THICKNESS: 0.25
+        GOAL_WIDTH: 1
+        BALL_RADIUS: 0.0508
+        CAR_WIDTH: 0.0762
+        CAR_LENGTH: 0.2032
+
+        CAR_INIT: {"pos": [-2.3, 0.0, 0.06], "orient": [0.0, 0.0, 1.5707963] }
+        BALL_INIT: [1.0, 1.0, 0.06]
+        SPEED_INIT: 0.0
+    </rosparam>
 
     <!-- Simulation -->
     <arg name="pybullet_render" default="true"/>
@@ -26,9 +40,5 @@
     </node>
 
     <!-- Test Cases -->
-    <test test-name="test_car" name="test_car_node" pkg="rktl_sim" type="test_car_node">
-        <rosparam>
-
-        </rosparam>
-    </test>
+    <test test-name="test_car" name="test_car_node" pkg="rktl_sim" type="test_car_node" />
 </launch>

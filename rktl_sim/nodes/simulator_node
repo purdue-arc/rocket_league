@@ -125,9 +125,12 @@ class SimulatorROS(object):
                 'no urdf file exists at path {}'.format(param))
 
     def set_throttle(self, throttle_req):
+        self.lock.acquire()
         self.throttle_cmd = throttle_req.data
         resp = SetSimThrottleResponse()
         resp.ok = True
+        resp.stamp = rospy.get_rostime()
+        self.lock.release()
         return resp
 
     def throttle_cb(self, throttle_msg):
