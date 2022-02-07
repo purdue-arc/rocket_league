@@ -31,9 +31,8 @@ class SnakeActions(IntEnum):
 
 class SnakeInterface(ROSInterface):
     """ROS interface for the snake game."""
-    _node_name = "snake_drl"
-    def __init__(self):
-        super().__init__()
+    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'snake_train.launch'], launch_args=[], run_id=None):
+        super().__init__(node_name='snake_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
         # Constants
         self._NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
@@ -56,10 +55,7 @@ class SnakeInterface(ROSInterface):
         self._score = None
         self._alive = None
         self._prev_time = None
-        self._prev_score = None
         self._start_time = None
-        self._total_reward = 0
-        self._episode = 0
 
         # Subscribers
         rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
@@ -77,9 +73,8 @@ class SnakeInterface(ROSInterface):
         """The Space object corresponding to valid observations."""
         locations = 2*(1+self._NUM_SEGMENTS)
         return Box(
-            low=np.array([-pi] + locations*[0]),
-            high=np.array([pi] + locations*[self._FIELD_SIZE]),
-            dtype=np.float32)
+            low=np.array([-pi] + locations*[0], dtype=np.float32),
+            high=np.array([pi] + locations*[self._FIELD_SIZE], dtype=np.float32))
 
     def _reset_env(self):
         """Reset environment for a new training episode."""
@@ -87,21 +82,9 @@ class SnakeInterface(ROSInterface):
 
     def _reset_self(self):
         """Reset internally for a new episode."""
-        # log data
-        if self._has_state():
-            self._log_data({
-                "episode" : self._episode,
-                "score" : self._score,
-                "duration" : (self._prev_time - self._start_time).to_sec(),
-                "net_reward" : self._total_reward})
-            self._episode += 1
-
-        # reset
         self._clear_state()
         self._prev_time = None
-        self._prev_score = None
         self._start_time = None
-        self._total_reward = 0
 
     def _has_state(self):
         """Determine if the new state is ready."""
@@ -153,9 +136,10 @@ class SnakeInterface(ROSInterface):
         if (time - self._start_time).to_sec() >= self._MAX_TIME:
             done = True
 
-        self._total_reward += reward
+        # info dict
+        info = {"score" : self._score}
 
-        return (observation, reward, done, {})
+        return (observation, reward, done, info)
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""

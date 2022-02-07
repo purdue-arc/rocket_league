@@ -1,6 +1,3 @@
-# steps to train
-training_steps: 50000
-
 reward:
   # reward to be given when the snake dies. This should be zero or negative
   death: 0.0
@@ -24,7 +21,10 @@ control:
   max_angular_velocity: 3.0
 
 log:
-  freq: 25
+  base_dir: "~/catkin_ws/data/snake/"
+  # frequency to save progress plot. Unit is episodes
+  plot_freq: 25
+  # variables to include in progress plot
   basic:
     - duration
   advanced:

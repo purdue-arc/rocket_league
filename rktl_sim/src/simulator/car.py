@@ -20,6 +20,10 @@ class Car(object):
         self._length_r = self._length / 2.
         self._steering_rate = 2*self._steering_limit / 0.25
 
+        # Collision handling
+        self._collision_started = False
+        self._collision_friction = 0.05
+
         # System response
         self._throttle_state = np.zeros((2,), dtype=np.float)
         self._A = np.array([[-8., -4.199], [8., 0.]])
@@ -32,9 +36,19 @@ class Car(object):
         p.resetBasePositionAndOrientation(
             self.id, pos, p.getQuaternionFromEuler(orient))
 
-    def step(self, cmd, dt):
+    def step(self, cmd, contact, dt):
         des_throttle = cmd[0]
         steering = cmd[1]
+
+        # Handle collision
+        if contact:
+            if not self._collision_started:
+                self._throttle_state = np.zeros((2,), dtype=np.float)
+                self._collision_started = True
+            else:
+                des_throttle *= self._collision_friction
+        else:
+            self._collision_started = False
 
         # Compute 2nd-order response of throttle
         throttle = self._C @ self._throttle_state

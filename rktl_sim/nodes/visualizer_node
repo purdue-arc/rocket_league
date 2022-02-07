@@ -10,19 +10,16 @@ TODO:
 """
 
 # 3rd party modules
-from std_msgs.msg import Float32
 import math
 from nav_msgs.msg import Odometry
-import os
 import rospy
-from std_srvs.srv import Empty, EmptyResponse
 from tf.transformations import euler_from_quaternion
 from threading import Lock
 
 # Local library
 import visualizer
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
-from rktl_msgs.msg import Target, Path, PathError, Waypoint, MatchStatus
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from rktl_msgs.msg import Path
 
 
 class VisualizerROS(object):
@@ -49,58 +46,81 @@ class VisualizerROS(object):
         self.timeout = rospy.get_param("~TIMEOUT", 10)
         rate = rospy.Rate(rospy.get_param("~RATE", 20))
 
-        # Setup field assets
-        self.window.createAsset(
-            1, wall_thickness, field_length, color=(0, 0, 0),
-            initPos=(0., (field_width + (wall_thickness / 2.)) / 2.))
-        self.window.createAsset(
-            2, wall_thickness, field_length, color=(0, 0, 0),
-            initPos=(0., -(field_width + (wall_thickness / 2.)) / 2.))
+        # Setting up field
+        id = 0
+        field_img_path = rospy.get_param("~FIELD_IMG_PATH", None)
+        if field_img_path is not None:
+            self.window.createAsset(
+                id, field_width, field_length, imgPath=field_img_path,
+                initPos=(0, 0))
+            id += 1
 
+        # Setting up sidewalls
+        sidewall_length = field_length + (wall_thickness * 2.0)
+        self.window.createAsset(
+            id, wall_thickness, sidewall_length, color=(0, 0, 0),
+            initPos=(0., (field_width + wall_thickness) / 2.))
+        id += 1
+        
+        self.window.createAsset(
+            id, wall_thickness, sidewall_length, color=(0, 0, 0),
+            initPos=(0., -(field_width + wall_thickness) / 2.))
+        id += 1
+
+        # Setting up backwalls
         backwall_width = (field_width - goal_width) / 2.
+        backwall_x = (field_length + wall_thickness) / 2.
+        backwall_y = (field_width / 2.) - (backwall_width / 2.)
         self.window.createAsset(
-            3, backwall_width, wall_thickness, color=(0, 0, 0),
-            initPos=((field_length + (wall_thickness / 2.)) / 2., (field_width / 2.) - (backwall_width / 2.)))
-        self.window.createAsset(
-            4, backwall_width, wall_thickness, color=(0, 0, 0),
-            initPos=((field_length + (wall_thickness / 2.)) / 2., -(field_width / 2.) + (backwall_width / 2.)))
-        self.window.createAsset(
-            5, backwall_width, wall_thickness, color=(0, 0, 0),
-            initPos=(-(field_length + (wall_thickness / 2.)) / 2., (field_width / 2.) - (backwall_width / 2.)))
-        self.window.createAsset(
-            6, backwall_width, wall_thickness, color=(0, 0, 0),
-            initPos=(-(field_length + (wall_thickness / 2.)) / 2., -(field_width / 2.) + (backwall_width / 2.)))
+            id, backwall_width, wall_thickness, color=(0, 0, 0),
+            initPos=(backwall_x, backwall_y))
+        id += 1
 
+        self.window.createAsset(
+            id, backwall_width, wall_thickness, color=(0, 0, 0),
+            initPos=(backwall_x, -backwall_y))
+        id += 1
+    
+        self.window.createAsset(
+            id, backwall_width, wall_thickness, color=(0, 0, 0),
+            initPos=(-backwall_x, backwall_y))
+        id += 1
+
+        self.window.createAsset(
+            id, backwall_width, wall_thickness, color=(0, 0, 0),
+            initPos=(-backwall_x, -backwall_y))
+        id += 1
+
+        # Setting up car
         car_img_path = rospy.get_param("~CAR_IMG_PATH", None)
         if car_img_path is not None:
-            self.car_id = 7
+            self.car_id = id
             self.window.createAsset(
                 self.car_id, car_width, car_length, imgPath=car_img_path)
+            id += 1
 
+        # Setting up ball
         ball_img_path = rospy.get_param("~BALL_IMG_PATH", None)
         if ball_img_path is not None:
-            self.ball_id = 8
+            self.ball_id = id
             self.window.createAsset(
                 self.ball_id, ball_radius * 2, ball_radius * 2, imgPath=ball_img_path)
+            id += 1
 
-        # TODO: Verify wall thickness and goal positions
-        goal_img_path = rospy.get_param("~GOAL_IMG_PATH", None)
-        if goal_img_path is not None:
-            # Top Goal:
-            self.goal1_id = 9
-            self.window.createAsset(
-                self.goal1_id, goal_width, wall_thickness, imgPath=goal_img_path
-            )
-            self.window.updateAssetPos(
-                self.goal1_id, (field_length / 2) + (wall_thickness / 4), 0)
-            # Bottom Goal:
-            self.goal2_id = 10
-            self.window.createAsset(
-                self.goal2_id, goal_width, wall_thickness, imgPath=goal_img_path
-            )
-            self.window.updateAssetPos(
-                self.goal2_id, -((field_length / 2) + (wall_thickness / 4)), 0)
-            self.window.updateAssetAngle(self.goal2_id, 180)
+        # Setting up goals
+        self.goal1_id = id
+        self.window.createAsset(
+            self.goal1_id, goal_width, wall_thickness, color=(255, 255, 255))
+        self.window.updateAssetPos(
+            self.goal1_id, (field_length / 2) + (wall_thickness / 2), 0)
+        id += 1
+        
+        self.goal2_id = id
+        self.window.createAsset(
+            self.goal2_id, goal_width, wall_thickness, color=(255, 255, 255))
+        self.window.updateAssetPos(
+            self.goal2_id, -((field_length / 2) + (wall_thickness / 2)), 0)
+        id += 1
 
         self.lock = Lock()
         self.last_time = None
