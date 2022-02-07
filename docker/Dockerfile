@@ -3,11 +3,11 @@ FROM osrf/ros:noetic-desktop-full
 # Update, Upgrade, Install, and Cleanup
 RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
     # basics
+    DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
     sudo tmux nano vim git wget net-tools iputils-ping x11-apps htop \
     mesa-utils python3-dev python3-pip python3-tk software-properties-common \
-    pylint clang-format jq swig zsh libeigen3-dev python3-catkin-tools \
+    pylint clang-format jq swig zsh libeigen3-dev python3-catkin-tools && \
     # pip
     pip3 install --upgrade pip && \
     pip3 install scipy numpy matplotlib \
