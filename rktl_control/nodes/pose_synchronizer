@@ -13,6 +13,7 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from collections import deque
 from threading import Lock
+from math import sin,cos, atan2
 
 class PoseSynchronizer(object):
     """Class to synchronize and buffer all poses."""
@@ -74,7 +75,8 @@ class PoseSynchronizer(object):
         """Callback for processing received poses and publishing"""
         avg_x = 0
         avg_y = 0
-        avg_yaw = 0
+        avg_hx = 0
+        avg_hy = 0
         samples = 0
 
         # sum and count usable measurements in buffer
@@ -93,7 +95,8 @@ class PoseSynchronizer(object):
             else:
                 avg_x += x
                 avg_y += y
-                avg_yaw += yaw
+                avg_hx += cos(yaw)
+                avg_hy += sin(yaw)
                 samples += 1
 
         # check there is sufficient data
@@ -104,7 +107,7 @@ class PoseSynchronizer(object):
         # take avg
         avg_x /= samples
         avg_y /= samples
-        avg_yaw /= samples
+        avg_yaw = atan2(avg_hy, avg_hx)
         rospy.logdebug("%s: using %d samples", topic, samples)
 
         # publish message
