@@ -7,7 +7,7 @@ License:
 """
 
 import rospy
-from std_msgs.msg import Float32
+from rktl_msgs.msg import ControlEffort
 from std_srvs.srv import Empty
 
 from curses import wrapper
@@ -42,8 +42,11 @@ def main(win):
         throttle_effort = max(min(throttle_effort, 1.0), -1.0)
         steering_effort = max(min(steering_effort, 1.0), -1.0)
 
-        throttle_pub.publish(throttle_effort)
-        steering_pub.publish(steering_effort)
+        msg = ControlEffort()
+        msg.header.stamp = rospy.Time.now()
+        msg.throttle = throttle_effort
+        msg.steering = steering_effort
+        effort_pub.publish(msg)
 
         win.clear()
         win.addstr("keyboard controller\n")
@@ -56,8 +59,7 @@ def main(win):
         sleep(0.01)
 
 rospy.init_node('keyboard')
-throttle_pub = rospy.Publisher('/effort/throttle', Float32, queue_size=1)
-steering_pub = rospy.Publisher('/effort/steering', Float32, queue_size=1)
+effort_pub = rospy.Publisher('car0/effort', ControlEffort, queue_size=1)
 reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
 wrapper(main)

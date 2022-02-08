@@ -31,9 +31,8 @@ class SnakeActions(IntEnum):
 
 class SnakeInterface(ROSInterface):
     """ROS interface for the snake game."""
-    _node_name = "snake_drl"
-    def __init__(self):
-        super().__init__()
+    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'snake_train.launch'], launch_args=[], run_id=None):
+        super().__init__(node_name='snake_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
         # Constants
         self._NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
@@ -74,9 +73,8 @@ class SnakeInterface(ROSInterface):
         """The Space object corresponding to valid observations."""
         locations = 2*(1+self._NUM_SEGMENTS)
         return Box(
-            low=np.array([-pi] + locations*[0]),
-            high=np.array([pi] + locations*[self._FIELD_SIZE]),
-            dtype=np.float32)
+            low=np.array([-pi] + locations*[0], dtype=np.float32),
+            high=np.array([pi] + locations*[self._FIELD_SIZE], dtype=np.float32))
 
     def _reset_env(self):
         """Reset environment for a new training episode."""

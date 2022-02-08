@@ -1,24 +1,23 @@
 <launch>
   <!-- arguments -->
-  <arg name="render"        default="false"/>
-  <arg name="weights"       default="~/catkin_ws/data/rocketleague/weights"/>
+  <arg name="plot_log"      default="false"/>
+  <arg name="render"        default="true"/>
+  <arg name="weights"       default="~/catkin_ws/data/rocket_league/weights"/>
 
   <!-- constants -->
-  <arg name="rate"          default="10.0"/>
+  <arg name="rate"          value="10.0"/>
 
   <!-- environment -->
-  <include file="$(find rktl_launch)/launch/rocket_league_sim.launch"/>
+  <include file="$(find rktl_launch)/launch/rocket_league_sim.launch" pass_all_args="true"/>
 
   <!-- agent -->
   <node type="rocket_league_agent" pkg="rktl_autonomy" name="rocket_league_agent" output="screen">
     <rosparam command="load" file="$(find rktl_autonomy)/config/rocket_league.yaml"/>
-    <param name="rate"      value="$(arg rate)"/>
-    <param name="eval"      value="true"/>
     <param name="weights"   value="$(arg weights)"/>
   </node>
 
 <!-- plot performance -->
-  <node type="plotter" pkg="rktl_autonomy" name="plotter" output="screen">
+  <node if="$(arg plot_log)" type="plotter" pkg="rktl_autonomy" name="plotter" output="screen">
     <rosparam command="load" file="$(find rktl_autonomy)/config/rocket_league.yaml"/>
     <remap from="~log" to="rocket_league_agent/log"/>
   </node>

@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Real-time evaluation of the agent trained for the Rocket League project.
+"""Real-time evaluation of the agent trained on the snake environment.
 License:
   BSD 3-Clause License
   Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
-from rktl_autonomy import RocketLeagueInterface
+from rktl_autonomy import SnakeInterface
 from stable_baselines3 import PPO
 from os.path import expanduser
 import rospy
 
 # create interface (and init ROS)
-env = RocketLeagueInterface(eval=True)
+env = SnakeInterface(eval=True)
 
 # load the model
 weights = expanduser(rospy.get_param('~weights'))

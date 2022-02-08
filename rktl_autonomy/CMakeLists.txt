@@ -12,6 +12,9 @@ catkin_package()
 
 # Tests
 if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+  roslaunch_add_file_check(launch/cartpole)
+  roslaunch_add_file_check(launch/rocket_league)
   find_package(rostest REQUIRED)
   add_rostest(test/test_step.test)
 endif()
