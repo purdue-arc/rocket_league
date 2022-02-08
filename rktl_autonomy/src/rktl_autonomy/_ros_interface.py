@@ -7,7 +7,7 @@ License:
 
 from abc import abstractmethod
 from threading import Condition
-import time, uuid, socket, os
+import time, uuid, socket, os, random
 
 from gym import Env
 
@@ -64,6 +64,7 @@ class ROSInterface(Env):
                     with socket.socket() as sock:
                         sock.bind(('localhost', 0))
                         port = sock.getsockname()[1]
+                    time.sleep(2.0*random.random())
             # launch the training ROS network
             ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_id)
