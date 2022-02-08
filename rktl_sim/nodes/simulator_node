@@ -88,7 +88,8 @@ class SimulatorROS(object):
         self.sim = simulator.Sim(
             urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, fl)
 
-        self.lock = Lock()
+        self.cmd_lock = Lock()
+        self.reset_lock = Lock()
         self.throttle_cmd = 0.
         self.steering_cmd = 0.
         self.last_time = None
@@ -125,37 +126,37 @@ class SimulatorROS(object):
                 'no urdf file exists at path {}'.format(param))
 
     def set_throttle(self, throttle_req):
-        self.lock.acquire()
+        self.cmd_lock.acquire()
         self.throttle_cmd = throttle_req.data
         resp = SetSimThrottleResponse()
         resp.ok = True
         resp.stamp = rospy.get_rostime()
-        self.lock.release()
+        self.cmd_lock.release()
         return resp
 
     def throttle_cb(self, throttle_msg):
-        self.lock.acquire()
+        self.cmd_lock.acquire()
         self.throttle_cmd = throttle_msg.data
-        self.lock.release()
+        self.cmd_lock.release()
 
     def steering_cb(self, steering_msg):
-        self.lock.acquire()
+        self.cmd_lock.acquire()
         self.steering_cmd = steering_msg.data
-        self.lock.release()
+        self.cmd_lock.release()
 
     def reset_cb(self, _):
         """Resets simulator."""
-        self.lock.acquire()
+        self.reset_lock.acquire()
         self.sim.reset()
         self.throttle_cmd = 0.
         self.steering_cmd = 0.
         self.last_time = None
-        self.lock.release()
+        self.reset_lock.release()
         return EmptyResponse()
 
     def loop_once(self):
         """Main loop."""
-        self.lock.acquire()
+        self.reset_lock.acquire()
         now = rospy.Time.now()
         if self.last_time is not None and self.last_time != now:
             # Iterate sim one step
@@ -171,7 +172,11 @@ class SimulatorROS(object):
                 status.status = MatchStatus.ONGOING
             self.status_pub.publish(status)
 
-            self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
+            self.cmd_lock.acquire()
+            throttle_cmd = self.throttle_cmd
+            steering_cmd = self.steering_cmd
+            self.cmd_lock.release()
+            self.sim.step(throttle_cmd, steering_cmd, delta_t)
 
             # Publish ball odometry
             ball_msg = Odometry()
@@ -216,7 +221,7 @@ class SimulatorROS(object):
             self.car_pub.publish(car_msg)
 
         self.last_time = now
-        self.lock.release()
+        self.reset_lock.release()
 
 if __name__ == "__main__":
     SimulatorROS()
