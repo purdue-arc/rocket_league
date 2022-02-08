@@ -14,9 +14,9 @@ fi
 docker run --rm \
     $TTY_OPTS \
     -e USER \
-    -e DISPLAY=unix$DISPLAY \
+    -e DISPLAY \
     -e NVIDIA_DRIVER_CAPABILITIES=all \
-    -v $XAUTHORITY:/home/$USER/.Xauthority \
+    -v $XAUTHORITY:/home/$USER/.Xauthority:ro \
     -v $WS_DIR:/home/$USER/catkin_ws \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v ~/.gitconfig:/home/$USER/.gitconfig:ro \
