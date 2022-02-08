@@ -1,9 +1,6 @@
 <?xml version="1.0"?> 
 <robot name="simplecar">
     <!-- Colors --> 
-    <material name="black"> 
-        <color rgba="0 0 0 1"/>
-    </material>
     <material name="blue"> 
         <color rgba="0.6 0.7 0.8 1"/>
     </material>
@@ -51,7 +48,7 @@
 
     <joint name="x_joint" type="prismatic">
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <axis xyz="0 1 0" />
+        <axis xyz="1 0 0" />
         <parent link="x_link" />
         <child link="w_link" />
         <limit effort="500" velocity="500.0" lower="-100.0" upper="100.0" />
@@ -66,7 +63,7 @@
 
     <joint name="y_joint" type="prismatic">
         <origin xyz="0 0 0" rpy="0 0 0" />
-        <axis xyz="1 0 0" />
+        <axis xyz="0 1 0" />
         <parent link="base_link" />
         <child link="x_link" />
         <limit effort="500" velocity="500.0" lower="-100.0" upper="100.0" />
