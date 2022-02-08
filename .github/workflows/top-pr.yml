@@ -30,7 +30,7 @@ jobs:
     name: Catkin build and test using PR tagged Docker image
     needs: [changes, docker]
     if: needs.changes.outputs.docker == 'true'
-    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@docker-refactor
+    uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
     with:
       tag: ${{ github.event.number }}
   catkin_latest:
