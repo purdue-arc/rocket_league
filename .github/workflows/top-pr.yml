@@ -20,7 +20,7 @@ jobs:
     name: Rebuild Docker image and push to PR tag
     needs: changes
     if: needs.changes.outputs.docker == 'true'
-    uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@docker-refactor
+    uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
     with:
       tag: ${{ github.event.number }}
     secrets:
