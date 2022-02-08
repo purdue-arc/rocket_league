@@ -37,14 +37,10 @@ class Car(object):
         p.resetBasePositionAndOrientation(
             self.id, [0., 0., pos[2]], p.getQuaternionFromEuler([0., 0., 0.]))
 
-        self.y_joint_id = 0
-        self.x_joint_id = 1
-        self.w_joint_id = 2
-
-        orient = self.orientToLocal(orient)
-        p.resetJointState(self.id, self.x_joint_id, targetValue=pos[0])
-        p.resetJointState(self.id, self.y_joint_id, targetValue=pos[1])
-        p.resetJointState(self.id, self.w_joint_id, targetValue=orient[2])
+        self.joint_ids = (1, 0, 2) # X, Y, W
+        p.resetJointState(self.id, self.joint_ids[0], targetValue=pos[0])
+        p.resetJointState(self.id, self.joint_ids[1], targetValue=pos[1])
+        p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
 
     def step(self, cmd, contact, dt):
         des_throttle = cmd[0]
@@ -80,24 +76,19 @@ class Car(object):
 
         beta = math.atan(
             (self._length_r) * math.tan(self._steering_angle) / self._length)
-        x_vel = throttle * math.sin(heading + beta)
-        y_vel = throttle * math.cos(heading + beta)
+        x_vel = throttle * math.cos(heading + beta)
+        y_vel = throttle * math.sin(heading + beta)
         w = throttle * math.tan(self._steering_angle) * \
             math.cos(beta) / self._length
 
-        p.setJointMotorControl2(self.id, self.x_joint_id,
-            controlMode=p.VELOCITY_CONTROL, targetVelocity=x_vel, force=5000)
-        p.setJointMotorControl2(self.id, self.y_joint_id,
-            controlMode=p.VELOCITY_CONTROL, targetVelocity=y_vel, force=5000)
-        p.setJointMotorControl2(self.id, self.w_joint_id,
-            controlMode=p.VELOCITY_CONTROL, targetVelocity=w, force=5000)
+        p.setJointMotorControlArray(self.id, self.joint_ids,
+            targetVelocities=(x_vel, y_vel, w),
+            controlMode=p.VELOCITY_CONTROL, forces=(5000, 5000, 5000))
 
-    def orientToLocal(self, orient):
-        return (orient[0], orient[1], orient[2] + (math.pi / 2.0))
 
     def getPose(self):
         pos = p.getLinkState(self.id, self.body_link_id)[0]
-        heading = p.getJointState(self.id, self.w_joint_id)[0]
+        heading = p.getJointState(self.id, self.joint_ids[2])[0]
         return (pos, p.getQuaternionFromEuler((0.0, 0.0, heading)))
 
     def getVelocity(self):
@@ -116,7 +107,6 @@ class Car(object):
         self._steering_angle = 0
         self._throttle_state = np.zeros((2,), dtype=np.float)
 
-        orient = self.orientToLocal(orient)
-        p.resetJointState(self.id, self.x_joint_id, targetValue=pos[0])
-        p.resetJointState(self.id, self.y_joint_id, targetValue=pos[1])
-        p.resetJointState(self.id, self.w_joint_id, targetValue=orient[2])
+        p.resetJointState(self.id, self.joint_ids[0], targetValue=pos[0])
+        p.resetJointState(self.id, self.joint_ids[1], targetValue=pos[1])
+        p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
