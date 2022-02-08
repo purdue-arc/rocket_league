@@ -16,7 +16,7 @@ from collections import deque
 from threading import Lock
 from math import sin, cos
 
-class OdomEstimator(object):
+class MeanOdomFilter(object):
     """Class to smooth pose estimations and predict velocity."""
     def __init__(self):
         rospy.init_node('averaging_odom')
@@ -26,7 +26,7 @@ class OdomEstimator(object):
         self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
 
         # variables
-        self.buffer = deque(maxlen=rospy.get_param('buffer_size'))
+        self.buffer = deque(maxlen=rospy.get_param('buffer_size', 3))
         self.lock = Lock()
 
         # pubs / subs
@@ -73,7 +73,7 @@ class OdomEstimator(object):
 
         with self.lock:
             # sum all positions and velocities in buffer
-            prev_t, prev_x, prev_y, prev_yaw = None
+            prev_t = None
             for t, x, y, yaw in self.buffer:
                 avg_x += x
                 avg_y += y
@@ -122,3 +122,6 @@ class OdomEstimator(object):
         odom.twist.twist.angular.y = 0
         odom.twist.twist.angular.z = avg_omega
         self.odom_pub.publish(odom)
+
+if __name__ == "__main__":
+    MeanOdomFilter()
