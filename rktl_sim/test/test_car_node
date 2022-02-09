@@ -39,9 +39,9 @@ class TestCar(unittest.TestCase):
     cls.time_received = msg.header.stamp
 
   def test_throttle_resp(self):
-    self.run_throttle_resp(0.25, 1.0, 1.1431, 0.15)
+    self.run_throttle_resp(0.25, 1.03, 1.1431, 0.15)
     rospy.sleep(rospy.Duration(0.5))
-    self.run_throttle_resp(0.5, 1.0, 2.2862, 0.2)
+    self.run_throttle_resp(0.5, 1.03, 2.2862, 0.15)
 
   def run_throttle_resp(self, i_throttle, i_wait, e_dist, e_err):
     try:
