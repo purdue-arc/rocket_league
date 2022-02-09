@@ -48,17 +48,6 @@ To run: `roslaunch camera_tracking focus_assist.launch`
 ## Configuration files
 Configuration files are located in the `config` directory. They contain configuration information for different cameras, inculding sensor information used by the GenICam standard and distortion/rectification/rectifcation matrices.
 
-Input/Output parameters:
-- `guid`: The name of the camera, as seen by aravis/GenICam. The output of
-  running `arv-tool-0.6` will suffice.
-- `publish_tf`: Whether or not transformation data should be published.
-- `tf_publish_rate`: The rate at which transformation data should be
-  published.
-
-GenICam settings (if ommited, values will be detected automatically). See the
-[GenICam SNFC](https://www.emva.org/wp-content/uploads/GenICam_SFNC_2_0_0.pdf)
-for more infomtaion.
-
 Camera Calibration Info. Gotten from running
 `rosrun camera_calibration cameracalibrator.py` and copy/pasting the
 contents of the resulting `.yml` file into this config file. See the
