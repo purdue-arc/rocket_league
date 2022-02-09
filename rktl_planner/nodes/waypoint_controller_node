@@ -11,14 +11,14 @@ import rospy
 import numpy as np
 import math
 import time
-from std_msgs.msg import Float32, Float64
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
+from std_msgs.msg import Float32
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 
 # Local modules
 import local_planner.convert as convert
 import local_planner.pure_pursuit as pursuit
-from rktl_msgs.msg import Target, Path, PathError, Waypoint
+from rktl_msgs.msg import Path, PathError
 
 
 class WaypointControllerROS(object):

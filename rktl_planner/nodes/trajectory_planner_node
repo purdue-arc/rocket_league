@@ -7,15 +7,12 @@ License:
 """
 import rospy
 
-import pdb
-from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose, Twist
+from geometry_msgs.msg import Pose, Twist
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float64, Empty, Float32
+from std_msgs.msg import Float32
 import numpy as np
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
-from rktl_msgs.msg import Target, Path, PathError, Waypoint
-from matplotlib import pyplot as plt
-
+from rktl_msgs.msg import Target, Path, Waypoint
 
 class TrajectoryPlannerROS(object):
     """A node to plan local car trajectories."""
@@ -125,7 +122,6 @@ class TrajectoryPlannerROS(object):
         # Get bot velocity vector and normalize it for future calculations
         self.bot_vel = bot_odom_message.twist.twist
         linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])
-        mag = np.linalg.norm(linear_vel)
         self.bot_normalized_vel = normalize(linear_vel)
 
         # Get bot's init vector heading through orientation
@@ -233,7 +229,6 @@ class TrajectoryPlannerROS(object):
         """Converts points from list or numpy array to pose array and sets twists as well"""
 
         # add extra points for stoppin
-        point = np.vstack((np.array([self.bot_pose.position.x, self.bot_pose.position.y]), points))
         if self.backwards:
             bot_position = np.array([self.bot_pose.position.x, self.bot_pose.position.y])
             bot_linear_vel = np.array([self.bot_vel.linear.x, self.bot_vel.linear.y])

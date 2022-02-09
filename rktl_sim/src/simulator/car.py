@@ -9,7 +9,6 @@ License:
 import pybullet as p
 import math
 import numpy as np
-import time
 
 class Car(object):
     def __init__(self, carID, length, pos, orient):
@@ -57,9 +56,8 @@ class Car(object):
             self._collision_started = False
 
         # Compute 2nd-order response of throttle
-        throttle = self._C @ self._throttle_state
-        throttle_dt = self._A @ self._throttle_state + \
-            self._B @ np.array([des_throttle])
+        throttle = (self._C @ self._throttle_state)[0]
+        throttle_dt = self._A @ self._throttle_state + self._B @ np.array([des_throttle])
         self._throttle_state += throttle_dt * dt
 
         # Compute 0th-order response of steering

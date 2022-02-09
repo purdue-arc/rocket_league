@@ -8,77 +8,47 @@ License:
 
 import unittest
 import rospy
-import sys
-import time
-from nav_msgs.msg import Odometry
-from std_msgs.msg import *
-from std_srvs.srv import Empty
-from rktl_sim.srv import SetSimEffort, SetSimEffortRequest
+import simulator
 
 class TestCar(unittest.TestCase):
-  set_effort = None
-  odom_cb = None
-  sim_reset = None
-  x_pos = 0.0
-  time_received = None 
-
   @classmethod
   def setUpClass(cls):
     rospy.init_node('test_car_node')
 
-    rospy.wait_for_service('set_sim_effort')
-    cls.set_effort = rospy.ServiceProxy('set_sim_effort', SetSimEffort)
-    rospy.Subscriber('car0/odom', Odometry, cls.car_odom_cb)
+    field_setup = {}
+    field_setup["car"] = {
+      "pos": (0.0, 0.0, 0.06),
+      "orient": (0.0, 0.0, 0.0),
+    }
 
-    rospy.wait_for_service('sim_reset')
-    cls.sim_reset = rospy.ServiceProxy('sim_reset', Empty)
-  
-  @classmethod
-  def car_odom_cb(cls, msg):
-    cls.x_pos = msg.pose.pose.position.x
-    cls.time_received = msg.header.stamp
+    urdf_paths = {}
+    urdf_paths["car"] = rospy.get_param('~CAR_URDF_PATH')
+    urdf_paths["plane"] = rospy.get_param('~FLOOR_URDF')
+
+    # Creating physics simulator
+    cls.sim = simulator.Sim(
+        urdf_paths, field_setup, {}, 0.0, False)
 
   def test_throttle_resp(self):
-    self.run_throttle_resp(0.25, 1.03, 1.1431, 0.15)
+    self.run_throttle_resp(0.25, 1.00, 1.5357, 0.04)
     rospy.sleep(rospy.Duration(0.5))
-    self.run_throttle_resp(0.5, 1.03, 2.2862, 0.15)
+    self.run_throttle_resp(0.5, 1.00, 3.0714, 0.04)
 
-  def run_throttle_resp(self, i_throttle, i_wait, e_dist, e_err):
-    try:
-      self.set_effort(SetSimEffortRequest(0.0, 0.0))
-    except rospy.ServiceException as _:
-      self.fail('failed to set throttle')
+  def run_throttle_resp(self, i_throttle, i_wait, e_vel, e_err):
+    self.sim.reset()
+    rospy.sleep(rospy.Duration(0.2))
 
-    rospy.sleep(rospy.Duration(1.0))
+    freq = 35.0
+    dt = 1/freq
+    for _ in range(int(i_wait * freq)+1):
+      self.sim.step(i_throttle, 0.0, dt)
 
-    try:
-      self.sim_reset()
-    except rospy.ServiceException as _:
-      self.fail('failed to reset sim')
-
-    while self.x_pos != -2.3:
-      rospy.sleep(rospy.Duration.from_sec(0.01))
-
-    try:
-      start_x_pos = self.x_pos
-      resp = self.set_effort(SetSimEffortRequest(i_throttle, 0.0))
-      start_time = resp.stamp
-
-      dur = rospy.Duration(i_wait)
-      rospy.sleep(dur)
-      while (self.time_received - start_time) < dur:
-        rospy.sleep(rospy.Duration.from_sec(0.01))
-      end_x_pos = self.x_pos
-
-      dist = end_x_pos - start_x_pos
-      self.assertLess(dist, e_dist + e_err, 'car moving too fast: ' +
-        f'expected distance {e_dist}, actual distance {dist}')
-    
-      self.assertGreater(dist, e_dist - e_err, f'car moving too slow: ' +
-        f'expected distance {e_dist}, actual distance {dist}')
+    vel = self.sim.getCarVelocity()[0][0]
+    self.assertLess(vel, e_vel + e_err, 'car moving too fast: ' +
+      f'expected velocity {e_vel}, actual velocity {vel}')
   
-    except rospy.ServiceException as _:
-      self.fail('failed to set throttle')
+    self.assertGreater(vel, e_vel - e_err, 'car moving too slow: ' +
+      f'expected velocity {e_vel}, actual velocity {vel}')
 
 if __name__ == '__main__':
   import rostest

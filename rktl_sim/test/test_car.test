@@ -1,44 +1,11 @@
 <launch>
-    <!-- Testing Params -->
-    <rosparam>
-        FRAME_ID: "map"
-
-        FIELD_WIDTH: 3.5
-        FIELD_LENGTH: 5
-        WALL_THICKNESS: 0.25
-        GOAL_WIDTH: 1
-        BALL_RADIUS: 0.0508
-        CAR_WIDTH: 0.0762
-        CAR_LENGTH: 0.2032
-
-        CAR_INIT: {"pos": [-2.3, 0.0, 0.06], "orient": [0.0, 0.0, 0.0] }
-        BALL_INIT: [1.0, 1.0, 0.06]
-        SPEED_INIT: 0.0
-    </rosparam>
-
-    <!-- Simulation -->
-    <arg name="pybullet_render" default="false"/>
-
     <!-- URDF paths -->
-    <arg name="ball_urdf_path" default="$(find rktl_sim)/urdf/ball.urdf" />
     <arg name="car_urdf_path" default="$(find rktl_sim)/urdf/car.urdf" />
-    <arg name="goal_urdf_path" default="$(find rktl_sim)/urdf/goal.urdf" />
-    <arg name="sidewall_urdf_path" default="$(find rktl_sim)/urdf/sidewall.urdf" />
-    <arg name="backwall_urdf_path" default="$(find rktl_sim)/urdf/backwall.urdf" />
     <arg name="floor_urdf_path" default="$(find rktl_sim)/urdf/plane.urdf" />
 
-    <!-- Launch simulation node -->
-    <node pkg="rktl_sim" type="simulator_node" name="simulator_node" output="screen" required="true">
-        <param name="RATE" value="35" />
-        <param name="RENDER_ENABLED" value="$(arg pybullet_render)" />
-        <param name="BALL_URDF_PATH" value="$(arg ball_urdf_path)" />
-        <param name="CAR_URDF_PATH" value="$(arg car_urdf_path)" />
-        <param name="GOAL_URDF_PATH" value="$(arg goal_urdf_path)" />
-        <param name="SIDEWALL_URDF_PATH" value="$(arg sidewall_urdf_path)" />
-        <param name="BACKWALL_URDF_PATH" value="$(arg backwall_urdf_path)" />
-        <param name="FLOOR_URDF" value="$(arg floor_urdf_path)" />
-    </node>
-
     <!-- Test Cases -->
-    <test test-name="test_car" name="test_car_node" pkg="rktl_sim" type="test_car_node" />
+    <test test-name="test_car" name="test_car_node" pkg="rktl_sim" type="test_car_node" >
+        <param name="FLOOR_URDF" value="$(arg floor_urdf_path)" />
+        <param name="CAR_URDF_PATH" value="$(arg car_urdf_path)" />
+    </test>
 </launch>
