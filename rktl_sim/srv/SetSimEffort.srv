@@ -1,5 +1,0 @@
-float32 throttle
-float32 steering
----
-time stamp
-bool ok
