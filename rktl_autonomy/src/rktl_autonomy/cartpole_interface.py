@@ -19,37 +19,21 @@ import numpy as np
 from enum import IntEnum, unique, auto
 from math import pi
 
-
 @unique
 class CartpoleActions(IntEnum):
     """Possible actions for deep learner."""
-
     LEFT = 0
     RIGHT = auto()
     SIZE = auto()
 
-
 class CartpoleInterface(ROSInterface):
     """ROS interface for the cartpole game."""
-
-    def __init__(
-        self,
-        eval=False,
-        launch_file=["rktl_autonomy", "cartpole_train.launch"],
-        launch_args=[],
-        run_id=None,
-    ):
-        super().__init__(
-            node_name="cartpole_agent",
-            eval=eval,
-            launch_file=launch_file,
-            launch_args=launch_args,
-            run_id=run_id,
-        )
+    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'cartpole_train.launch'], launch_args=[], run_id=None):
+        super().__init__(node_name='cartpole_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
         # Publishers
-        self._action_pub = rospy.Publisher("cartpole/action", Int32, queue_size=1)
-        self._reset_srv = rospy.ServiceProxy("cartpole/reset", Empty)
+        self._action_pub = rospy.Publisher('cartpole/action', Int32, queue_size=1)
+        self._reset_srv = rospy.ServiceProxy('cartpole/reset', Empty)
 
         # State variables
         self._obs = None
@@ -57,9 +41,9 @@ class CartpoleInterface(ROSInterface):
         self._done = None
 
         # Subscribers
-        rospy.Subscriber("cartpole/observation", Float32MultiArray, self._obs_cb)
-        rospy.Subscriber("cartpole/done", Bool, self._done_cb)
-        rospy.Subscriber("cartpole/reward", Float32, self._reward_cb)
+        rospy.Subscriber('cartpole/observation', Float32MultiArray, self._obs_cb)
+        rospy.Subscriber('cartpole/done', Bool, self._done_cb)
+        rospy.Subscriber('cartpole/reward', Float32, self._reward_cb)
 
     @property
     def action_space(self):
@@ -82,10 +66,9 @@ class CartpoleInterface(ROSInterface):
     def _has_state(self):
         """Determine if the new state is ready."""
         return (
-            self._obs is not None
-            and self._reward is not None
-            and self._done is not None
-        )
+            self._obs is not None and
+            self._reward is not None and
+            self._done is not None)
 
     def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""

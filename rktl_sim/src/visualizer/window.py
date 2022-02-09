@@ -22,20 +22,22 @@ class Window(object):
 
     class ShutdownError(Exception):
         """Exception for when pygame is shut down"""
-
         pass
 
     def __init__(self, map_width, map_length, wall_thickness):
         # Support for 1080p monitors
-        self.scaling = 1080 * 0.5 / (map_length + (wall_thickness * 2.0))
+        self.scaling = 1080 * 0.5 / (map_length + (wall_thickness*2.))
 
-        self.window_length = int((map_length + (wall_thickness * 2.0)) * self.scaling)
-        self.window_width = int((map_width + (wall_thickness * 2.0)) * self.scaling)
+        self.window_length = int(
+            (map_length + (wall_thickness*2.)) * self.scaling)
+        self.window_width = int(
+            (map_width + (wall_thickness*2.)) * self.scaling)
 
         self.assets = {}
 
         pygame.display.init()
-        self._screen = pygame.display.set_mode((self.window_width, self.window_length))
+        self._screen = pygame.display.set_mode(
+            (self.window_width, self.window_length))
 
     def createAsset(self, id, width, length, initPos=None, imgPath=None, color=None):
         width = int(width * self.scaling)
@@ -51,8 +53,10 @@ class Window(object):
 
     def updateAssetPos(self, id, x, y):
         # Adjust for simulation coordinate frame
-        x = self.window_length - (int(x * self.scaling) + (self.window_length // 2))
-        y = self.window_width - (int(y * self.scaling) + (self.window_width // 2))
+        x = self.window_length - \
+            (int(x * self.scaling) + (self.window_length // 2))
+        y = self.window_width - \
+            (int(y * self.scaling) + (self.window_width // 2))
         self.assets[id].setPos(y, x)
 
     def updateAssetAngle(self, id, angle):

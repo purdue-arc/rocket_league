@@ -5,7 +5,6 @@ License:
   All rights reserved.
 """
 
-
 class PIDController(object):
     """A very basic PID controller."""
 

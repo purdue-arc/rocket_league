@@ -41,9 +41,8 @@ def pose_to_array(msg):
     """Convert pose msg to numpy arrays."""
 
     p = np.array([msg.position.x, msg.position.y, msg.position.z])
-    q = np.array(
-        [msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w]
-    )
+    q = np.array([msg.orientation.x, msg.orientation.y,
+                  msg.orientation.z, msg.orientation.w])
 
     return p, q
 

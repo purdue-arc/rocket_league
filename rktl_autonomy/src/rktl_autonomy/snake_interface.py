@@ -21,49 +21,33 @@ from tf.transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
 from math import pi
 
-
 @unique
 class SnakeActions(IntEnum):
     """Possible actions for deep learner."""
-
     FORWARD = 0
     LEFT = auto()
     RIGHT = auto()
     SIZE = auto()
 
-
 class SnakeInterface(ROSInterface):
     """ROS interface for the snake game."""
-
-    def __init__(
-        self,
-        eval=False,
-        launch_file=["rktl_autonomy", "snake_train.launch"],
-        launch_args=[],
-        run_id=None,
-    ):
-        super().__init__(
-            node_name="snake_agent",
-            eval=eval,
-            launch_file=launch_file,
-            launch_args=launch_args,
-            run_id=run_id,
-        )
+    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'snake_train.launch'], launch_args=[], run_id=None):
+        super().__init__(node_name='snake_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
         # Constants
-        self._NUM_SEGMENTS = rospy.get_param("~num_segments", 7)
-        self._FIELD_SIZE = rospy.get_param("~field_size", 10)
-        self._ANGULAR_VELOCITY = rospy.get_param("~control/max_angular_velocity", 3.0)
-        self._LINEAR_VELOCITY = rospy.get_param("~control/max_linear_velocity", 3.0)
-        self._DEATH_REWARD = rospy.get_param("~reward/death", 0.0)
-        self._GOAL_REWARD = rospy.get_param("~reward/goal", 50.0)
-        self._DISTANCE_REWARD = rospy.get_param("~reward/distance", 0.0)
-        self._CONSTANT_REWARD = rospy.get_param("~reward/constant", 0.0)
-        self._MAX_TIME = rospy.get_param("~max_episode_time", 30.0)
+        self._NUM_SEGMENTS = rospy.get_param('~num_segments', 7)
+        self._FIELD_SIZE = rospy.get_param('~field_size', 10)
+        self._ANGULAR_VELOCITY = rospy.get_param('~control/max_angular_velocity', 3.0)
+        self._LINEAR_VELOCITY = rospy.get_param('~control/max_linear_velocity', 3.0)
+        self._DEATH_REWARD = rospy.get_param('~reward/death', 0.0)
+        self._GOAL_REWARD = rospy.get_param('~reward/goal', 50.0)
+        self._DISTANCE_REWARD = rospy.get_param('~reward/distance', 0.0)
+        self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
+        self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
 
         # Publishers
-        self._action_pub = rospy.Publisher("snake/cmd_vel", Twist, queue_size=1)
-        self._reset_srv = rospy.ServiceProxy("snake/reset", Empty)
+        self._action_pub = rospy.Publisher('snake/cmd_vel', Twist, queue_size=1)
+        self._reset_srv = rospy.ServiceProxy('snake/reset', Empty)
 
         # State variables
         self._pose = None
@@ -74,10 +58,10 @@ class SnakeInterface(ROSInterface):
         self._start_time = None
 
         # Subscribers
-        rospy.Subscriber("snake/pose", PoseArray, self._pose_cb)
-        rospy.Subscriber("snake/goal", PointStamped, self._goal_cb)
-        rospy.Subscriber("snake/score", Int32, self._score_cb)
-        rospy.Subscriber("snake/active", Bool, self._alive_cb)
+        rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
+        rospy.Subscriber('snake/goal', PointStamped, self._goal_cb)
+        rospy.Subscriber('snake/score', Int32, self._score_cb)
+        rospy.Subscriber('snake/active', Bool, self._alive_cb)
 
     @property
     def action_space(self):
@@ -87,11 +71,10 @@ class SnakeInterface(ROSInterface):
     @property
     def observation_space(self):
         """The Space object corresponding to valid observations."""
-        locations = 2 * (1 + self._NUM_SEGMENTS)
+        locations = 2*(1+self._NUM_SEGMENTS)
         return Box(
-            low=np.array([-pi] + locations * [0], dtype=np.float32),
-            high=np.array([pi] + locations * [self._FIELD_SIZE], dtype=np.float32),
-        )
+            low=np.array([-pi] + locations*[0], dtype=np.float32),
+            high=np.array([pi] + locations*[self._FIELD_SIZE], dtype=np.float32))
 
     def _reset_env(self):
         """Reset environment for a new training episode."""
@@ -106,11 +89,10 @@ class SnakeInterface(ROSInterface):
     def _has_state(self):
         """Determine if the new state is ready."""
         return (
-            self._pose is not None
-            and self._goal is not None
-            and self._score is not None
-            and self._alive is not None
-        )
+            self._pose is not None and
+            self._goal is not None and
+            self._score is not None and
+            self._alive is not None)
 
     def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
@@ -136,10 +118,8 @@ class SnakeInterface(ROSInterface):
         if self._prev_time is not None:
             reward += (time - self._prev_time).to_sec() * self._CONSTANT_REWARD
             dist_sq = np.sum(np.square(pose[1:3] - goal))
-            norm_dist = dist_sq / (self._FIELD_SIZE**2)
-            reward += (
-                (time - self._prev_time).to_sec() * self._DISTANCE_REWARD * norm_dist
-            )
+            norm_dist = dist_sq / (self._FIELD_SIZE ** 2)
+            reward += (time - self._prev_time).to_sec() * self._DISTANCE_REWARD * norm_dist
         self._prev_time = time
 
         if self._prev_score is not None:
@@ -157,7 +137,7 @@ class SnakeInterface(ROSInterface):
             done = True
 
         # info dict
-        info = {"score": self._score}
+        info = {"score" : self._score}
 
         return (observation, reward, done, info)
 
@@ -178,23 +158,18 @@ class SnakeInterface(ROSInterface):
         """Callback for poses of each segment of snake."""
         assert len(pose_msg.poses) == self._NUM_SEGMENTS
 
-        yaw, __, __ = euler_from_quaternion(
-            (
-                pose_msg.poses[0].orientation.x,
-                pose_msg.poses[0].orientation.y,
-                pose_msg.poses[0].orientation.z,
-                pose_msg.poses[0].orientation.w,
-            )
-        )
+        yaw, __, __ = euler_from_quaternion((
+            pose_msg.poses[0].orientation.x,
+            pose_msg.poses[0].orientation.y,
+            pose_msg.poses[0].orientation.z,
+            pose_msg.poses[0].orientation.w))
 
         self._pose = tuple(
-            [yaw]
-            + [
-                func(pose_msg.poses[i])
-                for i in range(self._NUM_SEGMENTS)
-                for func in (lambda pose: pose.position.x, lambda pose: pose.position.y)
-            ]
-        )
+            [yaw] +
+            [func(pose_msg.poses[i]) for i in range(self._NUM_SEGMENTS)
+                for func in (
+                    lambda pose: pose.position.x,
+                    lambda pose: pose.position.y)])
         with self._cond:
             self._cond.notify_all()
 
