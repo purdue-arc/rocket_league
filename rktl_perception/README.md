@@ -12,6 +12,23 @@ Takes a rolling average of odom data to reduce noise.
 Params:
 - `buffer_size` (int): The number of datapoints to average. Default: `10`
 
+### `ball_detection`
+Uses color thresholding to find a vector pointing from the camera in the direction of the ball
+
+Params:
+- `publishThresh` (bool): Whether or not to publish the image after thresholding is applied. Default: `false`
+- `minHue` (int): The lower value of the hue to threshold on a 0 - 255 scale. Default: `60`
+- `minSat` (int): The lower value of the saturation to threshold on a 0 - 255 scale. Default: `135`
+- `minVib` (int): The lower value of the vibrance to threshold on a 0 - 255 scale. Default: `50`
+- `maxHue` (int): The upper value of the hue to threshold on a 0 - 255 scale. Default: `150`
+- `maxSat` (int): The upper value of the saturation to threshold on a 0 - 255 scale. Default: `225`
+- `maxVib` (int): The upper value of the vibrance to threshold on a 0 - 255 scale. Default: `255`
+
+### `focus_vis`
+Publishes a version of `image_color_rect` that has had Canny Edge Detection applied.
+
+### `localizer`
+Calculates the location of all objects in the cameras' view.
 
 ## Launch files
 ### `camera.launch`
