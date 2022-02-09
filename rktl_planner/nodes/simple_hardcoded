@@ -8,13 +8,12 @@ License:
 
 import rospy
 
-import pdb
-from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose, Twist
+from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float32, Empty, Float64
 import numpy as np
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
-from rktl_msgs.msg import Target, Path, PathError, Waypoint
+from tf.transformations import quaternion_from_euler
+from rktl_msgs.msg import Target, PathError
 
 
 class HighLevelPlannerROS(object):
@@ -81,9 +80,6 @@ class HighLevelPlannerROS(object):
         time_float = self.target_time
 
         # turn velocity into proper type
-        linear_x = Float64()
-        linear_y = Float64()
-        linear_z = Float64()
         angular_x = Float64()
         angular_y = Float64()
         angular_z = Float64()

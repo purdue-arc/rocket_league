@@ -9,8 +9,6 @@ License:
 import pybullet as p
 import math
 import numpy as np
-import time
-
 
 class Car(object):
     def __init__(self, carID, length, pos, orient):

@@ -47,7 +47,7 @@ class TestCar(unittest.TestCase):
     self.assertLess(vel, e_vel + e_err, 'car moving too fast: ' +
       f'expected velocity {e_vel}, actual velocity {vel}')
   
-    self.assertGreater(vel, e_vel - e_err, f'car moving too slow: ' +
+    self.assertGreater(vel, e_vel - e_err, 'car moving too slow: ' +
       f'expected velocity {e_vel}, actual velocity {vel}')
 
 if __name__ == '__main__':

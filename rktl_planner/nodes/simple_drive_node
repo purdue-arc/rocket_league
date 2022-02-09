@@ -8,10 +8,7 @@ License:
 
 # 3rd party modules
 import rospy
-import numpy
-import math
-from std_msgs.msg import Float32, Float64
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
+from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
 
