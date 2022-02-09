@@ -135,7 +135,10 @@ class VisualizerROS(object):
         )
 
         while not rospy.is_shutdown():
-            self.window.show()
+            try:
+                self.window.show()
+            except self.window.ShutdownError:
+                exit()
             try:
                 rate.sleep()
             except rospy.ROSInterruptException:
