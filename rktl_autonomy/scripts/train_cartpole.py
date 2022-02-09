@@ -10,19 +10,21 @@ from rktl_autonomy import CartpoleInterface
 from stable_baselines3 import PPO
 import gym, time
 
+
 def show_progress(model, episodes=5):
-   env = gym.make("CartPole-v0")
-   obs = env.reset()
-   episodes = 0
-   while episodes < 5:
-      action, __ = model.predict(obs, deterministic=True)
-      obs, __, done, __ = env.step(action)
-      env.render()
-      time.sleep(0.01)
-      if done:
-         obs = env.reset()
-         episodes += 1
-   env.close()
+    env = gym.make("CartPole-v0")
+    obs = env.reset()
+    episodes = 0
+    while episodes < 5:
+        action, __ = model.predict(obs, deterministic=True)
+        obs, __, done, __ = env.step(action)
+        env.render()
+        time.sleep(0.01)
+        if done:
+            obs = env.reset()
+            episodes += 1
+    env.close()
+
 
 env = CartpoleInterface()
 model = PPO("MlpPolicy", env, verbose=1)
