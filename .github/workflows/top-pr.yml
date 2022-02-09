@@ -4,29 +4,17 @@ on:
   pull_request:
     branches: ['main']
 
-
-
 jobs:
-  run-black:
-    name: Run black formatter
+  pyflakes:
+    name: runner / pyflakes
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v2
+      - name: pyflakes
+        uses: reviewdog/action-pyflakes@master
         with:
-          python-version: 3.8
-
-      - name: Install black
-        run: pip install black
-
-      - name: Run black
-        uses: wearerequired/lint-action@v1
-        with:
-          black: true
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-check # Change reporter.
   changes:
     name: Check for changes to files in docker directory
     runs-on: ubuntu-latest
