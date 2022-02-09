@@ -58,21 +58,24 @@ Float32 THROTTLE_LIMIT = 1;
 int THROTTLE_MAX_FORWARD = 2000;
 int THROTTLE_ZERO = 1500;
 int THROTTLE_MAX_BACKWARD = 1000;
-int STEERING_MAX_RIGHT = 2000;
-int STEERING_ZERO = 1500;
-int STEERING_MAX_LEFT = 1000;
-int CAR0_TRIM = 0;
-int CAR1_TRIM = 0;
-int CAR2_TRIM = 0;
-int CAR3_TRIM = 0;
-int CAR4_TRIM = 0;
-int CAR5_TRIM = 0;
-int CAR0_STEERING = 1;
-int CAR1_STEERING = 1;
-int CAR2_STEERING = 1;
-int CAR3_STEERING = 1;
-int CAR4_STEERING = 1;
-int CAR5_STEERING = 1;
+int CAR0_MAX_LEFT = 1000;
+int CAR0_CENTER = 1500;
+int CAR0_MAX_RIGHT = 2000;
+int CAR1_MAX_LEFT = 1000;
+int CAR1_CENTER = 1500;
+int CAR1_MAX_RIGHT = 2000;
+int CAR2_MAX_LEFT = 1000;
+int CAR2_CENTER = 1500;
+int CAR2_MAX_RIGHT = 2000;
+int CAR3_MAX_LEFT = 1000;
+int CAR3_CENTER = 1500;
+int CAR3_MAX_RIGHT = 2000;
+int CAR4_MAX_LEFT = 1000;
+int CAR4_CENTER = 1500;
+int CAR4_MAX_RIGHT = 2000;
+int CAR5_MAX_LEFT = 1000;
+int CAR5_CENTER = 1500;
+int CAR5_MAX_RIGHT = 2000;
 
 
 
@@ -98,45 +101,53 @@ const float effort_to_ppm_throttle(const float effort)
   return THROTTLE_ZERO + effort * 500 * THROTTLE_LIMIT;
 }
 
-const float effort_to_ppm_steering(const float effort, const int trim)
+const float effort_to_ppm_steering(const float effort, const int left, const int center, const int right)
 {
-  return STEERING_ZERO + (effort + trim) * 500;
+  
+  if (effort > 0) {
+    return (left - center) / effort + center;
+  }
+  else if (effort < 0) {
+    return (right - center) / effort + center;
+  }
+  
+  return center;
 }
 
 void control_callback0(const rktl_msgs::ControlEffort& control)
 {
   outputPPM0.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle.data));
-  outputPPM0.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR0_STEERING, CAR0_TRIM));
+  outputPPM0.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR0_STEERING, CAR0_MAX_LEFT, CAR0_CENTER, CAR0_MAX_RIGHT));
 }
 
 void control_callback1(const rktl_msgs::ControlEffort& control)
 {
   outputPPM1.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle.data));
-  outputPPM1.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR1_STEERING, CAR1_TRIM));
+  outputPPM1.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR1_STEERING, CAR1_MAX_LEFT, CAR1_CENTER, CAR1_MAX_RIGHT));
 }
 
 void control_callback2(const rktl_msgs::ControlEffort& control)
 {
   outputPPM2.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle.data));
-  outputPPM2.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR2_STEERING, CAR2_TRIM));
+  outputPPM2.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR2_STEERING, CAR2_MAX_LEFT, CAR2_CENTER, CAR2_MAX_RIGHT));
 }
 
 void control_callback3(const rktl_msgs::ControlEffort& control)
 {
   outputPPM3.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle.data));
-  outputPPM3.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR3_STEERING, CAR3_TRIM));
+  outputPPM3.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR3_STEERING, CAR3_MAX_LEFT, CAR3_CENTER, CAR3_MAX_RIGHT));
 }
 
 void control_callback4(const rktl_msgs::ControlEffort& control)
 {
   outputPPM4.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle.data));
-  outputPPM4.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR4_STEERING, CAR4_TRIM));
+  outputPPM4.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR4_STEERING, CAR4_MAX_LEFT, CAR4_CENTER, CAR4_MAX_RIGHT));
 }
 
 void control_callback5(const rktl_msgs::ControlEffort& control)
 {
   outputPPM5.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle.data));
-  outputPPM5.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR5_STEERING, CAR5_TRIM));
+  outputPPM5.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering.data * CAR5_STEERING, CAR5_MAX_LEFT, CAR5_CENTER, CAR5_MAX_RIGHT));
 }
 
 //Might have to change subscriber name
@@ -163,18 +174,30 @@ void setup()
   nh.initNode();
   
   nh.getParam("THROTTLE_LIMIT", &THROTTLE_LIMIT, 1);
-  nh.getParam("CAR0_TRIM", &CAR0_TRIM, 0);
-  nh.getParam("CAR1_TRIM", &CAR1_TRIM, 0);
-  nh.getParam("CAR2_TRIM", &CAR2_TRIM, 0);
-  nh.getParam("CAR3_TRIM", &CAR3_TRIM, 0);
-  nh.getParam("CAR4_TRIM", &CAR4_TRIM, 0);
-  nh.getParam("CAR5_TRIM", &CAR5_TRIM, 0);
-  nh.getParam("CAR0_STEERING", &CAR0_STEERING, 1);
-  nh.getParam("CAR1_STEERING", &CAR1_STEERING, 1);
-  nh.getParam("CAR2_STEERING", &CAR2_STEERING, 1);
-  nh.getParam("CAR3_STEERING", &CAR3_STEERING, 1);
-  nh.getParam("CAR4_STEERING", &CAR4_STEERING, 1);
-  nh.getParam("CAR5_STEERING", &CAR5_STEERING, 1);
+
+  nh.getParam("CAR0_MAX_LEFT", &CAR0_MAX_LEFT, 1000);
+  nh.getParam("CAR0_CENTER", &CAR0_CENTER, 1500);
+  nh.getParam("CAR0_MAX_RIGHT", &CAR0_MAX_RIGHT, 2000);
+
+  nh.getParam("CAR1_MAX_LEFT", &CAR1_MAX_LEFT, 1000);
+  nh.getParam("CAR1_CENTER", &CAR1_CENTER, 1500);
+  nh.getParam("CAR1_MAX_RIGHT", &CAR1_MAX_RIGHT, 2000);
+
+  nh.getParam("CAR2_MAX_LEFT", &CAR2_MAX_LEFT, 1000);
+  nh.getParam("CAR2_CENTER", &CAR2_CENTER, 1500);
+  nh.getParam("CAR2_MAX_RIGHT", &CAR2_MAX_RIGHT, 2000);
+
+  nh.getParam("CAR3_MAX_LEFT", &CAR3_MAX_LEFT, 1000);
+  nh.getParam("CAR3_CENTER", &CAR3_CENTER, 1500);
+  nh.getParam("CAR3_MAX_RIGHT", &CAR3_MAX_RIGHT, 2000);
+
+  nh.getParam("CAR4_MAX_LEFT", &CAR4_MAX_LEFT, 1000);
+  nh.getParam("CAR4_CENTER", &CAR4_CENTER, 1500);
+  nh.getParam("CAR4_MAX_RIGHT", &CAR4_MAX_RIGHT, 2000);
+
+  nh.getParam("CAR5_MAX_LEFT", &CAR5_MAX_LEFT, 1000);
+  nh.getParam("CAR5_CENTER", &CAR5_CENTER, 1500);
+  nh.getParam("CAR5_MAX_RIGHT", &CAR5_MAX_RIGHT, 2000);
 
   nh.subscribe(control_effort_sub0);
   nh.subscribe(control_effort_sub1);
