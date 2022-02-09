@@ -14,14 +14,28 @@ import rospy
 # System
 import gym
 
+
 class CartpoleDirectInterface(ROSInterface):
     """ROS interface for the cartpole game."""
-    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'cartpole_train.launch'], launch_args=[], run_id=None):
-        super().__init__(node_name='cartpole_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
-        self._RENDER = rospy.get_param('~render', False)
+    def __init__(
+        self,
+        eval=False,
+        launch_file=["rktl_autonomy", "cartpole_train.launch"],
+        launch_args=[],
+        run_id=None,
+    ):
+        super().__init__(
+            node_name="cartpole_agent",
+            eval=eval,
+            launch_file=launch_file,
+            launch_args=launch_args,
+            run_id=run_id,
+        )
 
-        self._env = gym.make('CartPole-v0')
+        self._RENDER = rospy.get_param("~render", False)
+
+        self._env = gym.make("CartPole-v0")
         self._state = None
 
     @property

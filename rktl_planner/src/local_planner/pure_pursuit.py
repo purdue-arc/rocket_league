@@ -20,12 +20,12 @@ def find_intersection(path_seg, bot_path, lookahead_dist):
     a = np.dot(path_seg, path_seg)
     b = 2 * np.dot(path_seg, bot_path)
     c = np.dot(bot_path, bot_path) - (lookahead_dist * lookahead_dist)
-    discrim = (b*b) - (4*a*c)
+    discrim = (b * b) - (4 * a * c)
 
     if discrim >= 0:
         discrim = math.sqrt(discrim)
-        t1 = (-b - discrim)/(2*a)
-        t2 = (-b + discrim)/(2*a)
+        t1 = (-b - discrim) / (2 * a)
+        t2 = (-b + discrim) / (2 * a)
 
         if t1 >= 0 and t1 <= 1:
             return path_seg * t1
@@ -59,7 +59,7 @@ def calculate_turn_rad(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     c = (math.tan(bot_yaw) * bot_pos[0]) - bot_pos[1]
     dist = math.sqrt(math.pow(a, 2) + 1)
     x = abs((a * intersect_pos[0]) + intersect_pos[1] + c) / dist
-    radius = (lookahead_dist * lookahead_dist)/(2 * x)
+    radius = (lookahead_dist * lookahead_dist) / (2 * x)
 
     bot_line_x = math.cos(bot_yaw) * lookahead_dist
     bot_line_y = math.sin(bot_yaw) * lookahead_dist
@@ -84,7 +84,7 @@ def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
 
     tang_line = intersect_pos - (bot_pos + bot_line)
     dist = np.linalg.norm(tang_line)
-    angle = (2 * math.asin(round((dist / 2) / lookahead_dist, 6)))
+    angle = 2 * math.asin(round((dist / 2) / lookahead_dist, 6))
     sign = np.sign(np.cross(intersect_pos - bot_line, bot_line))[2]
     if bkw:
         angle = math.pi - angle

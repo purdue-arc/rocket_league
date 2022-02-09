@@ -29,8 +29,7 @@ class Image(Asset):
         self.angle = 0
 
         self.init_img = pygame.image.load(img_path)
-        self.init_img = pygame.transform.scale(
-            self.init_img, (width, length))
+        self.init_img = pygame.transform.scale(self.init_img, (width, length))
         self.img = self.init_img
 
     def setPos(self, x, y):
@@ -38,7 +37,7 @@ class Image(Asset):
 
     def setAngle(self, angle):
         if angle < 0:
-            angle = 360. + angle
+            angle = 360.0 + angle
 
         self.img = pygame.transform.rotate(self.init_img, angle)
 

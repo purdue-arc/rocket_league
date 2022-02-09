@@ -15,9 +15,12 @@ import rospy, roslaunch
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
+
 class SimTimeException(Exception):
     """For when advancing sim time does not go as planned."""
+
     pass
+
 
 class ROSInterface(Env):
     """Extension of the Gym environment class for all specific interfaces
@@ -39,7 +42,14 @@ class ROSInterface(Env):
         - notify _cond when _has_state() may have turned true
     """
 
-    def __init__(self, node_name='gym_interface', eval=False, launch_file=None, launch_args=[], run_id=None):
+    def __init__(
+        self,
+        node_name="gym_interface",
+        eval=False,
+        launch_file=None,
+        launch_args=[],
+        run_id=None,
+    ):
         """init function
         Params:
             node_name: desired name of this node in the ROS network
@@ -55,26 +65,32 @@ class ROSInterface(Env):
         if not self.__EVAL_MODE:
             assert launch_file is not None
             # use temp files to avoid crash caused by race condition for ports
-            port = 11311    # default port
+            port = 11311  # default port
             while True:
                 try:
-                    open(f'/tmp/{run_id}_{port}', mode='x')
+                    open(f"/tmp/{run_id}_{port}", mode="x")
                     break
                 except FileExistsError:
                     with socket.socket() as sock:
-                        sock.bind(('localhost', 0))
+                        sock.bind(("localhost", 0))
                         port = sock.getsockname()[1]
-                    time.sleep(2.0*random.random())
+                    time.sleep(2.0 * random.random())
             # launch the training ROS network
             ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_id)
             launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
-            launch_args = [f'render:={port==11311}', f'plot_log:={port==11311}'] + launch_args + [f'agent_name:={node_name}']
-            launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
+            launch_args = (
+                [f"render:={port==11311}", f"plot_log:={port==11311}"]
+                + launch_args
+                + [f"agent_name:={node_name}"]
+            )
+            launch = roslaunch.parent.ROSLaunchParent(
+                ros_id, [(launch_file, launch_args)], port=port
+            )
             launch.start()
-            self.close = lambda : launch.shutdown()
+            self.close = lambda: launch.shutdown()
             # initialize self
-            os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
+            os.environ["ROS_MASTER_URI"] = f"http://localhost:{port}"
             rospy.init_node(node_name)
         else:
             # use an existing ROS network
@@ -85,8 +101,12 @@ class ROSInterface(Env):
 
         # additional set up for training
         if not self.__EVAL_MODE:
-            self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
-            self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
+            self.__DELTA_T = rospy.Duration.from_sec(
+                1.0 / rospy.get_param("~rate", 30.0)
+            )
+            self.__clock_pub = rospy.Publisher(
+                "/clock", Clock, queue_size=1, latch=True
+            )
 
             # initialize sim time
             self.__time = rospy.Time.from_sec(time.time())
@@ -95,8 +115,8 @@ class ROSInterface(Env):
         # additional set up for logging
         if run_id is None:
             run_id = uuid.uuid4()
-        self.__LOG_ID = f'{run_id}:{port}'
-        self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
+        self.__LOG_ID = f"{run_id}:{port}"
+        self.__log_pub = rospy.Publisher("~log", DiagnosticStatus, queue_size=1)
         self.__episode = 0
         self.__net_reward = 0
         self.__start_time = rospy.Time.now()
@@ -122,7 +142,7 @@ class ROSInterface(Env):
         self._publish_action(action)
         self.__step_time_and_wait_for_state()
         state = self._get_state()
-        self.__net_reward += state[1]   # logging
+        self.__net_reward += state[1]  # logging
         return state
 
     def reset(self):
@@ -139,18 +159,20 @@ class ROSInterface(Env):
         if self._has_state():
             # generate log
             info = {
-                'episode'    : self.__episode,
-                'net_reward' : self.__net_reward,
-                'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
+                "episode": self.__episode,
+                "net_reward": self.__net_reward,
+                "duration": (rospy.Time.now() - self.__start_time).to_sec(),
             }
             info.update(self._get_state()[3])
             # send message
             msg = DiagnosticStatus()
             msg.level = DiagnosticStatus.OK
-            msg.name = 'ROS-Gym Interface'
-            msg.message = 'log of episode data'
+            msg.name = "ROS-Gym Interface"
+            msg.message = "log of episode data"
             msg.hardware_id = self.__LOG_ID
-            msg.values = [KeyValue(key=key, value=str(value)) for key, value in info.items()]
+            msg.values = [
+                KeyValue(key=key, value=str(value)) for key, value in info.items()
+            ]
             self.__log_pub.publish(msg)
             # update variables (update time after reset)
             self.__episode += 1
@@ -161,7 +183,7 @@ class ROSInterface(Env):
             self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
-        self.__start_time = rospy.Time.now()    # logging
+        self.__start_time = rospy.Time.now()  # logging
         return self._get_state()[0]
 
     def __step_time_and_wait_for_state(self, max_retries=1):
@@ -180,7 +202,7 @@ class ROSInterface(Env):
                     retries += 1
         else:
             while not self.__wait_once_for_state():
-                pass    # idle wait
+                pass  # idle wait
 
     def __wait_once_for_state(self):
         """Wait and allow other threads to run."""

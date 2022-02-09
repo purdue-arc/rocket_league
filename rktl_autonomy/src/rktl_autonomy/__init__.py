@@ -9,4 +9,5 @@ __all__ = [
     "CartpoleInterface",
     "CartpoleDirectInterface",
     "SnakeInterface",
-    "RocketLeagueInterface"]
+    "RocketLeagueInterface",
+]
