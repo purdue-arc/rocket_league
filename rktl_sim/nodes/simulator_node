@@ -11,7 +11,7 @@ TODO:
 """
 
 # 3rd party modules
-from std_msgs.msg import Float32
+from rktl_msgs.msg import ControlEffort
 from nav_msgs.msg import Odometry
 import os
 import rospy
@@ -21,7 +21,7 @@ from threading import Lock
 # Local library
 import simulator
 from rktl_msgs.msg import MatchStatus
-from rktl_sim.srv import SetSimThrottle, SetSimThrottleResponse
+from rktl_sim.srv import SetSimEffort, SetSimEffortResponse
 
 class SimulatorROS(object):
     """ROS wrapper for the simulator."""
@@ -102,11 +102,10 @@ class SimulatorROS(object):
             'match_status', MatchStatus, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('effort/throttle', Float32, self.throttle_cb)
-        rospy.Subscriber('effort/steering', Float32, self.steering_cb)
+        rospy.Subscriber('car0/effort', ControlEffort, self.effort_cb)
 
         # Services
-        rospy.Service('set_sim_throttle', SetSimThrottle, self.set_throttle)
+        rospy.Service('set_sim_effort', SetSimEffort, self.set_effort)
         rospy.Service('sim_reset', Empty, self.reset_cb)
 
         while not rospy.is_shutdown():
@@ -125,23 +124,21 @@ class SimulatorROS(object):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
 
-    def set_throttle(self, throttle_req):
+    def set_effort(self, effort_req):
         self.cmd_lock.acquire()
-        self.throttle_cmd = throttle_req.data
-        resp = SetSimThrottleResponse()
+        self.throttle_cmd = effort_req.throttle
+        self.steering_cmd = effort_req.steering
+        self.cmd_lock.release()
+
+        resp = SetSimEffortResponse()
         resp.ok = True
         resp.stamp = rospy.get_rostime()
-        self.cmd_lock.release()
         return resp
 
-    def throttle_cb(self, throttle_msg):
+    def effort_cb(self, effort_msg):
         self.cmd_lock.acquire()
-        self.throttle_cmd = throttle_msg.data
-        self.cmd_lock.release()
-
-    def steering_cb(self, steering_msg):
-        self.cmd_lock.acquire()
-        self.steering_cmd = steering_msg.data
+        self.throttle_cmd = effort_msg.throttle
+        self.steering_cmd = effort_msg.steering
         self.cmd_lock.release()
 
     def reset_cb(self, _):
@@ -172,11 +169,7 @@ class SimulatorROS(object):
                 status.status = MatchStatus.ONGOING
             self.status_pub.publish(status)
 
-            self.cmd_lock.acquire()
-            throttle_cmd = self.throttle_cmd
-            steering_cmd = self.steering_cmd
-            self.cmd_lock.release()
-            self.sim.step(throttle_cmd, steering_cmd, delta_t)
+            self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
 
             # Publish ball odometry
             ball_msg = Odometry()

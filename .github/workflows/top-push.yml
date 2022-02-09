@@ -1,6 +1,7 @@
 name: Top-level push workflow
 
 on:
+  workflow_dispatch:
   push:
     branches: ['main']
 

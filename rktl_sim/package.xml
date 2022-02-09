@@ -21,4 +21,5 @@
   <exec_depend>PyBullet</exec_depend>
   <exec_depend>rktl_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
+  <exec_depend>joy</exec_depend>
 </package>

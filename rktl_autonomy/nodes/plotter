@@ -33,7 +33,7 @@ class Plotter(object):
         rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
 
         self.history = None
-        self.UUID = None
+        self.LOG_NAME = None
         self.next_plot_episode = self.PLOT_FREQ
         self.init_plot()
 
@@ -92,9 +92,8 @@ class Plotter(object):
 
     def progress_cb(self, progress_msg):
         """Track training progress and save when configured to."""
-        if self.UUID is None and progress_msg.hardware_id:
-            self.UUID = progress_msg.hardware_id
-            self.LOG_DIR += "/" + self.UUID
+        if self.LOG_NAME is None and progress_msg.hardware_id:
+            self.LOG_NAME = '/' + progress_msg.hardware_id.replace(':', '/plot_') + '.png'
 
         data = {}
 
@@ -166,8 +165,8 @@ class Plotter(object):
         plt.draw()
 
         # update file
-        rospy.loginfo(f"Saving training progress to {self.LOG_DIR}/plot.png")
-        plt.savefig(self.LOG_DIR + "/plot.png")
+        rospy.loginfo(f"Saving training progress to {self.LOG_DIR}{self.LOG_NAME}")
+        plt.savefig(self.LOG_DIR + self.LOG_NAME)
 
 if __name__ == "__main__":
     Plotter()

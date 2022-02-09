@@ -13,7 +13,7 @@ catkin_python_setup()
 # services
 add_service_files(
   FILES
-  SetSimThrottle.srv
+  SetSimEffort.srv
 )
 
 generate_messages()
