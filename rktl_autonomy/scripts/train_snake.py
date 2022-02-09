@@ -15,32 +15,28 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from os.path import expanduser
 import uuid
 
-if __name__ == "__main__":  # this is required due to forking processes
+if __name__ == '__main__':      # this is required due to forking processes
     run_id = str(uuid.uuid4())  # ALL running environments must share this
 
-    env = make_vec_env(
-        SnakeInterface,
-        env_kwargs={"run_id": run_id},
-        n_envs=16,
-        vec_env_cls=SubprocVecEnv,
-    )
+    env = make_vec_env(SnakeInterface, env_kwargs={'run_id':run_id},
+            n_envs=16, vec_env_cls=SubprocVecEnv)
     model = PPO("MlpPolicy", env)
 
     # log training progress as CSV
-    log_dir = expanduser(f"~/catkin_ws/data/snake/{run_id}")
+    log_dir = expanduser(f'~/catkin_ws/data/snake/{run_id}')
     logger = configure(log_dir, ["stdout", "csv", "log"])
     model.set_logger(logger)
 
     # log model weights
-    freq = 300  # (time steps in a SINGLE environment)
+    freq = 300 # (time steps in a SINGLE environment)
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 50000  # 50k (timesteps accross ALL environments)
+    steps = 50000 # 50k (timesteps accross ALL environments)
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 
     # save final weights
     print("done training")
     model.save(log_dir + "/final_weights")
-    env.close()  # this must be done to clean up other processes
+    env.close() # this must be done to clean up other processes
