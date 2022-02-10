@@ -85,7 +85,7 @@ class TestStep(unittest.TestCase):
         obs, reward, done, __ = env.step(env.action_space.sample())
 
         self.assertTrue(np.allclose(obs, [0, 0, 0, -1, 0, 1, 0, 0, 0]), msg='observation vector is incorrect')
-        self.assertAlmostEqual(reward, 998.775, places=4, msg=f'reward is incorrect')
+        self.assertAlmostEqual(reward, 998.775, places=4, msg='reward is incorrect')
         self.assertTrue(done, msg='done is incorrect')
         self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
 

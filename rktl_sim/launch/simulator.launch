@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="pybullet_render" default="true"/>
+    <arg name="pybullet_render" default="false"/>
 
     <!-- URDF paths -->
     <arg name="ball_urdf_path" default="$(find rktl_sim)/urdf/ball.urdf" />

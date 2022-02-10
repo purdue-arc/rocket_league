@@ -29,3 +29,5 @@ License:
 """
 
 from visualizer.window import Window
+
+__all__ = ["Window",]
