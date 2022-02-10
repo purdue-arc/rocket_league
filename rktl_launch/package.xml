@@ -15,5 +15,6 @@
   <buildtool_depend>catkin</buildtool_depend>
   <exec_depend>rktl_perception</exec_depend>
   <exec_depend>rktl_sim</exec_depend>
+  <exec_depend>rktl_control</exec_depend>
 
 </package>
