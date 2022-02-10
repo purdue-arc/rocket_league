@@ -12,6 +12,8 @@ catkin_package()
 
 # tests
 if(CATKIN_ENABLE_TESTING)
+  find_package(roslaunch REQUIRED)
+  roslaunch_add_file_check(launch)
   find_package(rostest REQUIRED)
   add_rostest(test/test_car.test)
 endif()
