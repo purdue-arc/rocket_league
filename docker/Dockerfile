@@ -11,7 +11,7 @@ RUN apt update && \
     # pip
     pip3 install --upgrade pip && \
     pip3 install scipy numpy matplotlib \
-    pandas jupyterlab autopep8 && \
+    pandas jupyterlab autopep8 pyflakes && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
@@ -26,7 +26,7 @@ RUN apt update && \
     ros-$ROS_DISTRO-rosserial-arduino \
     ros-$ROS_DISTRO-rosbridge-server && \
     # pip
-    pip3 install pybullet gym[box2d] stable-baselines3 pyflakes && \
+    pip3 install pybullet gym[box2d] stable-baselines3 && \
     # clean up
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
