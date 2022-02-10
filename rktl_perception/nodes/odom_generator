@@ -39,7 +39,6 @@ def sample():
   temp_x = 0
   temp_y = 0
   temp_yaw = 0
-  time = 0
 
   with lock:
     for sample in buffer:

@@ -6,7 +6,6 @@ License:
 """
 
 # 3rd Party Modules
-import math
 import pygame
 from abc import ABC, abstractmethod
 

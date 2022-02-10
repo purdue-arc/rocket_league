@@ -7,7 +7,7 @@ License:
 """
 
 # Python
-from math import sin, cos, pi
+from math import sin, cos
 from scipy import signal
 
 # ROS
@@ -92,8 +92,6 @@ class OdomEstimator(object):
             if dt == 0:
                 return
 
-            vx = dx / dt
-            vy = dy / dt
             v_theta = d_theta / dt
 
             # velocites in local frame

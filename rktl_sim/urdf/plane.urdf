@@ -2,7 +2,7 @@
   <link name="base_link">
     <!-- Contact coefficients -->
     <contact>
-        <lateral_friction value="1.0"/>
+        <lateral_friction value="0.0"/>
     </contact>
 
     <visual>

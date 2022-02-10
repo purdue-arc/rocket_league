@@ -11,7 +11,7 @@ RUN apt update && \
     # pip
     pip3 install --upgrade pip && \
     pip3 install scipy numpy matplotlib \
-    pandas jupyterlab autopep8 && \
+    pandas jupyterlab autopep8 pyflakes && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 

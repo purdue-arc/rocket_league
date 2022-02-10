@@ -6,11 +6,10 @@ License:
 """
 
 # 3rd party modules
-import math
 import pygame
 
 # Local modules
-from visualizer.asset import Asset, Image, Rectangle
+from visualizer.asset import Image, Rectangle
 
 
 class Window(object):
