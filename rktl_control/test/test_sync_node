@@ -7,9 +7,9 @@ License:
 """
 
 import unittest, rostest, rospy
-from nav_msgs.msg import PoseWithCovarianceStamped
-import numpy as np
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
+import numpy as np
 
 def set_pose(t, x, y, yaw):
     """Helper to construct pose msgs."""
@@ -56,15 +56,23 @@ class TestSync(unittest.TestCase):
         self.last_car1 = None
         self.last_ball = None
 
+        import pdb
+        pdb.set_trace()
+
         # publish messages to get things going
         now = rospy.Time.now()
-        car0_pub.publish(set_pose(now, 0, 0, 0))
-        car1_pub.publish(set_pose(now, 0, 0, 0))
-        ball_pub.publish(set_pose(now, 0, 0, 0))
+        car0_pub.publish(set_pose(now, 0.0, 0.0, 0.0))
+        car1_pub.publish(set_pose(now, 0.0, 0.0, 0.0))
+        ball_pub.publish(set_pose(now, 0.0, 0.0, 0.0))
+        print("published")
+
+        pdb.set_trace()
 
         # wait for response
         while(not self.have_poses()):
             pass
+
+        print("recvd")
         self.assertTrue(self.times_match(), msg='output time is not synchronized')
 
         # case 1 (independent channels, divide by zero)
@@ -158,9 +166,9 @@ class TestSync(unittest.TestCase):
     def have_poses(self):
         """Helper to see if poses arrived."""
         return (
-            self.last_car0 is None and
-            self.last_car1 is None and
-            self.last_ball is None
+            self.last_car0 is not None and
+            self.last_car1 is not None and
+            self.last_ball is not None
         )
 
     def clear_poses(self):
