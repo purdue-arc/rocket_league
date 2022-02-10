@@ -21,7 +21,6 @@ from threading import Lock
 # Local library
 import simulator
 from rktl_msgs.msg import MatchStatus
-from rktl_sim.srv import SetSimEffort, SetSimEffortResponse
 
 class SimulatorROS(object):
     """ROS wrapper for the simulator."""
@@ -105,7 +104,6 @@ class SimulatorROS(object):
         rospy.Subscriber('car0/effort', ControlEffort, self.effort_cb)
 
         # Services
-        rospy.Service('set_sim_effort', SetSimEffort, self.set_effort)
         rospy.Service('sim_reset', Empty, self.reset_cb)
 
         while not rospy.is_shutdown():
@@ -123,17 +121,6 @@ class SimulatorROS(object):
         if not os.path.isfile(param):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
-
-    def set_effort(self, effort_req):
-        self.cmd_lock.acquire()
-        self.throttle_cmd = effort_req.throttle
-        self.steering_cmd = effort_req.steering
-        self.cmd_lock.release()
-
-        resp = SetSimEffortResponse()
-        resp.ok = True
-        resp.stamp = rospy.get_rostime()
-        return resp
 
     def effort_cb(self, effort_msg):
         self.cmd_lock.acquire()
