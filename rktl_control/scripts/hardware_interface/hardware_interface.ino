@@ -79,8 +79,8 @@ int CAR5_MAX_RIGHT = 2000;
 void enable_callback(const std_msgs::Bool& enable)
 {
   if (enable.data) {
-    nh.getParam("THROTTLE_LIMIT", &THROTTLE_LIMIT, 1.0);
-  } 
+    nh.getParam("~throttle_limit", &THROTTLE_LIMIT, 1.0f);
+  }
   else {
     THROTTLE_LIMIT = 0;
   }
@@ -139,12 +139,12 @@ void control_callback5(const rktl_msgs::ControlEffort& control)
 }
 
 //Might have to change subscriber name
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub0("car0/control_effort", control_callback0);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub1("car1/control_effort", control_callback1);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub2("car2/control_effort", control_callback2);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub3("car3/control_effort", control_callback3);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub4("car4/control_effort", control_callback4);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub5("car5/control_effort", control_callback5);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub0("car0/effort", control_callback0);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub1("car1/effort", control_callback1);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub2("car2/effort", control_callback2);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub3("car3/effort", control_callback3);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub4("car4/effort", control_callback4);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub5("car5/effort", control_callback5);
 ros::Subscriber<std_msgs::Bool> enable_sub("enable", enable_callback);
 
 void setup()
@@ -156,35 +156,35 @@ void setup()
   pinMode(PPM_OUT_PIN3, OUTPUT);
   pinMode(PPM_OUT_PIN4, OUTPUT);
   pinMode(PPM_OUT_PIN5, OUTPUT);
-  
+
   // ros
   nh.initNode();
-  
-  nh.getParam("THROTTLE_LIMIT", &THROTTLE_LIMIT, 1.0f);
 
-  nh.getParam("CAR0_MAX_LEFT", &CAR0_MAX_LEFT, 1000);
-  nh.getParam("CAR0_CENTER", &CAR0_CENTER, 1500);
-  nh.getParam("CAR0_MAX_RIGHT", &CAR0_MAX_RIGHT, 2000);
+  nh.getParam("~throttle_limit", &THROTTLE_LIMIT, 1.0f);
 
-  nh.getParam("CAR1_MAX_LEFT", &CAR1_MAX_LEFT, 1000);
-  nh.getParam("CAR1_CENTER", &CAR1_CENTER, 1500);
-  nh.getParam("CAR1_MAX_RIGHT", &CAR1_MAX_RIGHT, 2000);
+  nh.getParam("~car0/max_left", &CAR0_MAX_LEFT, 1000);
+  nh.getParam("~car0/center", &CAR0_CENTER, 1500);
+  nh.getParam("~car0/max_right", &CAR0_MAX_RIGHT, 2000);
 
-  nh.getParam("CAR2_MAX_LEFT", &CAR2_MAX_LEFT, 1000);
-  nh.getParam("CAR2_CENTER", &CAR2_CENTER, 1500);
-  nh.getParam("CAR2_MAX_RIGHT", &CAR2_MAX_RIGHT, 2000);
+  nh.getParam("~car1/max_left", &CAR1_MAX_LEFT, 1000);
+  nh.getParam("~car1/center", &CAR1_CENTER, 1500);
+  nh.getParam("~car1/max_right", &CAR1_MAX_RIGHT, 2000);
 
-  nh.getParam("CAR3_MAX_LEFT", &CAR3_MAX_LEFT, 1000);
-  nh.getParam("CAR3_CENTER", &CAR3_CENTER, 1500);
-  nh.getParam("CAR3_MAX_RIGHT", &CAR3_MAX_RIGHT, 2000);
+  nh.getParam("~car2/max_left", &CAR2_MAX_LEFT, 1000);
+  nh.getParam("~car2/center", &CAR2_CENTER, 1500);
+  nh.getParam("~car2/max_right", &CAR2_MAX_RIGHT, 2000);
 
-  nh.getParam("CAR4_MAX_LEFT", &CAR4_MAX_LEFT, 1000);
-  nh.getParam("CAR4_CENTER", &CAR4_CENTER, 1500);
-  nh.getParam("CAR4_MAX_RIGHT", &CAR4_MAX_RIGHT, 2000);
+  nh.getParam("~car3/max_left", &CAR3_MAX_LEFT, 1000);
+  nh.getParam("~car3/center", &CAR3_CENTER, 1500);
+  nh.getParam("~car3/max_right", &CAR3_MAX_RIGHT, 2000);
 
-  nh.getParam("CAR5_MAX_LEFT", &CAR5_MAX_LEFT, 1000);
-  nh.getParam("CAR5_CENTER", &CAR5_CENTER, 1500);
-  nh.getParam("CAR5_MAX_RIGHT", &CAR5_MAX_RIGHT, 2000);
+  nh.getParam("~car4/max_left", &CAR4_MAX_LEFT, 1000);
+  nh.getParam("~car4/center", &CAR4_CENTER, 1500);
+  nh.getParam("~car4/max_right", &CAR4_MAX_RIGHT, 2000);
+
+  nh.getParam("~car5/max_left", &CAR5_MAX_LEFT, 1000);
+  nh.getParam("~car5/center", &CAR5_CENTER, 1500);
+  nh.getParam("~car5/max_right", &CAR5_MAX_RIGHT, 2000);
 
   nh.subscribe(control_effort_sub0);
   nh.subscribe(control_effort_sub1);
@@ -192,7 +192,6 @@ void setup()
   nh.subscribe(control_effort_sub3);
   nh.subscribe(control_effort_sub4);
   nh.subscribe(control_effort_sub5);
- 
 
   // begin sending PPM signal
   outputPPM0.begin(PPM_OUT_PIN0);
