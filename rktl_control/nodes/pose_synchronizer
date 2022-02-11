@@ -26,10 +26,7 @@ class PoseSynchronizer(object):
         self.PERIOD = rospy.Duration(1/rospy.get_param('~rate', 10.0))
         self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.1))
 
-        # simple variables
-        self.lock = Lock()
-
-        # duplicated variables
+        # variables
         self.buffers = {
             topic : deque(maxlen=rospy.get_param('buffer_size', 15)) for topic in self.TOPICS
         }
@@ -38,16 +35,14 @@ class PoseSynchronizer(object):
         }
         for topic in self.TOPICS:
             rospy.Subscriber(topic, PoseWithCovarianceStamped,
-                lambda msg : self.recv_pose(topic, msg))
+                lambda msg, topic=topic: self.recv_pose(topic, msg))
 
         # main loop
         rate = rospy.Rate(1/self.PERIOD.to_sec())
         while not rospy.is_shutdown():
             now = rospy.Time.now()
-            self.lock.acquire()
             for topic in self.TOPICS:
                 self.send_pose(topic, now)
-            self.lock.release()
             try:
                 rate.sleep()
             except rospy.ROSInterruptException:
@@ -67,9 +62,8 @@ class PoseSynchronizer(object):
             pose_msg.pose.pose.orientation.w
         ])
         sample = (t, x, y, yaw)
-        # append to buffer
-        with self.lock:
-            self.buffers[topic].append(sample)
+        # append to buffer (thread safe)
+        self.buffers[topic].append(sample)
 
     def send_pose(self, topic, now):
         """Callback for processing received poses and publishing"""
@@ -101,7 +95,7 @@ class PoseSynchronizer(object):
 
         # check there is sufficient data
         if samples == 0:
-            rospy.logwarn("%s: insufficient pose data", topic)
+            rospy.logwarn_throttle(1.0, "%s: insufficient pose data", topic)
             return
 
         # take avg

@@ -8,6 +8,4 @@
         - ball/pose
     </rosparam>
   </node>
-  <node pkg="rosservice" type="rosservice" name="set_log_level"
-    args="call --wait /sync_node/set_logger_level 'rosout' 'debug'"/>
 </launch>
