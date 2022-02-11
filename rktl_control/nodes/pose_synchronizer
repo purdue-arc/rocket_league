@@ -12,7 +12,6 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from collections import deque
-from threading import Lock
 from math import sin,cos, atan2
 
 class PoseSynchronizer(object):
