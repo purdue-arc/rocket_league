@@ -19,109 +19,114 @@ from math import sin, cos
 class MeanOdomFilter(object):
     """Class to smooth pose estimations and predict velocity."""
     def __init__(self):
-        rospy.init_node('averaging_odom')
+        rospy.init_node('mean_odom_filter')
 
         # constants
         self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
         self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
 
+        self.POS_COUNT = rospy.get_param('pos_buffer_size', 3)
+        self.VEL_COUNT = rospy.get_param('vel_buffer_size', 3)
+
         # variables
-        self.buffer = deque(maxlen=rospy.get_param('buffer_size', 3))
-        self.lock = Lock()
+        self.buffer = deque(maxlen=max(self.POS_COUNT, self.VEL_COUNT+1))
 
         # pubs / subs
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
         rospy.Subscriber('pose', PoseWithCovarianceStamped, self.pose_cb)
 
         # main loop
-        rate = rospy.Rate(rospy.get_param('~rate', 10.0))
-        while not rospy.is_shutdown():
-            self.sample_buffer()
-            try:
-                rate.sleep()
-            except rospy.ROSInterruptException:
-                pass
+        rospy.spin()
 
-    def pose_cb(self, pose):
+    def pose_cb(self, pose_msg):
         """Callback for new poses."""
-        assert(pose.header.frame_id == self.MAP_FRAME)
-        t = pose.header.stamp.to_sec()
-        x = pose.pose.pose.position.x
-        y = pose.pose.pose.position.y
+        assert(pose_msg.header.frame_id == self.MAP_FRAME)
+
+        # add sample to buffer
+        t = pose_msg.header.stamp.to_sec()
+        x = pose_msg.pose.pose.position.x
+        y = pose_msg.pose.pose.position.y
         __, __, yaw = euler_from_quaternion([
-            pose.pose.pose.orientation.x,
-            pose.pose.pose.orientation.y,
-            pose.pose.pose.orientation.z,
-            pose.pose.pose.orientation.w
+            pose_msg.pose.pose.orientation.x,
+            pose_msg.pose.pose.orientation.y,
+            pose_msg.pose.pose.orientation.z,
+            pose_msg.pose.pose.orientation.w
         ])
         sample = (t, x, y, yaw)
-        with self.lock:
-            self.buffer.append(sample)
+        self.buffer.appendleft(sample)
 
-    def sample_buffer(self):
-        """Sample the buffer and publish an estimated Odometry."""
-        with self.lock:
-            if len(self.buffer) < 2:
-                return
+        # check for enough samples
+        if len(self.buffer < 2):
+            return
 
+        # get current position and velocity estimates
+        x, y, yaw = self.sample_position()
+        vx, vy, omega = self.sample_velocity()
+
+        # convert velocity to body frame
+        body_vx = vx*cos(yaw) + vy*sin(yaw)
+        body_vy = vy*cos(yaw) - vx*sin(yaw)
+
+        # publish message
+        odom_msg = Odometry()
+        odom_msg.header = pose_msg.header
+        odom_msg.child_frame_id = self.BODY_FRAME
+        odom_msg.pose.pose.position.x = x
+        odom_msg.pose.pose.position.y = y
+        x, y, z, w = quaternion_from_euler(0, 0, yaw)
+        odom_msg.pose.pose.orientation.x = x
+        odom_msg.pose.pose.orientation.y = y
+        odom_msg.pose.pose.orientation.z = z
+        odom_msg.pose.pose.orientation.w = w
+        odom_msg.twist.twist.linear.x = body_vx
+        odom_msg.twist.twist.linear.y = body_vy
+        odom_msg.twist.twist.angular.z = omega
+        self.odom_pub.publish(odom_msg)
+
+    def sample_position(self):
+        """Sample the buffer and generate an estimated position."""
         avg_x = 0
         avg_y = 0
         avg_yaw = 0
-        avg_vx = 0
-        avg_vy = 0
-        avg_omega = 0
+        count = 0
 
-        with self.lock:
-            # sum all positions and velocities in buffer
-            prev_t = None
-            for t, x, y, yaw in self.buffer:
+        for __, x, y, yaw in self.buffer:
+            if count == self.POS_COUNT:
+                break
+            else:
                 avg_x += x
                 avg_y += y
                 avg_yaw += yaw
+                count += 1
 
-                if prev_t is not None:
-                    # use 2 point derivatives for velocity
-                    delta_t = t - prev_t
-                    avg_vx += (x - prev_x) / delta_t
-                    avg_vy += (y - prev_y) / delta_t
-                    avg_omega += (yaw - prev_yaw) / delta_t
+        avg_x /= count
+        avg_y /= count
+        avg_yaw /= count
 
-                prev_t = t
-                prev_x = x
-                prev_y = y
-                prev_yaw = yaw
+        return (avg_x, avg_y, avg_yaw)
 
-            # divide by number of measurements to get average
-            num_obs = len(self.buffer)
-            avg_x /= num_obs
-            avg_y /= num_obs
-            avg_yaw /= num_obs
-            avg_vx /= (num_obs-1)
-            avg_vy /= (num_obs-1)
-            avg_omega /= (num_obs-1)
+    def sample_velocity(self):
+        """Sample the buffer and generate an estimated velocity."""
+        avg_vx = 0
+        avg_vy = 0
+        avg_omega = 0
+        count = 0
 
-        # convert world velocities to body velocities
-        body_vx = avg_vx*cos(yaw) + avg_vy*sin(yaw)
-        body_vy = avg_vy*cos(yaw) - avg_vx*sin(yaw)
+        for new, old in zip(self.buffer, self.buffer.copy().popleft()):
+            if count == self.VEL_COUNT:
+                break
+            else:
+                delta_t = (new[0] - old[0]).to_sec()
+                avg_vx += (new[1] - old[1]) / delta_t
+                avg_vy += (new[2] - old[2]) / delta_t
+                avg_omega += (new[3] - old[3]) / delta_t
+                count += 1
 
-        # publish message
-        odom = Odometry()
-        odom.header.stamp = rospy.Time.now()
-        odom.header.frame_id = self.MAP_FRAME
-        odom.pose.pose.position.x = avg_x
-        odom.pose.pose.position.y = avg_y
-        x, y, z, w = quaternion_from_euler(0, 0, avg_yaw)
-        odom.pose.pose.orientation.x = x
-        odom.pose.pose.orientation.y = y
-        odom.pose.pose.orientation.z = z
-        odom.pose.pose.orientation.w = w
-        odom.twist.twist.linear.x = body_vx
-        odom.twist.twist.linear.y = body_vy
-        odom.twist.twist.linear.z = 0
-        odom.twist.twist.angular.x = 0
-        odom.twist.twist.angular.y = 0
-        odom.twist.twist.angular.z = avg_omega
-        self.odom_pub.publish(odom)
+        avg_vx /= count
+        avg_vy /= count
+        avg_omega /= count
+
+        return (avg_vx, avg_vy, avg_omega)
 
 if __name__ == "__main__":
     MeanOdomFilter()
