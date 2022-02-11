@@ -43,7 +43,7 @@ class TestStep(unittest.TestCase):
 
         # initialize code under test
         # would hang if above service was not initialized first
-        env = RocketLeagueInterface()
+        env = RocketLeagueInterface(launch_args=['render:=false'])
 
         # wait until first clock callback called
         while(self.last_time is None):
