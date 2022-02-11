@@ -43,7 +43,7 @@ class MeanOdomFilter(object):
         assert(pose_msg.header.frame_id == self.MAP_FRAME)
 
         # add sample to buffer
-        t = pose_msg.header.stamp.to_sec()
+        t = pose_msg.header.stamp
         x = pose_msg.pose.pose.position.x
         y = pose_msg.pose.pose.position.y
         __, __, yaw = euler_from_quaternion([
@@ -56,7 +56,7 @@ class MeanOdomFilter(object):
         self.buffer.appendleft(sample)
 
         # check for enough samples
-        if len(self.buffer < 2):
+        if len(self.buffer) < 2:
             return
 
         # get current position and velocity estimates
@@ -114,14 +114,16 @@ class MeanOdomFilter(object):
         avg_omega = 0
         count = 0
 
-        for new, old in zip(self.buffer, self.buffer.copy().popleft()):
+        old_buffer = self.buffer.copy()
+        old_buffer.popleft()
+        for new, old in zip(self.buffer, old_buffer):
             if count == self.VEL_COUNT:
                 break
             else:
                 delta_t = (new[0] - old[0]).to_sec()
                 avg_vx += (new[1] - old[1]) / delta_t
                 avg_vy += (new[2] - old[2]) / delta_t
-                avg_omega += sad(new[3], old[3]) / delta_t
+                avg_omega += sad(old[3], new[3]) / delta_t
                 count += 1
 
         avg_vx /= count
