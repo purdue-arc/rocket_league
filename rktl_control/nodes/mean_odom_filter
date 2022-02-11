@@ -13,8 +13,8 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from collections import deque
-from threading import Lock
-from math import sin, cos
+from angles import shortest_angular_distance as sad
+from math import sin, cos, atan2
 
 class MeanOdomFilter(object):
     """Class to smooth pose estimations and predict velocity."""
@@ -87,7 +87,8 @@ class MeanOdomFilter(object):
         """Sample the buffer and generate an estimated position."""
         avg_x = 0
         avg_y = 0
-        avg_yaw = 0
+        avg_hx = 0
+        avg_hy = 0
         count = 0
 
         for __, x, y, yaw in self.buffer:
@@ -96,12 +97,13 @@ class MeanOdomFilter(object):
             else:
                 avg_x += x
                 avg_y += y
-                avg_yaw += yaw
+                avg_hx += cos(yaw)
+                avg_hy += sin(yaw)
                 count += 1
 
         avg_x /= count
         avg_y /= count
-        avg_yaw /= count
+        avg_yaw = atan2(avg_hy, avg_hx)
 
         return (avg_x, avg_y, avg_yaw)
 
@@ -119,7 +121,7 @@ class MeanOdomFilter(object):
                 delta_t = (new[0] - old[0]).to_sec()
                 avg_vx += (new[1] - old[1]) / delta_t
                 avg_vy += (new[2] - old[2]) / delta_t
-                avg_omega += (new[3] - old[3]) / delta_t
+                avg_omega += sad(new[3], old[3]) / delta_t
                 count += 1
 
         avg_vx /= count
