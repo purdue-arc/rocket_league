@@ -22,6 +22,7 @@ RUN apt update && \
     ros-$ROS_DISTRO-apriltag-ros \
     ros-$ROS_DISTRO-pointgrey-camera-driver \
     ros-$ROS_DISTRO-usb-cam \
+    ros-$ROS_DISTRO-camera-calibration \
     ros-$ROS_DISTRO-joy \
     ros-$ROS_DISTRO-rosserial-arduino \
     ros-$ROS_DISTRO-rosbridge-server && \
