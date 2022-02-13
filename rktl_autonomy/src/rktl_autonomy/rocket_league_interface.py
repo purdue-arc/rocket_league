@@ -35,6 +35,7 @@ class RocketLeagueInterface(ROSInterface):
         # Observations
         self._FIELD_WIDTH = rospy.get_param('~field/width', 3.5)
         self._FIELD_HEIGHT = rospy.get_param('~field/height', 5)
+        self._GOAL_DEPTH = rospy.get_param('~field/goal_depth', 0.075)
         self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
         self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
 
@@ -86,15 +87,19 @@ class RocketLeagueInterface(ROSInterface):
             # x, y, theta, v, omega (car)
             # x, y, vx, vy (ball)
             low=np.array([
-                -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
+                -(self._FIELD_HEIGHT/2) - self._GOAL_DEPTH,
+                -self._FIELD_WIDTH/2,
                 -pi, -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
-                -self._FIELD_HEIGHT/2, -self._FIELD_WIDTH/2,
+                -(self._FIELD_HEIGHT/2) - self._GOAL_DEPTH,
+                -self._FIELD_WIDTH/2,
                 -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
                 dtype=np.float32),
             high=np.array([
-                self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
+                (self._FIELD_HEIGHT/2) + self._GOAL_DEPTH,
+                self._FIELD_WIDTH/2,
                 pi, self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
-                self._FIELD_HEIGHT/2, self._FIELD_WIDTH/2,
+                (self._FIELD_HEIGHT/2) + self._GOAL_DEPTH,
+                self._FIELD_WIDTH/2,
                 self._MAX_OBS_VEL, self._MAX_OBS_VEL],
                 dtype=np.float32))
 
@@ -129,6 +134,7 @@ class RocketLeagueInterface(ROSInterface):
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
         if not self.observation_space.contains(observation):
+            print(self.observation_space)
             rospy.logerr("observation outside of valid bounds:\nObservation: %s", observation)
 
         # check if time exceeded
