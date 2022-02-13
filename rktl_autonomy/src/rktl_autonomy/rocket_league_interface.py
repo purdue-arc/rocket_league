@@ -134,7 +134,6 @@ class RocketLeagueInterface(ROSInterface):
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
         if not self.observation_space.contains(observation):
-            print(self.observation_space)
             rospy.logerr("observation outside of valid bounds:\nObservation: %s", observation)
 
         # check if time exceeded
