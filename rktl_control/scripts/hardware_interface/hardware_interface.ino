@@ -193,6 +193,20 @@ void setup()
   nh.subscribe(control_effort_sub4);
   nh.subscribe(control_effort_sub5);
 
+  // initialize to no motion commands
+  outputPPM0.write(THROTTLE_CHANNEL, THROTTLE_ZERO);
+  outputPPM0.write(STEERING_CHANNEL, CAR0_CENTER);
+  outputPPM1.write(THROTTLE_CHANNEL, THROTTLE_ZERO);
+  outputPPM1.write(STEERING_CHANNEL, CAR1_CENTER);
+  outputPPM2.write(THROTTLE_CHANNEL, THROTTLE_ZERO);
+  outputPPM2.write(STEERING_CHANNEL, CAR2_CENTER);
+  outputPPM3.write(THROTTLE_CHANNEL, THROTTLE_ZERO);
+  outputPPM3.write(STEERING_CHANNEL, CAR3_CENTER);
+  outputPPM4.write(THROTTLE_CHANNEL, THROTTLE_ZERO);
+  outputPPM4.write(STEERING_CHANNEL, CAR4_CENTER);
+  outputPPM5.write(THROTTLE_CHANNEL, THROTTLE_ZERO);
+  outputPPM5.write(STEERING_CHANNEL, CAR5_CENTER);
+
   // begin sending PPM signal
   outputPPM0.begin(PPM_OUT_PIN0);
   outputPPM1.begin(PPM_OUT_PIN1);
