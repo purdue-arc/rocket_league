@@ -23,14 +23,14 @@
 
     <!-- Localization -->
     <node pkg="rktl_perception" type="localizer" name="localizer" output="screen">
-        <param name="origin_id" type="str" value="0"/>
+        <param name="origin_id" type="str" value="0,1,2,3,4,5,6,7"/>
         <param name="buffer_size" type="int" value="300"/>
         <param name="ball_sub_topic" type="str" value="ball_vec"/>
         <param name="ball_pub_topic" type="str" value="/ball/pose"/>
         <param name="ball_radius" type="double" value="0.05"/>
         <rosparam param="pub_topics">
-      '0': /origin/pose
-      '2': /car0/pose
+            '0,1,2,3,4,5,6,7': /origin/pose
+            '10': /car0/pose
         </rosparam>
     </node>
 
