@@ -53,8 +53,8 @@ PulsePositionOutput outputPPM3(RISING);
 PulsePositionOutput outputPPM4(RISING);
 PulsePositionOutput outputPPM5(RISING);
 
-//Getting Parameters
-float THROTTLE_LIMIT = 1.0f;
+// Parameters
+float THROTTLE_LIMIT = 1.0;
 int THROTTLE_ZERO = 1500;
 int THROTTLE_THROW = 500;
 int CAR0_MAX_LEFT = 1000;
@@ -76,23 +76,23 @@ int CAR5_MAX_LEFT = 1000;
 int CAR5_CENTER = 1500;
 int CAR5_MAX_RIGHT = 2000;
 
-void enable_callback(const std_msgs::Bool& enable)
-{
-  if (enable.data) {
-    nh.getParam("~throttle_limit", &THROTTLE_LIMIT, 1.0f);
+// Variables
+bool enabled = true;
+
+void enable_callback(const std_msgs::Bool& enable) {
+  enabled = enable.data;
+}
+
+const float effort_to_ppm_throttle(const float effort) {
+  if (enabled) {
+    return THROTTLE_ZERO + effort * THROTTLE_THROW * THROTTLE_LIMIT;
   }
   else {
-    THROTTLE_LIMIT = 0;
+    return THROTTLE_ZERO;
   }
 }
 
-const float effort_to_ppm_throttle(const float effort)
-{
-  return THROTTLE_ZERO + effort * THROTTLE_THROW * THROTTLE_LIMIT;
-}
-
-const float effort_to_ppm_steering(const float effort, const int left, const int center, const int right)
-{
+const float effort_to_ppm_steering(const float effort, const int left, const int center, const int right) {
   if (effort > 0) {
     return (left - center) * effort + center;
   }
@@ -102,43 +102,36 @@ const float effort_to_ppm_steering(const float effort, const int left, const int
   return center;
 }
 
-void control_callback0(const rktl_msgs::ControlEffort& control)
-{
+void control_callback0(const rktl_msgs::ControlEffort& control) {
   outputPPM0.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle));
   outputPPM0.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering, CAR0_MAX_LEFT, CAR0_CENTER, CAR0_MAX_RIGHT));
 }
 
-void control_callback1(const rktl_msgs::ControlEffort& control)
-{
+void control_callback1(const rktl_msgs::ControlEffort& control) {
   outputPPM1.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle));
   outputPPM1.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering, CAR1_MAX_LEFT, CAR1_CENTER, CAR1_MAX_RIGHT));
 }
 
-void control_callback2(const rktl_msgs::ControlEffort& control)
-{
+void control_callback2(const rktl_msgs::ControlEffort& control) {
   outputPPM2.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle));
   outputPPM2.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering, CAR2_MAX_LEFT, CAR2_CENTER, CAR2_MAX_RIGHT));
 }
 
-void control_callback3(const rktl_msgs::ControlEffort& control)
-{
+void control_callback3(const rktl_msgs::ControlEffort& control) {
   outputPPM3.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle));
   outputPPM3.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering, CAR3_MAX_LEFT, CAR3_CENTER, CAR3_MAX_RIGHT));
 }
 
-void control_callback4(const rktl_msgs::ControlEffort& control)
-{
+void control_callback4(const rktl_msgs::ControlEffort& control) {
   outputPPM4.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle));
   outputPPM4.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering, CAR4_MAX_LEFT, CAR4_CENTER, CAR4_MAX_RIGHT));
 }
 
-void control_callback5(const rktl_msgs::ControlEffort& control)
-{
+void control_callback5(const rktl_msgs::ControlEffort& control) {
   outputPPM5.write(THROTTLE_CHANNEL, effort_to_ppm_throttle(control.throttle));
   outputPPM5.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering, CAR5_MAX_LEFT, CAR5_CENTER, CAR5_MAX_RIGHT));
 }
 
-//Might have to change subscriber name
 ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub0("car0/effort", control_callback0);
 ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub1("car1/effort", control_callback1);
 ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub2("car2/effort", control_callback2);
@@ -147,45 +140,38 @@ ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub4("car4/effort", con
 ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub5("car5/effort", control_callback5);
 ros::Subscriber<std_msgs::Bool> enable_sub("enable", enable_callback);
 
-void setup()
-{
-  Serial.begin(57600);
-  pinMode(PPM_OUT_PIN0, OUTPUT);
-  pinMode(PPM_OUT_PIN1, OUTPUT);
-  pinMode(PPM_OUT_PIN2, OUTPUT);
-  pinMode(PPM_OUT_PIN3, OUTPUT);
-  pinMode(PPM_OUT_PIN4, OUTPUT);
-  pinMode(PPM_OUT_PIN5, OUTPUT);
-
-  // ros
+void setup() {
+  // init node
   nh.initNode();
 
-  nh.getParam("~throttle_limit", &THROTTLE_LIMIT, 1.0f);
+  // get params
+  nh.getParam("~throttle_limit", &THROTTLE_LIMIT);
 
-  nh.getParam("~car0/max_left", &CAR0_MAX_LEFT, 1000);
-  nh.getParam("~car0/center", &CAR0_CENTER, 1500);
-  nh.getParam("~car0/max_right", &CAR0_MAX_RIGHT, 2000);
+  nh.getParam("~car0/max_left", &CAR0_MAX_LEFT);
+  nh.getParam("~car0/center", &CAR0_CENTER);
+  nh.getParam("~car0/max_right", &CAR0_MAX_RIGHT);
 
-  nh.getParam("~car1/max_left", &CAR1_MAX_LEFT, 1000);
-  nh.getParam("~car1/center", &CAR1_CENTER, 1500);
-  nh.getParam("~car1/max_right", &CAR1_MAX_RIGHT, 2000);
+  nh.getParam("~car1/max_left", &CAR1_MAX_LEFT);
+  nh.getParam("~car1/center", &CAR1_CENTER);
+  nh.getParam("~car1/max_right", &CAR1_MAX_RIGHT);
 
-  nh.getParam("~car2/max_left", &CAR2_MAX_LEFT, 1000);
-  nh.getParam("~car2/center", &CAR2_CENTER, 1500);
-  nh.getParam("~car2/max_right", &CAR2_MAX_RIGHT, 2000);
+  nh.getParam("~car2/max_left", &CAR2_MAX_LEFT);
+  nh.getParam("~car2/center", &CAR2_CENTER);
+  nh.getParam("~car2/max_right", &CAR2_MAX_RIGHT);
 
-  nh.getParam("~car3/max_left", &CAR3_MAX_LEFT, 1000);
-  nh.getParam("~car3/center", &CAR3_CENTER, 1500);
-  nh.getParam("~car3/max_right", &CAR3_MAX_RIGHT, 2000);
+  nh.getParam("~car3/max_left", &CAR3_MAX_LEFT);
+  nh.getParam("~car3/center", &CAR3_CENTER);
+  nh.getParam("~car3/max_right", &CAR3_MAX_RIGHT);
 
-  nh.getParam("~car4/max_left", &CAR4_MAX_LEFT, 1000);
-  nh.getParam("~car4/center", &CAR4_CENTER, 1500);
-  nh.getParam("~car4/max_right", &CAR4_MAX_RIGHT, 2000);
+  nh.getParam("~car4/max_left", &CAR4_MAX_LEFT);
+  nh.getParam("~car4/center", &CAR4_CENTER);
+  nh.getParam("~car4/max_right", &CAR4_MAX_RIGHT);
 
-  nh.getParam("~car5/max_left", &CAR5_MAX_LEFT, 1000);
-  nh.getParam("~car5/center", &CAR5_CENTER, 1500);
-  nh.getParam("~car5/max_right", &CAR5_MAX_RIGHT, 2000);
+  nh.getParam("~car5/max_left", &CAR5_MAX_LEFT);
+  nh.getParam("~car5/center", &CAR5_CENTER);
+  nh.getParam("~car5/max_right", &CAR5_MAX_RIGHT);
 
+  // subscribers
   nh.subscribe(control_effort_sub0);
   nh.subscribe(control_effort_sub1);
   nh.subscribe(control_effort_sub2);
@@ -216,7 +202,6 @@ void setup()
   outputPPM5.begin(PPM_OUT_PIN5);
 }
 
-void loop()
-{
+void loop() {
   nh.spinOnce();
 }
