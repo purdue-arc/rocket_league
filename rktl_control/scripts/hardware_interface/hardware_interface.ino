@@ -99,7 +99,9 @@ const float effort_to_ppm_steering(const float effort, const int left, const int
   else if (effort < 0) {
     return (center - right) * effort + center;
   }
-  return center;
+  else {
+    return center;
+  }
 }
 
 void control_callback0(const rktl_msgs::ControlEffort& control) {
