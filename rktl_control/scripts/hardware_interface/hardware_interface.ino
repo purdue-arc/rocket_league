@@ -94,10 +94,10 @@ const float effort_to_ppm_throttle(const float effort)
 const float effort_to_ppm_steering(const float effort, const int left, const int center, const int right)
 {
   if (effort > 0) {
-    return (left - center) / effort + center;
+    return (left - center) * effort + center;
   }
   else if (effort < 0) {
-    return (right - center) / effort + center;
+    return (center - right) * effort + center;
   }
   return center;
 }
