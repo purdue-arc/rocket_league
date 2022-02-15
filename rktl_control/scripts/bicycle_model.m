@@ -7,8 +7,8 @@ syms x y theta v beta DELTA_T CAR_LENGTH;  % input state
 next_x = x+ v*cos(theta+beta)*DELTA_T;
 next_y = y+ v*sin(theta+beta)*DELTA_T;
 
-radius = CAR_LENGTH/(2*sin(beta));
-next_theta = theta + radius*v*DELTA_T;
+curvature = 2*sin(beta)/CAR_LENGTH;
+next_theta = theta + curvature*v*DELTA_T;
 
 % compute jacobian
 state = [x; y; theta; v; beta];

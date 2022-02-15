@@ -8,14 +8,14 @@ global DELTA_T CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
 ORIGIN_STD_DEV = 0.1;
 HEADING_STD_DEV = deg2rad(10);
 DELTA_T = 0.1;
-DURATION = 60;
+DURATION = 10;
 
 
 CAR_LENGTH = .01;               % wheel to wheel dist, m
 MAX_STEERING = deg2rad(15);     % center-side throw, rad
-STEERING_RATE = deg2rad(30);    % roc steering, rad per sec
+STEERING_RATE = deg2rad(5);    % roc steering, rad per sec
 MAX_SPEED = 1;                  % max speed, m/s
-SPEED_RATE = 1;                 % roc speed, m/s2
+SPEED_RATE = 0.1;                 % roc speed, m/s2
 
 %% Generate random measurement data
 % pre-allocate matrix to hold output
@@ -31,7 +31,7 @@ for i = 1:size(raw_data,2)
     raw_data(:,i) = state(1:3);
 
     % generate random controls
-    control = rand([2,1]);
+    control = rand([2,1]).*[0.5; 2] + [0.5; -1];
 
     % step
     state = simulate(state, control);
@@ -84,8 +84,11 @@ end
 
 %% Graphical output
 figure
-plot(raw_data(1,:), raw_data(2,:))
-% plot(filtered_data(1,:), filtered_data(2,:))
+plot(raw_data(1,:), raw_data(2,:)), hold
+no_cov = reshape(filtered_data(:,1,:), [5,size(filtered_data,3)]);
+plot(no_cov(1,:), no_cov(2,:))
+plot(raw_data(1,1), raw_data(2,1), '*')
+
 
 %% Helper functions
 function [next_state, F] = extrapolate(state)
@@ -101,29 +104,28 @@ function [next_state, F] = extrapolate(state)
     next_state = state + DELTA_T * [
         v*cos(beta + theta);
         v*sin(beta + theta);
-        (CAR_LENGTH*v)/(2*sin(beta));
+        2*v*sin(beta)/CAR_LENGTH;
         0; 0];
 
     % calculate jacobian (linearization of this function about this point)
-    F = [1, 0, -DELTA_T*v*sin(beta + theta),          DELTA_T*cos(beta + theta),                      -DELTA_T*v*sin(beta + theta);
-         0, 1,  DELTA_T*v*cos(beta + theta),          DELTA_T*sin(beta + theta),                       DELTA_T*v*cos(beta + theta);
-         0, 0,                            1, (CAR_LENGTH*DELTA_T)/(2*sin(beta)), -(CAR_LENGTH*DELTA_T*v*cos(beta))/(2*sin(beta)^2);
-         0, 0,                            0,                                  1,                                                 0;
-         0, 0,                            0,                                  0,                                                 1];
+    F = [1, 0, -DELTA_T*v*sin(beta + theta),        DELTA_T*cos(beta + theta),       -DELTA_T*v*sin(beta + theta);
+        0, 1,  DELTA_T*v*cos(beta + theta),        DELTA_T*sin(beta + theta),        DELTA_T*v*cos(beta + theta);
+        0, 0,                            1, (2*DELTA_T*sin(beta))/CAR_LENGTH, (2*DELTA_T*v*cos(beta))/CAR_LENGTH;
+        0, 0,                            0,                                1,                                  0;
+        0, 0,                            0,                                0,                                  1];
 end
 
 function next_state = simulate(state, control)
     % simple bicycle model with control
     global DELTA_T CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
 
-    % disect state
+    % unpack input
     x = state(1);
     y = state(2);
     theta = state(3);
     v = state(4);
     beta = state(5);
 
-    % disect control
     v_rear_ref = MAX_SPEED*control(1);
     psi_ref = MAX_STEERING*control(2);
 
@@ -156,7 +158,7 @@ function next_state = simulate(state, control)
     next_state = [
         x + v*cos(beta + theta)*DELTA_T;
         y + v*sin(beta + theta)*DELTA_T;
-        theta + (CAR_LENGTH*v)/(2*sin(beta))*DELTA_T;
+        theta + 2*v*sin(beta)/CAR_LENGTH*DELTA_T;
         v;
         beta];
 end
