@@ -3,97 +3,124 @@ clear
 close all
 
 %% Constants
-global DELTA_T CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
+% timing
+DURATION = 30;                  % duration of data, sec
+FILTER_DELTA_T = 0.1;           % step size of filter, sec
+TRUTH_DELTA_T = 0.01;           % step size of ground truth simulation, sec
+% ^ THESE NEED TO BE INTEGER MULTIPLES
 
-ORIGIN_STD_DEV = 0.1;
-HEADING_STD_DEV = deg2rad(10);
-DELTA_T = 0.1;
-DURATION = 10;
+% uncertainties
+ORIGIN_LOC_STD_DEV = 0.1;           % uncertainty of initial location, m
+ORIGIN_DIR_STD_DEV = deg2rad(10);   % uncertainty of initial heading, rad
+
+MEAS_LOC_STD_DEV = 0.05;            % uncertainty of location measurement, m
+MEAS_DIR_STD_DEV = deg2rad(5);      % uncertainty of heading measurment, rad
 
 
-CAR_LENGTH = .01;               % wheel to wheel dist, m
-MAX_STEERING = deg2rad(15);     % center-side throw, rad
-STEERING_RATE = deg2rad(5);    % roc steering, rad per sec
-MAX_SPEED = 1;                  % max speed, m/s
-SPEED_RATE = 0.1;                 % roc speed, m/s2
+% physical properties of car
+global CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
+CAR_LENGTH = .01;              % wheel to wheel dist, m
+MAX_STEERING = deg2rad(15);    % center-side throw, rad
+STEERING_RATE = deg2rad(5);    % ROC steering, rad per sec
+MAX_SPEED = 1;                 % max speed, m/s
+SPEED_RATE = 0.1;              % ROC speed, m/s2
 
-%% Generate random measurement data
+%% Generate randomized ground truth data
 % pre-allocate matrix to hold output
-% each column is x, y, theta
+% each column is full state (x, y, theta, v, beta)
 % new column for each time step
-raw_data = zeros([3,DURATION/DELTA_T]);
+ground_truth = zeros(5, DURATION/TRUTH_DELTA_T);
 
 % generate initial state
 % random position, zero velocity, centered steering
-state = randn([5,1]).*[ORIGIN_STD_DEV; ORIGIN_STD_DEV; HEADING_STD_DEV; 0; 0];
-for i = 1:size(raw_data,2)
+state = randn(5, 1).*[ORIGIN_LOC_STD_DEV; ORIGIN_LOC_STD_DEV; ORIGIN_DIR_STD_DEV; 0; 0];
+
+for i = 1:size(ground_truth,2)
     % add to raw_data
-    raw_data(:,i) = state(1:3);
+    ground_truth(:,i) = state;
 
     % generate random controls
-    control = rand([2,1]).*[0.5; 2] + [0.5; -1];
+    % throttle uniform between 0.5 and 1.0
+    % steering uniform between -1.0 and 1.0
+    control = rand(2, 1).*[0.5; 2] + [0.5; -1];
 
     % step
-    state = simulate(state, control);
+    state = simulate(state, control, TRUTH_DELTA_T);
 end
 
+%% Calculate resulting measurement data
+% each column is measurement (x, y, theta)
+% new column for each time step
+measurements = ground_truth(1:3, 1:(FILTER_DELTA_T/TRUTH_DELTA_T):end);
 
-%% Initial guess
-% state: [x, y, yaw, v, beta]^T
-state = [0;0;0;0;0];
+% add artificial noise
+measurements = measurements + randn(size(measurements)).*[MEAS_LOC_STD_DEV; MEAS_LOC_STD_DEV; MEAS_DIR_STD_DEV];
 
-% covariance
-% assume variances along diagonal
-cov = eye(5).*[ORIGIN_STD_DEV; ORIGIN_STD_DEV; HEADING_STD_DEV; 0.01; deg2rad(1)].^2;
-
-%% PARAMETERS
-% process noise
-% this is wrong, but maybe an OK guess
+%% Paramters for EKF
+% @TODO process noise
+% this is a rough guess and should be formally calculated at some point
 Q = eye(5).*[0.001; 0.001; deg2rad(1); 0.1; deg2rad(3)].^2;
 
 % observation matrix (can only see position, not internal state)
-H = [eye(3), zeros([3,2])];
+H = [eye(3), zeros(3,2)];
 
 % measurement uncertainty
-R = eye(3).*[0.05; 0.05; deg2rad(5)].^2;
+% assume variances along diagonal
+R = eye(3).*[MEAS_LOC_STD_DEV; MEAS_LOC_STD_DEV; MEAS_DIR_STD_DEV].^2;
 
+%% Initial guess
+state = [0; 0; 0; 0; 0];
+
+% covariance
+% assume variances along diagonal
+% pick something small for v, beta
+cov = eye(5).*[ORIGIN_LOC_STD_DEV; ORIGIN_LOC_STD_DEV; ORIGIN_DIR_STD_DEV; 0.01; deg2rad(1)].^2;
 
 %% Process via Kalman filter
-% pre-allocate matrix to hold output
-% first column is state
-% others are covariance
-% each page corresponds to time step
-filtered_data = zeros([5,6,size(raw_data,1)]);
+% pre-allocate matrices to hold output
+estimates = zeros(5, size(measurements,2));
 
-for i = 1:size(raw_data,2)
-    % Add to filtered_data
-    filtered_data(:,:,i) = [state, cov];
+% each page corresponds to time step
+covariances = zeros(5,5,size(measurements,2));
+
+for i = 1:size(measurements,2)
+    % Add to outputs
+    estimates(:,i) = state;
+    covariances(:,:,i) = cov;
 
     % Extrapolate
-    [next_state, F] = extrapolate(state);
+    [next_state, F] = extrapolate(state, FILTER_DELTA_T);
     next_cov = F*cov*F'+ Q;
 
     % Kalman gain
     gain = next_cov*H'/(H*next_cov*H'+R);
 
     % Update
-    meas = raw_data(:,i);
-    state = next_state + gain*(meas - H*next_state);
+    state = next_state + gain*(measurements(:,i) - H*next_state);
     cov = (eye(5)-gain*H)*next_cov*(eye(5)-gain*H)' + gain*R*gain';
 end
 
 %% Graphical output
 figure
-plot(raw_data(1,:), raw_data(2,:)), hold
-no_cov = reshape(filtered_data(:,1,:), [5,size(filtered_data,3)]);
-plot(no_cov(1,:), no_cov(2,:))
-plot(raw_data(1,1), raw_data(2,1), '*')
+% plot ground truth (no noise)
+plot(ground_truth(1,:), ground_truth(2,:))
+hold, grid on
 
+% plot measurements (with noise)
+plot(measurements(1,:), measurements(2,:), 'x')
+
+% plot filter output
+plot(estimates(1,:), estimates(2,:), '--')
+
+% plot origin
+plot(ground_truth(1,1), ground_truth(2,1), '*b')
+
+legend(["Ground Truth", "Measurements", "Estimates"])
 
 %% Helper functions
-function [next_state, F] = extrapolate(state)
+function [next_state, F] = extrapolate(state, DELTA_T)
     % equations were derived in bicyle_model.m
-    global DELTA_T CAR_LENGTH;
+    global CAR_LENGTH;
 
     % disect state
     theta = state(3);
@@ -115,9 +142,9 @@ function [next_state, F] = extrapolate(state)
         0, 0,                            0,                                0,                                  1];
 end
 
-function next_state = simulate(state, control)
+function next_state = simulate(state, control, DELTA_T)
     % simple bicycle model with control
-    global DELTA_T CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
+    global CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
 
     % unpack input
     x = state(1);
