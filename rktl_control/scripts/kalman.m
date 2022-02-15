@@ -16,8 +16,8 @@ ORIGIN_DIR_STD_DEV = deg2rad(10);   % uncertainty of initial heading, rad
 MEAS_LOC_STD_DEV = 0.05;            % uncertainty of location measurement, m
 MEAS_DIR_STD_DEV = deg2rad(5);      % uncertainty of heading measurment, rad
 
-PROC_VEL_STD_DEV = 0.05;           % process noise for velocity, m/s
-PROC_BETA_STD_DEV = deg2rad(0.75);  % process noise for beta, rad
+PROC_VEL_STD_DEV = 0.05;           % process noise for rear wheel velocity, m/s
+PROC_PSI_STD_DEV = deg2rad(0.75);  % process noise for steering angle, rad
 
 % physical properties of car
 global CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
@@ -29,7 +29,7 @@ SPEED_RATE = 1;                 % ROC speed, m/s2
 
 %% Generate randomized ground truth data
 % pre-allocate matrix to hold output
-% each column is full state (x, y, theta, v, beta)
+% each column is full state (x, y, theta, v_rear, psi)
 % new column for each time step
 ground_truth = zeros(5, DURATION/TRUTH_DELTA_T);
 
@@ -65,22 +65,23 @@ measurements = measurements + randn(size(measurements)).*[MEAS_LOC_STD_DEV; MEAS
 
 %% Paramters for EKF
 % process noise
-% project v, beta error onto model later
-Q0 = eye(5).*[0; 0; 0; PROC_VEL_STD_DEV; PROC_BETA_STD_DEV].^2;
+% assume steering and rear wheel velocity are independent
+% projecting v_rear, psi noise onto model requires linearization done at each time step
+Q0 = eye(5).*[0; 0; 0; PROC_VEL_STD_DEV; PROC_PSI_STD_DEV].^2;
 
 % observation matrix (can only see position, not internal state)
 H = [eye(3), zeros(3,2)];
 
 % measurement uncertainty
-% assume variances along diagonal
+% assume independence between x, y, theta
 R = eye(3).*[MEAS_LOC_STD_DEV; MEAS_LOC_STD_DEV; MEAS_DIR_STD_DEV].^2;
 
 %% Initial guess
 state = [0; 0; 0; 0; 0];
 
 % covariance
-% assume variances along diagonal
-% pick something small for v, beta
+% assume independence between all
+% pick something small for v_rear, psi
 cov = eye(5).*[ORIGIN_LOC_STD_DEV; ORIGIN_LOC_STD_DEV; ORIGIN_DIR_STD_DEV; 0.01; deg2rad(1)].^2;
 
 %% Process via Kalman filter
@@ -140,27 +141,34 @@ end
 
 %% Helper functions
 function [next_state, F] = extrapolate(state, DELTA_T)
-    % equations were derived in bicyle_model.m
+    % using bicycle model, extrapolate future state
     global CAR_LENGTH;
 
-    % disect state
+    % unpack input
+    x = state(1);
+    y = state(2);
     theta = state(3);
-    v = state(4);
-    beta = state(5);
+    v_rear = state(4);
+    psi = state(5);
 
-    % using bicycle model, extrapolate future state
-    next_state = state + DELTA_T * [
-        v*cos(beta + theta);
-        v*sin(beta + theta);
-        2*v*sin(beta)/CAR_LENGTH;
-        0; 0];
+    % equations were derived in bicyle_model.m
+    % calculate predicted next state
+    next_state = [
+        x + DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
+        y + DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
+        theta + (DELTA_T*v_rear*tan(psi))/CAR_LENGTH;
+        v_rear;
+        psi
+    ];
 
     % calculate jacobian (linearization of this function about this point)
-    F = [1, 0, -DELTA_T*v*sin(beta + theta),        DELTA_T*cos(beta + theta),       -DELTA_T*v*sin(beta + theta);
-         0, 1,  DELTA_T*v*cos(beta + theta),        DELTA_T*sin(beta + theta),        DELTA_T*v*cos(beta + theta);
-         0, 0,                            1, (2*DELTA_T*sin(beta))/CAR_LENGTH, (2*DELTA_T*v*cos(beta))/CAR_LENGTH;
-         0, 0,                            0,                                1,                                  0;
-         0, 0,                            0,                                0,                                  1];
+    F = [
+        1, 0, -DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), DELTA_T*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), (DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*tan(psi)*(tan(psi)^2 + 1))/(4*(tan(psi)^2/4 + 1)^(1/2)) - (DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/2 + 1/2))/(tan(psi)^2/4 + 1)^(1/2);
+        0, 1,  DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), DELTA_T*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), (DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/2 + 1/2))/(tan(psi)^2/4 + 1)^(1/2) + (DELTA_T*v_rear*tan(psi)*sin(theta + atan(tan(psi)/2))*(tan(psi)^2 + 1))/(4*(tan(psi)^2/4 + 1)^(1/2));
+        0, 0,                                                                      1,                                  (DELTA_T*tan(psi))/CAR_LENGTH,                                                                                                                                                         (DELTA_T*v_rear*(tan(psi)^2 + 1))/CAR_LENGTH;
+        0, 0,                                                                      0,                                                              1,                                                                                                                                                                                                    0;
+        0, 0,                                                                      0,                                                              0,                                                                                                                                                                                                    1
+    ];
 end
 
 function next_state = simulate(state, control, DELTA_T)
@@ -171,17 +179,13 @@ function next_state = simulate(state, control, DELTA_T)
     x = state(1);
     y = state(2);
     theta = state(3);
-    v = state(4);
-    beta = state(5);
+    v_rear = state(4);
+    psi = state(5);
 
     v_rear_ref = MAX_SPEED*control(1);
     psi_ref = MAX_STEERING*control(2);
 
-    % convert v, beta to v_rear, psi
-    v_rear = v*cos(beta);
-    psi = atan(2*tan(beta));
-
-    % update v_rear, psi
+    % update v_rear, psi using massless, constant acceleration
     if abs(v_rear_ref - v_rear) < SPEED_RATE*DELTA_T
         v_rear = v_rear_ref;
     elseif v_rear_ref > v_rear
@@ -198,15 +202,12 @@ function next_state = simulate(state, control, DELTA_T)
         psi = psi - STEERING_RATE*DELTA_T;
     end
 
-    % convert v_rear, psi to v, beta
-    v = v_rear/cos(beta);
-    beta = atan(tan(psi)/2);
-
     % using bicycle model, extrapolate future state
     next_state = [
-        x + v*cos(beta + theta)*DELTA_T;
-        y + v*sin(beta + theta)*DELTA_T;
-        theta + 2*v*sin(beta)/CAR_LENGTH*DELTA_T;
-        v;
-        beta];
+        x + DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
+        y + DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
+        theta + (DELTA_T*v_rear*tan(psi))/CAR_LENGTH;
+        v_rear;
+        psi
+    ];
 end
