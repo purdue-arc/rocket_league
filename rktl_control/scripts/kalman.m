@@ -116,7 +116,7 @@ hold, grid on
 plot(estimates(1,:), estimates(2,:), '--')
 plot(measurements(1,:), measurements(2,:), '.')
 plot(ground_truth(1,1), ground_truth(2,1), '*b')
-legend(["Ground Truth", "Measurements", "Estimates"])
+legend(["Ground Truth", "Estimates", "Measurements"])
 title("XY tracking")
 
 for i = 1:5
@@ -134,8 +134,8 @@ for i = 1:5
         case 1; title("X tracking")
         case 2; title("Y tracking")
         case 3; title("\theta tracking")
-        case 4; title("V tracking")
-        case 5; title("\beta tracking")
+        case 4; title("rear wheel velocity tracking")
+        case 5; title("steering angle tracking")
     end
 end
 
