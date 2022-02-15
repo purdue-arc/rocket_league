@@ -116,7 +116,7 @@ hold, grid on
 plot(estimates(1,:), estimates(2,:), '--')
 plot(measurements(1,:), measurements(2,:), '.')
 plot(ground_truth(1,1), ground_truth(2,1), '*b')
-legend(["Ground Truth", "Estimates", "Measurements"])
+legend(["Ground Truth", "Estimates", "Measurements"], 'Location', 'Best')
 title("XY tracking")
 xlabel("X Position, m")
 ylabel("Y Position, m")
@@ -130,9 +130,9 @@ for i = 1:5
     plot(filter_time, estimates(i,:), '--')
     if (i <= 3)
         plot(filter_time, measurements(i,:), '.')
-        legend(["Ground Truth", "Estimates", "Measurements"])
+        legend(["Ground Truth", "Estimates", "Measurements"], 'Location', 'Best')
     else
-        legend(["Ground Truth", "Estimates"])
+        legend(["Ground Truth", "Estimates"], 'Location', 'Best')
     end
     xlabel("Time, sec")
     switch i
