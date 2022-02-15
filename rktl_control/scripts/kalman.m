@@ -16,7 +16,7 @@ ORIGIN_DIR_STD_DEV = deg2rad(10);   % uncertainty of initial heading, rad
 MEAS_LOC_STD_DEV = 0.05;            % uncertainty of location measurement, m
 MEAS_DIR_STD_DEV = deg2rad(5);      % uncertainty of heading measurment, rad
 
-PROC_VEL_STD_DEV = 0.025;           % process noise for velocity, m/s
+PROC_VEL_STD_DEV = 0.05;           % process noise for velocity, m/s
 PROC_BETA_STD_DEV = deg2rad(0.75);  % process noise for beta, rad
 
 % physical properties of car
@@ -97,8 +97,7 @@ for i = 1:size(measurements,2)
 
     % Extrapolate
     [next_state, F] = extrapolate(state, FILTER_DELTA_T);
-    Q = F*Q0*F';
-    next_cov = F*cov*F'+ Q;
+    next_cov = F*cov*F'+ F*Q0*F';
 
     % Kalman gain
     gain = next_cov*H'/(H*next_cov*H'+R);
