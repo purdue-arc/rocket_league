@@ -20,12 +20,12 @@ PROC_VEL_STD_DEV = 0.05;           % process noise for rear wheel velocity, m/s
 PROC_PSI_STD_DEV = deg2rad(0.75);  % process noise for steering angle, rad
 
 % physical properties of car
-global CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
+global CAR_LENGTH MAX_SPEED THROTTLE_TAU STEERING_THROW STEERING_RATE
 CAR_LENGTH = .01;               % wheel to wheel dist, m
-MAX_STEERING = deg2rad(15);     % center-side throw, rad
-STEERING_RATE = deg2rad(30);    % ROC steering, rad per sec
 MAX_SPEED = 1;                  % max speed, m/s
-SPEED_RATE = 1;                 % ROC speed, m/s2
+THROTTLE_TAU = 0.25;            % time constant for changing speed, sec
+STEERING_THROW = deg2rad(15);   % center-side steering throw, rad
+STEERING_RATE = deg2rad(30);    % ROC steering, rad per sec
 
 %% Generate randomized ground truth data
 % pre-allocate matrix to hold output
@@ -142,7 +142,7 @@ end
 %% Helper functions
 function [next_state, F] = extrapolate(state, DELTA_T)
     % using bicycle model, extrapolate future state
-    global CAR_LENGTH;
+    global CAR_LENGTH
 
     % unpack input
     x = state(1);
@@ -173,7 +173,7 @@ end
 
 function next_state = simulate(state, control, DELTA_T)
     % simple bicycle model with control
-    global CAR_LENGTH MAX_STEERING STEERING_RATE MAX_SPEED SPEED_RATE;
+    global CAR_LENGTH MAX_SPEED THROTTLE_TAU STEERING_THROW STEERING_RATE
 
     % unpack input
     x = state(1);
@@ -183,17 +183,12 @@ function next_state = simulate(state, control, DELTA_T)
     psi = state(5);
 
     v_rear_ref = MAX_SPEED*control(1);
-    psi_ref = MAX_STEERING*control(2);
+    psi_ref = STEERING_THROW*control(2);
 
-    % update v_rear, psi using massless, constant acceleration
-    if abs(v_rear_ref - v_rear) < SPEED_RATE*DELTA_T
-        v_rear = v_rear_ref;
-    elseif v_rear_ref > v_rear
-        v_rear = v_rear + SPEED_RATE*DELTA_T;
-    else
-        v_rear = v_rear - SPEED_RATE*DELTA_T;
-    end
+    % update rear wheel velocity using 1st order model
+    v_rear = (v_rear-v_rear_ref)*exp(-DELTA_T/THROTTLE_TAU) + v_rear_ref;
 
+    % update steering angle using massless acceleration to a fixed rate
     if abs(psi_ref - psi) < STEERING_RATE*DELTA_T
         psi = psi_ref;
     elseif psi_ref > psi
