@@ -118,24 +118,29 @@ plot(measurements(1,:), measurements(2,:), '.')
 plot(ground_truth(1,1), ground_truth(2,1), '*b')
 legend(["Ground Truth", "Estimates", "Measurements"])
 title("XY tracking")
+xlabel("X Position, m")
+ylabel("Y Position, m")
 
+truth_time = 0:TRUTH_DELTA_T:(DURATION-TRUTH_DELTA_T);
+filter_time = 0:FILTER_DELTA_T:(DURATION-FILTER_DELTA_T);
 for i = 1:5
     subplot(2,3,i+1)
-    plot(ground_truth(i, 1:(FILTER_DELTA_T/TRUTH_DELTA_T):end))
+    plot(truth_time, ground_truth(i, :))
     hold, grid on
-    plot(estimates(i,:), '--')
+    plot(filter_time, estimates(i,:), '--')
     if (i <= 3)
-        plot(measurements(i,:), '.')
+        plot(filter_time, measurements(i,:), '.')
         legend(["Ground Truth", "Estimates", "Measurements"])
     else
         legend(["Ground Truth", "Estimates"])
     end
+    xlabel("Time, sec")
     switch i
-        case 1; title("X tracking")
-        case 2; title("Y tracking")
-        case 3; title("\theta tracking")
-        case 4; title("rear wheel velocity tracking")
-        case 5; title("steering angle tracking")
+        case 1; title("X tracking"); ylabel("X Position, m")
+        case 2; title("Y tracking"); ylabel("Y Position, m")
+        case 3; title("\theta tracking"); ylabel("Theta, rad")
+        case 4; title("rear wheel velocity tracking"); ylabel("Rear wheel velocity, m/s")
+        case 5; title("steering angle tracking"); ylabel("Steering angle, rad")
     end
 end
 
