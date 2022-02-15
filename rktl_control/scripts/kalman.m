@@ -110,42 +110,34 @@ end
 
 %% Graphical output
 figure
-subplot(2,2,1)
+subplot(2,3,1)
 plot(ground_truth(1,:), ground_truth(2,:))
 hold, grid on
-plot(measurements(1,:), measurements(2,:), 'x')
 plot(estimates(1,:), estimates(2,:), '--')
+plot(measurements(1,:), measurements(2,:), '.')
 plot(ground_truth(1,1), ground_truth(2,1), '*b')
 legend(["Ground Truth", "Measurements", "Estimates"])
 title("XY tracking")
 
-subplot(2,2,2)
-i = 1;
-plot(ground_truth(i, 1:(FILTER_DELTA_T/TRUTH_DELTA_T):end))
-hold, grid on
-plot(measurements(i,:), 'x')
-plot(estimates(i,:), '--')
-legend(["Ground Truth", "Measurements", "Estimates"])
-title("X tracking")
-
-subplot(2,2,3)
-i = 2;
-plot(ground_truth(i, 1:(FILTER_DELTA_T/TRUTH_DELTA_T):end))
-hold, grid on
-plot(measurements(i,:), 'x')
-plot(estimates(i,:), '--')
-legend(["Ground Truth", "Measurements", "Estimates"])
-title("Y tracking")
-
-subplot(2,2,4)
-i = 3;
-plot(ground_truth(i, 1:(FILTER_DELTA_T/TRUTH_DELTA_T):end))
-hold, grid on
-plot(measurements(i,:), 'x')
-plot(estimates(i,:), '--')
-legend(["Ground Truth", "Measurements", "Estimates"])
-title("Theta tracking")
-
+for i = 1:5
+    subplot(2,3,i+1)
+    plot(ground_truth(i, 1:(FILTER_DELTA_T/TRUTH_DELTA_T):end))
+    hold, grid on
+    plot(estimates(i,:), '--')
+    if (i <= 3)
+        plot(measurements(i,:), '.')
+        legend(["Ground Truth", "Estimates", "Measurements"])
+    else
+        legend(["Ground Truth", "Estimates"])
+    end
+    switch i
+        case 1; title("X tracking")
+        case 2; title("Y tracking")
+        case 3; title("\theta tracking")
+        case 4; title("V tracking")
+        case 5; title("\beta tracking")
+    end
+end
 
 %% Helper functions
 function [next_state, F] = extrapolate(state, DELTA_T)
