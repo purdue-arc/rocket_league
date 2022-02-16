@@ -1,3 +1,0 @@
-geometry_msgs/Pose target_pose
-float64 target_speed
-std_msgs/Duration target_duration_prev

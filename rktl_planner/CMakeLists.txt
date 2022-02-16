@@ -17,14 +17,6 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_python_setup()
 
 # msg and srv
-add_message_files(
-  FILES
-  BezierCurve.msg
-  BezierPath.msg
-  MultiBezierPath.msg
-  Waypoint.msg
-)
-
 add_service_files(
   FILES
   CreateBezierPath.srv
@@ -32,6 +24,7 @@ add_service_files(
 
 generate_messages(
   DEPENDENCIES
+  rktl_msgs
   std_srvs
   std_msgs
   geometry_msgs

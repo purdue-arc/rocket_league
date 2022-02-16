@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from rktl_planner.msg import BezierCurve as BezierCurveMsg
 from geometry_msgs.msg import Point
 from math import pow
 
@@ -12,10 +11,7 @@ class BezierCurve:
         self.order = None
 
         if args:
-            if len(args) == 1 and type(args[0]) is BezierCurveMsg:
-                self.order = args[0].order
-                self.control_points = args[0].control_points
-            elif len(args) == 1 and type(args[0]) is list:
+            if len(args) == 1 and type(args[0]) is list:
                 self.control_points = args[0]
             elif len(args) == 1 and type(args[0]) is int:
                 self.order = args[0]
@@ -26,10 +22,7 @@ class BezierCurve:
                 self.control_points = args
         if kwargs:
             for k, v in kwargs.items():
-                if k == 'msg':
-                    self.order = v.order
-                    self.control_points = v.control_points
-                elif k == 'order':
+                if k == 'order':
                     if type(v) is not int:
                         raise ValueError(f'{k!r} must be {int}, got {type(v)}')
                     self.order = v
@@ -103,10 +96,6 @@ class BezierCurve:
 
     def deriv(self, t):
         return self.hodograph().at(t)
-
-    def to_msg(self):
-        msg = BezierCurveMsg(order=self.order, control_points=self.control_points)
-        return msg
 
     def de_casteljau(self, t):
         # b[j][i] = b_i^(j)

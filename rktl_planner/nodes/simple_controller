@@ -6,31 +6,44 @@ from rktl_planner import BezierPath
 from tf.transformations import quaternion_from_euler
 from std_msgs.msg import Duration
 from nav_msgs.msg import Odometry
-from rktl_planner.msg import Waypoint, MultiBezierPath
+from geometry_msgs.msg import Pose
+from rktl_msgs.msg import BezierPath as BezierPathMsg, Path as PathMsg
 from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest
+
 
 class SimpleController:
     def __init__(self):
         rospy.init_node('simple_controller')
 
-        self.car_odom_topic = rospy.get_param('~car_odom_topic', '/car0/odom')
-        self.ball_odom_topic = rospy.get_param('~ball_odom_topic', '/ball/odom')
-        self.reset_service = rospy.get_param('~reset_service', 'reset_controller')
-        self.path_service = rospy.get_param('~path_service', 'create_bezier_path')
-        self.path_topic = rospy.get_param('~path_topic', '/car0/bezier_path')
-        
+        self.car_odom_topic = rospy.get_param('~car_odom_topic', 'odom')
+        self.ball_odom_topic = rospy.get_param(
+            '~ball_odom_topic', '/ball/odom')
+        self.reset_service = rospy.get_param(
+            '~reset_service', 'reset_controller')
+        self.path_service = rospy.get_param(
+            '~path_service', 'create_bezier_path')
+        self.path_topic = rospy.get_param('~path_topic', 'path')
+        self.bezier_path_topic = rospy.get_param(
+            '~bezier_path_topic', 'bezier_path')
 
         self.car_odom = Odometry()
         self.ball_odom = Odometry()
 
-        self.car_sub = rospy.Subscriber(self.car_odom_topic, Odometry, self.car_odom_callback)
-        self.ball_sub = rospy.Subscriber(self.ball_odom_topic,   Odometry, self.ball_odom_callback)
-        self.reset_server = rospy.Service(self.reset_service, Empty, self.reset)
-        self.path_client = rospy.ServiceProxy(self.path_service, CreateBezierPath)
-        self.path_pub = rospy.Publisher(self.path_topic, MultiBezierPath, queue_size=1, latch=True)
-
-        self.path = MultiBezierPath()
+        self.car_sub = rospy.Subscriber(
+            self.car_odom_topic, Odometry, self.car_odom_callback)
+        self.ball_sub = rospy.Subscriber(
+            self.ball_odom_topic,   Odometry, self.ball_odom_callback)
+        self.reset_server = rospy.Service(
+            self.reset_service, Empty, self.reset)
+        self.path_client = rospy.ServiceProxy(
+            self.path_service, CreateBezierPath)
+        if rospy.has_param('~linear_path_topic'):
+            self.linear_path_pub = rospy.Publisher(rospy.get_param(
+                '~linear_path_topic'), PathMsg, queue_size=1, latch=True)
+        if rospy.has_param('~bezier_path_topic'):
+            self.bezier_path_pub = rospy.Publisher(rospy.get_param(
+                '~bezier_path_topic'), BezierPathMsg, queue_size=1, latch=True)
         self.goal_pos = (rospy.get_param('/FIELD_LENGTH', 1) / 2, 0.)
 
         rospy.spin()
@@ -41,54 +54,56 @@ class SimpleController:
     def ball_odom_callback(self, data: Odometry):
         self.ball_odom = data
 
-    def reset(self, req: EmptyRequest):
+    def reset(self, _: EmptyRequest):
+        req = CreateBezierPathRequest()
+        req.bezier_segment_duration.data = rospy.Duration(0.5)
+        req.linear_segment_duration.data = rospy.Duration(0.01)
+
+        # Target 0 (car pos)
+        pose0 = Pose()
+        pose0.position.x = self.car_odom.pose.pose.position.x
+        pose0.position.y = self.car_odom.pose.pose.position.y
+        pose0.position.z = 0.0
+        pose0.orientation = self.car_odom.pose.pose.orientation
+        req.target_poses.append(pose0)
+        req.target_speeds.append(0.0)
+        req.target_durations.append(Duration(data=rospy.Duration(5)))
+
+        # Target 1 (ball pos)
         final_vec_x = self.goal_pos[0] - self.ball_odom.pose.pose.position.x
         final_vec_y = self.goal_pos[1] - self.ball_odom.pose.pose.position.y
-        final_quat = quaternion_from_euler(0., 0., math.atan2(final_vec_y, final_vec_x))
+        final_quat = quaternion_from_euler(
+            0., 0., math.atan2(final_vec_y, final_vec_x))
         final_vec_len = math.sqrt(final_vec_x ** 2 + final_vec_y ** 2)
+        pose1 = Pose()
+        pose1.position.x = self.ball_odom.pose.pose.position.x
+        pose1.position.y = self.ball_odom.pose.pose.position.y
+        pose1.position.z = 0.0
+        pose1.orientation.x = final_quat[0]
+        pose1.orientation.y = final_quat[1]
+        pose1.orientation.z = final_quat[2]
+        pose1.orientation.w = final_quat[3]
+        req.target_poses.append(pose1)
+        req.target_speeds.append(1.0)
+        req.target_durations.append(Duration(data=rospy.Duration(0.5)))
 
-        waypoint1 = Waypoint()
-        waypoint1.target_pose.position.x = self.car_odom.pose.pose.position.x
-        waypoint1.target_pose.position.y = self.car_odom.pose.pose.position.y
-        waypoint1.target_pose.position.z = 0.0
-        waypoint1.target_pose.orientation = self.car_odom.pose.pose.orientation
-        waypoint1.target_speed = 0.0
+        # Target 2 (stop)
+        pose2 = Pose()
+        pose2.position.x = pose1.position.x + final_vec_x / final_vec_len / 2
+        pose2.position.y = pose1.position.y + final_vec_y / final_vec_len / 2
+        pose2.position.z = 0.0
+        pose2.orientation = pose2.orientation
+        req.target_poses.append(pose2)
+        req.target_speeds.append(0.0)
 
-        waypoint2 = Waypoint()
-        waypoint2.target_pose.position.x = self.ball_odom.pose.pose.position.x
-        waypoint2.target_pose.position.y = self.ball_odom.pose.pose.position.y
-        waypoint2.target_pose.position.z = 0.0
-        waypoint2.target_pose.orientation.x = final_quat[0]
-        waypoint2.target_pose.orientation.y = final_quat[1]
-        waypoint2.target_pose.orientation.z = final_quat[2]
-        waypoint2.target_pose.orientation.w = final_quat[3]
-        waypoint2.target_speed = 1.0
-        waypoint2.target_duration_prev.data = rospy.Duration(5)
-
-        waypoint3 = Waypoint()
-        waypoint3.target_pose.position.x = waypoint2.target_pose.position.x + final_vec_x / final_vec_len / 2
-        waypoint3.target_pose.position.y = waypoint2.target_pose.position.y + final_vec_y / final_vec_len / 2
-        waypoint3.target_pose.position.z = 0.0
-        waypoint3.target_pose.orientation = waypoint2.target_pose.orientation
-        waypoint3.target_speed = 0.0
-        waypoint3.target_duration_prev.data = rospy.Duration(1)
-        
-        path_request = CreateBezierPathRequest()
-        path_request.waypoints = [waypoint1, waypoint2, waypoint3]
-        path_request.max_segment_duration.data = rospy.Duration(0.1)
-        path_response = self.path_client(path_request)
-        self.path = path_response.path
-        print('-' * 64)
-        print('Waypoints:')
-        for wp in path_request.waypoints:
-            pos = wp.target_pose.position
-            print(f'    ({pos.x}, {pos.y}, {pos.z})')
-        print('Curves:')
-        for segment in self.path.segments:
-            print(f'    {BezierPath(segment)!r}')
-        self.path_pub.publish(self.path)
-        
+        # Send request
+        res = self.path_client(req)
+        if self.linear_path_pub:
+            self.linear_path_pub.publish(res.linear_path)
+        if self.bezier_path_pub:
+            self.bezier_path_pub.publish(res.bezier_path)
         return EmptyResponse()
+
 
 if __name__ == '__main__':
     SimpleController()

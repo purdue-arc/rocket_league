@@ -3,22 +3,24 @@
 import rospy
 import math
 from rospy import service
-from tf.transformations import euler_from_quaternion
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest, CreateBezierPathResponse
-from rktl_planner import BezierCurve, BezierPath
-from rktl_planner.msg import Waypoint, MultiBezierPath
-from geometry_msgs.msg import Point, Vector3
+from rktl_planner import BezierPath
+from rktl_msgs.msg import Path, Waypoint
+from geometry_msgs.msg import Pose, Point, Vector3
 
-def vel(wp: Waypoint):
-    q = wp.target_pose.orientation
+
+def vel(pose: Pose, speed: float):
+    q = pose.orientation
     angle = euler_from_quaternion([q.x, q.y, q.z, q.w])[2]
     head = Vector3()
     head.x = math.cos(angle)
     head.y = math.sin(angle)
     vel = Vector3()
-    vel.x = wp.target_speed * head.x
-    vel.y = wp.target_speed * head.y
+    vel.x = speed * head.x
+    vel.y = speed * head.y
     return vel, head
+
 
 def line(p: Point, v: Vector3, t: float):
     point = Point()
@@ -27,16 +29,17 @@ def line(p: Point, v: Vector3, t: float):
     point.z = p.z + t * v.z
     return point
 
-def create_segment(wp1: Waypoint, wp2: Waypoint, max_segment_duration: rospy.Duration):
-    control_points = [wp1.target_pose.position, wp2.target_pose.position]
-    start_vel, start_head = vel(wp1)
-    end_vel, end_head = vel(wp2)
-    duration = wp2.target_duration_prev.data.to_sec()
-    t_val = duration / 3
 
-    if wp1.target_speed == 0 or wp2.target_speed == 0:
-        if wp1.target_speed == 0 and wp2.target_speed == 0:
-            dist = math.sqrt((control_points[0].x - control_points[1].x) ** 2 + (control_points[0].y - control_points[1].y) ** 2)
+def create_segment(start_pose: Pose, end_pose: Pose, start_speed: float, end_speed: float, duration: rospy.Duration, segment_duration: rospy.Duration):
+    control_points = [start_pose.position, end_pose.position]
+    start_vel, start_head = vel(start_pose, start_speed)
+    end_vel, end_head = vel(end_pose, end_speed)
+    t_val = duration.to_sec() / 3
+
+    if start_speed == 0 or end_speed == 0:
+        if start_speed == 0 and end_speed == 0:
+            dist = math.sqrt((control_points[0].x - control_points[1].x)
+                             ** 2 + (control_points[0].y - control_points[1].y) ** 2)
             control_points = [
                 control_points[0],
                 line(control_points[0], start_head, dist / 3),
@@ -44,16 +47,19 @@ def create_segment(wp1: Waypoint, wp2: Waypoint, max_segment_duration: rospy.Dur
                 control_points[1]
             ]
         else:
-            t_val = duration / 4
-            if wp1.target_speed == 0:
-                control_points.insert(1, line(control_points[0], start_head, wp2.target_speed * t_val))
+            t_val = duration.to_sec() / 4
+            if start_speed == 0:
+                control_points.insert(
+                    1, line(control_points[0], start_head, end_speed * t_val))
             else:
-                control_points.insert(1, line(control_points[-1], end_head, -wp1.target_speed * t_val))
+                control_points.insert(
+                    1, line(control_points[-1], end_head, -start_speed * t_val))
     control_points.insert(1, line(control_points[0], start_vel, t_val))
-    control_points.insert(len(control_points) - 1, line(control_points[-1], end_vel, -t_val))
-    path = BezierPath(control_points, duration)
-    num_segments = math.ceil(duration / max_segment_duration.to_sec())
-    segment_length = duration / num_segments
+    control_points.insert(len(control_points) - 1,
+                          line(control_points[-1], end_vel, -t_val))
+    path = BezierPath(control_points, duration.to_sec())
+    num_segments = math.ceil(duration.to_sec() / segment_duration.to_sec())
+    segment_length = duration.to_sec() / num_segments
     segments = []
     for i in range(num_segments - 1):
         path0, path1 = path.split(segment_length)
@@ -62,16 +68,50 @@ def create_segment(wp1: Waypoint, wp2: Waypoint, max_segment_duration: rospy.Dur
     segments.append(path)
     return segments
 
+
 def bezier_path_server(req: CreateBezierPathRequest):
-    segments = []
-    waypoint_pairs = [(req.waypoints[i], req.waypoints[i + 1]) for i in range(len(req.waypoints) - 1)]
-    for wp1, wp2 in waypoint_pairs:
-        segments.extend(create_segment(wp1, wp2, req.max_segment_duration.data))
-    
-    path = MultiBezierPath([x.to_msg() for x in segments])
-    return CreateBezierPathResponse(path)
+    bezier_segments = []
+    durations = [0.]
+    for i in range(req.target_durations):
+        start_pose = req.target_pose[i]
+        end_pose = req.target_pose[i + 1]
+        start_speed = req.target_speeds[i]
+        end_speed = req.target_speeds[i + 1]
+        duration = req.target_durations[i]
+        segments = create_segment(start_pose, end_pose, start_speed,
+                                  end_speed, duration, req.bezier_segment_duration)
+        bezier_segments.extend(segments)
+        for segment in segments:
+            durations += durations[-1] + segment.duration
+
+    res = CreateBezierPathResponse()
+    res.bezier_path = [x.to_msg() for x in bezier_segments]
+    res.linear_path = Path()
+
+    num_segments = math.ceil(duration.to_sec() / req.segment_duration.to_sec())
+    segment_length = duration.to_sec() / num_segments
+    idx = 0
+    t = 0.
+    for i in range(num_segments):
+        heading = bezier_segments[idx].heading_at(t)
+        quat = quaternion_from_euler(0, 0, math.atan2(heading.y, heading.x))
+        wp = Waypoint()
+        wp.pose.position = bezier_segments[idx].at(t)
+        wp.pose.orientation.x = quat[0]
+        wp.pose.orientation.y = quat[1]
+        wp.pose.orientation.z = quat[2]
+        wp.pose.orientation.w = quat[3]
+        wp.twist.linear = bezier_segments[idx].vel_at(t)
+        res.linear_path.append(wp)
+        t += segment_length
+        while idx < len(durations) and t > durations[idx].duration.to_sec():
+            t -= durations[idx].duration.to_sec()
+            idx += 1
+    return res
+
 
 if __name__ == '__main__':
     rospy.init_node('bezier_path_server')
-    service = rospy.Service('create_bezier_path', CreateBezierPath, bezier_path_server)
+    service = rospy.Service('create_bezier_path',
+                            CreateBezierPath, bezier_path_server)
     rospy.spin()
