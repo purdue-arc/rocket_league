@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Downsample the raw perception data to produce synchronized poses.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+# ROS
+import rospy
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
+from collections import deque
+from math import sin,cos, atan2
+
+class PoseSynchronizer(object):
+    """Class to synchronize and buffer all poses."""
+    def __init__(self):
+        rospy.init_node('pose_synchronizer')
+
+        # constants
+        self.MAP_FRAME = rospy.get_param('~map_frame', 'map')
+        self.TOPICS = rospy.get_param('~topics')
+        self.PERIOD = rospy.Duration(1/rospy.get_param('~rate', 10.0))
+        self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.1))
+
+        # variables
+        self.buffers = {
+            topic : deque(maxlen=rospy.get_param('buffer_size', 15)) for topic in self.TOPICS
+        }
+        self.pubs = {
+            topic : rospy.Publisher(topic+'_sync', PoseWithCovarianceStamped, queue_size=1) for topic in self.TOPICS
+        }
+        for topic in self.TOPICS:
+            rospy.Subscriber(topic, PoseWithCovarianceStamped,
+                lambda msg, topic=topic: self.recv_pose(topic, msg))
+
+        # main loop
+        rate = rospy.Rate(1/self.PERIOD.to_sec())
+        while not rospy.is_shutdown():
+            now = rospy.Time.now()
+            for topic in self.TOPICS:
+                self.send_pose(topic, now)
+            try:
+                rate.sleep()
+            except rospy.ROSInterruptException:
+                pass
+
+    def recv_pose(self, topic, pose_msg):
+        """Callback for receiving new poses."""
+        assert pose_msg.header.frame_id == self.MAP_FRAME
+        # extract data
+        t = pose_msg.header.stamp
+        x = pose_msg.pose.pose.position.x
+        y = pose_msg.pose.pose.position.y
+        __, __, yaw = euler_from_quaternion([
+            pose_msg.pose.pose.orientation.x,
+            pose_msg.pose.pose.orientation.y,
+            pose_msg.pose.pose.orientation.z,
+            pose_msg.pose.pose.orientation.w
+        ])
+        sample = (t, x, y, yaw)
+        # append to buffer (thread safe)
+        self.buffers[topic].append(sample)
+
+    def send_pose(self, topic, now):
+        """Callback for processing received poses and publishing"""
+        avg_x = 0
+        avg_y = 0
+        avg_hx = 0
+        avg_hy = 0
+        samples = 0
+
+        # sum and count usable measurements in buffer
+        for _ in range(len(self.buffers[topic])):
+            t, x, y, yaw = self.buffers[topic].popleft()
+            # check if too old
+            if t < now - self.DELAY - self.PERIOD/2:
+                rospy.logdebug("%s: discarding pose from %f", topic, t.to_sec())
+                continue
+            # check if too new
+            if t > now - self.DELAY + self.PERIOD/2:
+                self.buffers[topic].append((t, x, y, yaw))
+                rospy.logdebug("%s: skipping recent pose from %f", topic, t.to_sec())
+                continue
+            # add to averages
+            else:
+                avg_x += x
+                avg_y += y
+                avg_hx += cos(yaw)
+                avg_hy += sin(yaw)
+                samples += 1
+
+        # check there is sufficient data
+        if samples == 0:
+            rospy.logwarn_throttle(1.0, "%s: insufficient pose data", topic)
+            return
+
+        # take avg
+        avg_x /= samples
+        avg_y /= samples
+        avg_yaw = atan2(avg_hy, avg_hx)
+        rospy.logdebug("%s: using %d samples", topic, samples)
+
+        # publish message
+        pose_msg = PoseWithCovarianceStamped()
+        pose_msg.header.stamp = now - self.DELAY
+        pose_msg.header.frame_id = self.MAP_FRAME
+        pose_msg.pose.pose.position.x = avg_x
+        pose_msg.pose.pose.position.y = avg_y
+        x, y, z, w = quaternion_from_euler(0, 0, avg_yaw)
+        pose_msg.pose.pose.orientation.x = x
+        pose_msg.pose.pose.orientation.y = y
+        pose_msg.pose.pose.orientation.z = z
+        pose_msg.pose.pose.orientation.w = w
+        self.pubs[topic].publish(pose_msg)
+
+if __name__ == "__main__":
+    PoseSynchronizer()
