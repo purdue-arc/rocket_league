@@ -16,8 +16,8 @@ ORIGIN_DIR_STD_DEV = deg2rad(10);   % uncertainty of initial heading, rad
 MEAS_LOC_STD_DEV = 0.05;            % uncertainty of location measurement, m
 MEAS_DIR_STD_DEV = deg2rad(5);      % uncertainty of heading measurment, rad
 
-PROC_VEL_STD_DEV = 0.05;           % process noise for rear wheel velocity, m/s
-PROC_PSI_STD_DEV = deg2rad(0.75);  % process noise for steering angle, rad
+PROC_PSI_STD_DEV = deg2rad(0.75);   % process noise for steering angle, rad
+PROC_ACL_STD_DEV = 0.1;             % process noise for rear wheel acceleration, m/s2
 
 % physical properties of car
 global CAR_LENGTH MAX_SPEED THROTTLE_TAU STEERING_THROW STEERING_RATE
@@ -67,29 +67,29 @@ measurements = measurements + randn(size(measurements)).*[MEAS_LOC_STD_DEV; MEAS
 % process noise
 % assume steering and rear wheel velocity are independent
 % projecting v_rear, psi noise onto model requires linearization done at each time step
-Q0 = eye(5).*[0; 0; 0; PROC_VEL_STD_DEV; PROC_PSI_STD_DEV].^2;
+Q0 = eye(6).*[0; 0; 0; 0; PROC_PSI_STD_DEV; PROC_ACL_STD_DEV].^2;
 
 % observation matrix (can only see position, not internal state)
-H = [eye(3), zeros(3,2)];
+H = [eye(3), zeros(3, 3)];
 
 % measurement uncertainty
 % assume independence between x, y, theta
 R = eye(3).*[MEAS_LOC_STD_DEV; MEAS_LOC_STD_DEV; MEAS_DIR_STD_DEV].^2;
 
 %% Initial guess
-state = [0; 0; 0; 0; 0];
+state = zeros(6, 1);
 
 % covariance
 % assume independence between all
-% pick something small for v_rear, psi
-cov = eye(5).*[ORIGIN_LOC_STD_DEV; ORIGIN_LOC_STD_DEV; ORIGIN_DIR_STD_DEV; 0.01; deg2rad(1)].^2;
+% pick something small for v_rear, psi, a_rear
+cov = eye(6).*[ORIGIN_LOC_STD_DEV; ORIGIN_LOC_STD_DEV; ORIGIN_DIR_STD_DEV; 0.01; deg2rad(1); 0.01].^2;
 
 %% Process via Kalman filter
 % pre-allocate matrices to hold output
-estimates = zeros(5, size(measurements,2));
+estimates = zeros(6, size(measurements,2));
 
 % each page corresponds to time step
-covariances = zeros(5,5,size(measurements,2));
+covariances = zeros(6, 6, size(measurements,2));
 
 for i = 1:size(measurements,2)
     % Add to outputs
@@ -105,7 +105,7 @@ for i = 1:size(measurements,2)
 
     % Update
     state = next_state + gain*(measurements(:,i) - H*next_state);
-    cov = (eye(5)-gain*H)*next_cov*(eye(5)-gain*H)' + gain*R*gain';
+    cov = (eye(6)-gain*H)*next_cov*(eye(6)-gain*H)' + gain*R*gain';
 end
 
 %% Calculate odometry output
@@ -201,6 +201,7 @@ function [next_state, F] = extrapolate(state, DELTA_T)
     theta = state(3);
     v_rear = state(4);
     psi = state(5);
+    a_rear = state(6);
 
     % equations were derived in bicyle_model.m
     % calculate predicted next state
@@ -208,17 +209,19 @@ function [next_state, F] = extrapolate(state, DELTA_T)
         x + DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
         y + DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
         theta + (DELTA_T*v_rear*tan(psi))/CAR_LENGTH;
-        v_rear;
-        psi
+        v_rear + DELTA_T*a_rear;
+        psi;
+        a_rear
     ];
 
     % calculate jacobian (linearization of this function about this point)
     F = [
-        1, 0, -DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), DELTA_T*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), (DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*tan(psi)*(tan(psi)^2 + 1))/(4*(tan(psi)^2/4 + 1)^(1/2)) - (DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/2 + 1/2))/(tan(psi)^2/4 + 1)^(1/2);
-        0, 1,  DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), DELTA_T*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), (DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/2 + 1/2))/(tan(psi)^2/4 + 1)^(1/2) + (DELTA_T*v_rear*tan(psi)*sin(theta + atan(tan(psi)/2))*(tan(psi)^2 + 1))/(4*(tan(psi)^2/4 + 1)^(1/2));
-        0, 0,                                                                      1,                                  (DELTA_T*tan(psi))/CAR_LENGTH,                                                                                                                                                         (DELTA_T*v_rear*(tan(psi)^2 + 1))/CAR_LENGTH;
-        0, 0,                                                                      0,                                                              1,                                                                                                                                                                                                    0;
-        0, 0,                                                                      0,                                                              0,                                                                                                                                                                                                    1
+        1, 0, -DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), DELTA_T*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), (DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*tan(psi)*(tan(psi)^2 + 1))/(4*(tan(psi)^2/4 + 1)^(1/2)) - (DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/2 + 1/2))/(tan(psi)^2/4 + 1)^(1/2),       0;
+        0, 1,  DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), DELTA_T*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2), (DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/2 + 1/2))/(tan(psi)^2/4 + 1)^(1/2) + (DELTA_T*v_rear*tan(psi)*sin(theta + atan(tan(psi)/2))*(tan(psi)^2 + 1))/(4*(tan(psi)^2/4 + 1)^(1/2)),       0;
+        0, 0,                                                                      1,                                  (DELTA_T*tan(psi))/CAR_LENGTH,                                                                                                                                                         (DELTA_T*v_rear*(tan(psi)^2 + 1))/CAR_LENGTH,       0;
+        0, 0,                                                                      0,                                                              1,                                                                                                                                                                                                    0, DELTA_T;
+        0, 0,                                                                      0,                                                              0,                                                                                                                                                                                                    1,       0;
+        0, 0,                                                                      0,                                                              0,                                                                                                                                                                                                    0,       1
     ];
 end
 
