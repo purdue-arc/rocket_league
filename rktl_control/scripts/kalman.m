@@ -108,9 +108,31 @@ for i = 1:size(measurements,2)
     cov = (eye(5)-gain*H)*next_cov*(eye(5)-gain*H)' + gain*R*gain';
 end
 
+%% Calculate odometry output
+beta = atan(tan(ground_truth(5,:))/2);
+v_body = ground_truth(4,:)/cos(beta);
+curvature = 2*sin(beta)/CAR_LENGTH;
+odom_true = [
+    ground_truth(1:3,:);
+    v_body*cos(beta);
+    v_body*sin(beta);
+    v_body*curvature
+];
+truth_time = 0:TRUTH_DELTA_T:(DURATION-TRUTH_DELTA_T);
+
+beta = atan(tan(estimates(5,:))/2);
+v_body = estimates(4,:)/cos(beta);
+curvature = 2*sin(beta)/CAR_LENGTH;
+odom_est = [
+    estimates(1:3,:);
+    v_body*cos(beta);
+    v_body*sin(beta);
+    v_body*curvature
+];
+filter_time = 0:FILTER_DELTA_T:(DURATION-FILTER_DELTA_T);
+
 %% Graphical output
 figure
-subplot(2,3,1)
 plot(ground_truth(1,:), ground_truth(2,:))
 hold, grid on
 plot(estimates(1,:), estimates(2,:), '--')
@@ -118,13 +140,13 @@ plot(measurements(1,:), measurements(2,:), '.')
 plot(ground_truth(1,1), ground_truth(2,1), '*b')
 legend(["Ground Truth", "Estimates", "Measurements"], 'Location', 'Best')
 title("XY tracking")
-xlabel("X Position, m")
-ylabel("Y Position, m")
+xlabel("x, m")
+ylabel("y, m")
 
-truth_time = 0:TRUTH_DELTA_T:(DURATION-TRUTH_DELTA_T);
-filter_time = 0:FILTER_DELTA_T:(DURATION-FILTER_DELTA_T);
+figure
+sgtitle("Internal state tracking")
 for i = 1:5
-    subplot(2,3,i+1)
+    subplot(2,3,i)
     plot(truth_time, ground_truth(i, :))
     hold, grid on
     plot(filter_time, estimates(i,:), '--')
@@ -136,11 +158,35 @@ for i = 1:5
     end
     xlabel("Time, sec")
     switch i
-        case 1; title("X tracking"); ylabel("X Position, m")
-        case 2; title("Y tracking"); ylabel("Y Position, m")
-        case 3; title("\theta tracking"); ylabel("Theta, rad")
-        case 4; title("rear wheel velocity tracking"); ylabel("Rear wheel velocity, m/s")
-        case 5; title("steering angle tracking"); ylabel("Steering angle, rad")
+        case 1; title("X tracking"); ylabel("x, m")
+        case 2; title("Y tracking"); ylabel("y, m")
+        case 3; title("Heading tracking"); ylabel("\theta, rad")
+        case 4; title("Rear wheel velocity tracking"); ylabel("v_{rear}, m/s")
+        case 5; title("Steering angle tracking"); ylabel("\psi, rad")
+    end
+end
+
+figure
+sgtitle("External state tracking")
+for i = 1:6
+    subplot(2,3,i)
+    plot(truth_time, odom_true(i, :))
+    hold, grid on
+    plot(filter_time, odom_est(i,:), '--')
+    if (i <= 3)
+        plot(filter_time, measurements(i,:), '.')
+        legend(["Ground Truth", "Estimates", "Measurements"], 'Location', 'Best')
+    else
+        legend(["Ground Truth", "Estimates"], 'Location', 'Best')
+    end
+    xlabel("Time, sec")
+    switch i
+        case 1; title("X tracking"); ylabel("x, m")
+        case 2; title("Y tracking"); ylabel("y, m")
+        case 3; title("Heading tracking"); ylabel("\theta, rad")
+        case 4; title("Body forward velocity tracking"); ylabel("x', m/s")
+        case 5; title("Body lateral velocity tracking"); ylabel("y', m/s")
+        case 6; title("Angular velocity tracking"); ylabel("\omega, rad/sec")
     end
 end
 
