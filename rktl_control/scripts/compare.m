@@ -77,10 +77,9 @@ cov = diag([ORIGIN_LOC_STD_DEV, ORIGIN_LOC_STD_DEV, ORIGIN_DIR_STD_DEV, 0.01, de
 R = diag([MEAS_LOC_STD_DEV; MEAS_LOC_STD_DEV; MEAS_DIR_STD_DEV]);
 
 % process noise
-% @TODO update every time step using jacobian?
-Q = diag([0, 0, 0, 0, PROC_PSI_STD_DEV, PROC_ACL_STD_DEV]).^2;
+Q0 = diag([0, 0, 0, 0, PROC_PSI_STD_DEV, PROC_ACL_STD_DEV]).^2;
 F = state_jacobian_func(zeros(6,1));
-Q = F*Q*F';
+Q = F*Q0*F';
 
 %% Create filters
 % EKF
@@ -110,10 +109,14 @@ ukf_state = zeros(6, STEPS);
 for i = 1:DURATION/DELTA_T
     %EKF
     [ekf_state(:,i), ~] = correct(ekf, measurements(:,i));
+    F = state_jacobian_func(ekf_state(:,i));
+    ekf.ProcessNoise = F*Q0*F';
     predict(ekf);
 
     % UKF
     [ukf_state(:,i), ~] = correct(ukf, measurements(:,i));
+    F = state_jacobian_func(ukf_state(:,i));
+    ukf.ProcessNoise = F*Q0*F';
     predict(ukf);
 
     % Particle
