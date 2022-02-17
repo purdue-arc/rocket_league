@@ -82,7 +82,7 @@ F = state_jacobian_func(zeros(6,1));
 Q = F*Q0*F';
 
 %% Create filters
-% EKF
+% EKF (additive)
 ekf = extendedKalmanFilter(@state_func, @meas_func, state);
 ekf.StateTransitionJacobianFcn = @state_jacobian_func;
 ekf.MeasurementJacobianFcn = @meas_jacobian_func;
@@ -90,11 +90,17 @@ ekf.StateCovariance = cov;
 ekf.MeasurementNoise = R;
 ekf.ProcessNoise = Q;
 
-% UKF
+% UKF (additive)
 ukf = unscentedKalmanFilter(@state_func, @meas_func, state);
 ukf.StateCovariance = cov;
 ukf.MeasurementNoise = R;
 ukf.ProcessNoise = Q;
+
+% UFK (non-additive)
+ukf_noise = unscentedKalmanFilter(@state_func_noise, @meas_func, state, 'HasAdditiveProcessNoise', false);
+ukf_noise.StateCovariance = cov;
+ukf_noise.MeasurementNoise = R;
+ukf_noise.ProcessNoise = Q0;
 
 % Particle filter
 % pf = particleFilter(@state_func, )
@@ -103,6 +109,7 @@ ukf.ProcessNoise = Q;
 %% Pre-allocate output
 ekf_state = zeros(6, STEPS);
 ukf_state = zeros(6, STEPS);
+ukf_noise_state = zeros(6, STEPS);
 
 
 %% Run filters
@@ -119,6 +126,10 @@ for i = 1:DURATION/DELTA_T
     ukf.ProcessNoise = F*Q0*F';
     predict(ukf);
 
+    % UKF (noise)
+    [ukf_noise_state(:,i), ~] = correct(ukf_noise, measurements(:,i));
+    predict(ukf_noise);
+
     % Particle
 end
 
@@ -131,6 +142,7 @@ time = 0:DELTA_T:(DURATION-DELTA_T);
 truth_odom = state_to_odom(ground_truth);
 ekf_odom = state_to_odom(ekf_state);
 ukf_odom = state_to_odom(ukf_state);
+ukf_noise_odom = state_to_odom(ukf_noise_state);
 
 % XY plot
 figure
@@ -138,9 +150,10 @@ plot(truth_odom(1,:), truth_odom(2,:))
 hold, grid on
 plot(ekf_odom(1,:), ekf_odom(2,:), '--')
 plot(ukf_odom(1,:), ukf_odom(2,:), '--')
+plot(ukf_odom(1,:), ukf_noise_odom(2,:), '--')
 plot(measurements(1,:), measurements(2,:), 'x:')
 plot(truth_odom(1,1), truth_odom(2,1), '*b')
-legend(["Ground Truth", "EKF", "UKF", "Measurements"], 'Location', 'Best')
+legend(["Ground Truth", "EKF", "UKF", "NA UKF", "Measurements"], 'Location', 'Best')
 title("XY tracking")
 xlabel("x, m")
 ylabel("y, m")
@@ -154,11 +167,12 @@ for i = 1:6
     hold, grid on
     plot(time, ekf_odom(i,:), '--')
     plot(time, ukf_odom(i,:), '--')
+    plot(time, ukf_noise_odom(i,:), '--')
     if (i <= 3)
         plot(time, measurements(i,:), 'x:')
-        legend(["Ground Truth", "EKF", "UKF", "Measurements"], 'Location', 'Best')
+        legend(["Ground Truth", "EKF", "UKF", "NA UKF", "Measurements"], 'Location', 'Best')
     else
-        legend(["Ground Truth", "EKF", "UKF"], 'Location', 'Best')
+        legend(["Ground Truth", "EKF", "UKF", "NA UKF"], 'Location', 'Best')
     end
     xlabel("Time, sec")
     switch i
@@ -172,6 +186,7 @@ for i = 1:6
 end
 
 %% Helper functions
+% transition functions (additive noise) for EKF, UFK
 function next_state = state_func(state)
     % using bicycle model, extrapolate future state
     global CAR_LENGTH DELTA_T
@@ -201,6 +216,32 @@ function measurement = meas_func(state)
     measurement = state(1:3);
 end
 
+% transition functions (non-additive noise) for EKF, UFK
+function next_state = state_func_noise(state, noise)
+    % using bicycle model, extrapolate future state
+    global CAR_LENGTH DELTA_T
+
+    % unpack input
+    x       = state(1) + noise(1);
+    y       = state(2) + noise(2);
+    theta   = state(3) + noise(3);
+    v_rear  = state(4) + noise(4);
+    psi     = state(5) + noise(5);
+    a_rear  = state(6) + noise(6);
+
+    % equations were derived in bicyle_model.m
+    % calculate predicted next state
+    next_state = [
+        x + DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
+        y + DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
+        theta + (DELTA_T*v_rear*tan(psi))/CAR_LENGTH;
+        v_rear + DELTA_T*a_rear;
+        psi;
+        a_rear
+    ];
+end
+
+% jacobian functions for EKF
 function jacobian = state_jacobian_func(state)
     global CAR_LENGTH DELTA_T
 
@@ -227,6 +268,7 @@ function jacobian = meas_jacobian_func(~)
     jacobian = [eye(3), zeros(3)];
 end
 
+% Functions for particle filter
 function particles = particle_state_func(particles)
     for i = 1:size(particles, 2)
         particles(:,i) = state_func(particles(i,i));
