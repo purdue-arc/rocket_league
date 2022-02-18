@@ -5,7 +5,7 @@ close all
 %% Constants
 % timing
 global DELTA_T
-DURATION = 30;          % duration of data, sec
+DURATION = 15;          % duration of data, sec
 DELTA_T = 0.1;          % step size of filter, sec
 TRUTH_DELTA_T = 0.001;  % step size of ground truth simulation, sec
 
@@ -16,11 +16,13 @@ TRUTH_STEPS = DURATION/TRUTH_DELTA_T;
 ORIGIN_LOC_STD_DEV = 0.1;           % uncertainty of initial location, m
 ORIGIN_DIR_STD_DEV = deg2rad(10);   % uncertainty of initial heading, rad
 
+global MEAS_LOC_STD_DEV MEAS_DIR_STD_DEV
 MEAS_LOC_STD_DEV = 0.05;            % uncertainty of location measurement, m
 MEAS_DIR_STD_DEV = deg2rad(5);      % uncertainty of heading measurment, rad
 
-PROC_PSI_STD_DEV = deg2rad(0.75);   % process noise for steering angle, rad
-PROC_ACL_STD_DEV = 0.1;             % process noise for rear wheel acceleration, m/s2
+PROC_PSI_STD_DEV = deg2rad(1.5);    % process noise for steering angle, rad
+PROC_ACL_STD_DEV = 0.2;             % process noise for rear wheel acceleration, m/s2
+NUM_PARTICLES = 1000;               % particles in filter
 
 % physical properties of car
 global CAR_LENGTH MAX_SPEED THROTTLE_TAU STEERING_THROW STEERING_RATE
@@ -96,21 +98,14 @@ ukf.StateCovariance = cov;
 ukf.MeasurementNoise = R;
 ukf.ProcessNoise = Q;
 
-% UFK (non-additive)
-ukf_noise = unscentedKalmanFilter(@state_func_noise, @meas_func, state, 'HasAdditiveProcessNoise', false);
-ukf_noise.StateCovariance = cov;
-ukf_noise.MeasurementNoise = R;
-ukf_noise.ProcessNoise = Q0;
-
 % Particle filter
-% pf = particleFilter(@state_func, )
-
+pf = particleFilter(@particle_state_func, @particle_meas_func);
+initialize(pf, NUM_PARTICLES, zeros(5,1), cov(1:5,1:5));
 
 %% Pre-allocate output
 ekf_state = zeros(6, STEPS);
 ukf_state = zeros(6, STEPS);
-ukf_noise_state = zeros(6, STEPS);
-
+pf_state = zeros(5, STEPS);
 
 %% Run filters
 for i = 1:DURATION/DELTA_T
@@ -126,11 +121,9 @@ for i = 1:DURATION/DELTA_T
     ukf.ProcessNoise = F*Q0*F';
     predict(ukf);
 
-    % UKF (noise)
-    [ukf_noise_state(:,i), ~] = correct(ukf_noise, measurements(:,i));
-    predict(ukf_noise);
-
     % Particle
+    pf_state(:,i) = correct(pf, measurements(:,i));
+    predict(pf);
 end
 
 %% Plotting
@@ -142,7 +135,7 @@ time = 0:DELTA_T:(DURATION-DELTA_T);
 truth_odom = state_to_odom(ground_truth);
 ekf_odom = state_to_odom(ekf_state);
 ukf_odom = state_to_odom(ukf_state);
-ukf_noise_odom = state_to_odom(ukf_noise_state);
+pf_odom = state_to_odom(pf_state);
 
 % XY plot
 figure
@@ -150,10 +143,10 @@ plot(truth_odom(1,:), truth_odom(2,:))
 hold, grid on
 plot(ekf_odom(1,:), ekf_odom(2,:), '--')
 plot(ukf_odom(1,:), ukf_odom(2,:), '--')
-plot(ukf_odom(1,:), ukf_noise_odom(2,:), '--')
+plot(pf_odom(1,:), pf_odom(2,:), '--')
 plot(measurements(1,:), measurements(2,:), 'x:')
 plot(truth_odom(1,1), truth_odom(2,1), '*b')
-legend(["Ground Truth", "EKF", "UKF", "NA UKF", "Measurements"], 'Location', 'Best')
+legend(["Ground Truth", "EKF", "UKF", "PF", "Measurements"], 'Location', 'Best')
 title("XY tracking")
 xlabel("x, m")
 ylabel("y, m")
@@ -167,12 +160,12 @@ for i = 1:6
     hold, grid on
     plot(time, ekf_odom(i,:), '--')
     plot(time, ukf_odom(i,:), '--')
-    plot(time, ukf_noise_odom(i,:), '--')
+    plot(time, pf_odom(i,:), '--')
     if (i <= 3)
         plot(time, measurements(i,:), 'x:')
-        legend(["Ground Truth", "EKF", "UKF", "NA UKF", "Measurements"], 'Location', 'Best')
+        legend(["Ground Truth", "EKF", "UKF", "PF", "Measurements"], 'Location', 'Best')
     else
-        legend(["Ground Truth", "EKF", "UKF", "NA UKF"], 'Location', 'Best')
+        legend(["Ground Truth", "EKF", "UKF", "PF"], 'Location', 'Best')
     end
     xlabel("Time, sec")
     switch i
@@ -216,31 +209,6 @@ function measurement = meas_func(state)
     measurement = state(1:3);
 end
 
-% transition functions (non-additive noise) for EKF, UFK
-function next_state = state_func_noise(state, noise)
-    % using bicycle model, extrapolate future state
-    global CAR_LENGTH DELTA_T
-
-    % unpack input
-    x       = state(1) + noise(1);
-    y       = state(2) + noise(2);
-    theta   = state(3) + noise(3);
-    v_rear  = state(4) + noise(4);
-    psi     = state(5) + noise(5);
-    a_rear  = state(6) + noise(6);
-
-    % equations were derived in bicyle_model.m
-    % calculate predicted next state
-    next_state = [
-        x + DELTA_T*v_rear*cos(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
-        y + DELTA_T*v_rear*sin(theta + atan(tan(psi)/2))*(tan(psi)^2/4 + 1)^(1/2);
-        theta + (DELTA_T*v_rear*tan(psi))/CAR_LENGTH;
-        v_rear + DELTA_T*a_rear;
-        psi;
-        a_rear
-    ];
-end
-
 % jacobian functions for EKF
 function jacobian = state_jacobian_func(state)
     global CAR_LENGTH DELTA_T
@@ -271,8 +239,26 @@ end
 % Functions for particle filter
 function particles = particle_state_func(particles)
     for i = 1:size(particles, 2)
-        particles(:,i) = state_func(particles(i,i));
+        % create random control noise
+        control = rand(2,1).*[0.5; 2] + [0.5; -1];
+        % propagate
+        global DELTA_T
+        particles(:,i) = simulate(particles(:,i), control, DELTA_T);
     end
+    % add a little more modeling noise
+%     particles = particles + diag([.001, .001, deg2rad(1), .01, deg2rad(5)])*randn(size(particles));
+end
+
+function probability = particle_meas_func(particles, measurement)
+    pred_meas = particles(1:3,:);
+    error = pred_meas - ones(size(pred_meas)).*measurement;
+
+    global MEAS_DIR_STD_DEV MEAS_LOC_STD_DEV
+    sigma = [MEAS_DIR_STD_DEV; MEAS_DIR_STD_DEV; MEAS_LOC_STD_DEV];
+    base = (sigma*sqrt(2*pi)).^2;
+    probs = base .* exp(-.5*(error./sigma).^2);
+   
+    probability = probs(1,:).*probs(2,:).*probs(3,:);
 end
 
 function next_state = simulate(state, control, DELTA_T)
