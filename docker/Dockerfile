@@ -27,7 +27,7 @@ RUN apt update && \
     ros-$ROS_DISTRO-rosserial-arduino \
     ros-$ROS_DISTRO-rosbridge-server && \
     # pip
-    pip3 install pybullet gym[box2d] stable-baselines3 && \
+    pip3 install pybullet gym[box2d] stable-baselines3 pfilter && \
     # clean up
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
