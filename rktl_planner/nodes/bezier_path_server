@@ -6,7 +6,7 @@ from rospy import service
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest, CreateBezierPathResponse
 from rktl_planner import BezierPath
-from rktl_msgs.msg import Path, Waypoint
+from rktl_msgs.msg import BezierPath as BezierPathMsg, Path as PathMsg, Waypoint as WaypointMsg
 from geometry_msgs.msg import Pose, Point, Vector3
 
 
@@ -34,6 +34,7 @@ def create_segment(start_pose: Pose, end_pose: Pose, start_speed: float, end_spe
     control_points = [start_pose.position, end_pose.position]
     start_vel, start_head = vel(start_pose, start_speed)
     end_vel, end_head = vel(end_pose, end_speed)
+
     t_val = duration.to_sec() / 3
 
     if start_speed == 0 or end_speed == 0:
@@ -72,40 +73,40 @@ def create_segment(start_pose: Pose, end_pose: Pose, start_speed: float, end_spe
 def bezier_path_server(req: CreateBezierPathRequest):
     bezier_segments = []
     durations = [0.]
-    for i in range(req.target_durations):
-        start_pose = req.target_pose[i]
-        end_pose = req.target_pose[i + 1]
+    for i in range(len(req.target_durations)):
+        start_pose = req.target_poses[i]
+        end_pose = req.target_poses[i + 1]
         start_speed = req.target_speeds[i]
         end_speed = req.target_speeds[i + 1]
-        duration = req.target_durations[i]
+        duration = req.target_durations[i].data
         segments = create_segment(start_pose, end_pose, start_speed,
-                                  end_speed, duration, req.bezier_segment_duration)
+                                  end_speed, duration, req.bezier_segment_duration.data)
         bezier_segments.extend(segments)
         for segment in segments:
-            durations += durations[-1] + segment.duration
+            durations.append(durations[-1] + segment.duration.to_sec())
 
     res = CreateBezierPathResponse()
-    res.bezier_path = [x.to_msg() for x in bezier_segments]
-    res.linear_path = Path()
+    res.bezier_paths = [x.to_msg() for x in bezier_segments]
+    res.linear_path = PathMsg()
 
-    num_segments = math.ceil(duration.to_sec() / req.segment_duration.to_sec())
+    num_segments = math.ceil(duration.to_sec() / req.linear_segment_duration.data.to_sec())
     segment_length = duration.to_sec() / num_segments
     idx = 0
     t = 0.
     for i in range(num_segments):
-        heading = bezier_segments[idx].heading_at(t)
-        quat = quaternion_from_euler(0, 0, math.atan2(heading.y, heading.x))
-        wp = Waypoint()
+        heading = bezier_segments[idx].angle_at(t)
+        quat = quaternion_from_euler(0, 0, heading)
+        wp = WaypointMsg()
         wp.pose.position = bezier_segments[idx].at(t)
         wp.pose.orientation.x = quat[0]
         wp.pose.orientation.y = quat[1]
         wp.pose.orientation.z = quat[2]
         wp.pose.orientation.w = quat[3]
         wp.twist.linear = bezier_segments[idx].vel_at(t)
-        res.linear_path.append(wp)
+        res.linear_path.waypoint.append(wp)
         t += segment_length
-        while idx < len(durations) and t > durations[idx].duration.to_sec():
-            t -= durations[idx].duration.to_sec()
+        while idx < len(durations) and t > durations[idx]:
+            t -= durations[idx]
             idx += 1
     return res
 

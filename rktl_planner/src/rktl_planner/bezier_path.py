@@ -85,10 +85,11 @@ class BezierPath:
         dx = self.bezier_curve.hodograph().at(t)
         dv = self.bezier_curve.hodograph().hodograph().at(t)
         dt = self.duration.to_sec()
-        denominator = math.sqrt(dx.x ** 2 + dx.y ** 2 + dx.z ** 2) * dt ** 2
-        if denominator == 0.0:
-            return 0.0
-        numerator = dx.x * dv.x + dx.y * dv.y + dx.z * dv.z
+        # denominator = math.sqrt(dx.x ** 2 + dx.y ** 2 + dx.z ** 2) * dt ** 2
+        # if denominator == 0.0:
+        #     return 0.0
+        # numerator = dx.x * dv.x + dx.y * dv.y + dx.z * dv.z
+        return Vector3(dv.x/(dt**2), dv.y/(dt**2), dv.z/(dt**2))
         return numerator / denominator
 
     def angle_at(self, secs):

@@ -4,5 +4,5 @@ std_msgs/Duration[] target_durations
 std_msgs/Duration bezier_segment_duration
 std_msgs/Duration linear_segment_duration
 ---
-rktl_msgs/BezierPath[] bezier_path
+rktl_msgs/BezierPath[] bezier_paths
 rktl_msgs/Path linear_path

@@ -7,7 +7,7 @@ from tf.transformations import quaternion_from_euler
 from std_msgs.msg import Duration
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
-from rktl_msgs.msg import BezierPath as BezierPathMsg, Path as PathMsg
+from rktl_msgs.msg import MultiBezierPath as MultiBezierPathMsg, Path as PathMsg
 from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest
 
@@ -23,7 +23,7 @@ class SimpleController:
             '~reset_service', 'reset_controller')
         self.path_service = rospy.get_param(
             '~path_service', 'create_bezier_path')
-        self.path_topic = rospy.get_param('~path_topic', 'path')
+        self.linear_path_topic = rospy.get_param('~path_topic', 'path')
         self.bezier_path_topic = rospy.get_param(
             '~bezier_path_topic', 'bezier_path')
 
@@ -41,9 +41,13 @@ class SimpleController:
         if rospy.has_param('~linear_path_topic'):
             self.linear_path_pub = rospy.Publisher(rospy.get_param(
                 '~linear_path_topic'), PathMsg, queue_size=1, latch=True)
+        else:
+            self.linear_path_pub = None
         if rospy.has_param('~bezier_path_topic'):
             self.bezier_path_pub = rospy.Publisher(rospy.get_param(
-                '~bezier_path_topic'), BezierPathMsg, queue_size=1, latch=True)
+                '~bezier_path_topic'), MultiBezierPathMsg, queue_size=1, latch=True)
+        else:
+            self.bezier_path_pub = None
         self.goal_pos = (rospy.get_param('/FIELD_LENGTH', 1) / 2, 0.)
 
         rospy.spin()
@@ -101,7 +105,9 @@ class SimpleController:
         if self.linear_path_pub:
             self.linear_path_pub.publish(res.linear_path)
         if self.bezier_path_pub:
-            self.bezier_path_pub.publish(res.bezier_path)
+            multi_bezier_path = MultiBezierPathMsg()
+            multi_bezier_path.paths = res.bezier_paths
+            self.bezier_path_pub.publish(multi_bezier_path)
         return EmptyResponse()
 
 
