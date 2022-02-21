@@ -3,7 +3,7 @@
 WS_DIR=$(realpath $(dirname $0)/../../../)
 REPO_NAME="purduearc/rocket-league"
 CONTAINER_NAME="${CONTAINER_NAME:-arc-rocket-league-dev}"
-echo "mounting host directory $WS_DIR as container directory $HOME/catkin_ws"
+echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
 # tty-specific options
 if [ -t 0 -a -t 1 ]
@@ -16,11 +16,11 @@ docker run --rm \
     -e USER \
     -e DISPLAY \
     -e NVIDIA_DRIVER_CAPABILITIES=all \
-    -v $XAUTHORITY:$HOME/.Xauthority:ro \
-    -v $WS_DIR:$HOME/catkin_ws \
+    -v $XAUTHORITY:/home/$USER/.Xauthority:ro \
+    -v $WS_DIR:/home/$USER/catkin_ws \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    `[ -f ~/.gitconfig ] && echo "-v $HOME/.gitconfig:$HOME/.gitconfig:ro"` \
-    -v ~/.ssh:$HOME/.ssh:ro \
+    `[ -f ~/.gitconfig ] && echo "-v $HOME/.gitconfig:/home/$USER/.gitconfig:ro"` \
+    -v ~/.ssh:/home/$USER/.ssh:ro \
     --name $CONTAINER_NAME \
     $@ \
     $REPO_NAME:local \
