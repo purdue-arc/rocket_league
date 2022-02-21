@@ -108,7 +108,9 @@ class ParticleOdomFilter(object):
         v_rear_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
         psi_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
 
-        # extract some states from particles matrix
+        # extract current states from particles matrix
+        x = particles[:,0]
+        y = particles[:,1]
         theta = particles[:,2]
         v_rear = particles[:,3]
         psi = particles[:,4]
@@ -127,9 +129,9 @@ class ParticleOdomFilter(object):
 
         # using bicycle model, extrapolate future state
         return np.array([
-            self.DELTA_T * v_rear * np.cos(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
-            self.DELTA_T * v_rear * np.sin(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
-            self.DELTA_T * v_rear * np.tan(psi) / self.CAR_LENGTH,
+            x + self.DELTA_T * v_rear * np.cos(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
+            y + self.DELTA_T * v_rear * np.sin(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
+            theta + self.DELTA_T * v_rear * np.tan(psi) / self.CAR_LENGTH,
             v_rear,
             psi]).T
 
