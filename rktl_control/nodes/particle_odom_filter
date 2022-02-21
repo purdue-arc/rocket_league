@@ -40,7 +40,7 @@ class ParticleOdomFilter(object):
 
         # variables
         self.filter = ParticleFilter(
-            prior_fn=self.particle_init, 
+            prior_fn=self.particle_init,
             dynamics_fn=self.particle_dynamics,
             observe_fn=self.particle_observation,
             weight_fn=self.particle_weight,
@@ -103,9 +103,9 @@ class ParticleOdomFilter(object):
     def particle_dynamics(self, particles):
         """Extrapolate all particles to future state, including random control noise."""
         # create random control noise
-        # throttle between 0.5 and 1.0, steering -1.0 to 1.0
+        # efforts uniformly distributed between -1.0 and +1.0
         rng = np.random.default_rng()
-        v_rear_ref = rng.random(self.NUM_PARTICLES) * 0.5 + 0.5
+        v_rear_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
         psi_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
 
         # extract some states from particles matrix
@@ -135,6 +135,7 @@ class ParticleOdomFilter(object):
 
     def particle_observation(self, particles):
         """Calculate expected measurements for each particle."""
+        # measurement is x, y, theta
         return particles[:,0:3]
 
     def particle_weight(self, expected, observed):
@@ -150,11 +151,21 @@ class ParticleOdomFilter(object):
     def particle_init(self, num_particles):
         """Initial guesses for particle states."""
         rng = np.random.default_rng()
+        # states uniformly distributed across all valid ranges
         return (
             rng.random((num_particles, 5))
-            * np.array([self.FIELD_WIDTH, self.FIELD_HEIGHT, 2.0*pi, 0.0, 0.0])
-            - np.array([self.FIELD_WIDTH/2.0, self.FIELD_HEIGHT/2.0, pi, 0.0, 0.0])
-        )
+            * np.array([
+                self.FIELD_WIDTH,
+                self.FIELD_HEIGHT,
+                2.0*pi,
+                self.MAX_SPEED,
+                2.0*self.STEERING_THROW])
+            - np.array([
+                self.FIELD_WIDTH/2.0,
+                self.FIELD_HEIGHT/2.0,
+                pi,
+                0.0,
+                self.STEERING_THROW]))
 
 if __name__ == "__main__":
     ParticleOdomFilter()
