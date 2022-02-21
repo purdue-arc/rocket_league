@@ -14,7 +14,7 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 import numpy as np
 from pfilter import ParticleFilter
-from math import sin, cos, tan, atan, pi, exp
+from math import sin, cos, tan, atan, sqrt, pi, exp
 
 class ParticleOdomFilter(object):
     """Class to estimate pose and velocity using Kalman filter."""
@@ -139,14 +139,11 @@ class ParticleOdomFilter(object):
 
     def particle_weight(self, expected, observed):
         """Weigh each particle based off difference between observed and expected measurements."""
-        # compute error
-        error = expected - observed
-
         # use a standard normal distribution pdf
         sigma = np.array([self.MEAS_DIR_STD_DEV, self.MEAS_DIR_STD_DEV, self.MEAS_LOC_STD_DEV])
-        base = 2.0 * pi * np.square(sigma)
-        probabilities = base * np.exp(np.square(error / sigma) / -2.0)
-   
+        base = 1.0 / (sigma * sqrt(2.0*pi))
+        probabilities = base * np.exp(np.square((expected - observed) / sigma) / -2.0)
+
         # assume each state is independent
         return probabilities[:,0] * probabilities[:,1] * probabilities[:,2]
 
