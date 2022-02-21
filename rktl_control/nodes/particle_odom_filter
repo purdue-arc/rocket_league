@@ -164,13 +164,13 @@ class ParticleOdomFilter(object):
                 self.FIELD_WIDTH,
                 self.FIELD_HEIGHT,
                 2.0*pi,
-                self.MAX_SPEED,
+                2.0*self.MAX_SPEED,
                 2.0*self.STEERING_THROW])
             - np.array([
                 self.FIELD_WIDTH/2.0,
                 self.FIELD_HEIGHT/2.0,
                 pi,
-                0.0,
+                self.MAX_SPEED,
                 self.STEERING_THROW]))
 
 if __name__ == "__main__":
