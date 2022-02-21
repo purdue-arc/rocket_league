@@ -144,15 +144,22 @@ class ParticleOdomFilter(object):
         """Weigh each particle based off difference between observed and expected measurements."""
         # compute error (and minimize angles)
         error = expected - observed
-        error[:,2] = np.unwrap(error[:,2])
+        error[:,2] = np.fmod(error[:,2], 2.0*pi)
+        error[:,2] = np.where(error[:,2] > +pi, 2.0*pi - error[:,2], error[:,2])
+        error[:,2] = np.where(error[:,2] < -pi, 2.0*pi + error[:,2], error[:,2])
 
-        # use a standard normal distribution pdf
+        # use a standard normal distribution to calculate probability of measurement given each particle
         sigma = np.array([self.MEAS_DIR_STD_DEV, self.MEAS_DIR_STD_DEV, self.MEAS_LOC_STD_DEV])
         base = 1.0 / (sigma * sqrt(2.0*pi))
-        probabilities = base * np.exp(np.square(error / sigma) / -2.0)
-
+        prob_z_x = base * np.exp(np.square(error / sigma) / -2.0)
         # assume each state is independent
-        return probabilities[:,0] * probabilities[:,1] * probabilities[:,2]
+        prob_z_x = np.prod(prob_z_x, axis=1)
+
+        # use law of total probability to calculate probability of measurement
+        prob_z = np.sum(prob_z_x * self.filter.weights)
+
+        # use Bayes rule to get probability of particle given measurement
+        return prob_z_x * self.filter.weights / prob_z
 
     def particle_init(self, num_particles):
         """Initial guesses for particle states."""
