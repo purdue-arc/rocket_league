@@ -140,10 +140,14 @@ class ParticleOdomFilter(object):
 
     def particle_weight(self, expected, observed):
         """Weigh each particle based off difference between observed and expected measurements."""
+        # compute error (and minimize angles)
+        error = expected - observed
+        error[:,2] = np.unwrap(error[:,2])
+
         # use a standard normal distribution pdf
         sigma = np.array([self.MEAS_DIR_STD_DEV, self.MEAS_DIR_STD_DEV, self.MEAS_LOC_STD_DEV])
         base = 1.0 / (sigma * sqrt(2.0*pi))
-        probabilities = base * np.exp(np.square((expected - observed) / sigma) / -2.0)
+        probabilities = base * np.exp(np.square(error / sigma) / -2.0)
 
         # assume each state is independent
         return probabilities[:,0] * probabilities[:,1] * probabilities[:,2]
