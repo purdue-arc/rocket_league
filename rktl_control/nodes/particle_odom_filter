@@ -9,7 +9,7 @@ License:
 # ROS
 import rospy
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 import numpy as np
@@ -37,6 +37,7 @@ class ParticleOdomFilter(object):
         self.DELTA_T = 0.1
         self.FIELD_WIDTH = 3
         self.FIELD_HEIGHT = 4.25
+        self.PUB_PARTICLES = False
 
         # variables
         self.filter = ParticleFilter(
@@ -50,6 +51,8 @@ class ParticleOdomFilter(object):
         # pubs / subs
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
         rospy.Subscriber('pose', PoseWithCovarianceStamped, self.pose_cb)
+        if self.PUB_PARTICLES:
+            self.cloud_pub = rospy.Publisher('odom_particles', PoseArray, queue_size=1)
 
         # main loop
         rospy.spin()
@@ -99,6 +102,30 @@ class ParticleOdomFilter(object):
         odom_msg.twist.twist.linear.y = vy_body
         odom_msg.twist.twist.angular.z = omega
         self.odom_pub.publish(odom_msg)
+
+        # publish all particles
+        if self.PUB_PARTICLES:
+            # create PoseArray msg to hold all particles' poses
+            cloud_msg = PoseArray()
+            cloud_msg.header = pose_msg.header
+            for i in range(self.NUM_PARTICLES):
+                # extract particle states
+                x = self.filter.hypotheses[i,0]
+                y = self.filter.hypotheses[i,1]
+                theta = self.filter.hypotheses[i,2]
+                # create Pose msg
+                particle_msg = Pose()
+                particle_msg.position.x = x
+                particle_msg.position.y = y
+                x, y, z, w = quaternion_from_euler(0, 0, theta)
+                particle_msg.orientation.x = x
+                particle_msg.orientation.y = y
+                particle_msg.orientation.z = z
+                particle_msg.orientation.w = w
+                # add Pose msg to PoseArray msg
+                cloud_msg.poses.append(particle_msg)
+            # publish PoseArray msg
+            self.cloud_pub.publish(cloud_msg)
 
     def particle_dynamics(self, particles):
         """Extrapolate all particles to future state, including random control noise."""
