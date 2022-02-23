@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Create a depth map to project camera data onto ground plane
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+# ROS
+import rospy
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from sensor_msgs.msg import Image, CameraInfo
+from tf.transformations import translation_matrix, quaternion_matrix
+
+import numpy as np
+
+class Projector(object):
+    """Class to synchronize and buffer all poses."""
+    def __init__(self):
+        rospy.init_node('projector')
+
+        self.depth_pub = rospy.Publisher('cam0/depth_rectified', Image, queue_size=1)
+        rospy.Subscriber('cam0/camera_info', CameraInfo, self.camera_info_cb)
+
+        # remove this when TF is implemented
+        rospy.Subscriber('cam0', PoseWithCovarianceStamped, self.pose_cb)
+        self.cam_tf = None
+
+        rospy.spin()
+
+    def pose_cb(self, pose_msg):
+        """Replace this with TF tree once implemented."""
+        # pull translation and quaternion from pose msg
+        translation = np.array([
+            pose_msg.pose.pose.position.x,
+            pose_msg.pose.pose.position.y,
+            pose_msg.pose.pose.position.z])
+        quaternion = np.array([
+            pose_msg.pose.pose.orientation.x,
+            pose_msg.pose.pose.orientation.y,
+            pose_msg.pose.pose.orientation.z,
+            pose_msg.pose.pose.orientation.w])
+        # create homographic matrix
+        self.map_to_cam = np.linalg.inv(
+            translation_matrix(translation) @ quaternion_matrix(quaternion))
+
+    def camera_info_cb(self, info_msg):
+        """Callback for creating depth map"""
+        # replace this with a call to TF
+        assert self.map_to_cam is not None
+        map_to_cam = self.map_to_cam
+
+        # basis vectors for plane in map space (XY plane)
+        basis_map = np.array([[1, 0, 0, 1], [0, 1, 0, 1]]).T
+        # convert basis vectors to camera space
+        basis_cam = map_to_cam @ basis_map
+
+        # extract camera projection matrix from msg
+        cam_to_img = np.array(info_msg.P).reshape((3,4))
+
+        # create a matrix such that [a,b,1].T input results in linear combination of basis vectors
+        # for real numbers a,b, this will produce every vector in the XY plane
+        param_to_cam_plane = np.array([
+            [basis_cam[0,0], basis_cam[0,1], 0],
+            [basis_cam[1,0], basis_cam[1,1], 0],
+            [basis_cam[2,0], basis_cam[2,1], 0],
+            [0, 0, 1]])
+
+        # img = cam_to_img x param_to_cam_plane x param
+        # img = [u, v, w].T, where i=u/w, j=v/w, and w = z_cam
+        # solve for param, and divide by z_cam
+        # [a/z, b/z, 1/z].T = inv(cam_to_img x param_to_cam_plane) x [i,j,1].T
+        # for each i,j in the image, solve this equation to get z_cam (depth)
+
+        import pdb
+        pdb.set_trace()
+
+        i = 0
+        j = 0
+        img = np.array([i, j, 1])
+        # do this for each pixel?
+        param = np.linalg.inv(cam_to_img @ param_to_cam_plane) @ img
+
+        # extract depth
+        depth = 1/param[2]
+
+        print(f"depth is {depth}")
+
+if __name__ == "__main__":
+    Projector()
