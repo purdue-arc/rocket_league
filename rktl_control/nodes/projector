@@ -7,6 +7,7 @@ License:
 """
 
 # ROS
+from ctypes import sizeof
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from sensor_msgs.msg import Image, CameraInfo
@@ -19,12 +20,12 @@ class Projector(object):
     def __init__(self):
         rospy.init_node('projector')
 
-        self.depth_pub = rospy.Publisher('cam0/depth_rectified', Image, queue_size=1)
+        self.depth_pub = rospy.Publisher('cam0/depth_rect', Image, queue_size=1)
         rospy.Subscriber('cam0/camera_info', CameraInfo, self.camera_info_cb)
 
         # remove this when TF is implemented
         rospy.Subscriber('cam0', PoseWithCovarianceStamped, self.pose_cb)
-        self.cam_tf = None
+        self.map_to_cam = None
 
         rospy.spin()
 
@@ -63,15 +64,43 @@ class Projector(object):
         # depth * [i,j,1].T = cam_to_img x ground_plane x [a,b,1].T
         # [i,j,1].T = cam_to_img x ground_plane x [A,B,1/depth].T
 
-        i = 0
-        j = 0
-        img = np.array([i, j, 1])
-        # do this for each pixel?
-        depth = np.linalg.solve(cam_to_img @ ground_plane, img)
-        # extract depth
-        depth = 1/depth[2]
+        # create matrix of all pixels
+        w = info_msg.width
+        h = info_msg.height
+        i = np.arange(stop=w).reshape((w,1,1,1))
+        j = np.arange(stop=h).reshape((1,h,1,1))
 
-        print(f"depth is {depth}")
+        i = np.broadcast_to(i, (w,h,1,1))
+        j = np.broadcast_to(j, (w,h,1,1))
+        k = np.broadcast_to(1, (w,h,1,1))
+
+        img = np.concatenate((i,j,k), axis=2)
+
+        # reshape matrix
+        mat = (cam_to_img @ ground_plane).reshape((1,1,3,3))
+        mat = np.broadcast_to(mat, (w,h,3,3))
+
+        # solve for all pixels at once
+        depth = np.linalg.solve(mat, img)
+        # extract depth
+        depth = 1/(depth[:,:,2,0]).reshape((w,h))
+
+        # convert to required format for ROS
+        depth = depth.astype('float32', order='C')
+        depth = np.ascontiguousarray(depth)
+
+        # create message
+        img_msg = Image()
+        img_msg.header = info_msg.header
+        # img_msg.header.stamp = rospy.Time.now()
+        img_msg.height = h
+        img_msg.width = w
+        img_msg.encoding = '32FC1'
+        img_msg.step = 4*w
+        img_msg.data = depth.tobytes()
+
+        # publish
+        self.depth_pub.publish(img_msg)
 
 if __name__ == "__main__":
     Projector()
