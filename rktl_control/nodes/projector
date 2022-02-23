@@ -83,10 +83,10 @@ class Projector(object):
         # solve for all pixels at once
         depth = np.linalg.solve(mat, img)
         # extract depth
-        depth = 1/(depth[:,:,2,0]).reshape((w,h))
+        depth = 1000/(depth[:,:,2,0]).reshape((w,h))
 
         # convert to required format for ROS
-        depth = depth.astype('float32', order='C')
+        depth = depth.astype('uint16')
         depth = np.ascontiguousarray(depth)
 
         # create message
@@ -95,8 +95,8 @@ class Projector(object):
         # img_msg.header.stamp = rospy.Time.now()
         img_msg.height = h
         img_msg.width = w
-        img_msg.encoding = '32FC1'
-        img_msg.step = 4*w
+        img_msg.encoding = '16UC1'
+        img_msg.step = 2*w
         img_msg.data = depth.tobytes()
 
         # publish
