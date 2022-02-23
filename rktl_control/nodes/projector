@@ -47,42 +47,29 @@ class Projector(object):
     def camera_info_cb(self, info_msg):
         """Callback for creating depth map"""
         # replace this with a call to TF
-        assert self.map_to_cam is not None
         map_to_cam = self.map_to_cam
+        if map_to_cam is None:
+            return
 
-        # basis vectors for plane in map space (XY plane)
-        basis_map = np.array([[1, 0, 0, 1], [0, 1, 0, 1]]).T
-        # convert basis vectors to camera space
-        basis_cam = map_to_cam @ basis_map
+        # ground plane in map space (X direction, Y direction, origin point)
+        # any [a,b,1].T input results in a point on the ground plane
+        ground_plane = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]]).T
+        # convert to camera space
+        ground_plane = map_to_cam @ ground_plane
 
         # extract camera projection matrix from msg
         cam_to_img = np.array(info_msg.P).reshape((3,4))
 
-        # create a matrix such that [a,b,1].T input results in linear combination of basis vectors
-        # for real numbers a,b, this will produce every vector in the XY plane
-        param_to_cam_plane = np.array([
-            [basis_cam[0,0], basis_cam[0,1], 0],
-            [basis_cam[1,0], basis_cam[1,1], 0],
-            [basis_cam[2,0], basis_cam[2,1], 0],
-            [0, 0, 1]])
-
-        # img = cam_to_img x param_to_cam_plane x param
-        # img = [u, v, w].T, where i=u/w, j=v/w, and w = z_cam
-        # solve for param, and divide by z_cam
-        # [a/z, b/z, 1/z].T = inv(cam_to_img x param_to_cam_plane) x [i,j,1].T
-        # for each i,j in the image, solve this equation to get z_cam (depth)
-
-        import pdb
-        pdb.set_trace()
+        # depth * [i,j,1].T = cam_to_img x ground_plane x [a,b,1].T
+        # [i,j,1].T = cam_to_img x ground_plane x [A,B,1/depth].T
 
         i = 0
         j = 0
         img = np.array([i, j, 1])
         # do this for each pixel?
-        param = np.linalg.inv(cam_to_img @ param_to_cam_plane) @ img
-
+        depth = np.linalg.solve(cam_to_img @ ground_plane, img)
         # extract depth
-        depth = 1/param[2]
+        depth = 1/depth[2]
 
         print(f"depth is {depth}")
 
