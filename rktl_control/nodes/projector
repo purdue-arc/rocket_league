@@ -67,11 +67,9 @@ class Projector(object):
             # ground plane in map space (X direction, Y direction, origin point)
             # any [a,b,1].T input results in a point on the ground plane
             ground_plane = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]]).T
-            # convert to camera space
-            ground_plane = map_to_cam @ ground_plane
 
-            # depth * [i,j,1].T = cam_to_img x ground_plane x [a,b,1].T
-            # [i,j,1].T = cam_to_img x ground_plane x [A,B,1/depth].T
+            # depth * [i,j,1].T = cam_to_img x map_to_cam x ground_plane x [a,b,1].T
+            # [i,j,1].T = cam_to_img x map_to_cam x ground_plane x [A,B,1/depth].T
 
             # create matrix of all pixels
             w = self.width
@@ -86,17 +84,13 @@ class Projector(object):
             img = np.concatenate((i,j,k), axis=2)
 
             # reshape matrix
-            mat = (self.cam_to_img @ ground_plane).reshape((1,1,3,3))
+            mat = (self.cam_to_img @ map_to_cam @ ground_plane).reshape((1,1,3,3))
             mat = np.broadcast_to(mat, (w,h,3,3))
 
             # solve for all pixels at once
             depth = np.linalg.solve(mat, img)
             # extract depth
-            depth = 1/(depth[:,:,2,0]).reshape((w,h))
-
-            # convert to required format for ROS
-            depth = depth.astype('float32')
-            depth = np.ascontiguousarray(depth)
+            depth = 1.0/(depth[:,:,2,0].reshape((w,h)))
 
             # create message
             if self.img_msg is None:
@@ -106,7 +100,7 @@ class Projector(object):
                 self.img_msg.width = w
                 self.img_msg.encoding = '32FC1'
                 self.img_msg.step = 4*w
-            self.img_msg.data = depth.tobytes()
+            self.img_msg.data = depth.astype('float32').tobytes()
 
             # delay since making the depth map is expensive
             rate.sleep()
