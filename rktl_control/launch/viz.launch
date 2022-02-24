@@ -1,21 +1,30 @@
 <launch>
-  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" />
-
-  <node pkg="nodelet" type="nodelet" name="register" output="screen"
-        args="load depth_image_proc/register nodelet_manager">
-        <remap from="rgb" to="cam0"/>
-        <param name="queue_size" value="1"/>
+  <node pkg="rktl_control" type="pose_to_tf" name="cam0_tf">
+    <param name="cam_frame" value="cam0"/>
   </node>
 
-  <node pkg="tf2_ros" type="static_transform_publisher" name="cam_static"
-        args="0.1 0.1 0 0 0 0 depth cam0"/>
+  <node pkg="rktl_control" type="pose_to_tf" name="cam1_tf">
+    <param name="cam_frame" value="cam1"/>
+  </node>
 
-<node pkg="tf2_ros" type="static_transform_publisher" name="map_static"
-        args="0 0 1 0 0 3.1415 map depth"/>
+  <node pkg="rktl_control" type="pose_to_tf" name="cam2_tf">
+    <param name="cam_frame" value="cam2"/>
+  </node>
 
-  <node pkg="rostopic" type="rostopic" name="depth_info" respawn="true"
-        args="pub depth/camera_info sensor_msgs/CameraInfo -s --use-rostime -f $(find rktl_control)/params/viz.yaml"/>
+  <node pkg="rktl_control" type="pose_to_tf" name="cam3_tf">
+    <param name="cam_frame" value="cam3"/>
+  </node>
 
-  <node pkg="rostopic" type="rostopic" name="depth_image" respawn="true"
-        args="pub depth/image_rect sensor_msgs/Image -s --use-rostime -f $(find rktl_control)/params/viz_cam.yaml"/>
+  <node pkg="rktl_control" type="projector" name="cam0_projector">
+    <param name="cam_frame" value="cam0"/>
+  </node>
+  <node pkg="rktl_control" type="projector" name="cam1_projector">
+    <param name="cam_frame" value="cam1"/>
+  </node>
+  <node pkg="rktl_control" type="projector" name="cam2_projector">
+    <param name="cam_frame" value="cam2"/>
+  </node>
+  <node pkg="rktl_control" type="projector" name="cam3_projector">
+    <param name="cam_frame" value="cam3"/>
+  </node>
 </launch>

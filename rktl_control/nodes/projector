@@ -7,10 +7,9 @@ License:
 """
 
 # ROS
-from ctypes import sizeof
 import rospy
-from geometry_msgs.msg import PoseWithCovarianceStamped
 from sensor_msgs.msg import Image, CameraInfo
+from tf2_ros import Buffer, TransformListener
 from tf.transformations import translation_matrix, quaternion_matrix
 
 import numpy as np
@@ -20,37 +19,36 @@ class Projector(object):
     def __init__(self):
         rospy.init_node('projector')
 
-        self.depth_pub = rospy.Publisher('cam0/depth_rect', Image, queue_size=1)
-        rospy.Subscriber('cam0/camera_info', CameraInfo, self.camera_info_cb)
+        self.FRAME = rospy.get_param('~cam_frame', 'cam0')
+        self.depth_pub = rospy.Publisher(f'{self.FRAME}/depth_rect', Image, queue_size=1)
+        rospy.Subscriber(f'{self.FRAME}/camera_info', CameraInfo, self.camera_info_cb)
 
-        # remove this when TF is implemented
-        rospy.Subscriber('cam0', PoseWithCovarianceStamped, self.pose_cb)
-        self.map_to_cam = None
+        self.buffer = Buffer()
+        listener = TransformListener(self.buffer)
 
         rospy.spin()
 
-    def pose_cb(self, pose_msg):
-        """Replace this with TF tree once implemented."""
-        # pull translation and quaternion from pose msg
-        translation = np.array([
-            pose_msg.pose.pose.position.x,
-            pose_msg.pose.pose.position.y,
-            pose_msg.pose.pose.position.z])
-        quaternion = np.array([
-            pose_msg.pose.pose.orientation.x,
-            pose_msg.pose.pose.orientation.y,
-            pose_msg.pose.pose.orientation.z,
-            pose_msg.pose.pose.orientation.w])
-        # create homographic matrix
-        self.map_to_cam = np.linalg.inv(
-            translation_matrix(translation) @ quaternion_matrix(quaternion))
-
     def camera_info_cb(self, info_msg):
         """Callback for creating depth map"""
-        # replace this with a call to TF
-        map_to_cam = self.map_to_cam
-        if map_to_cam is None:
+        # get camera location via TF tree
+        try:
+            map_to_cam_msg = self.buffer.lookup_transform('map', self.FRAME, rospy.Time())
+        except:
             return
+
+        # pull translation and quaternion from pose msg
+        translation = np.array([
+            map_to_cam_msg.transform.translation.x,
+            map_to_cam_msg.transform.translation.y,
+            map_to_cam_msg.transform.translation.z])
+        quaternion = np.array([
+            map_to_cam_msg.transform.rotation.x,
+            map_to_cam_msg.transform.rotation.y,
+            map_to_cam_msg.transform.rotation.z,
+            map_to_cam_msg.transform.rotation.w])
+        # create homographic matrix
+        map_to_cam = (
+            translation_matrix(translation) @ quaternion_matrix(quaternion))
 
         # ground plane in map space (X direction, Y direction, origin point)
         # any [a,b,1].T input results in a point on the ground plane

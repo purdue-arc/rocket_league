@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""publish info from a PoseWithCovarianceStamped to the TF tree
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+# ROS
+import rospy
+from geometry_msgs.msg import PoseWithCovarianceStamped, TransformStamped
+from tf2_ros import TransformBroadcaster
+
+class Publisher(object):
+    """Workaround class until TF is implemented"""
+    def __init__(self):
+        rospy.init_node('tf_broadcaster', anonymous=True)
+
+        self.broadcaster = TransformBroadcaster()
+        self.FRAME = rospy.get_param('~cam_frame', 'cam0')
+
+        rospy.Subscriber(self.FRAME, PoseWithCovarianceStamped, self.pose_cb)
+        rospy.spin()
+
+    def pose_cb(self, pose_msg):
+        """Publish a pose corresponding to the TF."""
+        tf = TransformStamped()
+        tf.header = pose_msg.header
+        tf.child_frame_id = self.FRAME
+        tf.transform.translation.x = pose_msg.pose.pose.position.x
+        tf.transform.translation.y = pose_msg.pose.pose.position.y
+        tf.transform.translation.z = pose_msg.pose.pose.position.z
+        tf.transform.rotation.x = pose_msg.pose.pose.orientation.x
+        tf.transform.rotation.y = pose_msg.pose.pose.orientation.y
+        tf.transform.rotation.z = pose_msg.pose.pose.orientation.z
+        tf.transform.rotation.w = pose_msg.pose.pose.orientation.w
+        self.broadcaster.sendTransform(tf)
+
+if __name__ == "__main__":
+    Publisher()
