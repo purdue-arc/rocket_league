@@ -1,4 +1,17 @@
 <launch>
-  <!-- TODO -->
-  <!-- Call other launch files to run entire project not in simulation -->
+  <rosparam command="load" file="$(find rktl_launch)/config/rocket_league_params.yaml"/>
+
+  <!-- Ball -->
+  <group ns="ball/">
+    <!-- Filter -->
+    <include file="$(find rktl_control)/launch/mean_odom_filter.launch" />
+  </group>
+
+  <!-- Cars -->
+  <group ns="cars/">
+    <include file="$(find rktl_launch)/launch/ball.launch">
+      <arg name="car_name" value="car_0" />
+      <arg name="real" value="true" />
+    </include>
+  </group>
 </launch>

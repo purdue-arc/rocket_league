@@ -1,0 +1,17 @@
+<launch>
+    <arg name="car_name" default="car_0" />
+    <arg name="real" default="true" />
+
+    <group ns="$(arg car_name)/">
+        <!-- Filter -->
+        <include file="$(find rktl_control)/launch/mean_odom_filter.launch" />
+
+        <group if="$(arg real)">
+            <!-- Control -->
+            <include file="$(find rktl_control)/launch/velocity_controller.launch" />
+
+            <!-- Hardware -->
+            <include file="$(find rktl_control/launch/hardware_interface.launch" />
+        </group>
+    </group>
+</launch>
