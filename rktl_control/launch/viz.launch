@@ -15,16 +15,8 @@
     <param name="cam_frame" value="cam3"/>
   </node>
 
-  <node pkg="rktl_control" type="projector" name="cam0_projector">
-    <param name="cam_frame" value="cam0"/>
-  </node>
-  <node pkg="rktl_control" type="projector" name="cam1_projector">
-    <param name="cam_frame" value="cam1"/>
-  </node>
-  <node pkg="rktl_control" type="projector" name="cam2_projector">
-    <param name="cam_frame" value="cam2"/>
-  </node>
-  <node pkg="rktl_control" type="projector" name="cam3_projector">
-    <param name="cam_frame" value="cam3"/>
-  </node>
+  <node ns="cam0" pkg="rktl_control" type="projector" name="cam0_projector"/>
+  <node ns="cam1" pkg="rktl_control" type="projector" name="cam1_projector"/>
+  <node ns="cam2" pkg="rktl_control" type="projector" name="cam2_projector"/>
+  <node ns="cam3" pkg="rktl_control" type="projector" name="cam3_projector"/>
 </launch>
