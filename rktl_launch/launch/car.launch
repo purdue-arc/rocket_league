@@ -1,5 +1,5 @@
 <launch>
-    <arg name="car_name" default="car_0" />
+    <arg name="car_name" default="car0" />
     <arg name="real" default="true" />
 
     <group ns="$(arg car_name)/">
