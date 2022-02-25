@@ -47,7 +47,7 @@ class Projector(object):
 
             # get camera location via TF tree
             try:
-                map_to_cam_msg = buffer.lookup_transform('map', self.frame_id, rospy.Time())
+                map_to_cam_msg = buffer.lookup_transform(self.frame_id, 'map', rospy.Time())
             except:
                 continue
 
@@ -61,7 +61,7 @@ class Projector(object):
                 map_to_cam_msg.transform.rotation.y,
                 map_to_cam_msg.transform.rotation.z,
                 map_to_cam_msg.transform.rotation.w])
-            # create homographic matrix
+            # create transformation matrix
             map_to_cam = translation_matrix(translation) @ quaternion_matrix(quaternion)
 
             # ground plane in map space (X direction, Y direction, origin point)
