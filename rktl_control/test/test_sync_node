@@ -44,12 +44,12 @@ class TestSync(unittest.TestCase):
         # initialize node and interface to code under test
         rospy.init_node('test_sync_node')
 
-        car0_pub = rospy.Publisher('car0/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
-        car1_pub = rospy.Publisher('car1/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
+        car0_pub = rospy.Publisher('cars/car0/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
+        car1_pub = rospy.Publisher('cars/car1/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
         ball_pub = rospy.Publisher('ball/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
 
-        rospy.Subscriber('car0/pose_sync', PoseWithCovarianceStamped, self.car0_cb)
-        rospy.Subscriber('car1/pose_sync', PoseWithCovarianceStamped, self.car1_cb)
+        rospy.Subscriber('cars/car0/pose_sync', PoseWithCovarianceStamped, self.car0_cb)
+        rospy.Subscriber('cars/car1/pose_sync', PoseWithCovarianceStamped, self.car1_cb)
         rospy.Subscriber('ball/pose_sync', PoseWithCovarianceStamped, self.ball_cb)
 
         # member variables used for test

@@ -3,8 +3,8 @@
   <node type="mean_odom_filter" pkg="rktl_control" name="mean_filter">
     <rosparam>
       topics:
-        - car0/pose
-        - car1/pose
+        - cars/car0/pose
+        - cars/car1/pose
         - ball/pose
     </rosparam>
   </node>
