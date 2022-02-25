@@ -11,7 +11,7 @@
             <include file="$(find rktl_control)/launch/velocity_controller.launch" />
 
             <!-- Hardware -->
-            <include file="$(find rktl_control/launch/hardware_interface.launch" />
+            <include file="$(find rktl_control)/launch/hardware_interface.launch" />
         </group>
     </group>
 </launch>
