@@ -16,7 +16,7 @@ class SimpleController:
     def __init__(self):
         rospy.init_node('simple_controller')
 
-        self.car_odom_topic = rospy.get_param('~car_odom_topic', 'odom')
+        self.car_odom_topic = rospy.get_param('~car_odom_topic', '/car0/odom')
         self.ball_odom_topic = rospy.get_param(
             '~ball_odom_topic', '/ball/odom')
         self.reset_service = rospy.get_param(

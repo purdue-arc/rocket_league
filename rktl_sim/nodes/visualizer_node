@@ -118,7 +118,7 @@ class VisualizerROS(object):
         rospy.Subscriber(
             "car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb
         )
-        rospy.Subscriber("car0/bezier_path", MultiBezierPath, self.bezier_path_cb)
+        rospy.Subscriber("bezier_path", MultiBezierPath, self.bezier_path_cb)
 
         while not rospy.is_shutdown():
             self.window.show()
@@ -158,7 +158,7 @@ class VisualizerROS(object):
     def bezier_path_cb(self, msg: MultiBezierPath):
         """Callback for bezier path messages."""
         self.window.resetAssetLines(self.lines_id)
-        paths = [BezierPath(x) for x in msg.segments]
+        paths = [BezierPath(x) for x in msg.paths]
         for path in paths:
             #for point in path.bezier_curve.control_points:
             #    self.window.updateAssetPos(self.lines_id, point.x, point.y)
