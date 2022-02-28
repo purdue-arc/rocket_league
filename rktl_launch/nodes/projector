@@ -22,7 +22,7 @@ class Projector(object):
         rospy.Subscriber('camera_info', CameraInfo, self.camera_info_cb)
 
         # constants
-        self.USE_PRIORITY = rospy.get_param('~use_priority', True)
+        self.GROUND_HEIGHT = rospy.get_param('~ground_height', 0.0)
 
         # used to access TF tree
         buffer = Buffer()
@@ -69,11 +69,7 @@ class Projector(object):
 
             # ground plane in map space (X direction, Y direction, origin point)
             # any [a,b,1].T input results in a point on the ground plane
-            if self.USE_PRIORITY:
-                offset = int(self.frame_id[-1]) * -0.01
-            else:
-                offset = 0.0
-            ground_plane = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, offset, 1]]).T
+            ground_plane = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, self.GROUND_HEIGHT, 1]]).T
 
             # depth * [u,v,1].T = cam_to_img x map_to_cam x ground_plane x [a,b,1].T
             # [u,v,1].T = cam_to_img x map_to_cam x ground_plane x [A,B,1/depth].T
