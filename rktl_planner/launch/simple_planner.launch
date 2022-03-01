@@ -1,6 +1,7 @@
 <launch>
     <node pkg="rktl_planner" type="bezier_path_server" name="bezier_path_server" />
     <node pkg="rktl_planner" type="simple_controller" name="simple_controller">
-        <param name="bezier_path_topic" value="bezier_path" />
+        <param name="linear_path_topic" value="car0/path" />
+        <!-- <param name="bezier_path_topic" value="bezier_path" /> -->
     </node>
 </launch>

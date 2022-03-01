@@ -9,5 +9,5 @@
     <include file="$(find rktl_sim)/launch/simulator.launch" pass_all_args="true"/>
     <include file="$(find rktl_planner)/launch/local_planner.launch" pass_all_args="true"/>
     <include file="$(find rktl_control)/launch/velocity_controller.launch" pass_all_args="true"/>
-    <include file="$(find rktl_planner)/launch/high_level.launch" pass_all_args="true"/>
+    <!-- <include file="$(find rktl_planner)/launch/high_level.launch" pass_all_args="true"/> -->
 </launch>

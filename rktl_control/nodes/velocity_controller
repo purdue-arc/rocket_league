@@ -81,7 +81,7 @@ class VelocityControllerROS(object):
         # atomic operation
         self.state = (odom_msg.header.stamp,
             odom_msg.twist.twist.linear.x,
-            odom_msg.twist.twist.angular.z)
+            -odom_msg.twist.twist.angular.z)
 
     def loop_once(self):
         """Main loop."""
@@ -115,7 +115,7 @@ class VelocityControllerROS(object):
                     yaw_rate_ref - yaw_rate_est, delta_t)
 
                 self.throttle_pub.publish(self.clamp(throttle_effort, self.throttle_limits))
-                self.steering_pub.publish(-self.clamp(steering_effort, self.steering_limits))
+                self.steering_pub.publish(self.clamp(steering_effort, self.steering_limits))
 
         self.last_time = now
 

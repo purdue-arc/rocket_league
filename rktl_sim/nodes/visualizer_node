@@ -107,6 +107,9 @@ class VisualizerROS(object):
         self.lines_id = 11
         self.window.createAsset(self.lines_id, 0, 0, color=(255, 0, 0), lines=True)
 
+        self.circle_id = 12
+        self.window.createAsset(self.circle_id, 0, 0, circle=True, color=(255,0,0), radius=0.25)
+
         self.lock = Lock()
         self.last_time = None
         self.path = None
@@ -116,7 +119,7 @@ class VisualizerROS(object):
         rospy.Subscriber("car0/odom", Odometry, self.car_odom_cb)
         rospy.Subscriber("car0/path", Path, self.path_arr_cb)
         rospy.Subscriber(
-            "car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb
+            "car0/lookahead_dist", Float32, self.lookahead_cb
         )
         rospy.Subscriber("bezier_path", MultiBezierPath, self.bezier_path_cb)
 
@@ -136,6 +139,7 @@ class VisualizerROS(object):
         heading = heading * 180. / math.pi
         self.window.updateAssetPos(self.car_id, x, y)
         self.window.updateAssetAngle(self.car_id, heading)
+        self.window.updateAssetPos(self.circle_id, x, y)
 
     def ball_odom_cb(self, odom_msg):
         x = odom_msg.pose.pose.position.x
@@ -144,16 +148,12 @@ class VisualizerROS(object):
 
     def path_arr_cb(self, path_arr_msg):
         """Callback for path array messages."""
+        self.window.resetAssetLines(self.lines_id)
         self.path = path_arr_msg.waypoint
-        self.path_points = []
-
         for point in self.path:
             x = point.pose.position.x
             y = point.pose.position.y
-            self.path_points.append((x, y))
-
-        if self.path_points is None:
-            self.path_points = [(0, 0)]
+            self.window.updateAssetPos(self.lines_id, x, y)
     
     def bezier_path_cb(self, msg: MultiBezierPath):
         """Callback for bezier path messages."""
@@ -167,12 +167,9 @@ class VisualizerROS(object):
                 point = path.at(t)
                 self.window.updateAssetPos(self.lines_id, point.x, point.y)
 
-    def lookahead_cb(self, pose_msg):
+    def lookahead_cb(self, msg: Float32):
         """Callback for lookahead_pnt messages."""
-        x = pose_msg.pose.pose.position.x
-        y = pose_msg.pose.pose.position.y
-        self.lookahead = (x, y)
-
+        self.window.updateAssetRadius(self.circle_id, msg.data)
 
 if __name__ == "__main__":
     VisualizerROS()

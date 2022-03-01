@@ -39,7 +39,7 @@ class WaypointControllerROS(object):
         self.max_speed = rospy.get_param('~max_speed', 0.1)
 
         # Radius to search for intersections
-        self.lookahead_dist = rospy.get_param('~lookahead_dist', 1)
+        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.15)
 
         # Coeffient to adjust lookahead distance by speed
         self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.035)
@@ -58,8 +58,8 @@ class WaypointControllerROS(object):
             'car0/path_error', PathError, queue_size=1)
 
         if self.is_debug:
-            self.lookahead_pnt_pub = rospy.Publisher('car0/lookahead_pnt',
-                                                     PoseWithCovarianceStamped,
+            self.lookahead_dist_pub = rospy.Publisher('car0/lookahead_dist',
+                                                     Float32,
                                                      queue_size=1)
             self.d_angle_pub = rospy.Publisher(
                 'car0/d_angle', Float32, queue_size=1)
@@ -134,6 +134,7 @@ class WaypointControllerROS(object):
                     d_angle = pursuit.calculate_angle(intersect, bot_pos,
                                                       bot_orient, lookahead_dist, bkw)
                     if abs(d_angle) > math.pi/2:
+                        print(d_angle)
                         intersect = None
                     else:
                         break
@@ -148,31 +149,28 @@ class WaypointControllerROS(object):
                 return
 
             if self.is_debug:
-                pose = PoseWithCovarianceStamped()
-                pose.header.frame_id = self.frame_id
-                pose.pose.pose.position.x = intersect[0]
-                pose.pose.pose.position.y = intersect[1]
-                self.lookahead_pnt_pub.publish(pose)
+                self.lookahead_dist_pub.publish(Float32(lookahead_dist))
 
             # Calculate ETA
             dist = np.linalg.norm(goal_pos - bot_pos)
             delta_time = time.time() - self.start_time
             time_left = goal_time.data - delta_time
-            if time_left <= 0:
-                # Report unfeasible path
-                linear_vel = 0
-                vel_error = goal_vel
-                rospy.logwarn("Path unfeasible to complete.")
-            else:
-                linear_vel = dist / time_left
-                if goal_vel < 0:
-                    linear_vel *= -1
-                vel_error = goal_vel - linear_vel
+            linear_vel = goal_vel
+            # if time_left <= 0:
+            #     # Report unfeasible path
+            #     linear_vel = 0
+            #     vel_error = goal_vel
+            #     rospy.logwarn("Path unfeasible to complete.")
+            # else:
+            #     linear_vel = dist / time_left
+            #     if goal_vel < 0:
+            #         linear_vel *= -1
+            #     vel_error = goal_vel - linear_vel
 
-                if vel_error > vel_margin:
-                    linear_vel = 0
-                    rospy.logwarn("Path unfeasible to complete.")
-                    # TODO: Tell highlevel planner we stopped
+            #     if vel_error > vel_margin:
+            #         linear_vel = 0
+            #         rospy.logwarn("Path unfeasible to complete.")
+            #         # TODO: Tell highlevel planner we stopped
 
             # Calculate angular velocity
             turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos,
@@ -188,17 +186,17 @@ class WaypointControllerROS(object):
             # Publish command data
             twist = Twist()
             twist.linear.x = linear_vel
-            twist.angular.z = angular_vel
+            twist.angular.z = -angular_vel
             self.bot_velocity_cmd.publish(twist)
 
             # Publish error data
-            error = PathError()
-            error.time = Float32(time_left)
-            error.position = Float32(dist)
-            error.orientation = Float32()
-            error.linear_velocity = Float32(vel_error)
-            error.angular_velocity = Float32()
-            self.path_error_pub.publish(error)
+            # error = PathError()
+            # error.time = Float32(time_left)
+            # error.position = Float32(dist)
+            # error.orientation = Float32()
+            # error.linear_velocity = Float32(vel_error)
+            # error.angular_velocity = Float32()
+            # self.path_error_pub.publish(error)
 
 
 if __name__ == "__main__":

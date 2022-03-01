@@ -86,8 +86,13 @@ def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     dist = np.linalg.norm(tang_line)
     angle = (2 * math.asin(round((dist / 2) / lookahead_dist, 6)))
     sign = np.sign(np.cross(intersect_pos - bot_line, bot_line))[2]
-    if bkw:
-        angle = math.pi - angle
+
+    # if angle < 0:
+    #     angle += math.pi
+    # else:
+    #     angle -= math.pi
+    # if bkw:
+        # angle = math.pi - angle
     return angle * sign
 
 
