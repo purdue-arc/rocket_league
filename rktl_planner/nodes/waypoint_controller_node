@@ -16,8 +16,8 @@ from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
 from nav_msgs.msg import Odometry
 
 # Local modules
-import local_planner.convert as convert
-import local_planner.pure_pursuit as pursuit
+import rktl_planner.convert as convert
+import rktl_planner.pure_pursuit as pursuit
 from rktl_msgs.msg import Target, Path, PathError, Waypoint
 
 
@@ -51,7 +51,7 @@ class WaypointControllerROS(object):
         self.is_debug = rospy.get_param('~is_debug', True)
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('car0/velocity',
+        self.bot_velocity_cmd = rospy.Publisher('car0/cmd_vel',
                                                 Twist, queue_size=1)
 
         self.path_error_pub = rospy.Publisher(
@@ -72,7 +72,7 @@ class WaypointControllerROS(object):
 
     def path_cb(self, path_arr_msg):
         """Creates path using waypoints in Path message."""
-        self.path_start_time = path_arr_msg.stamp
+        self.path_start_time = path_arr_msg.header.stamp
         self.path = path_arr_msg.waypoint
         self.last_pnt_idx = 0
         self.start_time = time.time()
@@ -129,7 +129,7 @@ class WaypointControllerROS(object):
                     goal_pos = end_pos
                     goal_vel = self.path[i + 1].twist.linear.x
                     goal_time = self.path[i + 1].delta_t
-                    vel_margin = self.path[i + 1].velocity_tolerance
+                    vel_margin = self.path[i + 1].velocity_tolerance.data
                     bkw = goal_vel < 0
                     d_angle = pursuit.calculate_angle(intersect, bot_pos,
                                                       bot_orient, lookahead_dist, bkw)

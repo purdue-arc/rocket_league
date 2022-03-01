@@ -1,9 +1,9 @@
 <launch>
   <node type="velocity_controller" pkg="rktl_control" name="velocity_controller" output="screen">
-    <rosparam command="load" file="$(find rktl_control)/params/velocity_controller.yaml" />
-    <remap from="effort/throttle" to ="control_effort/throttle"/>
-    <remap from="effort/steering" to ="control_effort/steering"/>
-    <remap from="odom" to ="bot_odom"/>
-    <remap from="cmd_vel" to ="bot_velocity_command"/>
+    <rosparam command="load" file="$(find rktl_control)/config/velocity_controller.yml" />
+    <remap from="effort/throttle" to ="effort/throttle"/>
+    <remap from="effort/steering" to ="effort/steering"/>
+    <remap from="odom" to ="car0/odom"/>
+    <remap from="cmd_vel" to ="car0/cmd_vel"/>
   </node>
 </launch>
