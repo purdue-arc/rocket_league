@@ -7,7 +7,7 @@ License:
 
 from abc import abstractmethod
 from threading import Condition
-import time, uuid, socket, os, random
+import time, uuid, socket, os
 
 from gym import Env
 
@@ -60,7 +60,7 @@ class ROSInterface(Env):
                     open(f'/tmp/{run_id}_launch', mode='x')
                     break
                 except FileExistsError:
-                    time.sleep(2.0*random.random())
+                    pass
             port = 11311    # default port
             while True:
                 try:
