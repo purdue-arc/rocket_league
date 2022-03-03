@@ -106,8 +106,11 @@ def optimize_agent(trial):
     
     print("\n")
     print("Mean Reward at step #" + str(step) + " : " + str(mean_reward) )
+<<<<<<< HEAD
     if (step + 1) % 10 == 0 :
     	print("Best Params:" + str(study.best_params))
+=======
+>>>>>>> 6e0ee23c6afd85afbcd3e79aab87e12467c531e6
 
     env.close() # this must be done to clean up other processes
     
