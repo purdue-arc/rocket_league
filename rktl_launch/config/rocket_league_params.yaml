@@ -9,3 +9,7 @@ GOAL_WIDTH: 1 # m
 BALL_RADIUS: 0.0508 # m (2 in)
 CAR_WIDTH: 0.0762 # m (3 in)
 CAR_LENGTH: 0.2032 # m (8 in)
+STEERING_THROW: 0.26179938 # rad (15 degrees)
+STEERING_RATE: 0.52359877 # rad/s (30 degrees/s)
+THROTTLE_TAU: 0.25 # first order / second order response
+MAX_SPEED: 1.0 # m/s 
