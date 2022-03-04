@@ -183,14 +183,8 @@ class Sim(object):
 
         # Step kinematic objects independently
         for car in self._cars.values():
-            wallContact = False
-            carContacts = p.getContactPoints(bodyA=car.id)
-            for contact in carContacts:
-                if contact[2] in self._walls:
-                    wallContact = True
-                    break
-            car.step((throttle_cmd, steering_cmd), wallContact, dt)
-    
+            car.step((throttle_cmd, steering_cmd), dt)
+
         # PyBullet steps at 240hz
         for _ in range(int(dt * 240.)):
             p.stepSimulation()
@@ -199,7 +193,7 @@ class Sim(object):
         cars = list(self._cars.values())
         if len(cars) == 0:
             return None
-        
+
         # TODO: Provide translation from ARC IDs to Sim IDs
         return cars[0].getPose()
 
