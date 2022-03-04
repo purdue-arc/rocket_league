@@ -1,4 +1,4 @@
-# The `camera_tracking` package
+# The `rktl_perception` package
 
 This packages contains all nodes, launch files, and configuration files
 associated with the
@@ -6,12 +6,6 @@ associated with the
 the [Purdue University Autonomous Robotics Club](https://www.purduearc.com/).
 
 ## Nodes
-### `odom_gemerator`
-Takes a rolling average of odom data to reduce noise.
-
-Params:
-- `buffer_size` (int): The number of datapoints to average. Default: `10`
-
 ### `ball_detection`
 Uses color thresholding to find a vector pointing from the camera in the direction of the ball
 
@@ -36,7 +30,7 @@ This launch file launches all nodes and nodelets associcated with a single
 camera. Most arguments can be safely ignored, with the exception of
 `camera_name`
 
-To run: `roslaunch camera_tracking camera.launch`
+To run: `roslaunch rktl_perception camera.launch`
 
 Arguments:
 - `camera_name` (string): The name of the camera to be launched. All topics
@@ -59,14 +53,13 @@ Arguments:
 ### `focus_assist.launch`
 This launch file launches the four nodes that generate a Canny Edge Detection copy of every camera, as to aide in focusing the cameras properly.
 
-To run: `roslaunch camera_tracking focus_assist.launch`
+To run: `roslaunch rktl_perception focus_assist.launch`
+
+### `cal.launch`
+This launch file launches a calibration node for each camera with the standard settions
+
+To run: `roslaunch rktl_perception cal.launch`
 
 
 ## Configuration files
 Configuration files are located in the `config` directory. They contain configuration information for different cameras, inculding sensor information used by the GenICam standard and distortion/rectification/rectifcation matrices.
-
-Camera Calibration Info. Gotten from running
-`rosrun camera_calibration cameracalibrator.py` and copy/pasting the
-contents of the resulting `.yml` file into this config file. See the
-[`camera_calibration`](https://wiki.ros.org/camera_calibration) package for
-more info.
