@@ -24,10 +24,6 @@ class Car(object):
         # URDF Configuration
         self.body_link_id = 1
 
-        # Collision handling
-        self._collision_started = False
-        self._collision_friction = 0.05
-
         # System state
         self._v_rear = 0.0
         self._psi = 0.0
@@ -41,17 +37,7 @@ class Car(object):
         p.resetJointState(self.id, self.joint_ids[1], targetValue=pos[1])
         p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
 
-    def step(self, cmd, contact, dt):
-        # Handle collision
-        if contact:
-            if not self._collision_started:
-                self._v_rear = 0.0
-                self._collision_started = True
-            else:
-                des_throttle *= self._collision_friction
-        else:
-            self._collision_started = False
-
+    def step(self, cmd, dt):
         # tranfrom control input to reference angles and velocities
         v_rear_ref = cmd[0] * self._MAX_SPEED
         psi_ref = cmd[1] * self._STEERING_THROW
