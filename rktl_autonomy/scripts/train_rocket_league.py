@@ -20,7 +20,7 @@ if __name__ == '__main__':      # this is required due to forking processes
 
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
-            n_envs=500, vec_env_cls=SubprocVecEnv)
+            n_envs=250, vec_env_cls=SubprocVecEnv)
 
     model = PPO("MlpPolicy", env)
 
@@ -30,7 +30,7 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 2000 # (time steps in a SINGLE environment)
+    freq = 4000 # (time steps in a SINGLE environment)
     # ex. To save 20 times with 10M timesteps on 10 vec_envs, set to 50k
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
