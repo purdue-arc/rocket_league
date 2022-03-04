@@ -48,7 +48,7 @@ def main(win):
         msg.steering = steering_effort
         effort_pub.publish(msg)
 
-        win.clear()
+        win.erase()
         win.addstr("keyboard controller\n")
         win.addstr("WASD for throttle / steering\n")
         win.addstr(f"current throttle: {throttle_effort:0.2f}\n")
