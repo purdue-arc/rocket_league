@@ -1,0 +1,6 @@
+<launch>
+    <node pkg="camera_calibration" type="cameracalibrator.py" name="calib" ns="cam0" args="--size 8x6 --square 0.026 image:=/cam0/image_raw camera:=/cam0" />
+    <node pkg="camera_calibration" type="cameracalibrator.py" name="calib" ns="cam1" args="--size 8x6 --square 0.026 image:=/cam1/image_raw camera:=/cam1" />
+    <node pkg="camera_calibration" type="cameracalibrator.py" name="calib" ns="cam2" args="--size 8x6 --square 0.026 image:=/cam2/image_raw camera:=/cam2" />
+    <node pkg="camera_calibration" type="cameracalibrator.py" name="calib" ns="cam3" args="--size 8x6 --square 0.026 image:=/cam3/image_raw camera:=/cam3" />
+</launch>
