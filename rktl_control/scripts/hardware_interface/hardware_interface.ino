@@ -45,7 +45,7 @@ const byte PPM_OUT_PIN5 = 9;
 const byte THROTTLE_CHANNEL = 1;
 const byte STEERING_CHANNEL = 2;
 
-ros::NodeHandle nh;
+// output objects
 PulsePositionOutput outputPPM0(RISING);
 PulsePositionOutput outputPPM1(RISING);
 PulsePositionOutput outputPPM2(RISING);
@@ -54,7 +54,6 @@ PulsePositionOutput outputPPM4(RISING);
 PulsePositionOutput outputPPM5(RISING);
 
 // Parameters
-float THROTTLE_LIMIT = 1.0;
 int THROTTLE_ZERO = 1500;
 int THROTTLE_THROW = 500;
 int CAR0_MAX_LEFT = 1000;
@@ -85,7 +84,7 @@ void enable_callback(const std_msgs::Bool& enable) {
 
 const float effort_to_ppm_throttle(const float effort) {
   if (enabled) {
-    return THROTTLE_ZERO + effort * THROTTLE_THROW * THROTTLE_LIMIT;
+    return THROTTLE_ZERO + THROTTLE_THROW * effort;
   }
   else {
     return THROTTLE_ZERO;
@@ -134,6 +133,8 @@ void control_callback5(const rktl_msgs::ControlEffort& control) {
   outputPPM5.write(STEERING_CHANNEL, effort_to_ppm_steering(control.steering, CAR5_MAX_LEFT, CAR5_CENTER, CAR5_MAX_RIGHT));
 }
 
+// ros
+ros::NodeHandle nh;
 ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub0("car0/effort", control_callback0);
 ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub1("car1/effort", control_callback1);
 ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub2("car2/effort", control_callback2);
@@ -146,8 +147,13 @@ void setup() {
   // init node
   nh.initNode();
 
+  // wait until connected
+  while (!nh.connected()) {
+    nh.spinOnce();
+  }
+
   // get params
-  nh.getParam("~throttle_limit", &THROTTLE_LIMIT);
+  nh.getParam("~throttle_throw", &THROTTLE_THROW);
 
   nh.getParam("~car0/max_left", &CAR0_MAX_LEFT);
   nh.getParam("~car0/center", &CAR0_CENTER);

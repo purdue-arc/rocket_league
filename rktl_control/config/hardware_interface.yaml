@@ -1,5 +1,5 @@
 # max allowable throttle effort (fwd and rev)
-throttle_limit: 0.375
+throttle_throw: 100
 
 # servo adjustments (uS)
 car0:
