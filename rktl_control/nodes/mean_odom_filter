@@ -33,7 +33,7 @@ class MeanOdomFilter(object):
 
         # pubs / subs
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
-        rospy.Subscriber('pose_sync', PoseWithCovarianceStamped, self.pose_cb)
+        rospy.Subscriber('pose', PoseWithCovarianceStamped, self.pose_cb)
 
         # main loop
         rospy.spin()
