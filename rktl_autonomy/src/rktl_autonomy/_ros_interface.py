@@ -7,7 +7,7 @@ License:
 
 from abc import abstractmethod
 from threading import Condition
-import time, uuid, socket, os, random
+import time, uuid, socket, os
 
 from gym import Env
 
@@ -54,17 +54,23 @@ class ROSInterface(Env):
         # ROS initialization
         if not self.__EVAL_MODE:
             assert launch_file is not None
-            # use temp files to avoid crash caused by race condition for ports
-            port = 11311    # default port
+            # use temporary files to enforce one environment roslaunching at a time
             while True:
                 try:
-                    open(f'/tmp/{run_id}_{port}', mode='x')
+                    open(f'/tmp/{run_id}_launch', mode='x')
                     break
                 except FileExistsError:
-                    with socket.socket() as sock:
-                        sock.bind(('localhost', 0))
-                        port = sock.getsockname()[1]
-                    time.sleep(2.0*random.random())
+                    pass
+            # find a free port (using default if available)
+            port = 11311
+            with socket.socket() as sock:
+                try:
+                    # see if default port is available
+                    sock.bind(('localhost', port))
+                except socket.error:
+                    # find a random open one
+                    sock.bind(('localhost', 0))
+                    port = sock.getsockname()[1]
             # launch the training ROS network
             ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_id)
@@ -76,6 +82,8 @@ class ROSInterface(Env):
             # initialize self
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
             rospy.init_node(node_name)
+            # let someone else take a turn
+            os.remove(f'/tmp/{run_id}_launch')
         else:
             # use an existing ROS network
             rospy.init_node(node_name)
