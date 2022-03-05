@@ -37,13 +37,13 @@
 
         <!-- Ball tracking -->
         <node pkg="rktl_perception" type="ball_detection" name="ball_detection">
-            <param name="publishThresh" value="false"/>
-            <param name="min_hue" value="60"/>
-            <param name="min_sat" value="135"/>
+            <param name="publishThresh" value="true"/>
+            <param name="min_hue" value="50"/>
+            <param name="min_sat" value="50"/>
             <param name="min_vib" value="50"/>
-            <param name="max_hue" value="140"/>
+            <param name="max_hue" value="80"/>
             <param name="max_sat" value="255"/>
-            <param name="max_vib" value="255"/>
+            <param name="max_vib" value="210"/>
         </node>
         <!-- pointgrey RGB camera nodelet -->
         <node pkg="nodelet" type="nodelet" name="$(arg camera_name)" args="load pointgrey_camera_driver/PointGreyCameraNodelet $(arg manager_name)" output="screen">
