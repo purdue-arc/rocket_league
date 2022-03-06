@@ -7,7 +7,7 @@
         <param name="dev" value="$(arg device)"/>
     </node>
 
-    <node name="xbox_interface" pkg="rktl_sim" type="xbox_interface" output="screen" respawn="false">
+    <node name="xbox_interface" pkg="rktl_control" type="xbox_interface" output="screen" respawn="false">
         <param name="device" value="$(arg device)"/>
     </node>
 </launch>
