@@ -23,16 +23,10 @@ if __name__ == '__main__':      # this is required due to forking processes
     run_id = str(uuid.uuid4())  # ALL running environments must share this
 
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
-    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
-            n_envs=2, vec_env_cls=SubprocVecEnv)
-            
-    # The noise objects for DDPG
-    #n_actions = env.action_space.shape[-1]
-    #action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
+    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id}, n_envs=24, vec_env_cls=SubprocVecEnv)
 
-    #model = DDPG("MlpPolicy", env, action_noise=action_noise)
+    model = PPO("MlpPolicy", env, n_steps= 163, gamma= 0.9973997734112163, learning_rate= 0.000875486766488368, ent_coef= 4.805419210954314e-06, clip_range= 0.1, n_epochs= 16, gae_lambda= 0.9614821689691063, batch_size= 3177, vf_coef= 0.7501914642632537)
 
-    model = PPO("MlpPolicy", env, batch_size= 64, n_steps= 512, gamma= 0.995, learning_rate= 1e-04, ent_coef= 0.001, clip_range= 0.3, gae_lambda= 0.9, max_grad_norm= 0.7, vf_coef= 0.430793, policy_kwargs= dict(log_std_init=-2, ortho_init=False, activation_fn=nn.ReLU, net_arch=[dict(pi=[512, 512], vf=[512, 512])]))
     
     # log training progress as CSV
     log_dir = expanduser(f'~/catkin_ws/data/rocket_league/{run_id}')
@@ -40,7 +34,7 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 12500 # (time steps in a SINGLE environment)
+    freq = 5000 # (time steps in a SINGLE environment)
     # ex. To save 20 times with 10M timesteps on 10 vec_envs, set to 50k
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 

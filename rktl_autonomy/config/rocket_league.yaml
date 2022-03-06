@@ -24,7 +24,7 @@ max_episode_time: 15
 log:
   base_dir: "~/catkin_ws/data/rocket_league/"
   # frequency to save progress plot. Unit is episodes
-  plot_freq: 50
+  plot_freq: 25
   # variables to display in progress plot
   basic:
     - "duration"

@@ -37,7 +37,7 @@ def optimize_ppo2(trial):
         'gamma': trial.suggest_loguniform('gamma', 0.9, 0.9997),
         'learning_rate': trial.suggest_loguniform('learning_rate', 5e-6, 0.003), 
         'ent_coef': trial.suggest_loguniform('ent_coef', 1e-8, 0.01), 
-        'clip_range': trial.suggest_uniform('clip_range', 0.1, 0.1), # try 0.2 and 0.3 as well
+        'clip_range': trial.suggest_uniform('clip_range', 0.1, 0.3), # try 0.2 and 0.3 as well
         'n_epochs': int(trial.suggest_loguniform('n_epochs', 3, 30)),
         'gae_lambda': trial.suggest_uniform('gae_lambda', 0.9, 1.0),
         'batch_size': int(trial.suggest_uniform('batch_size', 4, 4096)),
@@ -52,8 +52,8 @@ def optimize_agent(trial):
     global study
     
     env_count = 1 # Number of environments to run in parallel (keep at 1 for now)
-    timesteps = 1000 # Timesteps that the model will train on before getting assessed and tuned
-    episodes_per_trial = 6 # Number of episode attempts (runs) per trial
+    timesteps = 2000 # Timesteps that the model will train on before getting assessed and tuned
+    episodes_per_trial = 7 # Number of episode attempts (runs) per trial
     
     ### Train the model and optimize it.
     
@@ -106,7 +106,7 @@ def optimize_agent(trial):
     
     print("\n")
     print("Mean Reward at step #" + str(step) + " : " + str(mean_reward) )
-    if (step + 1) % 10 == 0 :
+    if (step + 1) % 2 == 0 :
     	print("Best Params:" + str(study.best_params))
 
     env.close() # this must be done to clean up other processes
