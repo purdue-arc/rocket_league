@@ -24,5 +24,5 @@ docker run --rm \
     -v ~/.ssh:/home/$USER/.ssh:ro \
     --name $USER-$CONTAINER_NAME \
     $@ \
-    $REPO_NAME:local \
+    $REPO_NAME:local-$USER \
     ${DOCKER_CMD:+/bin/zsh -c "$DOCKER_CMD"}
