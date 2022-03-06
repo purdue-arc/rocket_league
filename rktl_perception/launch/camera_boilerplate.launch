@@ -23,25 +23,25 @@
 
     <!-- Localization -->
     <node pkg="rktl_perception" type="localizer" name="localizer" output="screen">
-        <param name="origin_id" type="str" value="0"/>
+        <param name="origin_id" type="str" value="0,1,2,3,4,5,6,7"/>
         <param name="buffer_size" type="int" value="300"/>
         <param name="ball_sub_topic" type="str" value="ball_vec"/>
         <param name="ball_pub_topic" type="str" value="/ball/pose"/>
         <param name="ball_radius" type="double" value="0.05"/>
         <rosparam param="pub_topics">
-      '0': /origin/pose
-      '2': /car0/pose
+            '0,1,2,3,4,5,6,7': /origin/pose
+            '10': /car0/pose
         </rosparam>
     </node>
 
     <!-- Ball tracking -->
     <node pkg="rktl_perception" type="ball_detection" name="ball_detection">
-        <param name="publishThresh" value="false"/>
-        <param name="min_hue" value="60"/>
-        <param name="min_sat" value="135"/>
+        <param name="publishThresh" value="true"/>
+        <param name="min_hue" value="50"/>
+        <param name="min_sat" value="50"/>
         <param name="min_vib" value="50"/>
-        <param name="max_hue" value="140"/>
+        <param name="max_hue" value="80"/>
         <param name="max_sat" value="255"/>
-        <param name="max_vib" value="255"/>
+        <param name="max_vib" value="210"/>
     </node>
 </launch>
