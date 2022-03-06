@@ -22,7 +22,7 @@ docker run --rm \
     `[ -f ~/.gitconfig ] && echo "-v $HOME/.gitconfig:/home/$USER/.gitconfig:ro"` \
     -v $HOME/.Xauthority:/home/$USER/.Xauthority \
     -v ~/.ssh:/home/$USER/.ssh:ro \
-    --name $CONTAINER_NAME \
+    --name $USER-$CONTAINER_NAME \
     $@ \
     $REPO_NAME:local \
     ${DOCKER_CMD:+/bin/zsh -c "$DOCKER_CMD"}
