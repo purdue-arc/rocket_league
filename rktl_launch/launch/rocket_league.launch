@@ -1,5 +1,5 @@
 <launch>
-    <rosparam command="load" file="$(find rktl_launch)/config/rocket_league_params.yaml"/>
+    <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
 
     <!-- Ball -->
     <include file="$(find rktl_control)/launch/ball.launch"/>
