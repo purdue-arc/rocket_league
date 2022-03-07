@@ -1,6 +1,12 @@
 <launch>
+  <!-- Use hardcoded values -->
+  <rosparam>
+    field:
+      width: 3.5
+      length: 5.0
+  </rosparam>
   <test type="test_step_node" pkg="rktl_autonomy" test-name="test_step_node">
-    <!-- Use hardcoded values for the test -->
+    <!-- More hardcoded values -->
     <rosparam>
       rate: 10
       reward:
