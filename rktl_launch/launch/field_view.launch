@@ -1,34 +1,34 @@
 <launch>
-    <group ns="cam0">
+    <group ns="cams/cam0">
       <node pkg="rktl_launch" type="gen_cam_tf" name="pose2tf">
-        <param name="cam_frame" value="cam0"/>
+        <param name="cam_frame" value="cams/cam0"/>
       </node>
       <node pkg="rktl_launch" type="projector" name="projector">
         <param name="ground_height" value="0.00"/>
       </node>
     </group>
 
-    <group ns="cam1">
+    <group ns="cams/cam1">
       <node pkg="rktl_launch" type="gen_cam_tf" name="pose2tf">
-        <param name="cam_frame" value="cam1"/>
+        <param name="cam_frame" value="cams/cam1"/>
       </node>
       <node pkg="rktl_launch" type="projector" name="projector">
         <param name="ground_height" value="-0.02"/>
       </node>
     </group>
 
-    <group ns="cam2">
+    <group ns="cams/cam2">
       <node pkg="rktl_launch" type="gen_cam_tf" name="pose2tf">
-        <param name="cam_frame" value="cam2"/>
+        <param name="cam_frame" value="cams/cam2"/>
       </node>
       <node pkg="rktl_launch" type="projector" name="projector">
         <param name="ground_height" value="-0.01"/>
       </node>
     </group>
 
-    <group ns="cam3">
+    <group ns="cams/cam3">
       <node pkg="rktl_launch" type="gen_cam_tf" name="pose2tf">
-        <param name="cam_frame" value="cam3"/>
+        <param name="cam_frame" value="cams/cam3"/>
       </node>
       <node pkg="rktl_launch" type="projector" name="projector">
         <param name="ground_height" value="-0.03"/>
