@@ -4,12 +4,13 @@
     <group ns="cars/$(arg car_name)">
         <!-- Filter -->
         <node pkg="rktl_control" type="mean_odom_filter" name="mean_odom_filter" output="screen">
-            <rosparam command="load" file="$(find rktl_control)/config/mean_odom_filter.yaml" />
+            <rosparam command="load" file="$(find rktl_control)/config/mean_odom_filter.yaml"/>
+            <remap from="pose" to="pose_sync"/>
         </node>
 
         <!-- Controller -->
         <node pkg="rktl_control" type="velocity_controller" name="velocity_controller" output="screen">
-            <rosparam command="load" file="$(find rktl_control)/config/velocity_controller.yaml" />
+            <rosparam command="load" file="$(find rktl_control)/config/velocity_controller.yaml"/>
         </node>
     </group>
 </launch>

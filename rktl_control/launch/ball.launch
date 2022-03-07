@@ -1,5 +1,6 @@
 <launch>
     <node ns="ball" pkg="rktl_control" type="mean_odom_filter" name="mean_odom_filter" output="screen">
-        <rosparam command="load" file="$(find rktl_control)/config/mean_odom_filter.yaml" />
+        <rosparam command="load" file="$(find rktl_control)/config/mean_odom_filter.yaml"/>
+        <remap from="pose" to="pose_sync"/>
     </node>
 </launch>
