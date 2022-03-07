@@ -128,10 +128,10 @@ class VisualizerROS(object):
 
         # Subscribers
         rospy.Subscriber("ball/odom", Odometry, self.ball_odom_cb)
-        rospy.Subscriber("car0/odom", Odometry, self.car_odom_cb)
-        rospy.Subscriber("car0/path", Path, self.path_arr_cb)
+        rospy.Subscriber("cars/car0/odom", Odometry, self.car_odom_cb)
+        rospy.Subscriber("cars/car0/path", Path, self.path_arr_cb)
         rospy.Subscriber(
-            "car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb
+            "cars/car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb
         )
 
         while not rospy.is_shutdown():

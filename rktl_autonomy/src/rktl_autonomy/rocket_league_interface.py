@@ -51,7 +51,7 @@ class RocketLeagueInterface(ROSInterface):
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
 
         # Publishers
-        self._effort_pub = rospy.Publisher('car0/effort', ControlEffort, queue_size=1)
+        self._effort_pub = rospy.Publisher('cars/car0/effort', ControlEffort, queue_size=1)
         self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
         # State variables
@@ -61,7 +61,7 @@ class RocketLeagueInterface(ROSInterface):
         self._start_time = None
 
         # Subscribers
-        rospy.Subscriber('car0/odom', Odometry, self._car_odom_cb)
+        rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
         rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
         rospy.Subscriber('match_status', MatchStatus, self._score_cb)
 

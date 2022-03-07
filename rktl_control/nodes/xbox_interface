@@ -22,6 +22,6 @@ def callback(joy):
     effort_pub.publish(msg)
 
 rospy.init_node('xbox')
-effort_pub = rospy.Publisher('car0/effort', ControlEffort, queue_size=1)
+effort_pub = rospy.Publisher('cars/car0/effort', ControlEffort, queue_size=1)
 rospy.Subscriber('joy', Joy, callback)
 rospy.spin()

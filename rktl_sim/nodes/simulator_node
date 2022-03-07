@@ -96,12 +96,12 @@ class SimulatorROS(object):
         # Publishers
         self.ball_pub = rospy.Publisher('ball/odom',
                                         Odometry, queue_size=1)
-        self.car_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1)
+        self.car_pub = rospy.Publisher('cars/car0/odom', Odometry, queue_size=1)
         self.status_pub = rospy.Publisher(
             'match_status', MatchStatus, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('car0/effort', ControlEffort, self.effort_cb)
+        rospy.Subscriber('cars/car0/effort', ControlEffort, self.effort_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)

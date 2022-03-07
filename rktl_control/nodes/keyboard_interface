@@ -59,7 +59,7 @@ def main(win):
         sleep(0.01)
 
 rospy.init_node('keyboard')
-effort_pub = rospy.Publisher('car0/effort', ControlEffort, queue_size=1)
+effort_pub = rospy.Publisher('cars/car0/effort', ControlEffort, queue_size=1)
 reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
 wrapper(main)

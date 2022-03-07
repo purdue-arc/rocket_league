@@ -57,12 +57,12 @@ class TrajectoryPlannerROS(object):
         self.extra_time = 0   # the number of additional seconds required by the path 
 
         # Publishers   TODO: fix these
-        self.path_pub = rospy.Publisher("car0/path", Path, queue_size=1)
-        self.feasibility_pub = rospy.Publisher("car0/target_feasibility", Float32, queue_size=1)
+        self.path_pub = rospy.Publisher("cars/car0/path", Path, queue_size=1)
+        self.feasibility_pub = rospy.Publisher("cars/car0/target_feasibility", Float32, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber("car0/target", Target, self.target_cb)
-        rospy.Subscriber("car0/odom", Odometry, self.car_odom_cb)
+        rospy.Subscriber("cars/car0/target", Target, self.target_cb)
+        rospy.Subscriber("cars/car0/odom", Odometry, self.car_odom_cb)
         # rospy.Subscriber("trigger", Empty, self.trigger_cb)
 
         rospy.spin()

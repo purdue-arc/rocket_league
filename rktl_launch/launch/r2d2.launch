@@ -10,7 +10,7 @@
     <node pkg="rktl_control" type="pose_synchronizer" name="pose_sync_node">
         <rosparam>
             topics:
-                - car0/pose
+                - cars/car0/pose
                 - ball/pose
         </rosparam>
     </node>
