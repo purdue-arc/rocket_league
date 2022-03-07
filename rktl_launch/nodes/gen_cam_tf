@@ -19,7 +19,7 @@ class Publisher(object):
         self.broadcaster = TransformBroadcaster()
         self.FRAME = rospy.get_param('~cam_frame', 'cam0')
 
-        rospy.Subscriber(self.FRAME, PoseWithCovarianceStamped, self.pose_cb)
+        rospy.Subscriber("pose", PoseWithCovarianceStamped, self.pose_cb)
         rospy.spin()
 
     def pose_cb(self, pose_msg):

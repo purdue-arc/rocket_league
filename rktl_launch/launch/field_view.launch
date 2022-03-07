@@ -1,29 +1,39 @@
 <launch>
-  <node pkg="rktl_launch" type="gen_cam_tf" name="cam0_tf">
-    <param name="cam_frame" value="cam0"/>
-  </node>
-  <node pkg="rktl_launch" type="gen_cam_tf" name="cam1_tf">
-    <param name="cam_frame" value="cam1"/>
-  </node>
-  <node pkg="rktl_launch" type="gen_cam_tf" name="cam2_tf">
-    <param name="cam_frame" value="cam2"/>
-  </node>
-  <node pkg="rktl_launch" type="gen_cam_tf" name="cam3_tf">
-    <param name="cam_frame" value="cam3"/>
-  </node>
+    <group ns="cam0">
+      <node pkg="rktl_launch" type="gen_cam_tf" name="pose2tf">
+        <param name="cam_frame" value="cam0"/>
+      </node>
+      <node pkg="rktl_launch" type="projector" name="projector">
+        <param name="ground_height" value="0.00"/>
+      </node>
+    </group>
 
-  <node ns="cam0" pkg="rktl_launch" type="projector" name="cam0_projector">
-    <param name="ground_height" value="0.00"/>
-  </node>
-  <node ns="cam1" pkg="rktl_launch" type="projector" name="cam1_projector">
-    <param name="ground_height" value="-0.02"/>
-  </node>
-  <node ns="cam2" pkg="rktl_launch" type="projector" name="cam2_projector">
-    <param name="ground_height" value="-0.01"/>
-  </node>
-  <node ns="cam3" pkg="rktl_launch" type="projector" name="cam3_projector">
-    <param name="ground_height" value="-0.03"/>
-  </node>
+    <group ns="cam1">
+      <node pkg="rktl_launch" type="gen_cam_tf" name="pose2tf">
+        <param name="cam_frame" value="cam1"/>
+      </node>
+      <node pkg="rktl_launch" type="projector" name="projector">
+        <param name="ground_height" value="-0.02"/>
+      </node>
+    </group>
 
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rktl_launch)/rviz/field.rviz"/>
+    <group ns="cam2">
+      <node pkg="rktl_launch" type="gen_cam_tf" name="pose2tf">
+        <param name="cam_frame" value="cam2"/>
+      </node>
+      <node pkg="rktl_launch" type="projector" name="projector">
+        <param name="ground_height" value="-0.01"/>
+      </node>
+    </group>
+
+    <group ns="cam3">
+      <node pkg="rktl_launch" type="gen_cam_tf" name="pose2tf">
+        <param name="cam_frame" value="cam3"/>
+      </node>
+      <node pkg="rktl_launch" type="projector" name="projector">
+        <param name="ground_height" value="-0.03"/>
+      </node>
+    </group>  
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rktl_launch)/rviz/field.rviz"/>
 </launch>

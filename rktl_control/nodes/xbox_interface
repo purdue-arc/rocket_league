@@ -17,8 +17,8 @@ def callback(joy):
     if (joy.buttons[6] == 1):
         rospy.ServiceProxy('/sim_reset', Empty)()
     else:
-        msg.throttle = (joy.axes[5] - joy.axes[2]) / -8
-        msg.steering = joy.axes[0] * 4
+        msg.throttle = (joy.axes[5] - joy.axes[2]) / 2
+        msg.steering = joy.axes[0]
     effort_pub.publish(msg)
 
 rospy.init_node('xbox')
