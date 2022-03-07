@@ -1,11 +1,19 @@
-# TF
-FRAME_ID: "map"
+# ALL UNITS IN SI
 
-# Bounding Boxes (Recorded from URDFs)
-FIELD_WIDTH: 3.5 # m
-FIELD_LENGTH: 5 # m
-WALL_THICKNESS: 0.25 # m
-GOAL_WIDTH: 1 # m
-BALL_RADIUS: 0.0508 # m (2 in)
-CAR_WIDTH: 0.0762 # m (3 in)
-CAR_LENGTH: 0.2032 # m (8 in)
+# field dimensions
+field:
+  width: 3
+  length: 4.25
+  wall_thickness: 0.25
+
+  goal:
+    width: 1
+
+# car dimensions and physical constants
+ball:
+  radius: 0.0508 # (2 in)
+
+# car dimensions and physical constants
+cars:
+  width: 0.0762 # (3 in)
+  length: 0.2032 # (8 in)

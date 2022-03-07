@@ -29,20 +29,20 @@ class SimulatorROS(object):
         rospy.init_node('simulator')
 
         # Collecting global parameters
-        fw = rospy.get_param('FIELD_WIDTH')
-        fl = rospy.get_param('FIELD_LENGTH')
-        wt = rospy.get_param('WALL_THICKNESS')
-        gw = rospy.get_param('GOAL_WIDTH')
-        car_init = rospy.get_param('CAR_INIT', None)
-        ball_init = rospy.get_param('BALL_INIT', None)
-        speed_init = rospy.get_param('SPEED_INIT', 0.0)
-        spawn_height = rospy.get_param('SPAWN_HEIGHT', 0.06)
+        fw = rospy.get_param('/field/width')
+        fl = rospy.get_param('/field/length')
+        wt = rospy.get_param('/field/wall_thickness')
+        gw = rospy.get_param('/field/goal/width')
 
         # Collecting private parameters
-        render_enabled = rospy.get_param('~RENDER_ENABLED', False)
-        rate = rospy.Rate(rospy.get_param('~RATE', 30))
-        self.frame_id = rospy.get_param('~FRAME_ID', 'map')
-        self.timeout = rospy.get_param('~TIMEOUT', 10)
+        render_enabled = rospy.get_param('~render', False)
+        rate = rospy.Rate(rospy.get_param('~rate', 30))
+        self.frame_id = rospy.get_param('~frame_id', 'map')
+        self.timeout = rospy.get_param('~timeout', 10)
+        car_init = rospy.get_param('~init/car', None)
+        ball_init = rospy.get_param('~init/ball', None)
+        speed_init = rospy.get_param('~init/speed', 0.0)
+        spawn_height = rospy.get_param('~spawn_height', 0.06)
 
         field_setup = {}
 
@@ -70,17 +70,17 @@ class SimulatorROS(object):
                         [spawn_height, spawn_height]]
 
         urdf_paths = {}
-        urdf_paths["ball"] = rospy.get_param('~BALL_URDF_PATH')
+        urdf_paths["ball"] = rospy.get_param('~urdf/ball')
         self.check_urdf(urdf_paths["ball"])
-        urdf_paths["car"] = rospy.get_param('~CAR_URDF_PATH')
+        urdf_paths["car"] = rospy.get_param('~urdf/car')
         self.check_urdf(urdf_paths["car"])
-        urdf_paths["goal"] = rospy.get_param('~GOAL_URDF_PATH')
+        urdf_paths["goal"] = rospy.get_param('~urdf/goal')
         self.check_urdf(urdf_paths["goal"])
-        urdf_paths["sidewall"] = rospy.get_param('~SIDEWALL_URDF_PATH')
+        urdf_paths["sidewall"] = rospy.get_param('~urdf/sidewall')
         self.check_urdf(urdf_paths["sidewall"])
-        urdf_paths["backwall"] = rospy.get_param('~BACKWALL_URDF_PATH')
+        urdf_paths["backwall"] = rospy.get_param('~urdf/backwall')
         self.check_urdf(urdf_paths["backwall"])
-        urdf_paths["plane"] = rospy.get_param('~FLOOR_URDF')
+        urdf_paths["plane"] = rospy.get_param('~urdf/plane')
         self.check_urdf(urdf_paths["plane"])
 
         # Creating physics simulator
