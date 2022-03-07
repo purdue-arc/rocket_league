@@ -1,17 +1,15 @@
 <launch>
-  <rosparam command="load" file="$(find rktl_launch)/config/rocket_league_params.yaml"/>
+    <rosparam command="load" file="$(find rktl_launch)/config/rocket_league_params.yaml"/>
 
-  <!-- Ball -->
-  <group ns="ball/">
-    <!-- Filter -->
-    <include file="$(find rktl_control)/launch/mean_odom_filter.launch" />
-  </group>
+    <!-- Ball -->
+    <include file="$(find rktl_control)/launch/ball.launch"/>
 
-  <!-- Cars -->
-  <group ns="cars/">
-    <include file="$(find rktl_launch)/launch/car.launch">
-      <arg name="car_name" value="cars/car0" />
-      <arg name="real" value="true" />
+    <!-- Cars -->
+    <include file="$(find rktl_control)/launch/car.launch">
+        <arg name="car_name" value="car0" />
     </include>
-  </group>
+    <include file="$(find rktl_control)/launch/hardware_interface.launch"/>
+
+    <!-- viz -->
+    <include file="$(find rktl_launch)/launch/field_view.launch"/>
 </launch>

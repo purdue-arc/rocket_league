@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="rktl_control" type="velocity_controller" name="control" output="screen">
-    <rosparam command="load" file="$(find rktl_control)/config/velocity_controller.yaml" />
-  </node>
-</launch>

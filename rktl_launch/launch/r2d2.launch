@@ -15,6 +15,5 @@
         </rosparam>
     </node>
 
-    <include file="$(find rktl_launch)/launch/field_view.launch"/>
-    <include file="$(find rktl_control)/launch/hardware_interface.launch"/>
+    <include file="$(find rktl_launch)/launch/rocket_league.launch"/>
 </launch>

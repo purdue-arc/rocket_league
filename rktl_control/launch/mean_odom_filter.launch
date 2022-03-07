@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="rktl_control" type="mean_odom_filter" name="filter" output="screen">
-    <rosparam command="load" file="$(find rktl_control)/config/mean_odom_filter.yaml" />
-  </node>
-</launch>
