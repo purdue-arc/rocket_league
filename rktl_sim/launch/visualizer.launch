@@ -1,4 +1,3 @@
-<?xml version="1.0"?>
 <launch>
     <node pkg="rktl_sim" type="visualizer_node" name="visualizer_node" output="screen">
         <rosparam command="load" file="$(find rktl_sim)/config/visualization.yaml"/>
