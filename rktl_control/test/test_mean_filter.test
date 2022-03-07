@@ -1,11 +1,4 @@
 <launch>
   <test type="test_mean_filter_node" pkg="rktl_control" test-name="test_mean_filter_node"/>
-  <node type="mean_odom_filter" pkg="rktl_control" name="mean_filter">
-    <rosparam>
-      topics:
-        - cars/car0/pose
-        - cars/car1/pose
-        - ball/pose
-    </rosparam>
-  </node>
+  <node type="mean_odom_filter" pkg="rktl_control" name="mean_filter"/>
 </launch>
