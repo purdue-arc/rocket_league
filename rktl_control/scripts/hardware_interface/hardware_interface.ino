@@ -135,12 +135,12 @@ void control_callback5(const rktl_msgs::ControlEffort& control) {
 
 // ros
 ros::NodeHandle nh;
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub0("car0/effort", control_callback0);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub1("car1/effort", control_callback1);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub2("car2/effort", control_callback2);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub3("car3/effort", control_callback3);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub4("car4/effort", control_callback4);
-ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub5("car5/effort", control_callback5);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub0("cars/car0/effort", control_callback0);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub1("cars/car1/effort", control_callback1);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub2("cars/car2/effort", control_callback2);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub3("cars/car3/effort", control_callback3);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub4("cars/car4/effort", control_callback4);
+ros::Subscriber<rktl_msgs::ControlEffort> control_effort_sub5("cars/car5/effort", control_callback5);
 ros::Subscriber<std_msgs::Bool> enable_sub("enable", enable_callback);
 
 void setup() {

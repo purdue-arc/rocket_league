@@ -10,7 +10,7 @@
   <!-- Cars -->
   <group ns="cars/">
     <include file="$(find rktl_launch)/launch/car.launch">
-      <arg name="car_name" value="car0" />
+      <arg name="car_name" value="cars/car0" />
       <arg name="real" value="true" />
     </include>
   </group>
