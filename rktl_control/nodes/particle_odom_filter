@@ -2,7 +2,7 @@
 """Node to estimate odometry from poses over time using a Kalman filter.
 License:
   BSD 3-Clause License
-  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
