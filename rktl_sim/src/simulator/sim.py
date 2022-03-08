@@ -186,7 +186,7 @@ class Sim(object):
             car.step((throttle_cmd, steering_cmd), dt)
 
         # PyBullet steps at 240hz
-        for _ in range(int(dt * 240.)):
+        for _ in range(round(dt * 240.0)):
             p.stepSimulation()
 
     def getCarPose(self):
