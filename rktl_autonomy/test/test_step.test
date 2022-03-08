@@ -1,18 +1,24 @@
 <launch>
-  <test type="test_step_node" pkg="rktl_autonomy" test-name="test_step_node">
-    <!-- Use hardcoded values for the test -->
+    <!-- Use hardcoded values -->
     <rosparam>
-      rate: 10
-      reward:
-        constant: 1.0
-        ball_dist_sq: -0.1
-        goal_dist_sq: -0.5
-        win: 1000
-        loss: -500
-        reverse: -1
-        walls:
-          value: -5
-          threshold: 0.25
+        field:
+            width: 3.5
+            length: 5.0
     </rosparam>
-  </test>
+    <test type="test_step_node" pkg="rktl_autonomy" test-name="test_step_node">
+        <!-- More hardcoded values -->
+        <rosparam>
+        rate: 10
+        reward:
+            constant: 1.0
+            ball_dist_sq: -0.1
+            goal_dist_sq: -0.5
+            win: 1000
+            loss: -500
+            reverse: -1
+            walls:
+                value: -5
+                threshold: 0.25
+        </rosparam>
+    </test>
 </launch>

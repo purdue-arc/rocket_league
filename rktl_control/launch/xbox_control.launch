@@ -1,0 +1,14 @@
+<launch>
+    <arg name="device" default="/dev/input/js0"/>
+    <arg name="car_name" default="car0" />
+
+    <group ns="cars/$(arg car_name)">
+        <!--  joystick driver -->
+        <node pkg="joy" type="joy_node" name="joy_node" output="screen">
+            <param name="dev" value="$(arg device)"/>
+        </node>
+
+        <!-- interface -->
+        <node pkg="rktl_control" type="xbox_interface" name="xbox_interface" output="screen"/>
+    </group>
+</launch>

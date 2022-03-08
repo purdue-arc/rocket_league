@@ -21,27 +21,22 @@ class ParticleOdomFilter(object):
     def __init__(self):
         rospy.init_node('particle_odom_filter')
 
-        # constants
+        # global constants
+        self.FIELD_WIDTH = rospy.get_param('/field/width')
+        self.FIELD_HEIGHT = rospy.get_param('/field/length')
+        self.CAR_LENGTH = rospy.get_param('/cars/length')
+        self.MAX_SPEED = rospy.get_param('/cars/throttle/max_speed')
+        self.THROTTLE_TAU = rospy.get_param('/cars/throttle/tau')
+        self.STEERING_THROW = rospy.get_param('/cars/steering/throw')
+        self.STEERING_RATE = rospy.get_param('/cars/steering/rate')
+
+        # private constants
         self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
         self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
-
-        # OTHER CONSTANTS HERE
-        # self.CAR_LENGTH = 0.01
-        self.CAR_LENGTH = rospy.get_param('/CAR_LENGTH')
-        self.MAX_SPEED =  rospy.get_param('/MAX_SPEED')
-        self.THROTTLE_TAU = rospy.get_param('/THROTTLE_TAU')
-        self.STEERING_THROW = rospy.get_param('/STEERING_THROW')
-        self.STEERING_RATE = rospy.get_param('/STEERING_RATE')
-        
-        # next four defined in the particle_odom_filter.yaml 
-        self.MEAS_DIR_STD_DEV = rospy.get_param('~MEAS_DIR_STD_DEV', 0.05)
-        self.MEAS_LOC_STD_DEV = rospy.get_param('~MEAS_LOC_STD_DEV', np.deg2rad(5))
-        self.NUM_PARTICLES = rospy.get_param('~NUM_PARTICLES', 1000)
-        self.DELTA_T = rospy.get_param('~DELTA_T', 0.1)
-        # self.FIELD_WIDTH = 3
-        self.FIELD_WIDTH = rospy.get_param('/FIELD_WIDTH')
-        # self.FIELD_HEIGHT = 4.25
-        self.FIELD_HEIGHT = rospy.get_param('/FIELD_LENGTH')
+        self.MEAS_LOC_STD_DEV = rospy.get_param('~meas_std_dev/loc', 0.05)
+        self.MEAS_DIR_STD_DEV = rospy.get_param('~meas_std_dev/dir', np.deg2rad(5))
+        self.NUM_PARTICLES = rospy.get_param('~num_particles', 1000)
+        self.DELTA_T = 1.0/rospy.get_param('~rate', 10.0)
         self.PUB_PARTICLES = False
 
         # variables

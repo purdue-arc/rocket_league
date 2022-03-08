@@ -61,7 +61,7 @@ class VelocityControllerROS(object):
         self.steering_pub = rospy.Publisher('effort/steering', Float32, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('cmd_vel', Twist, self.command_cb)
+        rospy.Subscriber('cmd', Twist, self.command_cb)
         rospy.Subscriber('odom', Odometry, self.odom_cb)
 
         while not rospy.is_shutdown():

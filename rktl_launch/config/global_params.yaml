@@ -1,0 +1,25 @@
+# ALL UNITS IN SI
+
+# field dimensions
+field:
+  width: 3
+  length: 4.25
+  wall_thickness: 0.25
+
+  goal:
+    width: 1
+
+# car dimensions and physical constants
+ball:
+  radius: 0.0508 # (2 in)
+
+# car dimensions and physical constants
+cars:
+  width: 0.0762 # (3 in)
+  length: 0.2032 # (8 in)
+  steering:
+    throw: 0.26179938 # 15 degrees
+    rate: 0.52359877 # 30 degrees/s
+  throttle:
+    max_speed: 1.0
+    tau: 0.25 # (approx 1 sec to reach max speed)
