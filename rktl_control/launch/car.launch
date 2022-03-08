@@ -8,7 +8,7 @@
         </node>
 
         <!-- Controller -->
-        <node type="controller" pkg="rktl_control" name="controller" output="screen">
+        <node pkg="rktl_control" type="controller" name="controller" output="screen">
             <rosparam command="load" file="$(find rktl_control)/config/controller.yaml"/>
         </node>
     </group>
