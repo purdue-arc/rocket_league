@@ -20,4 +20,5 @@
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
   <depend>nodelet</depend>
+  <exec_depend>camera_calibration</exec_depend>
 </package>

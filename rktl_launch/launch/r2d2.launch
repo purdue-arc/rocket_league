@@ -7,5 +7,13 @@
         <arg name="camera_name" value="cam3"/>
     </include>
 
-    <node pkg="rktl_control" type="pose_synchronizer" name="pose_sync_node"/>
+    <node pkg="rktl_control" type="pose_synchronizer" name="pose_sync_node">
+        <rosparam>
+            topics:
+                - cars/car0/pose
+                - ball/pose
+        </rosparam>
+    </node>
+
+    <include file="$(find rktl_launch)/launch/rocket_league.launch"/>
 </launch>

@@ -15,13 +15,14 @@ def callback(joy):
     msg = ControlEffort()
     msg.header.stamp = rospy.Time.now()
     if (joy.buttons[6] == 1):
-        rospy.ServiceProxy('/sim_reset', Empty)()
+        reset_srv.call()
     else:
-        msg.throttle = (joy.axes[5] - joy.axes[2]) / -8
-        msg.steering = joy.axes[0] * 4
+        msg.throttle = (joy.axes[5] - joy.axes[2]) / 2
+        msg.steering = joy.axes[0]
     effort_pub.publish(msg)
 
 rospy.init_node('xbox')
-effort_pub = rospy.Publisher('car0/effort', ControlEffort, queue_size=1)
+effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
+reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
 rospy.Subscriber('joy', Joy, callback)
 rospy.spin()

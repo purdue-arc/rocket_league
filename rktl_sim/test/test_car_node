@@ -22,8 +22,8 @@ class TestCar(unittest.TestCase):
     }
 
     urdf_paths = {}
-    urdf_paths["car"] = rospy.get_param('~CAR_URDF_PATH')
-    urdf_paths["plane"] = rospy.get_param('~FLOOR_URDF')
+    urdf_paths["car"] = rospy.get_param('~urdf/car')
+    urdf_paths["plane"] = rospy.get_param('~urdf/plane')
 
     # Creating physics simulator
     cls.sim = simulator.Sim(

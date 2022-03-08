@@ -1,0 +1,19 @@
+# ALL UNITS IN SI
+
+# field dimensions
+field:
+  width: 3
+  length: 4.25
+  wall_thickness: 0.25
+
+  goal:
+    width: 1
+
+# car dimensions and physical constants
+ball:
+  radius: 0.0508 # (2 in)
+
+# car dimensions and physical constants
+cars:
+  width: 0.0762 # (3 in)
+  length: 0.2032 # (8 in)
