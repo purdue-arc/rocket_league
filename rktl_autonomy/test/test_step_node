@@ -28,7 +28,7 @@ class TestStep(unittest.TestCase):
     def test_all(self):
         # initialize node and interface to code under test
         rospy.init_node('rocket_league_agent')
-        self.car_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1) 
+        self.car_pub = rospy.Publisher('cars/car0/odom', Odometry, queue_size=1) 
         self.ball_pub = rospy.Publisher('ball/odom', Odometry, queue_size=1)
         self.match_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
         rospy.Subscriber('/clock', Clock, self.clock_cb)

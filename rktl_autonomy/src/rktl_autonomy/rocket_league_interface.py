@@ -33,9 +33,9 @@ class RocketLeagueInterface(ROSInterface):
         self._MAX_STEERING_EFFORT = rospy.get_param('~effort/steering/max',  1.0)
 
         # Observations
-        self._FIELD_WIDTH = rospy.get_param('~field/width', 3.5)
-        self._FIELD_HEIGHT = rospy.get_param('~field/height', 5)
-        self._GOAL_DEPTH = rospy.get_param('~field/goal_depth', 0.075)
+        self._FIELD_WIDTH = rospy.get_param('/field/width')
+        self._FIELD_LENGTH = rospy.get_param('/field/length')
+        self._GOAL_DEPTH = rospy.get_param('~observation/goal_depth', 0.075)
         self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
         self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
 
@@ -51,7 +51,7 @@ class RocketLeagueInterface(ROSInterface):
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
 
         # Publishers
-        self._effort_pub = rospy.Publisher('car0/effort', ControlEffort, queue_size=1)
+        self._effort_pub = rospy.Publisher('cars/car0/effort', ControlEffort, queue_size=1)
         self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
         # State variables
@@ -61,7 +61,7 @@ class RocketLeagueInterface(ROSInterface):
         self._start_time = None
 
         # Subscribers
-        rospy.Subscriber('car0/odom', Odometry, self._car_odom_cb)
+        rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
         rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
         rospy.Subscriber('match_status', MatchStatus, self._score_cb)
 
@@ -87,18 +87,18 @@ class RocketLeagueInterface(ROSInterface):
             # x, y, theta, v, omega (car)
             # x, y, vx, vy (ball)
             low=np.array([
-                -(self._FIELD_HEIGHT/2) - self._GOAL_DEPTH,
+                -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
                 -self._FIELD_WIDTH/2,
                 -pi, -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
-                -(self._FIELD_HEIGHT/2) - self._GOAL_DEPTH,
+                -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
                 -self._FIELD_WIDTH/2,
                 -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
                 dtype=np.float32),
             high=np.array([
-                (self._FIELD_HEIGHT/2) + self._GOAL_DEPTH,
+                (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
                 self._FIELD_WIDTH/2,
                 pi, self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
-                (self._FIELD_HEIGHT/2) + self._GOAL_DEPTH,
+                (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
                 self._FIELD_WIDTH/2,
                 self._MAX_OBS_VEL, self._MAX_OBS_VEL],
                 dtype=np.float32))
@@ -147,7 +147,7 @@ class RocketLeagueInterface(ROSInterface):
         ball_dist_sq = np.sum(np.square(ball[0:2] - car[0:2]))
         reward += self._BALL_DISTANCE_REWARD * ball_dist_sq
 
-        goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_HEIGHT/2, 0])))
+        goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_LENGTH/2, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
 
         if self._score != 0:
@@ -161,7 +161,7 @@ class RocketLeagueInterface(ROSInterface):
         if v < 0:
             reward += self._REVERSE_REWARD
 
-        if (abs(x) > self._FIELD_HEIGHT/2 - self._WALL_THRESHOLD or
+        if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
             abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
 

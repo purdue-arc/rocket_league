@@ -10,11 +10,10 @@
     <node pkg="rktl_control" type="pose_synchronizer" name="pose_sync_node">
         <rosparam>
             topics:
-                - car0/pose
+                - cars/car0/pose
                 - ball/pose
         </rosparam>
     </node>
 
-    <include file="$(find rktl_launch)/launch/field_view.launch"/>
-    <include file="$(find rktl_control)/launch/hardware_interface.launch"/>
+    <include file="$(find rktl_launch)/launch/rocket_league.launch"/>
 </launch>

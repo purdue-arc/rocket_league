@@ -1,21 +1,21 @@
 <launch>
-  <!-- arguments -->
-  <arg name="agent_name"    default="rocket_league_agent"/>
-  <arg name="render"        default="false"/>
+    <!-- arguments -->
+    <arg name="agent_name"    default="rocket_league_agent"/>
+    <arg name="render"        default="false"/>
 
-  <!-- constants -->
-  <arg name="rate"          value="30.0"/>
+    <!-- constants -->
+    <arg name="rate"          value="30.0"/>
 
-  <param name="/use_sim_time" value="true"/>
+    <param name="/use_sim_time" value="true"/>
 
-  <!-- agent -->
-  <group ns="$(arg agent_name)">
-    <param name="rate"      value="$(arg rate)"/>
-  </group>
+    <!-- agent -->
+    <group ns="$(arg agent_name)">
+        <param name="rate"      value="$(arg rate)"/>
+    </group>
 
-  <!-- environment -->
-  <node type="cartpole_env" pkg="rktl_autonomy" name="cartpole_env" output="screen">
-    <param name="frequency" value="$(eval 1/rate)"/>
-    <param name="render"    value="$(arg render)"/>
-  </node>
+    <!-- environment -->
+    <node type="cartpole_env" pkg="rktl_autonomy" name="cartpole_env" output="screen">
+        <param name="frequency" value="$(eval 1/rate)"/>
+        <param name="render"    value="$(arg render)"/>
+    </node>
 </launch>

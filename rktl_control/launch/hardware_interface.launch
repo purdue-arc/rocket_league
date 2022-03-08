@@ -1,6 +1,7 @@
 <launch>
-<arg name="serial_port" default="/dev/ttyACM0"/>
-  <node type="serial_node.py" pkg="rosserial_arduino" name="hardware_interface" args="$(arg serial_port)">
-    <rosparam command="load" file="$(find rktl_control)/config/hardware_interface.yaml"/>
-  </node>
+    <arg name="serial_port" default="/dev/ttyACM0"/>
+
+    <node ns="cars" pkg="rosserial_arduino" type="serial_node.py" name="hardware_interface" args="$(arg serial_port)">
+        <rosparam command="load" file="$(find rktl_control)/config/hardware_interface.yaml"/>
+    </node>
 </launch>

@@ -1,4 +1,15 @@
 <launch>
-  <!-- TODO -->
-  <!-- Call other launch files to run entire project not in simulation -->
+    <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
+
+    <!-- Ball -->
+    <include file="$(find rktl_control)/launch/ball.launch"/>
+
+    <!-- Cars -->
+    <include file="$(find rktl_control)/launch/car.launch">
+        <arg name="car_name" value="car0" />
+    </include>
+    <include file="$(find rktl_control)/launch/hardware_interface.launch"/>
+
+    <!-- viz -->
+    <include file="$(find rktl_launch)/launch/field_view.launch"/>
 </launch>
