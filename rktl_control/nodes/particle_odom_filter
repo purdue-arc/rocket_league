@@ -33,8 +33,8 @@ class ParticleOdomFilter(object):
         # private constants
         self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
         self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
-        self.MEAS_LOC_STD_DEV = rospy.get_param('~meas_std_dev/loc', 0.05)
-        self.MEAS_DIR_STD_DEV = rospy.get_param('~meas_std_dev/dir', np.deg2rad(5))
+        self.MEAS_LOC_STD_DEV = rospy.get_param('~measurement_error/location', 0.05)
+        self.MEAS_DIR_STD_DEV = rospy.get_param('~measurement_error/orientation', np.deg2rad(5))
         self.NUM_PARTICLES = rospy.get_param('~num_particles', 1000)
         self.DELTA_T = 1.0/rospy.get_param('~rate', 10.0)
         self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
