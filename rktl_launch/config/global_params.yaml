@@ -17,3 +17,9 @@ ball:
 cars:
   width: 0.0762 # (3 in)
   length: 0.2032 # (8 in)
+  steering:
+    max_throw: 0.26179938 # 15 degrees
+    rate: 0.52359877 # 30 degrees/s
+  throttle:
+    max_speed: 1.0
+    tau: 0.25 # (approx 1 sec to reach max speed)

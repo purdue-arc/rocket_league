@@ -17,7 +17,7 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled):
+    def __init__(self, urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, car_properties):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
@@ -155,9 +155,9 @@ class Sim(object):
                 self.initCarOrient = None
             self._cars[self._carID] = Car(
                 self._carID,
-                0.5,
                 carPos,
                 carOrient,
+                car_properties
             )
 
         self.touched_last = None

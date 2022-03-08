@@ -11,15 +11,15 @@ import math
 import numpy as np
 
 class Car(object):
-    def __init__(self, carID, length, pos, orient):
+    def __init__(self, carID, pos, orient, car_properties):
         self.id = carID
 
         # physical constants
-        self._LENGTH = length
-        self._MAX_SPEED = 1.0
-        self._THROTTLE_TAU = 0.25
-        self._STEERING_THROW = math.pi / 6.
-        self._STEERING_RATE = 2*self._STEERING_THROW / 0.25
+        self._LENGTH = car_properties['length']
+        self._MAX_SPEED = car_properties['max_speed']
+        self._THROTTLE_TAU = car_properties['throttle_tau']
+        self._STEERING_THROW = car_properties['steering_throw']
+        self._STEERING_RATE = car_properties['steering_rate']
 
         # URDF Configuration
         self.body_link_id = 1
