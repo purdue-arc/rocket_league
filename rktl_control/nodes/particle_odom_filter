@@ -37,7 +37,7 @@ class ParticleOdomFilter(object):
         self.MEAS_DIR_STD_DEV = rospy.get_param('~meas_std_dev/dir', np.deg2rad(5))
         self.NUM_PARTICLES = rospy.get_param('~num_particles', 1000)
         self.DELTA_T = 1.0/rospy.get_param('~rate', 10.0)
-        self.PUB_PARTICLES = False
+        self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
 
         # variables
         self.filter = ParticleFilter(
