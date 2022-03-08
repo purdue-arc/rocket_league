@@ -17,3 +17,5 @@ ball:
 cars:
   width: 0.0762 # (3 in)
   length: 0.2032 # (8 in)
+  steering:
+    throw: 0.1745 # (10 degrees)
