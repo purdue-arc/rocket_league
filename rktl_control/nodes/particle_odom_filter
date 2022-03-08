@@ -27,7 +27,7 @@ class ParticleOdomFilter(object):
         self.CAR_LENGTH = rospy.get_param('/cars/length')
         self.MAX_SPEED = rospy.get_param('/cars/throttle/max_speed')
         self.THROTTLE_TAU = rospy.get_param('/cars/throttle/tau')
-        self.STEERING_THROW = rospy.get_param('/cars/steering/throw')
+        self.STEERING_THROW = rospy.get_param('/cars/steering/max_throw')
         self.STEERING_RATE = rospy.get_param('/cars/steering/rate')
 
         # private constants
@@ -127,13 +127,18 @@ class ParticleOdomFilter(object):
             # publish PoseArray msg
             self.cloud_pub.publish(cloud_msg)
 
-    def particle_dynamics(self, particles):
+    def particle_dynamics(self, particles, control=None):
         """Extrapolate all particles to future state, including random control noise."""
-        # create random control noise
-        # efforts uniformly distributed between -1.0 and +1.0
-        rng = np.random.default_rng()
-        v_rear_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
-        psi_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
+        if control is None:
+            # create random control noise
+            # efforts uniformly distributed between -1.0 and +1.0
+            rng = np.random.default_rng()
+            v_rear_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
+            psi_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
+        else:
+            # use the provided control noise (likely for testing)
+            v_rear_ref = control[:,0]
+            psi_ref = control[:,1]
 
         # extract current states from particles matrix
         x = particles[:,0]
