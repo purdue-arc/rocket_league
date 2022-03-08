@@ -45,10 +45,9 @@ class TestCar(unittest.TestCase):
         self.sim.reset()
         rospy.sleep(rospy.Duration(0.2))
 
-        freq = 120.0
-        dt = 1/freq
+        freq = 12.0 # must be evenly divisible by i_wait
         for _ in range(round(i_wait * freq)):
-            self.sim.step(i_throttle, 0.0, dt)
+            self.sim.step(i_throttle, 0.0, 1.0/freq)
 
         vel = self.sim.getCarVelocity()[0][0]
         self.assertLess(vel, e_vel + e_err, 'car moving too fast: ' +
