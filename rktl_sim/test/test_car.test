@@ -1,0 +1,6 @@
+<launch>
+    <test test-name="test_car" name="test_car_node" pkg="rktl_sim" type="test_car_node">
+        <param name="urdf/plane"    value="$(find rktl_sim)/urdf/plane.urdf"/>
+        <param name="urdf/car"      value="$(find rktl_sim)/urdf/car.urdf"/>
+    </test>
+</launch>

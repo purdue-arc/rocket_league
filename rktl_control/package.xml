@@ -12,9 +12,11 @@
   <author email="rketler@purdue.edu">Robert Ketler</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <test_depend>rosunit</test_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>rosserial_arduino</exec_depend>
+  <exec_depend>joy</exec_depend>
 </package>

@@ -1,0 +1,15 @@
+<launch>
+    <arg name="car_name" default="car0" />
+
+    <group ns="cars/$(arg car_name)">
+        <!-- Filter -->
+        <node pkg="rktl_control" type="mean_odom_filter" name="mean_odom_filter" output="screen">
+            <rosparam command="load" file="$(find rktl_control)/config/mean_odom_filter.yaml"/>
+        </node>
+
+        <!-- Controller -->
+        <node type="controller" pkg="rktl_control" name="controller" output="screen">
+            <rosparam command="load" file="$(find rktl_control)/config/controller.yaml"/>
+        </node>
+    </group>
+</launch>

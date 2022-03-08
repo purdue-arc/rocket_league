@@ -28,7 +28,7 @@ class TestStep(unittest.TestCase):
     def test_all(self):
         # initialize node and interface to code under test
         rospy.init_node('rocket_league_agent')
-        self.car_pub = rospy.Publisher('car0/odom', Odometry, queue_size=1) 
+        self.car_pub = rospy.Publisher('cars/car0/odom', Odometry, queue_size=1) 
         self.ball_pub = rospy.Publisher('ball/odom', Odometry, queue_size=1)
         self.match_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
         rospy.Subscriber('/clock', Clock, self.clock_cb)
@@ -43,7 +43,7 @@ class TestStep(unittest.TestCase):
 
         # initialize code under test
         # would hang if above service was not initialized first
-        env = RocketLeagueInterface()
+        env = RocketLeagueInterface(launch_args=['render:=false'])
 
         # wait until first clock callback called
         while(self.last_time is None):
@@ -85,7 +85,7 @@ class TestStep(unittest.TestCase):
         obs, reward, done, __ = env.step(env.action_space.sample())
 
         self.assertTrue(np.allclose(obs, [0, 0, 0, -1, 0, 1, 0, 0, 0]), msg='observation vector is incorrect')
-        self.assertAlmostEqual(reward, 998.775, places=4, msg=f'reward is incorrect')
+        self.assertAlmostEqual(reward, 998.775, places=4, msg='reward is incorrect')
         self.assertTrue(done, msg='done is incorrect')
         self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
 

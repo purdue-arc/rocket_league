@@ -1,10 +1,10 @@
 # controller type: 'lead_lag' or 'pid'
 controller_type: 'lead_lag'
 # parameters for all controllers
-static_gain: 1.0
 limits:
-  min: -0.25
-  max:  0.25
+  throttle:
+    min: -1.0
+    max:  1.0
 # parameters for lead_lag
 lead:
   gain:  0.0

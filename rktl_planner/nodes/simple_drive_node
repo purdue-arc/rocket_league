@@ -8,10 +8,7 @@ License:
 
 # 3rd party modules
 import rospy
-import numpy
-import math
-from std_msgs.msg import Float32, Float64
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, PoseArray, Pose
+from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
 
@@ -29,11 +26,11 @@ class SimpleDriveROS(object):
         self.frame_id = rospy.get_param('~frame_id', 'map')
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('car0/velocity',
+        self.bot_velocity_cmd = rospy.Publisher('car/car0/velocity',
                                                 Twist, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('car0/odom', Odometry, self.odom_cb)
+        rospy.Subscriber('cars/car0/odom', Odometry, self.odom_cb)
 
         rospy.spin()
 

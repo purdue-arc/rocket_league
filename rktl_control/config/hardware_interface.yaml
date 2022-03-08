@@ -1,0 +1,28 @@
+# max allowable throttle effort (fwd and rev)
+throttle_throw: 125
+
+# servo adjustments (uS)
+car0:
+  max_left:   1100
+  center:     1450
+  max_right:  1800
+car1:
+  max_left:   1200
+  center:     1500
+  max_right:  1800
+car2:
+  max_left:   1200
+  center:     1500
+  max_right:  1800
+car3:
+  max_left:   1200
+  center:     1500
+  max_right:  1800
+car4:
+  max_left:   1200
+  center:     1500
+  max_right:  1800
+car5:
+  max_left:   1200
+  center:     1500
+  max_right:  1800

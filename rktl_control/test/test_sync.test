@@ -1,0 +1,11 @@
+<launch>
+    <test type="test_sync_node" pkg="rktl_control" test-name="test_sync_node"/>
+    <node type="pose_synchronizer" pkg="rktl_control" name="sync_node">
+        <rosparam>
+            topics:
+                - cars/car0/pose
+                - cars/car1/pose
+                - ball/pose
+        </rosparam>
+    </node>
+</launch>

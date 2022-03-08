@@ -22,8 +22,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -35,7 +33,6 @@ jobs:
         if: inputs.tag != 'latest'
         uses: docker/build-push-action@v2
         with:
-          platforms: linux/amd64,linux/arm64
           tags: ${{ env.REPO_NAME }}:${{ inputs.tag }}
           cache-from: type=registry,ref=${{ env.REPO_NAME }}:cache
           push: true
@@ -44,7 +41,6 @@ jobs:
         if: inputs.tag == 'latest'
         uses: docker/build-push-action@v2
         with:
-          platforms: linux/amd64,linux/arm64
           tags: ${{ env.REPO_NAME }}
           cache-from: type=registry,ref=${{ env.REPO_NAME }}:cache
           cache-to: type=registry,ref=${{ env.REPO_NAME }}:cache,mode=max
