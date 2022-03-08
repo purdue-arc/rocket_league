@@ -90,7 +90,7 @@ class TestSync(unittest.TestCase):
 
         # check response
         self.assertTrue(self.times_match(), msg='output time is not synchronized')
-        self.assertAlmostEqual(self.last_car0[0].to_sec(), t_next.to_sec(), places=3, msg='output time is incorrect')
+        self.assertAlmostEqual(self.last_car0[0].to_sec(), t_next.to_sec(), places=2, msg='output time is incorrect')
         self.assertTrue(np.allclose(self.last_car0[1:], [1.05, 1.05, 0.75]), msg='car0 pose is incorrect')
         self.assertTrue(np.allclose(self.last_car1[1:], [-1.05, -1.05, -0.75]), msg='car1 pose is incorrect')
         self.assertTrue(np.allclose(self.last_ball[1:], [1.5, -1.5, 0.0]), msg='ball pose is incorrect')
@@ -121,7 +121,7 @@ class TestSync(unittest.TestCase):
 
         # check response
         self.assertTrue(self.times_match(), msg='output time is not synchronized')
-        self.assertAlmostEqual(self.last_car0[0].to_sec(), t_next.to_sec(), places=3, msg='output time is incorrect')
+        self.assertAlmostEqual(self.last_car0[0].to_sec(), t_next.to_sec(), places=2, msg='output time is incorrect')
         self.assertTrue(np.allclose(self.last_car0[1:], [1.0, 1.0, 1.0]), msg='car0 pose is incorrect')
         self.assertTrue(np.allclose(self.last_car1[1:], [1.0, 1.0, 1.0]), msg='car1 pose is incorrect')
         self.assertTrue(np.allclose(self.last_ball[1:], [1.0, 1.0, 1.0]), msg='ball pose is incorrect')
@@ -143,7 +143,7 @@ class TestSync(unittest.TestCase):
 
         # check response
         self.assertTrue(self.times_match(), msg='output time is not synchronized')
-        self.assertAlmostEqual(self.last_car0[0].to_sec(), t_next.to_sec(), places=3, msg='output time is incorrect')
+        self.assertAlmostEqual(self.last_car0[0].to_sec(), t_next.to_sec(), places=2, msg='output time is incorrect')
         self.assertTrue(np.allclose(self.last_car0[1:], [1.5, 1.0, 0.5]), msg='car0 pose is incorrect')
         self.assertTrue(np.allclose(self.last_car1[1:], [1.5, 1.0, 0.5]), msg='car1 pose is incorrect')
         self.assertTrue(np.allclose(self.last_ball[1:], [1.5, 1.0, 0.5]), msg='ball pose is incorrect')
