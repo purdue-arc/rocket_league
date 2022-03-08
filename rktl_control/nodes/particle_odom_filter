@@ -127,9 +127,9 @@ class ParticleOdomFilter(object):
             # publish PoseArray msg
             self.cloud_pub.publish(cloud_msg)
 
-    def particle_dynamics(self, particles, control=None):
+    def particle_dynamics(self, particles, controls=None):
         """Extrapolate all particles to future state, including random control noise."""
-        if control is None:
+        if controls is None:
             # create random control noise
             # efforts uniformly distributed between -1.0 and +1.0
             rng = np.random.default_rng()
@@ -137,8 +137,8 @@ class ParticleOdomFilter(object):
             psi_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
         else:
             # use the provided control noise (likely for testing)
-            v_rear_ref = control[:,0]
-            psi_ref = control[:,1]
+            v_rear_ref = controls[:,0]
+            psi_ref = controls[:,1]
 
         # extract current states from particles matrix
         x = particles[:,0]
