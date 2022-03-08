@@ -7,7 +7,7 @@
         <node if="$(arg use_particle_filter)" pkg="rktl_control" type="particle_odom_filter" name="particle_odom_filter" output="screen">
             <rosparam command="load" file="$(find rktl_control)/config/particle_odom_filter.yaml"/>
         </node>
-        <node if="not $(arg use_particle_filter)" pkg="rktl_control" type="mean_odom_filter" name="mean_odom_filter" output="screen">
+        <node if="$(eval not use_particle_filter)" pkg="rktl_control" type="mean_odom_filter" name="mean_odom_filter" output="screen">
             <rosparam command="load" file="$(find rktl_control)/config/mean_odom_filter.yaml"/>
         </node>
 
