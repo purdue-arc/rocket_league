@@ -6,10 +6,10 @@ License:
   All rights reserved.
 """
 
-# ROS
 import rospy
 from nav_msgs.msg import Odometry
-from rktl_msgs.msg import ControlEffort
+from rktl_msgs.msg import ControlCommand, ControlEffort
+from math import atan, cos, sin
 
 class PIDController(object):
     """A very basic PID controller."""
@@ -77,11 +77,20 @@ class LeadLagController(object):
         self.prev_error = 0
 
 class Controller(object):
-    """Controller for car throttle."""
+    """Controller for car."""
     def __init__(self):
         rospy.init_node('controller')
 
-        # Make controller
+        # Constants
+        self.STEERING_THROW = rospy.get_param('/car/steering/throw')
+        self.BODY_LENGTH = rospy.get_param('/car/length')
+
+        self.MIN_THROTTLE_EFFORT = rospy.get_param('~limits/throttle/min', -1.0)
+        self.MAX_THROTTLE_EFFORT = rospy.get_param('~limits/throttle/max',  1.0)
+        self.MIN_STEERING_EFFORT = rospy.get_param('~limits/steering/min', -1.0)
+        self.MAX_STEERING_EFFORT = rospy.get_param('~limits/steering/max',  1.0)
+
+        # Make closed loop velocity controller
         if rospy.get_param('controller_type') == 'lead_lag':
             self.controller = LeadLagController(
                 rospy.get_param('~lead/gain'),
@@ -99,50 +108,50 @@ class Controller(object):
         else:
             raise NotImplementedError(f"unrecognized controller type: {rospy.get_param('controller_type')}")
 
-        # Constants
-        self.STATIC_GAIN = rospy.get_param('~static_gain')
-        self.MIN_EFFORT = rospy.get_param('~limits/min')
-        self.MAX_EFFORT = rospy.get_param('~limits/max')
-
         # State variables
-        self.ref_throttle = 0
-        self.ref_steering = 0
-        self.last_time = rospy.Time.now()
+        self.ref_velocity = 0.0
+        self.ref_curvature = 0.0
+        self.last_time = None
 
         # Publishers
         self.pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('control', ControlEffort, self.command_cb)
+        rospy.Subscriber('command', ControlCommand, self.command_cb)
         rospy.Subscriber('odom', Odometry, self.odom_cb)
 
         # trust that odom_cb runs at proper rate
         rospy.spin()
 
-    def command_cb(self, ref_msg):
+    def command_cb(self, cmd_msg):
         """Callback for command messages for car."""
-        self.ref_throttle = self.STATIC_GAIN * ref_msg.throttle
-        self.ref_steering = ref_msg.steering
+        self.ref_velocity = cmd_msg.velocity
+        self.ref_curvature = cmd_msg.curvature
 
     def odom_cb(self, odom_msg):
         """Callback for odom messages from car."""
-        error = self.reference - odom_msg.twist.twist.linear.x
+        if self.last_time is not None:
+            # get delta_t
+            delta_t = (odom_msg.header.stamp - self.last_time).to_sec()
 
-        # get delta_t
-        now = rospy.Time.now()
-        delta_t = (now - self.last_time).to_sec()
-        self.last_time = now
+            # calculate throttle effort (closed loop)
+            error = self.ref_velocity - odom_msg.twist.twist.linear.x
+            throttle_effort = self.controller.step(error, delta_t)
+            throttle_effort = max(min(throttle_effort, self.MAX_THROTTLE_EFFORT), self.MIN_THROTTLE_EFFORT)
 
-        # calculate throttle effort
-        throttle_effort = self.controller.step(error, delta_t)
-        throttle_effort = max(min(throttle_effort, self.MAX_EFFORT), self.MIN_EFFORT)
+            # calculate steering effort (open loop)
+            psi = atan(self.BODY_LENGTH * self.ref_curvature / cos(sin(self.BODY_LENGTH * self.ref_curvature / 2.0)))
+            steering_effort = psi / self.STEERING_THROW
+            steering_effort = max(min(steering_effort, self.MAX_STEERING_EFFORT), self.MIN_STEERING_EFFORT)
 
-        # publish actuator efforts
-        msg = ControlEffort()
-        msg.header.stamp = now
-        msg.throttle = throttle_effort
-        msg.steering = self.ref_steering
-        self.pub.publish(msg)
+            # publish actuator efforts
+            msg = ControlEffort()
+            msg.header.stamp = odom_msg.header.stamp
+            msg.throttle = throttle_effort
+            msg.steering = steering_effort
+            self.pub.publish(msg)
+
+        self.last_time = odom_msg.header.stamp
 
 if __name__ == "__main__":
     Controller()
