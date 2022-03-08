@@ -83,9 +83,16 @@ class SimulatorROS(object):
         urdf_paths["plane"] = rospy.get_param('~urdf/plane')
         self.check_urdf(urdf_paths["plane"])
 
+        car_properties = {}
+        car_properties['length'] = rospy.get_param('/cars/length')
+        car_properties['max_speed'] = rospy.get_param('/cars/throttle/max_speed')
+        car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
+        car_properties['steering_throw'] = rospy.get_param('/cars/steering/max_throw')
+        car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
+
         # Creating physics simulator
         self.sim = simulator.Sim(
-            urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled)
+            urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, car_properties)
 
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
