@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+"""Node to estimate odometry from poses over time using a Kalman filter.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+# ROS
+import rospy
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
+import numpy as np
+from pfilter import ParticleFilter
+from math import sin, cos, tan, atan, sqrt, pi, exp
+
+class ParticleOdomFilter(object):
+    """Class to estimate pose and velocity using Kalman filter."""
+    def __init__(self):
+        rospy.init_node('particle_odom_filter')
+
+        # global constants
+        self.FIELD_WIDTH = rospy.get_param('/field/width')
+        self.FIELD_HEIGHT = rospy.get_param('/field/length')
+        self.CAR_LENGTH = rospy.get_param('/cars/length')
+        self.MAX_SPEED = rospy.get_param('/cars/throttle/max_speed')
+        self.THROTTLE_TAU = rospy.get_param('/cars/throttle/tau')
+        self.STEERING_THROW = rospy.get_param('/cars/steering/max_throw')
+        self.STEERING_RATE = rospy.get_param('/cars/steering/rate')
+
+        # private constants
+        self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
+        self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
+        self.MEAS_LOC_STD_DEV = rospy.get_param('~measurement_error/location', 0.05)
+        self.MEAS_DIR_STD_DEV = rospy.get_param('~measurement_error/orientation', np.deg2rad(5))
+        self.NUM_PARTICLES = rospy.get_param('~num_particles', 1000)
+        self.DELTA_T = 1.0/rospy.get_param('~rate', 10.0)
+        self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
+
+        # variables
+        self.filter = ParticleFilter(
+            prior_fn=self.particle_init,
+            dynamics_fn=self.particle_dynamics,
+            observe_fn=self.particle_observation,
+            weight_fn=self.particle_weight,
+            n_particles=self.NUM_PARTICLES,
+            resample_proportion=0.1)
+
+        # pubs / subs
+        self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
+        rospy.Subscriber('pose_sync', PoseWithCovarianceStamped, self.pose_cb)
+        if self.PUB_PARTICLES:
+            self.cloud_pub = rospy.Publisher('odom_particles', PoseArray, queue_size=1)
+
+        # main loop
+        rospy.spin()
+
+    def pose_cb(self, pose_msg):
+        """Callback for new poses."""
+        assert(pose_msg.header.frame_id == self.MAP_FRAME)
+
+        # deconstruct message
+        x = pose_msg.pose.pose.position.x
+        y = pose_msg.pose.pose.position.y
+        __, __, yaw = euler_from_quaternion([
+            pose_msg.pose.pose.orientation.x,
+            pose_msg.pose.pose.orientation.y,
+            pose_msg.pose.pose.orientation.z,
+            pose_msg.pose.pose.orientation.w
+        ])
+        observation = np.array([x, y, yaw])
+
+        # filter
+        self.filter.update(observation)
+        state = self.filter.mean_state
+
+        # convert to odometry
+        beta = atan(tan(state[4]) / 2.0)
+        v_body = state[3] / cos(beta)
+        curvature = 2.0 * sin(beta) / self.CAR_LENGTH
+        x = state[0]
+        y = state[1]
+        theta = state[2]
+        vx_body = v_body * cos(beta)
+        vy_body = v_body * sin(beta)
+        omega = v_body * curvature
+
+        # publish message
+        odom_msg = Odometry()
+        odom_msg.header = pose_msg.header
+        odom_msg.child_frame_id = self.BODY_FRAME
+        odom_msg.pose.pose.position.x = x
+        odom_msg.pose.pose.position.y = y
+        x, y, z, w = quaternion_from_euler(0, 0, theta)
+        odom_msg.pose.pose.orientation.x = x
+        odom_msg.pose.pose.orientation.y = y
+        odom_msg.pose.pose.orientation.z = z
+        odom_msg.pose.pose.orientation.w = w
+        odom_msg.twist.twist.linear.x = vx_body
+        odom_msg.twist.twist.linear.y = vy_body
+        odom_msg.twist.twist.angular.z = omega
+        self.odom_pub.publish(odom_msg)
+
+        # publish all particles
+        if self.PUB_PARTICLES:
+            # create PoseArray msg to hold all particles' poses
+            cloud_msg = PoseArray()
+            cloud_msg.header = pose_msg.header
+            for i in range(self.NUM_PARTICLES):
+                # extract particle states
+                x = self.filter.hypotheses[i,0]
+                y = self.filter.hypotheses[i,1]
+                theta = self.filter.hypotheses[i,2]
+                # create Pose msg
+                particle_msg = Pose()
+                particle_msg.position.x = x
+                particle_msg.position.y = y
+                x, y, z, w = quaternion_from_euler(0, 0, theta)
+                particle_msg.orientation.x = x
+                particle_msg.orientation.y = y
+                particle_msg.orientation.z = z
+                particle_msg.orientation.w = w
+                # add Pose msg to PoseArray msg
+                cloud_msg.poses.append(particle_msg)
+            # publish PoseArray msg
+            self.cloud_pub.publish(cloud_msg)
+
+    def particle_dynamics(self, particles, controls=None):
+        """Extrapolate all particles to future state, including random control noise."""
+        if controls is None:
+            # create random control noise
+            # efforts uniformly distributed between -1.0 and +1.0
+            rng = np.random.default_rng()
+            v_rear_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
+            psi_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
+        else:
+            # use the provided control noise (likely for testing)
+            v_rear_ref = controls[:,0]
+            psi_ref = controls[:,1]
+
+        # extract current states from particles matrix
+        x = particles[:,0]
+        y = particles[:,1]
+        theta = particles[:,2]
+        v_rear = particles[:,3]
+        psi = particles[:,4]
+
+        # update rear wheel velocity using 1st order model
+        v_rear = (v_rear - v_rear_ref) * exp(-self.DELTA_T/self.THROTTLE_TAU) + v_rear_ref
+
+        # update steering angle using massless acceleration to a fixed rate
+        psi = np.where(np.abs(psi_ref - psi) < self.STEERING_RATE*self.DELTA_T,
+            psi_ref,
+            np.where(psi_ref > psi,
+                psi + self.STEERING_RATE*self.DELTA_T,
+                psi - self.STEERING_RATE*self.DELTA_T
+            )
+        )
+
+        # using bicycle model, extrapolate future state
+        return np.array([
+            x + self.DELTA_T * v_rear * np.cos(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
+            y + self.DELTA_T * v_rear * np.sin(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
+            theta + self.DELTA_T * v_rear * np.tan(psi) / self.CAR_LENGTH,
+            v_rear,
+            psi]).T
+
+    def particle_observation(self, particles):
+        """Calculate expected measurements for each particle."""
+        # measurement is x, y, theta
+        return particles[:,0:3]
+
+    def particle_weight(self, expected, observed):
+        """Weigh each particle based off difference between observed and expected measurements."""
+        # compute error (and minimize angles)
+        error = expected - observed
+        error[:,2] = np.fmod(error[:,2], 2.0*pi)
+        error[:,2] = np.where(error[:,2] > +pi, 2.0*pi - error[:,2], error[:,2])
+        error[:,2] = np.where(error[:,2] < -pi, 2.0*pi + error[:,2], error[:,2])
+
+        # use a standard normal distribution to calculate probability of measurement given each particle
+        sigma = np.array([self.MEAS_DIR_STD_DEV, self.MEAS_DIR_STD_DEV, self.MEAS_LOC_STD_DEV])
+        base = 1.0 / (sigma * sqrt(2.0*pi))
+        prob_z_x = base * np.exp(np.square(error / sigma) / -2.0)
+        # assume each state is independent
+        prob_z_x = np.prod(prob_z_x, axis=1)
+
+        # use law of total probability to calculate probability of measurement
+        prob_z = np.sum(prob_z_x * self.filter.weights)
+
+        # use Bayes rule to get probability of particle given measurement
+        return prob_z_x * self.filter.weights / prob_z
+
+    def particle_init(self, num_particles):
+        """Initial guesses for particle states."""
+        rng = np.random.default_rng()
+        # states uniformly distributed across all valid ranges
+        return (
+            rng.random((num_particles, 5))
+            * np.array([
+                self.FIELD_WIDTH,
+                self.FIELD_HEIGHT,
+                2.0*pi,
+                2.0*self.MAX_SPEED,
+                2.0*self.STEERING_THROW])
+            - np.array([
+                self.FIELD_WIDTH/2.0,
+                self.FIELD_HEIGHT/2.0,
+                pi,
+                self.MAX_SPEED,
+                self.STEERING_THROW]))
+
+if __name__ == "__main__":
+    ParticleOdomFilter()
