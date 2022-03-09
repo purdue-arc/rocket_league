@@ -78,8 +78,17 @@ the tires and it uses a lot of trigonometry. Details are in the MATLAB script
 [`bicycle_model.m`](scripts/bicycle_model.m).
 
 When advancing each particle one time-step, a random control vector (steering
-and velocity efforts are produced). These are uniformly distributed from +/- 1.0 
+and velocity efforts are produced). These are uniformly distributed between -1.0
+and +1.0. From these, a new wheel velocity and steering angle are predicted
+(using a 1st order and 0 order velocity model) and fed into the bicycle model.
 
+The relevant parameters to the filter (defined in [`particle_odom_filter.yaml`](config/particle_odom_filter.yaml))
+are `num_particles` and `measurement_error`. A higher number of particles should
+increase the performance of the filter, but will consume higher computational
+resources. Some tuning may be required. The measurement error parameters are the
+standard deviations of the data going in to the filter. Lowering these numbers
+will make it more trusting of incoming data, increasing these numbers will make
+it more trusting of it's own physics model for the car.
 
 #### Alternative algorithms
 [Kalman filters](https://www.kalmanfilter.net/default.aspx) were also considered.
