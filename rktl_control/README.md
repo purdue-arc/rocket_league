@@ -108,10 +108,85 @@ was found to have superior performance, so it was implemented in Python for the
 project.
 
 ## Controller
-TODO
+The controller is responsible for making the car do what you tell it to do.
+Simply, that means you give it a [`ControlCommand.msg`](../rktl_msgs/msg/ControlCommand.msg)
+and it produces a [`ControlEffort.msg`](../rktl_msgs/msg/ControlEffort.msg) that
+makes the car follow it. At a basic level, it uses the odometry produced by the
+filter and tries to minimize the error between what you want the car to do and
+what it is actually doing.
+
+Let's quickly discuss each control message in more detail:
+
+**command**
+- curvature and velocity
+- fixed units (m^-1 and m/s)
+- specific to a desired motion, not to a desired vehicle / car
+
+**effort**
+- steering and velocity
+- range between -1.0 and +1.0
+- specific to what is being controlled
+
+The incoming message is different from the outgoing message because it is taking
+a desired motion that could be for any mechanism, and it is converting it to
+very specific hardware commands for our specific cars. This allows the software
+generating the commands to ignore the specifics of the cars, and the software /
+hardware getting the efforts to the actuators to also ignore the specifics of the
+car as a whole.
+
+To get slightly more complex, let's talk about how it actually does that. First,
+it uses a bicycle model (which is discussed more in the particle filter) to
+convert desired the velocity and curvature of the center of mass to a desired
+steering angle and linear velocity of the rear wheels.
+
+For steering, it calculates the actuator effort to make that happen and sends
+it out. If it turns out to be off by a little bit, it ignores that. That is
+called "open loop" since the information flows in a straight line and the actual
+measurements are never used to correct that small error, "closing the loop." This
+is OK since it probably won't be off by much, and whatever generates the command
+will issue corrections (by closing its own loop) so the car goes where it is
+supposed to. In the future, a closed loop controller could be implemented for
+steering if testing determines it is necessary.
+
+For velocity, it uses one of two controllers (PID or lead-lag) to calculate the
+effort. These are more complex to understand, but they are basically functions
+that will minimize error, and you can "tune" them to minimize the error in
+different ways (ex: faster vs slower, more vs less overshoot). See
+**Closed Loop Controllers** below for more information. To use them, the controller
+will calculate an error between the desired (called "reference") rear wheel
+velocity and the actual (from measurements). This is the "closing the loop" part.
+It will then feed that error into the controller and it will make a good guess
+as to what effort (for the rear motor) will minimize that error. For example, it
+might initially give the car a really high effort to make it accelerate quickly,
+then lower the effort once it reaches the desired speed. It might also see that
+the car is consistently moving a little too slow, so it'll bump up the effort
+more than originally predicted. *If the controllers are properly tuned*, this
+will result in the car better matching what you want it to do as compared to
+simply predicting an effort based off velocity.
+
+### Closed Loop Controllers
+The two types of controllers supported are PID and lead-lag. If you've never
+heard of these before, PID is going to be something you can intuitively understand with some work,
+and lead-lag is probably something you're going to need to take some classes or
+read some textbooks to understand (ex: Purdue ME 365, 375, 475).
+
+PID control is very well explained in many places on the internet, so I won't
+discuss the basics here. The reason it is an option is because it is a commonly
+used controller that can be tuned intuitively by watching how the car is behaving.
+Lead-Lag is a very similar algorithm that can result in better performance
+(especially for discrete systems like this), but it is harder to tune. Intuitively
+tuning likely isn't an option, so instead MATLAB scripts can be really helpful
+to determine the specific gains to use. These are included in `scripts`.
+
+Some possibly useful references:
+- <https://www.youtube.com/watch?v=UR0hOmjaHp0>
+- <https://www.youtube.com/watch?v=wkfEZmsQqiA&list=PLn8PRpmsu08pQBgjxYFXSsODEF3Jqmm-y>
+- <https://www.youtube.com/watch?v=xLhvil5sDcU>
+
+These are all by Brian Douglas, who has many useful videos on control concepts.
 
 ## Hardware Interface
-This takes a [`ControlEffort.msg`](../rktl_msgs/msg/ControlEffort.msg) 
+This takes a [`ControlEffort.msg`](../rktl_msgs/msg/ControlEffort.msg)
 message and sends it to a physical car. The efforts in the message range from
 -1.0 to +1.0 corresponding to full reverse for full forward motor speed,
 or full left or full right steering angle respectively.
