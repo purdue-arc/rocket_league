@@ -11,14 +11,12 @@ import rospy
 import numpy as np
 import math
 import time
-from std_msgs.msg import Float32
-from geometry_msgs.msg import Twist
-from nav_msgs.msg import Odometry
+from nav_msgs.msg import OdometryMsg
 
 # Local modules
 import rktl_planner.convert as convert
 import rktl_planner.pure_pursuit as pursuit
-from rktl_msgs.msg import Path, ControlCommand
+from rktl_msgs.msg import PathMsg, ControlCommandMsg
 
 
 class PathFollower(object):
@@ -50,23 +48,23 @@ class PathFollower(object):
         # Publishers
         car_name = rospy.get_param('~car_name')
         self.bot_velocity_cmd = rospy.Publisher(f'/cars/{car_name}/command',
-            ControlCommand, queue_size=1)
+            ControlCommandMsg, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
-        rospy.Subscriber('linear_path', Path, self.path_cb)
+        rospy.Subscriber(f'/cars/{car_name}/odom', OdometryMsg, self.odom_cb)
+        rospy.Subscriber('linear_path', PathMsg, self.path_cb)
 
         rospy.spin()
 
-    def path_cb(self, path_arr_msg):
+    def path_cb(self, path_msg: PathMsg):
         """Creates path using waypoints in Path message."""
-        self.path_start_time = path_arr_msg.header.stamp
+        self.path_start_time = path_msg.header.stamp
         self.bkw = False
-        self.path = path_arr_msg.waypoint
+        self.path = path_msg.waypoints
         self.last_pnt_idx = 0
         self.start_time = time.time()
 
-    def odom_cb(self, odom_msg):
+    def odom_cb(self, odom_msg: OdometryMsg):
         """Updates car odometry and follows current path."""
         if self.path:
             if self.last_pose_idx == None:
@@ -115,7 +113,7 @@ class PathFollower(object):
 
                     # Check if intersection is behind vehicle
                     goal_pos = end_pos
-                    goal_vel = np.linalg.norm(convert.twist_to_array(self.path[i + 1].twist))
+                    goal_vel = 0.5
                     goal_time = self.path[i + 1].delta_t
                     vel_margin = self.path[i + 1].velocity_tolerance.data
                     d_angle = pursuit.calculate_angle(intersect, bot_pos,
@@ -130,7 +128,7 @@ class PathFollower(object):
 
             # If no intersection found, stop moving
             if intersect is None:
-                self.bot_velocity_cmd.publish(ControlCommand())
+                self.bot_velocity_cmd.publish(ControlCommandMsg())
                 rospy.logwarn("No intersection could be found.")
                 return
 
@@ -171,7 +169,7 @@ class PathFollower(object):
             #                          lookahead_dist * lookahead_dist)
 
             # Publish command data
-            cmd = ControlCommand()
+            cmd = ControlCommandMsg()
             cmd.velocity = linear_vel
             cmd.curvature = -(1.0 / turn_rad)
             self.bot_velocity_cmd.publish(cmd)

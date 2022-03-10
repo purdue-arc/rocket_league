@@ -58,6 +58,8 @@ class Car(object):
         else:
             self._v_rear = cmd[0]
             self._psi = math.atan(self._LENGTH * cmd[1])
+            if abs(self._psi) > self._STEERING_THROW:
+                self._psi = math.copysign(self._STEERING_THROW, self._psi)
 
         # get current yaw angle
         _, orient = self.getPose()

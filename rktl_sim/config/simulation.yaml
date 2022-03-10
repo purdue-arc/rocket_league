@@ -1,4 +1,4 @@
 rate: 10
 spawn_height: 0.06
 init:
-  speed: 1.0
+  speed: 0.0
