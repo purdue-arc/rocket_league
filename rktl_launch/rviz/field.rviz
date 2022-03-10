@@ -71,11 +71,7 @@ Visualization Manager:
         All Enabled: true
         cam0:
           Value: true
-        cam1:
-          Value: true
         cam2:
-          Value: true
-        cam3:
           Value: true
         map:
           Value: true
@@ -89,11 +85,7 @@ Visualization Manager:
         map:
           cam0:
             {}
-          cam1:
-            {}
           cam2:
-            {}
-          cam3:
             {}
       Update Interval: 0
       Value: true
@@ -110,11 +102,11 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/DepthCloud
       Color: 255; 255; 255
-      Color Image Topic: /cam0/image_rect
+      Color Image Topic: /cams/cam0/image_rect
       Color Transformer: RGB8
       Color Transport Hint: raw
       Decay Time: 0
-      Depth Map Topic: /cam0/depth_rect
+      Depth Map Topic: /cams/cam0/depth_rect
       Depth Map Transport Hint: raw
       Enabled: true
       Invert Rainbow: false
@@ -147,11 +139,11 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/DepthCloud
       Color: 255; 255; 255
-      Color Image Topic: /cam1/image_rect
+      Color Image Topic: /cams/cam1/image_rect
       Color Transformer: RGB8
       Color Transport Hint: raw
       Decay Time: 0
-      Depth Map Topic: /cam1/depth_rect
+      Depth Map Topic: /cams/cam1/depth_rect
       Depth Map Transport Hint: raw
       Enabled: true
       Invert Rainbow: false
@@ -184,11 +176,11 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/DepthCloud
       Color: 255; 255; 255
-      Color Image Topic: /cam2/image_rect
+      Color Image Topic: /cams/cam2/image_rect
       Color Transformer: RGB8
       Color Transport Hint: raw
       Decay Time: 0
-      Depth Map Topic: /cam2/depth_rect
+      Depth Map Topic: /cams/cam2/depth_rect
       Depth Map Transport Hint: raw
       Enabled: true
       Invert Rainbow: false
@@ -221,11 +213,11 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz/DepthCloud
       Color: 255; 255; 255
-      Color Image Topic: /cam3/image_rect
+      Color Image Topic: /cams/cam3/image_rect
       Color Transformer: RGB8
       Color Transport Hint: raw
       Decay Time: 0
-      Depth Map Topic: /cam3/depth_rect
+      Depth Map Topic: /cams/cam3/depth_rect
       Depth Map Transport Hint: raw
       Enabled: true
       Invert Rainbow: false
@@ -386,9 +378,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.244796872138977
+      Pitch: 0.7747973203659058
       Target Frame: <Fixed Frame>
-      Yaw: 3.955472707748413
+      Yaw: 3.850470542907715
     Saved: ~
 Window Geometry:
   Displays:
