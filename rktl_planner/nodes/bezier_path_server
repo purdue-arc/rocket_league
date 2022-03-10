@@ -30,31 +30,14 @@ def line(p: Point, v: Vector3, t: float):
     return point
 
 
-def create_segment(start_pose: Pose, end_pose: Pose, start_speed: float, end_speed: float, duration: rospy.Duration, segment_duration: rospy.Duration):
+def create_segment(start_pose: Pose, end_pose: Pose, velocity: float, 
+    duration: rospy.Duration, segment_duration: rospy.Duration):
     control_points = [start_pose.position, end_pose.position]
-    start_vel, start_head = vel(start_pose, start_speed)
-    end_vel, end_head = vel(end_pose, end_speed)
+    start_vel, start_head = vel(start_pose, velocity)
+    end_vel, end_head = vel(end_pose, velocity)
 
     t_val = duration.to_sec() / 3
 
-    if start_speed == 0 or end_speed == 0:
-        if start_speed == 0 and end_speed == 0:
-            dist = math.sqrt((control_points[0].x - control_points[1].x)
-                             ** 2 + (control_points[0].y - control_points[1].y) ** 2)
-            control_points = [
-                control_points[0],
-                line(control_points[0], start_head, dist / 3),
-                line(control_points[1], end_head, -dist / 3),
-                control_points[1]
-            ]
-        else:
-            t_val = duration.to_sec() / 4
-            if start_speed == 0:
-                control_points.insert(
-                    1, line(control_points[0], start_head, end_speed * t_val))
-            else:
-                control_points.insert(
-                    1, line(control_points[-1], end_head, -start_speed * t_val))
     control_points.insert(1, line(control_points[0], start_vel, t_val))
     control_points.insert(len(control_points) - 1,
                           line(control_points[-1], end_vel, -t_val))
@@ -71,16 +54,15 @@ def create_segment(start_pose: Pose, end_pose: Pose, start_speed: float, end_spe
 
 
 def bezier_path_server(req: CreateBezierPathRequest):
+    velocity = req.velocity
     bezier_segments = []
     durations = []
     for i in range(len(req.target_durations)):
         start_pose = req.target_poses[i]
         end_pose = req.target_poses[i + 1]
-        start_speed = req.target_speeds[i]
-        end_speed = req.target_speeds[i + 1]
         duration = req.target_durations[i].data
-        segments = create_segment(start_pose, end_pose, start_speed,
-                                  end_speed, duration, req.bezier_segment_duration.data)
+        segments = create_segment(start_pose, end_pose, velocity,
+            duration, req.bezier_segment_duration.data)
         bezier_segments.extend(segments)
         for segment in segments:
             if len(durations) > 0:
@@ -91,6 +73,7 @@ def bezier_path_server(req: CreateBezierPathRequest):
     res = CreateBezierPathResponse()
     res.bezier_paths = [x.to_msg() for x in bezier_segments]
     res.linear_path = PathMsg()
+    res.linear_path.velocity = velocity
 
     duration = durations[-1]
     segment_length = req.linear_segment_duration.data.to_sec()
@@ -107,7 +90,7 @@ def bezier_path_server(req: CreateBezierPathRequest):
         wp.pose.orientation.z = quat[2]
         wp.pose.orientation.w = quat[3]
         wp.twist.linear = bezier_segments[idx].vel_at(t)
-        res.linear_path.waypoint.append(wp)
+        res.linear_path.waypoints.append(wp)
         t += segment_length
         if t > durations[idx]:
             idx += 1

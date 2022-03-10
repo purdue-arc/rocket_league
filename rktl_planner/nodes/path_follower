@@ -11,12 +11,12 @@ import rospy
 import numpy as np
 import math
 import time
-from nav_msgs.msg import OdometryMsg
+from nav_msgs.msg import Odometry
 
 # Local modules
 import rktl_planner.convert as convert
 import rktl_planner.pure_pursuit as pursuit
-from rktl_msgs.msg import PathMsg, ControlCommandMsg
+from rktl_msgs.msg import Path, ControlCommand
 
 
 class PathFollower(object):
@@ -48,23 +48,23 @@ class PathFollower(object):
         # Publishers
         car_name = rospy.get_param('~car_name')
         self.bot_velocity_cmd = rospy.Publisher(f'/cars/{car_name}/command',
-            ControlCommandMsg, queue_size=1)
+            ControlCommand, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber(f'/cars/{car_name}/odom', OdometryMsg, self.odom_cb)
-        rospy.Subscriber('linear_path', PathMsg, self.path_cb)
+        rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
+        rospy.Subscriber('linear_path', Path, self.path_cb)
 
         rospy.spin()
 
-    def path_cb(self, path_msg: PathMsg):
+    def path_cb(self, path_msg: Path):
         """Creates path using waypoints in Path message."""
         self.path_start_time = path_msg.header.stamp
-        self.bkw = False
+        self.goal_vel = path_msg.velocity
         self.path = path_msg.waypoints
         self.last_pnt_idx = 0
         self.start_time = time.time()
 
-    def odom_cb(self, odom_msg: OdometryMsg):
+    def odom_cb(self, odom_msg: Odometry):
         """Updates car odometry and follows current path."""
         if self.path:
             if self.last_pose_idx == None:
@@ -89,9 +89,8 @@ class PathFollower(object):
             # Find next valid intersection along path
             intersect = None
             goal_pos = None
-            goal_vel = None
+            goal_vel = self.goal_vel
             goal_time = None
-            vel_margin = None
             i = self.last_pose_idx
             pnts_checked = 0
             while pnts_checked < lookahead_pnts:
@@ -113,11 +112,9 @@ class PathFollower(object):
 
                     # Check if intersection is behind vehicle
                     goal_pos = end_pos
-                    goal_vel = 0.5
                     goal_time = self.path[i + 1].delta_t
-                    vel_margin = self.path[i + 1].velocity_tolerance.data
                     d_angle = pursuit.calculate_angle(intersect, bot_pos,
-                        bot_orient, lookahead_dist, self.bkw)
+                        bot_orient, lookahead_dist, goal_vel < 0)
                     if abs(d_angle) > math.pi/2:                  
                         intersect = None
                     else:
@@ -128,7 +125,7 @@ class PathFollower(object):
 
             # If no intersection found, stop moving
             if intersect is None:
-                self.bot_velocity_cmd.publish(ControlCommandMsg())
+                self.bot_velocity_cmd.publish(ControlCommand())
                 rospy.logwarn("No intersection could be found.")
                 return
 
@@ -138,8 +135,8 @@ class PathFollower(object):
             time_left = goal_time.data - delta_time
             
             linear_vel = goal_vel
-            if self.bkw:
-                linear_vel *= -0.25
+            # if self.bkw:
+            #     linear_vel *= -0.25
 
             # if time_left <= 0:
             #     # Report unfeasible path
@@ -157,19 +154,12 @@ class PathFollower(object):
             #         rospy.logwarn("Path unfeasible to complete.")
             #         # TODO: Tell highlevel planner we stopped
 
-            # Calculate angular velocity
+            # Calculate curvature
             turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos,
-                bot_orient, lookahead_dist, self.bkw)
-            # angular_vel = pursuit.get_angular_speed(linear_vel, turn_rad)
-
-            # Steering-Angle Approach
-            # lat_error = pursuit.calculate_lat_error(intersect, bot_pos, \
-            #                                         bot_orient, lookahead_dist)
-            # angular_vel = math.atan2(2 * lat_error * .125,
-            #                          lookahead_dist * lookahead_dist)
+                bot_orient, lookahead_dist, linear_vel < 0)
 
             # Publish command data
-            cmd = ControlCommandMsg()
+            cmd = ControlCommand()
             cmd.velocity = linear_vel
             cmd.curvature = -(1.0 / turn_rad)
             self.bot_velocity_cmd.publish(cmd)

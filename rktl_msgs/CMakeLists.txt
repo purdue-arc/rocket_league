@@ -15,13 +15,11 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   BezierPath.msg
-  MultiBezierPath.msg
+  BezierPathList.msg
   ControlEffort.msg
   ControlCommand.msg
   MatchStatus.msg
   Path.msg
-  PathError.msg
-  Target.msg
   Waypoint.msg
 )
 

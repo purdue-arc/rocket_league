@@ -1,5 +1,5 @@
+float64 velocity
 geometry_msgs/Pose[] target_poses
-float64[] target_speeds
 std_msgs/Duration[] target_durations
 std_msgs/Duration bezier_segment_duration
 std_msgs/Duration linear_segment_duration

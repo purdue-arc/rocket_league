@@ -21,6 +21,7 @@ class Car(object):
         self._THROTTLE_TAU = car_properties['throttle_tau']
         self._STEERING_THROW = car_properties['steering_throw']
         self._STEERING_RATE = car_properties['steering_rate']
+        self._MAX_CURVATURE = math.tan(self._STEERING_THROW) / self._LENGTH
 
         # urdf configuration
         self.body_link_id = 1
@@ -39,6 +40,10 @@ class Car(object):
         p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
 
     def step(self, cmd, dt):
+        # get current yaw angle
+        _, orient = self.getPose()
+        theta = p.getEulerFromQuaternion(orient)[2]
+
         if self.simulate_effort:
             # transfrom control input to reference angles and velocities
             v_rear_ref = cmd[0] * self._MAX_SPEED
@@ -55,22 +60,25 @@ class Car(object):
                     self._psi += self._STEERING_RATE * dt
                 else:
                     self._psi -= self._STEERING_RATE * dt
+
+            # using bicycle model, extrapolate future state
+            x_dot = self._v_rear * math.cos(theta + math.atan(math.tan(self._psi) / 2.0)) * \
+                math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
+            y_dot = self._v_rear * math.sin(theta + math.atan(math.tan(self._psi) / 2.0)) * \
+                math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
+            omega = self._v_rear * math.tan(self._psi) / self._LENGTH
         else:
-            self._v_rear = cmd[0]
-            self._psi = math.atan(self._LENGTH * cmd[1])
-            if abs(self._psi) > self._STEERING_THROW:
-                self._psi = math.copysign(self._STEERING_THROW, self._psi)
+            body_vel = cmd[0]
+            if abs(body_vel) > self._MAX_SPEED:
+                body_vel = math.copysign(self._MAX_SPEED, body_vel)
 
-        # get current yaw angle
-        _, orient = self.getPose()
-        theta = p.getEulerFromQuaternion(orient)[2]
-
-        # using bicycle model, extrapolate future state
-        x_dot = self._v_rear * math.cos(theta + math.atan(math.tan(self._psi) / 2.0)) * \
-            math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
-        y_dot = self._v_rear * math.sin(theta + math.atan(math.tan(self._psi) / 2.0)) * \
-            math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
-        omega = self._v_rear * math.tan(self._psi) / self._LENGTH
+            body_curv = cmd[1]
+            if abs(body_curv) > self._MAX_CURVATURE:
+                body_curv = math.copysign(self._MAX_CURVATURE, body_curv) 
+            
+            x_dot = body_vel * math.cos(theta)
+            y_dot = body_vel * math.sin(theta)
+            omega = body_vel * body_curv
 
         p.setJointMotorControlArray(self.id, self.joint_ids,
             targetVelocities=(x_dot, y_dot, omega),
