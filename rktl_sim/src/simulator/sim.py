@@ -167,7 +167,7 @@ class Sim(object):
         p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
         p.setGravity(0, 0, -10)
 
-    def step(self, throttle_cmd, steering_cmd, dt):
+    def step(self, car_cmd, dt):
         """Advance one time-step in the sim."""
         if self._ballID is not None:
             ballContacts = p.getContactPoints(bodyA=self._ballID)
@@ -186,7 +186,7 @@ class Sim(object):
         for _ in range(round(dt / p_dt)):
             # Step kinematic objects independently, at max possible rate
             for car in self._cars.values():
-                car.step((throttle_cmd, steering_cmd), p_dt)
+                car.step(car_cmd, p_dt)
             p.stepSimulation()
 
     def getCarPose(self):

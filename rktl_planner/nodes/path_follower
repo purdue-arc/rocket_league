@@ -173,7 +173,7 @@ class PathFollower(object):
             # Publish command data
             cmd = ControlCommand()
             cmd.velocity = linear_vel
-            cmd.curvature = (1.0 / turn_rad)
+            cmd.curvature = -(1.0 / turn_rad)
             self.bot_velocity_cmd.publish(cmd)
 
 

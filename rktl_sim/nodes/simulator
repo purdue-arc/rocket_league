@@ -11,7 +11,6 @@ TODO:
 """
 
 # 3rd party modules
-from rktl_msgs.msg import ControlEffort
 from nav_msgs.msg import Odometry
 import os
 import rospy
@@ -20,7 +19,7 @@ from threading import Lock
 
 # Local library
 import simulator
-from rktl_msgs.msg import MatchStatus
+from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 class SimulatorROS(object):
     """ROS wrapper for the simulator."""
@@ -83,21 +82,22 @@ class SimulatorROS(object):
         urdf_paths["plane"] = rospy.get_param('~urdf/plane')
         self.check_urdf(urdf_paths["plane"])
 
+        self.simulate_car_effort = rospy.get_param('~simulate_car_effort')
+
         car_properties = {}
         car_properties['length'] = rospy.get_param('/cars/length')
         car_properties['max_speed'] = rospy.get_param('/cars/throttle/max_speed')
         car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
         car_properties['steering_throw'] = rospy.get_param('/cars/steering/max_throw')
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
+        car_properties['simulate_effort'] = self.simulate_car_effort
 
         # Creating physics simulator
-        self.sim = simulator.Sim(
-            urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, car_properties)
+        self.sim = simulator.Sim(urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, car_properties)
 
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
-        self.throttle_cmd = 0.
-        self.steering_cmd = 0.
+        self.car_cmd = (0.0, 0.0)
         self.last_time = None
 
         # Publishers
@@ -108,7 +108,10 @@ class SimulatorROS(object):
             'match_status', MatchStatus, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('/cars/car0/effort', ControlEffort, self.effort_cb)
+        if self.simulate_car_effort:
+            rospy.Subscriber('/cars/car0/effort', ControlEffort, self.effort_cb)
+        else:
+            rospy.Subscriber('/cars/car0/command', ControlCommand, self.cmd_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -131,8 +134,12 @@ class SimulatorROS(object):
 
     def effort_cb(self, effort_msg):
         self.cmd_lock.acquire()
-        self.throttle_cmd = effort_msg.throttle
-        self.steering_cmd = effort_msg.steering
+        self.car_cmd = (effort_msg.throttle, effort_msg.steering)
+        self.cmd_lock.release()
+
+    def cmd_cb(self, cmd_msg):
+        self.cmd_lock.acquire()
+        self.car_cmd = (cmd_msg.velocity, cmd_msg.curvature)
         self.cmd_lock.release()
 
     def reset_cb(self, _):
@@ -163,7 +170,7 @@ class SimulatorROS(object):
                 status.status = MatchStatus.ONGOING
             self.status_pub.publish(status)
 
-            self.sim.step(self.throttle_cmd, self.steering_cmd, delta_t)
+            self.sim.step(self.car_cmd, delta_t)
 
             # Publish ball odometry
             ball_msg = Odometry()

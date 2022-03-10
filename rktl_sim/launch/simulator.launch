@@ -1,5 +1,6 @@
 <launch>
     <arg name="pybullet_render" default="false"/>
+    <arg name="simulate_car_effort" default="false" />
 
     <node pkg="rktl_sim" type="simulator" name="simulator" output="screen" required="true">
         <rosparam command="load" file="$(find rktl_sim)/config/simulation.yaml"/>
@@ -10,5 +11,6 @@
         <param name="urdf/sidewall" value="$(find rktl_sim)/urdf/sidewall.urdf"/>
         <param name="urdf/backwall" value="$(find rktl_sim)/urdf/backwall.urdf"/>
         <param name="urdf/plane"    value="$(find rktl_sim)/urdf/plane.urdf"/>
+        <param name="simulate_car_effort" value="$(arg simulate_car_effort)"/>
     </node>
 </launch>
