@@ -48,12 +48,12 @@ class WaypointControllerROS(object):
         self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('~velocity',
+        self.bot_velocity_cmd = rospy.Publisher('velocity',
                                                 Twist, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('~path', Path, self.path_cb)
-        rospy.Subscriber('~odom', Odometry, self.odom_cb)
+        rospy.Subscriber('path', Path, self.path_cb)
+        rospy.Subscriber('odom', Odometry, self.odom_cb)
 
         rospy.spin()
 

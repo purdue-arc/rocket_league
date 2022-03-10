@@ -1,7 +1,7 @@
 <launch>
     <arg name="pybullet_render" default="false"/>
 
-    <node pkg="rktl_sim" type="simulator_node" name="simulator_node" output="screen" required="true">
+    <node pkg="rktl_sim" type="simulator" name="simulator" output="screen" required="true">
         <rosparam command="load" file="$(find rktl_sim)/config/simulation.yaml"/>
         <param name="render" value="$(arg pybullet_render)"/>
         <param name="urdf/ball"     value="$(find rktl_sim)/urdf/ball.urdf"/>

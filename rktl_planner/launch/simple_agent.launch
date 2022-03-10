@@ -1,0 +1,20 @@
+<launch>
+    <arg name="agent_name" default="agent0"/>
+    <arg name="car_name" default="car0"/>
+
+    <group ns="agents/$(arg agent_name)">
+        <!-- Path Follower -->
+        <node pkg="rktl_planner" type="path_follower" name="path_" output="screen">
+            <rosparam command="load" file="$(find rktl_planner)/config/waypoint_params.yaml" />
+            <param name="car_name" value="$(arg car_name)">
+        </node>
+
+        <!-- Path Planning -->
+        <node pkg="rktl_planner" type="bezier_path_server" name="bezier_path_server" output="screen"/>
+        <node pkg="rktl_planner" type="complex_controller" name="simple_controller" output="screen">
+            <param name="car_name" value="$(arg car_name)">
+        </node>
+    </group>
+
+  
+</launch>

@@ -1,5 +1,5 @@
 <launch>
-    <node pkg="rktl_sim" type="visualizer_node" name="visualizer_node" output="screen">
+    <node pkg="rktl_sim" type="visualizer" name="visualizer" output="screen">
         <rosparam command="load" file="$(find rktl_sim)/config/visualization.yaml"/>
         <param name="media/ball"    value="$(find rktl_sim)/media/ball.png"/>
         <param name="media/car"     value="$(find rktl_sim)/media/car.png"/>

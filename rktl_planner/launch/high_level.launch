@@ -1,8 +1,0 @@
-<launch>
-    <arg name="frame_id" default="map"/>
-    <arg name="is_debug" default="true"/>
-
-    <node type="simple_hardcoded" pkg="rktl_planner" name="simple_hardcoded" output="screen">
-        <rosparam command="load" file="$(find rktl_planner)/config/high_level_info.yaml" />
-    </node>
-</launch>

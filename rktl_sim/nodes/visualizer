@@ -138,7 +138,7 @@ class VisualizerROS(object):
         rospy.Subscriber("cars/car0/odom", Odometry, self.car_odom_cb)
         rospy.Subscriber("cars/car0/path", Path, self.path_arr_cb)
         rospy.Subscriber(
-            "cars/car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb)
+            "cars/car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb
         )
         rospy.Subscriber("bezier_path", MultiBezierPath, self.bezier_path_cb)
 
