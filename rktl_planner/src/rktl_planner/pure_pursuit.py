@@ -91,8 +91,8 @@ def calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     #     angle += math.pi
     # else:
     #     angle -= math.pi
-    # if bkw:
-        # angle = math.pi - angle
+    if bkw:
+        angle = math.pi - angle
     return angle * sign
 
 

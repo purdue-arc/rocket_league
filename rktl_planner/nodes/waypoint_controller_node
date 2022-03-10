@@ -73,6 +73,8 @@ class WaypointControllerROS(object):
     def path_cb(self, path_arr_msg):
         """Creates path using waypoints in Path message."""
         self.path_start_time = path_arr_msg.header.stamp
+        self.bkw = path_arr_msg.backwards
+        print(self.bkw, path_arr_msg.backwards)
         self.path = path_arr_msg.waypoint
         self.last_pnt_idx = 0
         self.start_time = time.time()
@@ -105,7 +107,6 @@ class WaypointControllerROS(object):
             goal_vel = None
             goal_time = None
             vel_margin = None
-            bkw = False
             i = self.last_pose_idx
             pnts_checked = 0
             while pnts_checked < lookahead_pnts:
@@ -119,7 +120,7 @@ class WaypointControllerROS(object):
                 bot_path = start_pos - bot_pos
 
                 intersect = pursuit.find_intersection(path_seg, bot_path,
-                                                      lookahead_dist)
+                    lookahead_dist)
 
                 if intersect is not None:
                     self.last_pose_idx = i
@@ -127,14 +128,12 @@ class WaypointControllerROS(object):
 
                     # Check if intersection is behind vehicle
                     goal_pos = end_pos
-                    goal_vel = self.path[i + 1].twist.linear.x
+                    goal_vel = np.linalg.norm(convert.twist_to_array(self.path[i + 1].twist))
                     goal_time = self.path[i + 1].delta_t
                     vel_margin = self.path[i + 1].velocity_tolerance.data
-                    bkw = goal_vel < 0
                     d_angle = pursuit.calculate_angle(intersect, bot_pos,
-                                                      bot_orient, lookahead_dist, bkw)
+                        bot_orient, lookahead_dist, self.bkw)
                     if abs(d_angle) > math.pi/2:
-                        print(d_angle)
                         intersect = None
                     else:
                         break
@@ -155,7 +154,11 @@ class WaypointControllerROS(object):
             dist = np.linalg.norm(goal_pos - bot_pos)
             delta_time = time.time() - self.start_time
             time_left = goal_time.data - delta_time
+            
             linear_vel = goal_vel
+            if self.bkw:
+                linear_vel *= -0.25
+
             # if time_left <= 0:
             #     # Report unfeasible path
             #     linear_vel = 0
@@ -174,7 +177,7 @@ class WaypointControllerROS(object):
 
             # Calculate angular velocity
             turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos,
-                                                  bot_orient, lookahead_dist, bkw)
+                                                  bot_orient, lookahead_dist, self.bkw)
             angular_vel = pursuit.get_angular_speed(linear_vel, turn_rad)
 
             # Steering-Angle Approach

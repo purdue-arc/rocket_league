@@ -13,7 +13,7 @@ throttle:
 
 steering:
   gains:  
-    kp: 1.0
+    kp: 5.0
     ki: 0.0
     kd: 0.0
     kff: 0.0

@@ -14,7 +14,7 @@
   </node>
 
   <node pkg="rktl_planner" type="bezier_path_server" name="bezier_path_server" output="screen"/>
-  <node pkg="rktl_planner" type="simple_controller" name="simple_controller" output="screen">
+  <node pkg="rktl_planner" type="complex_controller" name="simple_controller" output="screen">
       <param name="linear_path_topic" value="car0/path" />
       <!-- <param name="bezier_path_topic" value="bezier_path" /> -->
   </node>

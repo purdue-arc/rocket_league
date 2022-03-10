@@ -70,8 +70,8 @@ class SimpleController:
         pose0.position.z = 0.0
         pose0.orientation = self.car_odom.pose.pose.orientation
         req.target_poses.append(pose0)
-        req.target_speeds.append(0.0)
-        req.target_durations.append(Duration(data=rospy.Duration(5)))
+        req.target_speeds.append(0.5)
+        req.target_durations.append(Duration(data=rospy.Duration(5.0)))
 
         # Target 1 (ball pos)
         final_vec_x = self.goal_pos[0] - self.ball_odom.pose.pose.position.x
@@ -88,8 +88,8 @@ class SimpleController:
         pose1.orientation.z = final_quat[2]
         pose1.orientation.w = final_quat[3]
         req.target_poses.append(pose1)
-        req.target_speeds.append(1.0)
-        req.target_durations.append(Duration(data=rospy.Duration(0.5)))
+        req.target_speeds.append(0.5)
+        req.target_durations.append(Duration(data=rospy.Duration(1.0)))
 
         # Target 2 (stop)
         pose2 = Pose()
