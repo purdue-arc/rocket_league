@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contains the WaypointControllerROS Node.
+"""Contains the PathPlanner Node.
 License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -12,20 +12,20 @@ import numpy as np
 import math
 import time
 from std_msgs.msg import Float32
-from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
+from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 
 # Local modules
-import local_planner.convert as convert
-import local_planner.pure_pursuit as pursuit
-from rktl_msgs.msg import Path, PathError
+import rktl_planner.convert as convert
+import rktl_planner.pure_pursuit as pursuit
+from rktl_msgs.msg import Path, ControlCommand
 
 
-class WaypointControllerROS(object):
+class PathFollower(object):
     """A node to ensure the car follows a given trajectory."""
 
     def __init__(self):
-        rospy.init_node('waypoint_controller_node')
+        rospy.init_node('path_follower')
 
         self.path_start_time = None
         self.path = None
@@ -48,20 +48,20 @@ class WaypointControllerROS(object):
         self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
 
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('velocity',
-                                                Twist, queue_size=1)
+        car_name = rospy.get_param('~car_name')
+        self.bot_velocity_cmd = rospy.Publisher(f'/cars/{car_name}/command',
+            ControlCommand, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('path', Path, self.path_cb)
-        rospy.Subscriber('odom', Odometry, self.odom_cb)
+        rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
+        rospy.Subscriber('linear_path', Path, self.path_cb)
 
         rospy.spin()
 
     def path_cb(self, path_arr_msg):
         """Creates path using waypoints in Path message."""
         self.path_start_time = path_arr_msg.header.stamp
-        self.bkw = path_arr_msg.backwards
-        print(self.bkw, path_arr_msg.backwards)
+        self.bkw = False
         self.path = path_arr_msg.waypoint
         self.last_pnt_idx = 0
         self.start_time = time.time()
@@ -120,7 +120,7 @@ class WaypointControllerROS(object):
                     vel_margin = self.path[i + 1].velocity_tolerance.data
                     d_angle = pursuit.calculate_angle(intersect, bot_pos,
                         bot_orient, lookahead_dist, self.bkw)
-                    if abs(d_angle) > math.pi/2:
+                    if abs(d_angle) > math.pi/2:                  
                         intersect = None
                     else:
                         break
@@ -130,7 +130,7 @@ class WaypointControllerROS(object):
 
             # If no intersection found, stop moving
             if intersect is None:
-                self.bot_velocity_cmd.publish(Twist())
+                self.bot_velocity_cmd.publish(ControlCommand())
                 rospy.logwarn("No intersection could be found.")
                 return
 
@@ -161,8 +161,8 @@ class WaypointControllerROS(object):
 
             # Calculate angular velocity
             turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos,
-                                                  bot_orient, lookahead_dist, self.bkw)
-            angular_vel = pursuit.get_angular_speed(linear_vel, turn_rad)
+                bot_orient, lookahead_dist, self.bkw)
+            # angular_vel = pursuit.get_angular_speed(linear_vel, turn_rad)
 
             # Steering-Angle Approach
             # lat_error = pursuit.calculate_lat_error(intersect, bot_pos, \
@@ -171,11 +171,11 @@ class WaypointControllerROS(object):
             #                          lookahead_dist * lookahead_dist)
 
             # Publish command data
-            twist = Twist()
-            twist.linear.x = linear_vel
-            twist.angular.z = -angular_vel
-            self.bot_velocity_cmd.publish(twist)
+            cmd = ControlCommand()
+            cmd.velocity = linear_vel
+            cmd.curvature = (1.0 / turn_rad)
+            self.bot_velocity_cmd.publish(cmd)
 
 
 if __name__ == "__main__":
-    WaypointControllerROS()
+    PathFollower()

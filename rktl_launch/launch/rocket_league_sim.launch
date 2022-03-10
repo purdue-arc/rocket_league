@@ -17,7 +17,7 @@
     </include>
 
     <!-- Agents -->
-    <include file="$(find rktl_planner)/launch/local_planner.launch">
+    <include file="$(find rktl_planner)/launch/simple_agent.launch">
         <arg name="agent_name" value="agent0" />
         <arg name="car_name" value="car0" />
     </include>

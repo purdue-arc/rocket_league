@@ -114,7 +114,7 @@ class PathPlanner(object):
             raise NotImplementedError(f'unrecognized planner type: {rospy.get_param("~planner_type")}')
 
         # Subscribers
-        car_name = rospy.get_param('car_name')
+        car_name = rospy.get_param('~car_name')
         rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.car_odom_cb)
         rospy.Subscriber('/ball/odom', Odometry, self.ball_odom_cb)
 
