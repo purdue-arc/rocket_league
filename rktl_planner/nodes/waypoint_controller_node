@@ -47,26 +47,13 @@ class WaypointControllerROS(object):
         # Number of waypoints to search per pass (-1 is full path)
         self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
 
-        # Enables debug publishers such as lookahead_pnt pose
-        self.is_debug = rospy.get_param('~is_debug', True)
-
         # Publishers
-        self.bot_velocity_cmd = rospy.Publisher('car0/cmd_vel',
+        self.bot_velocity_cmd = rospy.Publisher('~velocity',
                                                 Twist, queue_size=1)
 
-        self.path_error_pub = rospy.Publisher(
-            'car0/path_error', PathError, queue_size=1)
-
-        if self.is_debug:
-            self.lookahead_dist_pub = rospy.Publisher('car0/lookahead_dist',
-                                                     Float32,
-                                                     queue_size=1)
-            self.d_angle_pub = rospy.Publisher(
-                'car0/d_angle', Float32, queue_size=1)
-
         # Subscribers
-        rospy.Subscriber('car0/path', Path, self.path_cb)
-        rospy.Subscriber('car0/odom', Odometry, self.odom_cb)
+        rospy.Subscriber('~path', Path, self.path_cb)
+        rospy.Subscriber('~odom', Odometry, self.odom_cb)
 
         rospy.spin()
 
@@ -147,9 +134,6 @@ class WaypointControllerROS(object):
                 rospy.logwarn("No intersection could be found.")
                 return
 
-            if self.is_debug:
-                self.lookahead_dist_pub.publish(Float32(lookahead_dist))
-
             # Calculate ETA
             dist = np.linalg.norm(goal_pos - bot_pos)
             delta_time = time.time() - self.start_time
@@ -191,15 +175,6 @@ class WaypointControllerROS(object):
             twist.linear.x = linear_vel
             twist.angular.z = -angular_vel
             self.bot_velocity_cmd.publish(twist)
-
-            # Publish error data
-            # error = PathError()
-            # error.time = Float32(time_left)
-            # error.position = Float32(dist)
-            # error.orientation = Float32()
-            # error.linear_velocity = Float32(vel_error)
-            # error.angular_velocity = Float32()
-            # self.path_error_pub.publish(error)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,21 @@
+<launch>
+    <arg name="car_name" default="car0"/>
+    <arg name="use_particle_filter" default="true"/>
+
+    <group ns="cars/$(arg car_name)">
+        <!-- Filter -->
+        <node if="$(arg use_particle_filter)" pkg="rktl_control" type="particle_odom_filter" name="particle_odom_filter" output="screen">
+            <rosparam command="load" file="$(find rktl_control)/config/particle_odom_filter.yaml"/>
+            <param name="frame_ids/body" value="car_name"/>
+        </node>
+        <node if="$(eval not use_particle_filter)" pkg="rktl_control" type="mean_odom_filter" name="mean_odom_filter" output="screen">
+            <rosparam command="load" file="$(find rktl_control)/config/mean_odom_filter.yaml"/>
+            <param name="frame_ids/body" value="car_name"/>
+        </node>
+
+        <!-- Controller -->
+        <node pkg="rktl_control" type="controller" name="controller" output="screen">
+            <rosparam command="load" file="$(find rktl_control)/config/controller.yaml"/>
+        </node>
+    </group>
+</launch>

@@ -1,17 +1,12 @@
 <launch>
-  <arg name="frame_id" default="map"/>
-  <arg name="is_debug" default="true"/>
+    <arg name="frame_id" default="map"/>
+    <arg name="is_debug" default="true"/>
 
-  <node type="waypoint_controller_node" pkg="rktl_planner" name="waypoint_controller" output="screen">
-    <param name="~frame_id" value="$(arg frame_id)"/>
-    <param name="~is_debug" value="$(arg is_debug)"/>
-    <rosparam command="load" file="$(find rktl_planner)/config/waypoint_params.yaml" />
-  </node>
-
-  <node type="trajectory_planner_node" pkg="rktl_planner" name="trajectory_planner_node" output="screen">
-    <rosparam command="load" file="$(find rktl_planner)/config/trajectory_params.yaml" />
-    <rosparam command="load" file="$(find rktl_planner)/config/high_level_info.yaml" />
-  </node>
+    <node type="waypoint_controller_node" pkg="rktl_planner" name="waypoint_controller" output="screen">
+        <param name="~frame_id" value="$(arg frame_id)"/>
+        <param name="~is_debug" value="$(arg is_debug)"/>
+        <rosparam command="load" file="$(find rktl_planner)/config/waypoint_params.yaml" />
+    </node>
 
   <node pkg="rktl_planner" type="bezier_path_server" name="bezier_path_server" output="screen"/>
   <node pkg="rktl_planner" type="complex_controller" name="simple_controller" output="screen">

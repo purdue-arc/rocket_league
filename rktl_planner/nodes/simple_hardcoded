@@ -35,10 +35,10 @@ class HighLevelPlannerROS(object):
         self.backwards = True
 
         # Subscribers
-        rospy.Subscriber("car0/odom", Odometry, self.car0_odom_cb)
+        rospy.Subscriber("cars/car0/odom", Odometry, self.car0_odom_cb)
         rospy.Subscriber("ball/odom", Odometry, self.ball_odom_cb)
-        rospy.Subscriber("car0/path_error", PathError, self.path_error_cb)
-        rospy.Subscriber("car0/target_feasibility", Float32,
+        rospy.Subscriber("cars/car0/path_error", PathError, self.path_error_cb)
+        rospy.Subscriber("cars/car0/target_feasibility", Float32,
                          self.target_feasibility_cb)
         # rospy.Subscriber("car1/odom", Odometry, self.car1_odom_cb)   TODO add this
 
@@ -46,7 +46,7 @@ class HighLevelPlannerROS(object):
         rospy.Subscriber("starter", Empty, self.starter_cb)
 
         # Publishers
-        self.target_pub = rospy.Publisher("car0/target", Target, queue_size=1)
+        self.target_pub = rospy.Publisher("cars/car0/target", Target, queue_size=1)
 
         rospy.spin()
 
