@@ -9,7 +9,7 @@
   <author email="baxter26@purdue.edu">James Baxter</author>
   <author email="dgerblic@purdue.edu">Daniel Gerblick</author>
   <author email="aernande@purdue.edu">AJ Ernandes</author>
- 
+
   <buildtool_depend>catkin</buildtool_depend>
   <depend>roscpp</depend>
   <depend>pointgrey_camera_driver</depend>
@@ -19,4 +19,5 @@
   <depend>tf2_ros</depend>
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
+  <depend>nodelet</depend>
 </package>

@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Tests control of the car matches expected model.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+import unittest
+import rospy
+import simulator
+
+class TestCar(unittest.TestCase):
+  @classmethod
+  def setUpClass(cls):
+    rospy.init_node('test_car_node')
+
+    field_setup = {}
+    field_setup["car"] = {
+      "pos": (0.0, 0.0, 0.06),
+      "orient": (0.0, 0.0, 0.0),
+    }
+
+    urdf_paths = {}
+    urdf_paths["car"] = rospy.get_param('~CAR_URDF_PATH')
+    urdf_paths["plane"] = rospy.get_param('~FLOOR_URDF')
+
+    # Creating physics simulator
+    cls.sim = simulator.Sim(
+        urdf_paths, field_setup, {}, 0.0, False)
+
+  def test_throttle_resp(self):
+    self.run_throttle_resp(0.25, 1.00, 1.5357, 0.04)
+    rospy.sleep(rospy.Duration(0.5))
+    self.run_throttle_resp(0.5, 1.00, 3.0714, 0.04)
+
+  def run_throttle_resp(self, i_throttle, i_wait, e_vel, e_err):
+    self.sim.reset()
+    rospy.sleep(rospy.Duration(0.2))
+
+    freq = 35.0
+    dt = 1/freq
+    for _ in range(int(i_wait * freq)+1):
+      self.sim.step(i_throttle, 0.0, dt)
+
+    vel = self.sim.getCarVelocity()[0][0]
+    self.assertLess(vel, e_vel + e_err, 'car moving too fast: ' +
+      f'expected velocity {e_vel}, actual velocity {vel}')
+  
+    self.assertGreater(vel, e_vel - e_err, 'car moving too slow: ' +
+      f'expected velocity {e_vel}, actual velocity {vel}')
+
+if __name__ == '__main__':
+  import rostest
+  rostest.run('rktl_sim', 'test_car_node', TestCar)

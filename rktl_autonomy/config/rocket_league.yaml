@@ -1,36 +1,33 @@
-# steps to train
-training_steps: 1000000
-
 reward:
   # reward to be given each frame
   constant: 0.0
   # reward as a function of squared distance from the ball
-  ball_dist_sq: -0.1
+  ball_dist_sq: -0.5
   # reward as a function of squared distance from the ball to the goal
-  goal_dist_sq: -0.5
-  # reward given when the episode ends with the car scoring a goal
-  win: 1000
+  goal_dist_sq: -1.0
+  # reward given when the episode ends with the car scoring the proper goal
+  win: 50000
+  # reward given when the episode ends with the car scoring on the wrong goal
+  loss: -50000
   # reward given each frame when the car is in reverse
-  reverse: -1
+  reverse: -25
   # reward given each frame when the car is near the walls
   walls:
     # actual reward value
-    value: -5
+    value: -50
     # threshold distance (meters)
     threshold: 0.25
 
 # duration when the episode will be terminated. Unit is seconds (sim time)
-max_episode_time: 10
+max_episode_time: 15
 
 log:
-  base_dir: "~/catkin_ws/data/rocketleague/"
-  # frequency to save model weights. Unit is timesteps
-  model_freq: 2048
+  base_dir: "~/catkin_ws/data/rocket_league/"
   # frequency to save progress plot. Unit is episodes
   plot_freq: 50
   # variables to display in progress plot
   basic:
-    - duration
+    - "duration"
+    - "goals"
   advanced:
-    - goals
-    - net_reward
+    - "net_reward"

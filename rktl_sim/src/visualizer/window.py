@@ -6,7 +6,6 @@ License:
 """
 
 # 3rd party modules
-import math
 import pygame
 
 # Local modules
@@ -16,7 +15,7 @@ from visualizer.asset import Asset, Image, Rectangle, Lines, Circle
 class Window(object):
     """Interfaces PyGame for rendering."""
 
-    BACKGROUND_COLOR = (200, 200, 200)
+    BACKGROUND_COLOR = (0, 0, 0)
     GOAL_COLOR = (0, 200, 0)
     WALL_COLOR = (0, 0, 0)
 
@@ -26,12 +25,12 @@ class Window(object):
 
     def __init__(self, map_width, map_length, wall_thickness):
         # Support for 1080p monitors
-        self.scaling = 1080 * 0.7 / (map_length + wall_thickness)
+        self.scaling = 1080 * 0.5 / (map_length + (wall_thickness*2.))
 
         self.window_length = int(
-            (map_length + wall_thickness) * self.scaling)
+            (map_length + (wall_thickness*2.)) * self.scaling)
         self.window_width = int(
-            (map_width + wall_thickness) * self.scaling)
+            (map_width + (wall_thickness*2.)) * self.scaling)
 
         self.assets = {}
 

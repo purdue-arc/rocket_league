@@ -1,0 +1,11 @@
+<launch>
+    <!-- URDF paths -->
+    <arg name="car_urdf_path" default="$(find rktl_sim)/urdf/car.urdf" />
+    <arg name="floor_urdf_path" default="$(find rktl_sim)/urdf/plane.urdf" />
+
+    <!-- Test Cases -->
+    <test test-name="test_car" name="test_car_node" pkg="rktl_sim" type="test_car_node" >
+        <param name="FLOOR_URDF" value="$(arg floor_urdf_path)" />
+        <param name="CAR_URDF_PATH" value="$(arg car_urdf_path)" />
+    </test>
+</launch>

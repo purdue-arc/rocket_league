@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Tests for mean pose filter. It will verify it can properly average past
+measurements to predict position and velocity.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+import unittest, rostest, rospy, time
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from nav_msgs.msg import Odometry
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+import numpy as np
+
+def set_pose(t, x, y, yaw):
+    """Helper to construct pose msgs."""
+    pose_msg = PoseWithCovarianceStamped()
+    pose_msg.header.frame_id = "map"
+    pose_msg.header.stamp = t
+    pose_msg.pose.pose.position.x = x
+    pose_msg.pose.pose.position.y = y
+    x, y, z, w = quaternion_from_euler(0, 0, yaw)
+    pose_msg.pose.pose.orientation.x = x
+    pose_msg.pose.pose.orientation.y = y
+    pose_msg.pose.pose.orientation.z = z
+    pose_msg.pose.pose.orientation.w = w
+    return pose_msg
+
+def get_odom(odom_msg):
+    """Helper to deconstruct odom msgs."""
+    assert odom_msg.header.frame_id == "map"
+    assert odom_msg.child_frame_id == "base_link"
+    t = odom_msg.header.stamp
+    x = odom_msg.pose.pose.position.x
+    y = odom_msg.pose.pose.position.y
+    __, __, yaw = euler_from_quaternion([
+        odom_msg.pose.pose.orientation.x,
+        odom_msg.pose.pose.orientation.y,
+        odom_msg.pose.pose.orientation.z,
+        odom_msg.pose.pose.orientation.w
+    ])
+    vx = odom_msg.twist.twist.linear.x
+    vy = odom_msg.twist.twist.linear.y
+    omega = odom_msg.twist.twist.angular.z
+    return (t, x, y, yaw, vx, vy, omega)
+
+class TestMeanFilter(unittest.TestCase):
+    def test_mean_filter(self):
+        # initialize node and interface to code under test
+        rospy.init_node('test_mean_filter_node')
+
+        pub = rospy.Publisher('pose', PoseWithCovarianceStamped, queue_size=1)
+        rospy.Subscriber('odom', Odometry, self.odom_cb)
+
+        # member variables used for test
+        self.odom = None
+
+        # publish messages to get things going
+        t = rospy.Time.now() - rospy.Duration(0.1)
+        while(self.odom is None):
+            t += rospy.Duration(0.1)
+            pub.publish(set_pose(t, 0.0, 0.0, 0.0))
+            time.sleep(0.1)
+
+        # check response
+        self.assertAlmostEqual(self.odom[0].to_sec(), t.to_sec(), msg='output time is incorrect')
+        self.assertTrue(np.allclose(self.odom[1:], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), msg='odom is incorrect')
+
+        # send and wait (3rd msg)
+        self.odom = None
+        t += rospy.Duration(0.1)
+        pub.publish(set_pose(t, 3.0, -3.0, 0.0))
+        while(self.odom is None):
+            pass
+
+        # check response
+        self.assertAlmostEqual(self.odom[0].to_sec(), t.to_sec(), msg='output time is incorrect')
+        self.assertTrue(np.allclose(self.odom[1:], [1.0, -1.0, 0.0, 15.0, -15.0, 0.0]), msg='odom is incorrect')
+
+        # send and wait (4th msg)
+        self.odom = None
+        t += rospy.Duration(0.1)
+        pub.publish(set_pose(t, 6.0, 0.0, 1.5708))
+        while(self.odom is None):
+            pass
+
+        # check response
+        self.assertAlmostEqual(self.odom[0].to_sec(), t.to_sec(), msg='output time is incorrect')
+        self.assertTrue(np.allclose(self.odom[1:], [3.0, -1.0, 0.464, 17.889, -8.944, 5.236], atol=0.001), msg='odom is incorrect')
+
+        # send and wait (5th - 7th msgs)
+        for __ in range(3):
+            self.odom = None
+            t += rospy.Duration(0.1)
+            pub.publish(set_pose(t, 0.0, 0.0, 0.0))
+            while(self.odom is None):
+                pass
+
+        # check response
+        self.assertAlmostEqual(self.odom[0].to_sec(), t.to_sec(), msg='output time is incorrect')
+        self.assertTrue(np.allclose(self.odom[1:4], [0.0, 0.0, 0.0]), msg='odom is incorrect')
+
+        # send and wait (8th msg)
+        self.odom = None
+        t += rospy.Duration(0.1)
+        pub.publish(set_pose(t, 0.0, 0.0, 0.0))
+        while(self.odom is None):
+            pass
+
+        # check response
+        self.assertAlmostEqual(self.odom[0].to_sec(), t.to_sec(), msg='output time is incorrect')
+        self.assertTrue(np.allclose(self.odom[1:], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]), msg='odom is incorrect')
+
+    def odom_cb(self, odom_msg):
+        """Callback for odom."""
+        self.odom = get_odom(odom_msg)
+
+if __name__ == '__main__':
+    rostest.rosrun('rktl_control', 'test_mean_filter', TestMeanFilter)

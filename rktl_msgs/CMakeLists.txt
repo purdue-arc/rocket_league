@@ -16,6 +16,7 @@ add_message_files(
   FILES
   BezierPath.msg
   MultiBezierPath.msg
+  ControlEffort.msg
   MatchStatus.msg
   Path.msg
   PathError.msg
