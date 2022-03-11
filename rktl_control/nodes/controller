@@ -13,29 +13,30 @@ from math import atan, cos, sin
 
 class PIDController(object):
     """A very basic PID controller."""
-    def __init__(self, kp, ki, kd, anti_windup, deadband):
+    def __init__(self, kp, ki, kd, anti_windup, deadband, delta_t):
         # Constants
         self.KP = kp
         self.KI = ki
         self.KD = kd
         self.ANTI_WINDUP = anti_windup
         self.DEADBAND = deadband
+        self.DELTA_T = delta_t
 
         # State variables
         self.integral = 0.0
         self.last_error = 0.0
         self.last_output = 0.0
 
-    def step(self, error, delta_t):
+    def step(self, error):
         """One time step."""
         if abs(error) < self.DEADBAND:
             return self.last_output
 
         kk = self.KP * error
         if abs(error) < self.ANTI_WINDUP:
-            self.integral += error * delta_t
+            self.integral += error * self.DELTA_T
         ii = self.KI * self.integral
-        dd = self.KD * (error - self.last_error) / delta_t
+        dd = self.KD * (error - self.last_error) / self.DELTA_T
 
         output = kk + ii + dd
         self.last_output = output
@@ -60,7 +61,7 @@ class LeadLagController(object):
         # State variables
         self.prev_error = 0
 
-    def step(self, error, __):
+    def step(self, error):
         """One time step."""
         # effort = k(z+a)/(z+b)_lead*(z+a)/(z+b)_lag
         effort = (self.GAIN_LEAD *
@@ -104,14 +105,14 @@ class Controller(object):
                 rospy.get_param('~pid/ki'),
                 rospy.get_param('~pid/kd'),
                 rospy.get_param('~pid/anti_windup'),
-                rospy.get_param('~pid/deadband'))
+                rospy.get_param('~pid/deadband'),
+                1.0 / rospy.get_param('~rate', 10.0))
         else:
             raise NotImplementedError(f"unrecognized controller type: {rospy.get_param('controller_type')}")
 
         # State variables
         self.vr_ref = 0.0
         self.psi_ref = 0.0
-        self.last_time = None
 
         # Publishers
         self.pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
@@ -132,27 +133,21 @@ class Controller(object):
 
     def odom_cb(self, odom_msg):
         """Callback for odom messages from car."""
-        if self.last_time is not None:
-            # get delta_t
-            delta_t = (odom_msg.header.stamp - self.last_time).to_sec()
+        # calculate throttle effort (closed loop)
+        error = self.vr_ref - odom_msg.twist.twist.linear.x
+        throttle_effort = self.controller.step(error)
+        throttle_effort = max(min(throttle_effort, self.MAX_THROTTLE_EFFORT), self.MIN_THROTTLE_EFFORT)
 
-            # calculate throttle effort (closed loop)
-            error = self.vr_ref - odom_msg.twist.twist.linear.x
-            throttle_effort = self.controller.step(error, delta_t)
-            throttle_effort = max(min(throttle_effort, self.MAX_THROTTLE_EFFORT), self.MIN_THROTTLE_EFFORT)
+        # calculate steering effort (open loop)
+        steering_effort = self.psi_ref / self.STEERING_THROW
+        steering_effort = max(min(steering_effort, self.MAX_STEERING_EFFORT), self.MIN_STEERING_EFFORT)
 
-            # calculate steering effort (open loop)
-            steering_effort = self.psi_ref / self.STEERING_THROW
-            steering_effort = max(min(steering_effort, self.MAX_STEERING_EFFORT), self.MIN_STEERING_EFFORT)
-
-            # publish actuator efforts
-            msg = ControlEffort()
-            msg.header.stamp = odom_msg.header.stamp
-            msg.throttle = throttle_effort
-            msg.steering = steering_effort
-            self.pub.publish(msg)
-
-        self.last_time = odom_msg.header.stamp
+        # publish actuator efforts
+        msg = ControlEffort()
+        msg.header.stamp = odom_msg.header.stamp
+        msg.throttle = throttle_effort
+        msg.steering = steering_effort
+        self.pub.publish(msg)
 
 if __name__ == "__main__":
     Controller()
