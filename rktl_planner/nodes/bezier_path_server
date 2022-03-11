@@ -2,11 +2,10 @@
 
 import rospy
 import math
-from rospy import service
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest, CreateBezierPathResponse
 from rktl_planner import BezierPath
-from rktl_msgs.msg import BezierPath as BezierPathMsg, Path as PathMsg, Waypoint as WaypointMsg
+from rktl_msgs.msg import Path as PathMsg, Waypoint as WaypointMsg
 from geometry_msgs.msg import Pose, Point, Vector3
 
 
@@ -99,5 +98,5 @@ def bezier_path_server(req: CreateBezierPathRequest):
 if __name__ == '__main__':
     rospy.init_node('bezier_path_server')
     service = rospy.Service('create_bezier_path',
-                            CreateBezierPath, bezier_path_server)
+        CreateBezierPath, bezier_path_server)
     rospy.spin()

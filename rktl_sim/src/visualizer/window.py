@@ -9,8 +9,7 @@ License:
 import pygame
 
 # Local modules
-from visualizer.asset import Asset, Image, Rectangle, Lines, Circle
-
+from visualizer.asset import Image, Rectangle, Lines, Circle
 
 class Window(object):
     """Interfaces PyGame for rendering."""

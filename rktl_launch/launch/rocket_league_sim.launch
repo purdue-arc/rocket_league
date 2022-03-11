@@ -1,6 +1,8 @@
 <launch>
     <arg name="render" default="true"/>
     <arg name="pybullet_render" default="false"/>
+    <arg name="simulate_car_effort" default="false" />
+    <arg name="simulate_filter" default="false" />
 
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
 

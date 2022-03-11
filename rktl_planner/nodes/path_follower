@@ -88,9 +88,7 @@ class PathFollower(object):
 
             # Find next valid intersection along path
             intersect = None
-            goal_pos = None
             goal_vel = self.goal_vel
-            goal_time = None
             i = self.last_pose_idx
             pnts_checked = 0
             while pnts_checked < lookahead_pnts:
@@ -111,8 +109,6 @@ class PathFollower(object):
                     intersect += start_pos
 
                     # Check if intersection is behind vehicle
-                    goal_pos = end_pos
-                    goal_time = self.path[i + 1].delta_t
                     d_angle = pursuit.calculate_angle(intersect, bot_pos,
                         bot_orient, lookahead_dist, goal_vel < 0)
                     if abs(d_angle) > math.pi/2:                  
@@ -129,38 +125,13 @@ class PathFollower(object):
                 rospy.logwarn("No intersection could be found.")
                 return
 
-            # Calculate ETA
-            dist = np.linalg.norm(goal_pos - bot_pos)
-            delta_time = time.time() - self.start_time
-            time_left = goal_time.data - delta_time
-            
-            linear_vel = goal_vel
-            # if self.bkw:
-            #     linear_vel *= -0.25
-
-            # if time_left <= 0:
-            #     # Report unfeasible path
-            #     linear_vel = 0
-            #     vel_error = goal_vel
-            #     rospy.logwarn("Path unfeasible to complete.")
-            # else:
-            #     linear_vel = dist / time_left
-            #     if goal_vel < 0:
-            #         linear_vel *= -1
-            #     vel_error = goal_vel - linear_vel
-
-            #     if vel_error > vel_margin:
-            #         linear_vel = 0
-            #         rospy.logwarn("Path unfeasible to complete.")
-            #         # TODO: Tell highlevel planner we stopped
-
             # Calculate curvature
             turn_rad = pursuit.calculate_turn_rad(intersect, bot_pos,
-                bot_orient, lookahead_dist, linear_vel < 0)
+                bot_orient, lookahead_dist, goal_vel < 0)
 
             # Publish command data
             cmd = ControlCommand()
-            cmd.velocity = linear_vel
+            cmd.velocity = goal_vel
             cmd.curvature = -(1.0 / turn_rad)
             self.bot_velocity_cmd.publish(cmd)
 

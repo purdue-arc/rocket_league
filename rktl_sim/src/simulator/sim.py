@@ -25,10 +25,8 @@ class Sim(object):
 
         self.urdf_paths = urdf_paths
         self.spawn_bounds = spawn_bounds
-
-        zeroPos = [0.0, 0.0, 0.0]
+    
         zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
-
         self._planeID = None
         if "plane" in urdf_paths:
             self._planeID = p.loadURDF(

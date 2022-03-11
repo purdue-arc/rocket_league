@@ -3,7 +3,6 @@
 import math
 import rospy
 import numpy as np
-from rktl_planner import BezierPath
 from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from std_msgs.msg import Duration
 from nav_msgs.msg import Odometry
@@ -75,7 +74,6 @@ def create_backup_path_req(car_odom, ball_odom, goal_pos):
     final_vec_y = goal_pos[1] - ball_odom.pose.pose.position.y
     final_quat = quaternion_from_euler(
         0., 0., math.atan2(final_vec_y, final_vec_x))
-    final_vec_len = math.sqrt(final_vec_x ** 2 + final_vec_y ** 2)
     pose1 = Pose()
     pose1.position.x = ball_odom.pose.pose.position.x - final_vec_x
     pose1.position.y = ball_odom.pose.pose.position.y - final_vec_y
