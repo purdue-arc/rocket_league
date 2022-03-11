@@ -9,20 +9,21 @@ License:
 import math
 import pybullet as p
 import random
+import numpy as np
 
 # Local modules
 from simulator.car import Car
 
-
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, car_properties):
+    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
             self._client = p.connect(p.DIRECT)
 
+        self.urdf_paths = urdf_paths
         self.spawn_bounds = spawn_bounds
 
         zeroPos = [0.0, 0.0, 0.0]
@@ -34,38 +35,6 @@ class Sim(object):
                 urdf_paths["plane"], [0, 0, 0], zeroOrient, useFixedBase=1
             )
             p.changeDynamics(bodyUniqueId=self._planeID, linkIndex=-1, restitution=1.0)
-
-        self._ballID = None
-        if "ball" in urdf_paths:
-            if "ball" in field_setup:
-                ballPos = field_setup["ball"]
-                self.initBallPos = ballPos
-            else:
-                ballPos = [
-                    random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
-                    random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]),
-                    random.uniform(spawn_bounds[2][0], spawn_bounds[2][1]),
-                ]
-                self.initBallPos = None
-            self._ballID = p.loadURDF(urdf_paths["ball"], ballPos, zeroOrient)
-            p.changeDynamics(
-                bodyUniqueId=self._ballID,
-                linkIndex=-1,
-                restitution=0.7,
-                linearDamping=0,
-                angularDamping=0,
-                rollingFriction=0.0001,
-                spinningFriction=0.001,
-            )
-
-            # Initialize ball with some speed
-            self._speed_bound = math.sqrt(2.0) * speed_init
-            ballVel = [
-                random.uniform(-self._speed_bound, self._speed_bound),
-                random.uniform(-self._speed_bound, self._speed_bound),
-                0.0,
-            ]
-            p.resetBaseVelocity(self._ballID, ballVel, zeroOrient)
 
         self._goalAID = None
         self._goalBID = None
@@ -137,18 +106,76 @@ class Sim(object):
             self._walls[brBackwallID] = True
 
         self._cars = {}
-        if "car" in urdf_paths:
-            self._carID = p.loadURDF(urdf_paths["car"], zeroPos, zeroOrient)
-            if "car" in field_setup:
-                carPos = field_setup["car"]["pos"]
-                carOrient = field_setup["car"]["orient"]
+        self._ballID = None
+
+        self.touched_last = None
+        self.scored = False
+        self.winner = None
+
+        p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
+        p.setGravity(0, 0, -10)
+
+    def create_ball(self, urdf_name, init_pose=None, init_speed=None, noise=None):
+        if urdf_name in self.urdf_paths:
+            zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
+            if init_pose:
+                ballPos = init_pose["pos"]
+                self.initBallPos = ballPos
+            else:
+                ballPos = [
+                    random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                    random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
+                ]
+                self.initBallPos = None
+            self._ballID = p.loadURDF(
+                self.urdf_paths[urdf_name], ballPos, zeroOrient)
+            p.changeDynamics(
+                bodyUniqueId=self._ballID,
+                linkIndex=-1,
+                restitution=0.7,
+                linearDamping=0,
+                angularDamping=0,
+                rollingFriction=0.0001,
+                spinningFriction=0.001,
+            )
+
+            # initize ball with some speed
+            self._speed_bound = math.sqrt(2.0) * init_speed
+            ballVel = [
+                random.uniform(-self._speed_bound, self._speed_bound),
+                random.uniform(-self._speed_bound, self._speed_bound),
+                0.0,
+            ]
+            p.resetBaseVelocity(self._ballID, ballVel, zeroOrient)
+            self.ball_noise = noise
+            return self._ballID
+        else:
+            return None
+
+    def create_car(self, urdf_name, init_pose=None, noise=None, props=None):
+        if urdf_name in self.urdf_paths:
+            zeroPos = [0.0, 0.0, 0.0]
+            zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
+            self._carID = p.loadURDF(self.urdf_paths[urdf_name], zeroPos, zeroOrient)
+            if init_pose:
+                if "pos" in init_pose:
+                    carPos = init_pose["pos"]
+                else:
+                    carPos = zeroPos
+
+                if "orient" in init_pose:
+                    carOrient = init_pose["orient"]
+                else:
+                    carOrient = zeroOrient
+
                 self.initCarPos = carPos
                 self.initCarOrient = carOrient
             else:
                 carPos = [
-                    random.uniform(spawn_bounds[0][0], spawn_bounds[0][1]),
-                    random.uniform(spawn_bounds[1][0], spawn_bounds[1][1]),
-                    random.uniform(spawn_bounds[2][0], spawn_bounds[2][1]),
+                    random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                    random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
                 carOrient = [0.0, 0.0, random.uniform(0, 2 * math.pi)]
                 self.initCarPos = None
@@ -157,15 +184,12 @@ class Sim(object):
                 self._carID,
                 carPos,
                 carOrient,
-                car_properties
+                props
             )
-
-        self.touched_last = None
-        self.scored = False
-        self.winner = None
-
-        p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
-        p.setGravity(0, 0, -10)
+            self.car_noise = noise
+            return self._carID
+        else:
+            return None
 
     def step(self, car_cmd, dt):
         """Advance one time-step in the sim."""
@@ -195,7 +219,7 @@ class Sim(object):
             return None
 
         # TODO: Provide translation from ARC IDs to Sim IDs
-        return cars[0].getPose()
+        return cars[0].getPose(noise=self.car_noise)
 
     def getCarVelocity(self):
         cars = list(self._cars.values())
@@ -209,6 +233,10 @@ class Sim(object):
         if self._ballID is None:
             return None
         pos, _ = p.getBasePositionAndOrientation(self._ballID)
+        
+        if self.ball_noise:
+            pos = np.random.normal(
+                pos, self.ball_noise['pos'])
         return pos, p.getQuaternionFromEuler([0, 0, 0])
 
     def getBallVelocity(self):

@@ -11,6 +11,7 @@ TODO:
 """
 
 # 3rd party modules
+from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 import os
 import rospy
@@ -27,30 +28,21 @@ class SimulatorROS(object):
     def __init__(self):
         rospy.init_node('simulator')
 
-        # Collecting global parameters
-        fw = rospy.get_param('/field/width')
-        fl = rospy.get_param('/field/length')
-        wt = rospy.get_param('/field/wall_thickness')
-        gw = rospy.get_param('/field/goal/width')
-
-        # Collecting private parameters
         render_enabled = rospy.get_param('~render', False)
         rate = rospy.Rate(rospy.get_param('~rate', 30))
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 10)
-        car_init = rospy.get_param('~init/car', None)
-        ball_init = rospy.get_param('~init/ball', None)
-        speed_init = rospy.get_param('~init/speed', 0.0)
+        self.simulate_filter = rospy.get_param('~simulate_filter', True)
+
+        # Setting up field
+        fw = rospy.get_param('/field/width')
+        fl = rospy.get_param('/field/length')
+        wt = rospy.get_param('/field/wall_thickness')
+        gw = rospy.get_param('/field/goal/width')
         spawn_height = rospy.get_param('~spawn_height', 0.06)
 
+        # Setting up field
         field_setup = {}
-
-        if car_init is not None:
-            field_setup['car'] = car_init
-
-        if ball_init is not None:
-            field_setup['ball'] = ball_init
-
         field_setup["goalA"] = [(fl/2.) + (wt/2.), 0, spawn_height]
         field_setup["goalB"] = [(-fl/2.) - (wt/2.), 0, spawn_height]
         field_setup["rsidewall"] = [0, (fw/2) + (wt/2.), spawn_height]
@@ -68,20 +60,27 @@ class SimulatorROS(object):
                         [-(fw/2) + (2 * wt), (fw/2) - (2 * wt)],
                         [spawn_height, spawn_height]]
 
-        urdf_paths = {}
-        urdf_paths["ball"] = rospy.get_param('~urdf/ball')
-        self.check_urdf(urdf_paths["ball"])
-        urdf_paths["car"] = rospy.get_param('~urdf/car')
-        self.check_urdf(urdf_paths["car"])
-        urdf_paths["goal"] = rospy.get_param('~urdf/goal')
-        self.check_urdf(urdf_paths["goal"])
-        urdf_paths["sidewall"] = rospy.get_param('~urdf/sidewall')
-        self.check_urdf(urdf_paths["sidewall"])
-        urdf_paths["backwall"] = rospy.get_param('~urdf/backwall')
-        self.check_urdf(urdf_paths["backwall"])
-        urdf_paths["plane"] = rospy.get_param('~urdf/plane')
-        self.check_urdf(urdf_paths["plane"])
+        urdf_paths = rospy.get_param('~urdf')
+        for path in urdf_paths.values():
+            self.check_urdf(path)
 
+        # Creating physics simulator
+        self.sim = simulator.Sim(urdf_paths, field_setup, spawn_bounds, render_enabled)
+
+        # Creating the ball
+        ball_init_pose = rospy.get_param('~ball/init_pose', None)
+        ball_init_speed = rospy.get_param('~ball/init_speed', None)
+        ball_noise = rospy.get_param('~ball/sensor_noise', None)
+        self.sim.create_ball('ball', init_pose=ball_init_pose,
+            init_speed=ball_init_speed, noise=ball_noise)
+        
+        if not self.simulate_filter:
+            self.ball_pub = rospy.Publisher('/ball/pose_sync',
+                PoseWithCovarianceStamped, queue_size=1)
+        else:
+            self.ball_pub = rospy.Publisher('/ball/odom', Odometry, queue_size=1)
+
+        # Creating a single car
         self.simulate_car_effort = rospy.get_param('~simulate_car_effort')
 
         car_properties = {}
@@ -91,27 +90,32 @@ class SimulatorROS(object):
         car_properties['steering_throw'] = rospy.get_param('/cars/steering/max_throw')
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
         car_properties['simulate_effort'] = self.simulate_car_effort
+        
+        self.sim.create_car('car', 
+            init_pose=rospy.get_param('~car/init_pose', None),
+            noise=rospy.get_param('~car/sensor_noise', None),
+            props=car_properties)
 
-        # Creating physics simulator
-        self.sim = simulator.Sim(urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, car_properties)
+        if not self.simulate_filter:
+            self.car_pub = rospy.Publisher('/cars/car0/pose_sync',
+                PoseWithCovarianceStamped, queue_size=1)
+        else:
+            self.car_pub = rospy.Publisher('/cars/car0/odom', Odometry, queue_size=1)
 
+        if self.simulate_car_effort:
+            rospy.Subscriber('/cars/car0/effort', ControlEffort, self.effort_cb)
+        else:
+            rospy.Subscriber('/cars/car0/command', ControlCommand, self.cmd_cb)
+
+        # Node data
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
         self.car_cmd = (0.0, 0.0)
         self.last_time = None
 
         # Publishers
-        self.ball_pub = rospy.Publisher('/ball/odom',
-                                        Odometry, queue_size=1)
-        self.car_pub = rospy.Publisher('/cars/car0/odom', Odometry, queue_size=1)
         self.status_pub = rospy.Publisher(
             'match_status', MatchStatus, queue_size=1)
-
-        # Subscribers
-        if self.simulate_car_effort:
-            rospy.Subscriber('/cars/car0/effort', ControlEffort, self.effort_cb)
-        else:
-            rospy.Subscriber('/cars/car0/command', ControlCommand, self.cmd_cb)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -146,8 +150,7 @@ class SimulatorROS(object):
         """Resets simulator."""
         self.reset_lock.acquire()
         self.sim.reset()
-        self.throttle_cmd = 0.
-        self.steering_cmd = 0.
+        self.car_cmd = (0.0, 0.0)
         self.last_time = None
         self.reset_lock.release()
         return EmptyResponse()
@@ -172,47 +175,76 @@ class SimulatorROS(object):
 
             self.sim.step(self.car_cmd, delta_t)
 
-            # Publish ball odometry
-            ball_msg = Odometry()
-            ball_msg.header.stamp = now
-            ball_msg.header.frame_id = self.frame_id
-            ball_pos, ball_quat = self.sim.getBallPose()
-            ball_msg.pose.pose.position.x = ball_pos[0]
-            ball_msg.pose.pose.position.y = ball_pos[1]
-            ball_msg.pose.pose.position.z = ball_pos[2]
-            ball_msg.pose.pose.orientation.x = ball_quat[0]
-            ball_msg.pose.pose.orientation.y = ball_quat[1]
-            ball_msg.pose.pose.orientation.z = ball_quat[2]
-            ball_msg.pose.pose.orientation.w = ball_quat[3]
-            ball_linear, ball_angular = self.sim.getBallVelocity()
-            ball_msg.twist.twist.linear.x = ball_linear[0]
-            ball_msg.twist.twist.linear.y = ball_linear[1]
-            ball_msg.twist.twist.linear.z = ball_linear[2]
-            ball_msg.twist.twist.angular.x = ball_angular[0]
-            ball_msg.twist.twist.angular.y = ball_angular[1]
-            ball_msg.twist.twist.angular.z = ball_angular[2]
-            self.ball_pub.publish(ball_msg)
+            if not self.simulate_filter:
+                # Publish ball sync pose
+                ball_msg = PoseWithCovarianceStamped()
+                ball_msg.header.stamp = now
+                ball_msg.header.frame_id = self.frame_id
+                ball_pos, ball_quat = self.sim.getBallPose()
+                ball_msg.pose.pose.position.x = ball_pos[0]
+                ball_msg.pose.pose.position.y = ball_pos[1]
+                ball_msg.pose.pose.position.z = ball_pos[2]
+                ball_msg.pose.pose.orientation.x = ball_quat[0]
+                ball_msg.pose.pose.orientation.y = ball_quat[1]
+                ball_msg.pose.pose.orientation.z = ball_quat[2]
+                ball_msg.pose.pose.orientation.w = ball_quat[3]
+                self.ball_pub.publish(ball_msg)
 
-            # Publish bot odometry
-            car_msg = Odometry()
-            car_msg.header.stamp = now
-            car_msg.header.frame_id = self.frame_id
-            car_pos, car_quat = self.sim.getCarPose()
-            car_msg.pose.pose.position.x = car_pos[0]
-            car_msg.pose.pose.position.y = car_pos[1]
-            car_msg.pose.pose.position.z = car_pos[2]
-            car_msg.pose.pose.orientation.x = car_quat[0]
-            car_msg.pose.pose.orientation.y = car_quat[1]
-            car_msg.pose.pose.orientation.z = car_quat[2]
-            car_msg.pose.pose.orientation.w = car_quat[3]
-            car_linear, car_angular = self.sim.getCarVelocity()
-            car_msg.twist.twist.linear.x = car_linear[0]
-            car_msg.twist.twist.linear.y = car_linear[1]
-            car_msg.twist.twist.linear.z = car_linear[2]
-            car_msg.twist.twist.angular.x = car_angular[0]
-            car_msg.twist.twist.angular.y = car_angular[1]
-            car_msg.twist.twist.angular.z = car_angular[2]
-            self.car_pub.publish(car_msg)
+                # Publish car sync pose
+                car_msg = PoseWithCovarianceStamped()
+                car_msg.header.stamp = now
+                car_msg.header.frame_id = self.frame_id
+                car_pos, car_quat = self.sim.getCarPose()
+                car_msg.pose.pose.position.x = car_pos[0]
+                car_msg.pose.pose.position.y = car_pos[1]
+                car_msg.pose.pose.position.z = car_pos[2]
+                car_msg.pose.pose.orientation.x = car_quat[0]
+                car_msg.pose.pose.orientation.y = car_quat[1]
+                car_msg.pose.pose.orientation.z = car_quat[2]
+                car_msg.pose.pose.orientation.w = car_quat[3]
+                self.car_pub.publish(car_msg)
+            else:
+                # Publish ball odometry
+                ball_msg = Odometry()
+                ball_msg.header.stamp = now
+                ball_msg.header.frame_id = self.frame_id
+                ball_pos, ball_quat = self.sim.getBallPose()
+                ball_msg.pose.pose.position.x = ball_pos[0]
+                ball_msg.pose.pose.position.y = ball_pos[1]
+                ball_msg.pose.pose.position.z = ball_pos[2]
+                ball_msg.pose.pose.orientation.x = ball_quat[0]
+                ball_msg.pose.pose.orientation.y = ball_quat[1]
+                ball_msg.pose.pose.orientation.z = ball_quat[2]
+                ball_msg.pose.pose.orientation.w = ball_quat[3]
+                ball_linear, ball_angular = self.sim.getBallVelocity()
+                ball_msg.twist.twist.linear.x = ball_linear[0]
+                ball_msg.twist.twist.linear.y = ball_linear[1]
+                ball_msg.twist.twist.linear.z = ball_linear[2]
+                ball_msg.twist.twist.angular.x = ball_angular[0]
+                ball_msg.twist.twist.angular.y = ball_angular[1]
+                ball_msg.twist.twist.angular.z = ball_angular[2]
+                self.ball_pub.publish(ball_msg)
+
+                # Publish bot odometry
+                car_msg = Odometry()
+                car_msg.header.stamp = now
+                car_msg.header.frame_id = self.frame_id
+                car_pos, car_quat = self.sim.getCarPose()
+                car_msg.pose.pose.position.x = car_pos[0]
+                car_msg.pose.pose.position.y = car_pos[1]
+                car_msg.pose.pose.position.z = car_pos[2]
+                car_msg.pose.pose.orientation.x = car_quat[0]
+                car_msg.pose.pose.orientation.y = car_quat[1]
+                car_msg.pose.pose.orientation.z = car_quat[2]
+                car_msg.pose.pose.orientation.w = car_quat[3]
+                car_linear, car_angular = self.sim.getCarVelocity()
+                car_msg.twist.twist.linear.x = car_linear[0]
+                car_msg.twist.twist.linear.y = car_linear[1]
+                car_msg.twist.twist.linear.z = car_linear[2]
+                car_msg.twist.twist.angular.x = car_angular[0]
+                car_msg.twist.twist.angular.y = car_angular[1]
+                car_msg.twist.twist.angular.z = car_angular[2]
+                self.car_pub.publish(car_msg)
 
         self.last_time = now
         self.reset_lock.release()

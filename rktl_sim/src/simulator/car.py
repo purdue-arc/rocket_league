@@ -85,10 +85,16 @@ class Car(object):
             controlMode=p.VELOCITY_CONTROL,
             forces=(5000, 5000, 5000))
 
-    def getPose(self):
+    def getPose(self, noise=None):
         pos = p.getLinkState(self.id, self.body_link_id)[0]
         heading = p.getJointState(self.id, self.joint_ids[2])[0]
-        return (pos, p.getQuaternionFromEuler((0.0, 0.0, heading)))
+        orient = (0.0, 0.0, heading)
+        if noise:
+            pos = np.random.normal(
+                pos, noise['pos'])
+            orient = np.random.normal(
+                orient, noise['orient'])
+        return (pos, p.getQuaternionFromEuler(orient))
 
     def getVelocity(self):
         link_state = p.getLinkState(self.id, self.body_link_id, computeLinkVelocity=1)
