@@ -109,8 +109,8 @@ class Controller(object):
             raise NotImplementedError(f"unrecognized controller type: {rospy.get_param('controller_type')}")
 
         # State variables
-        self.ref_velocity = 0.0
-        self.ref_curvature = 0.0
+        self.vr_ref = 0.0
+        self.psi_ref = 0.0
         self.last_time = None
 
         # Publishers
@@ -125,8 +125,10 @@ class Controller(object):
 
     def command_cb(self, cmd_msg):
         """Callback for command messages for car."""
-        self.ref_velocity = cmd_msg.velocity
-        self.ref_curvature = cmd_msg.curvature
+        # calculate reference steering angle and rear wheel velocities
+        cos_beta = cos(sin(cmd_msg.curvature * self.BODY_LENGTH / 2.0))
+        self.vr_ref = cmd_msg.velocity * cos_beta
+        self.psi_ref = atan(self.BODY_LENGTH * cmd_msg.curvature / cos_beta)
 
     def odom_cb(self, odom_msg):
         """Callback for odom messages from car."""
@@ -135,13 +137,12 @@ class Controller(object):
             delta_t = (odom_msg.header.stamp - self.last_time).to_sec()
 
             # calculate throttle effort (closed loop)
-            error = self.ref_velocity - odom_msg.twist.twist.linear.x
+            error = self.vr_ref - odom_msg.twist.twist.linear.x
             throttle_effort = self.controller.step(error, delta_t)
             throttle_effort = max(min(throttle_effort, self.MAX_THROTTLE_EFFORT), self.MIN_THROTTLE_EFFORT)
 
             # calculate steering effort (open loop)
-            psi = atan(self.BODY_LENGTH * self.ref_curvature / cos(sin(self.BODY_LENGTH * self.ref_curvature / 2.0)))
-            steering_effort = psi / self.STEERING_THROW
+            steering_effort = self.psi_ref / self.STEERING_THROW
             steering_effort = max(min(steering_effort, self.MAX_STEERING_EFFORT), self.MIN_STEERING_EFFORT)
 
             # publish actuator efforts
