@@ -42,8 +42,8 @@ for i = 1:numel(files)
     figure
     plot(effort.x_time, effort.field), hold
     plot(velocity.x_time, velocity.field)
-    plot(position.x_time, v_raw)
-    plot(position.x_time, v_smooth)
+    plot(position.x_time, v_raw, ':')
+    plot(position.x_time, v_smooth, ':')
     xlabel("Time, seconds")
     ylabel("Effort | Velocity, m/s")
     legend("effor", "filter velocity", "raw velocity", "smoothed velocity")
