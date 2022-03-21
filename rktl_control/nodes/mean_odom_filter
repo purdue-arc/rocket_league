@@ -25,15 +25,15 @@ class MeanOdomFilter(object):
         self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
         self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
 
-        self.POS_COUNT = rospy.get_param('pos_buffer_size', 3)
-        self.VEL_COUNT = rospy.get_param('vel_buffer_size', 3)
+        self.POS_COUNT = rospy.get_param('~buffer_size/position', 3)
+        self.VEL_COUNT = rospy.get_param('~buffer_size/velocity', 3)
 
         # variables
         self.buffer = deque(maxlen=max(self.POS_COUNT, self.VEL_COUNT+1))
 
         # pubs / subs
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
-        rospy.Subscriber('pose', PoseWithCovarianceStamped, self.pose_cb)
+        rospy.Subscriber('pose_sync', PoseWithCovarianceStamped, self.pose_cb)
 
         # main loop
         rospy.spin()

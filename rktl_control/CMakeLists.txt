@@ -4,9 +4,6 @@ project(rktl_control)
 # Find catkin macros
 find_package(catkin REQUIRED)
 
-# install python module(s)
-catkin_python_setup()
-
 # generates cmake config files and set variables for installation
 catkin_package()
 
@@ -17,4 +14,5 @@ if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest(test/test_sync.test)
   add_rostest(test/test_mean_filter.test)
+  add_rostest(test/test_particle_filter.test)
 endif()

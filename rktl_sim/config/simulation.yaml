@@ -1,3 +1,4 @@
-RATE: 10
-SPAWN_HEIGHT: 0.06
-SPEED_INIT: 1.0
+rate: 10
+spawn_height: 0.06
+init:
+  speed: 1.0

@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   ControlEffort.msg
+  ControlCommand.msg
   MatchStatus.msg
   Path.msg
   PathError.msg

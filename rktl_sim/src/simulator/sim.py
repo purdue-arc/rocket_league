@@ -17,7 +17,7 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled):
+    def __init__(self, urdf_paths, field_setup, spawn_bounds, speed_init, render_enabled, car_properties):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
@@ -155,9 +155,9 @@ class Sim(object):
                 self.initCarOrient = None
             self._cars[self._carID] = Car(
                 self._carID,
-                0.5,
                 carPos,
                 carOrient,
+                car_properties
             )
 
         self.touched_last = None
@@ -181,12 +181,12 @@ class Sim(object):
                     self.scored = True
                     self.winner = "B"
 
-        # Step kinematic objects independently
-        for car in self._cars.values():
-            car.step((throttle_cmd, steering_cmd), dt)
-
         # PyBullet steps at 240hz
-        for _ in range(int(dt * 240.)):
+        p_dt = 1.0 / 240.0
+        for _ in range(round(dt / p_dt)):
+            # Step kinematic objects independently, at max possible rate
+            for car in self._cars.values():
+                car.step((throttle_cmd, steering_cmd), p_dt)
             p.stepSimulation()
 
     def getCarPose(self):

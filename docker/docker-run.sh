@@ -19,7 +19,7 @@ docker run --rm \
     -v $XAUTHORITY:/home/$USER/.Xauthority:ro \
     -v $WS_DIR:/home/$USER/catkin_ws \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v ~/.gitconfig:/home/$USER/.gitconfig:ro \
+    `[ -f ~/.gitconfig ] && echo "-v $HOME/.gitconfig:/home/$USER/.gitconfig:ro"` \
     -v ~/.ssh:/home/$USER/.ssh:ro \
     --name $CONTAINER_NAME \
     $@ \
