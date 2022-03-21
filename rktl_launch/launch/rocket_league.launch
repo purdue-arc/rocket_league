@@ -6,10 +6,13 @@
 
     <!-- Cars -->
     <include file="$(find rktl_control)/launch/car.launch">
-        <arg name="car_name" value="car0" />
+        <arg name="car_name" value="car0"/>
     </include>
     <include file="$(find rktl_control)/launch/hardware_interface.launch"/>
 
-    <!-- viz -->
-    <include file="$(find rktl_launch)/launch/field_view.launch"/>
+    <!-- Agents -->
+    <include file="$(find rktl_planner)/launch/simple_agent.launch">
+        <arg name="agent_name" value="agent0"/>
+        <arg name="car_name" value="car0"/>
+    </include>
 </launch>

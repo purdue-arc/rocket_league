@@ -90,7 +90,7 @@ class SimulatorROS(object):
             init_speed=ball_init_speed, noise=ball_noise)
         
         if self.mode == SimulatorMode.REALISTIC:
-            self.ball_pub = rospy.Publisher('/ball/pose_sync',
+            self.ball_pub = rospy.Publisher('/ball/pose_sync_early',
                 PoseWithCovarianceStamped, queue_size=1)
         elif self.mode == SimulatorMode.IDEAL:
             self.ball_pub = rospy.Publisher('/ball/odom', Odometry, queue_size=1)
@@ -114,9 +114,9 @@ class SimulatorROS(object):
             props=car_properties)
 
         if self.mode == SimulatorMode.REALISTIC:
-            self.car_pub = rospy.Publisher('/cars/car0/pose_sync',
+            self.car_pub = rospy.Publisher('/cars/car0/pose_sync_early',
                 PoseWithCovarianceStamped, queue_size=1)
-            rospy.Subscriber('/cars/car0/effort', ControlEffort, self.effort_cb)
+            rospy.Subscriber('/cars/car0/effort_delayed', ControlEffort, self.effort_cb)
         elif self.mode == SimulatorMode.IDEAL:
             self.car_pub = rospy.Publisher('/cars/car0/odom', Odometry, queue_size=1)
             rospy.Subscriber('/cars/car0/command', ControlCommand, self.cmd_cb)
