@@ -6,6 +6,8 @@
 
     <!-- constants -->
     <arg name="rate"          value="10.0"/>
+    <arg name="sim_mode"      value="ideal"/>
+    <arg name="run_agent"     value="false"/>
 
     <param name="/use_sim_time" value="true"/>
 

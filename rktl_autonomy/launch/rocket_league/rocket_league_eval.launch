@@ -6,6 +6,7 @@
 
     <!-- constants -->
     <arg name="rate"          value="10.0"/>
+    <arg name="run_agent"     value="false"/>
 
     <!-- environment -->
     <include file="$(find rktl_launch)/launch/rocket_league_sim.launch" pass_all_args="true"/>

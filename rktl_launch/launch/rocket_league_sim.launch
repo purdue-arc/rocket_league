@@ -4,6 +4,7 @@
     <arg name="sim_mode" default="realistic"/> <!-- Either realistic or ideal (check docs) -->
     <arg name="input_delay" default="0.15"/>
     <arg name="output_delay" default="0.15"/>
+    <arg name="run_agent" default="true"/>
 
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
 
@@ -48,7 +49,7 @@
     </group>
 
     <!-- Agents -->
-    <include file="$(find rktl_planner)/launch/simple_agent.launch">
+    <include if="$(arg run_agent)" file="$(find rktl_planner)/launch/simple_agent.launch">
         <arg name="agent_name" value="agent0"/>
         <arg name="car_name" value="car0"/>
     </include>

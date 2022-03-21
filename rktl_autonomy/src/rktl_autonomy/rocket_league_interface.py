@@ -12,13 +12,13 @@ from gym.spaces import Box
 # ROS
 import rospy
 from nav_msgs.msg import Odometry
-from rktl_msgs.msg import ControlEffort, MatchStatus
+from rktl_msgs.msg import ControlCommand, MatchStatus
 from std_srvs.srv import Empty
 
 # System
 import numpy as np
 from tf.transformations import euler_from_quaternion
-from math import pi
+from math import pi, tan
 
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
@@ -27,10 +27,28 @@ class RocketLeagueInterface(ROSInterface):
 
         ## Constants
         # Actions
-        self._MIN_THROTTLE_EFFORT = rospy.get_param('~effort/throttle/min', -0.25)
-        self._MAX_THROTTLE_EFFORT = rospy.get_param('~effort/throttle/max',  0.25)
-        self._MIN_STEERING_EFFORT = rospy.get_param('~effort/steering/min', -1.0)
-        self._MAX_STEERING_EFFORT = rospy.get_param('~effort/steering/max',  1.0)
+        self._MIN_VELOCITY = -rospy.get_param('/cars/throttle/max_speed')
+        self._MAX_VELOCITY =  rospy.get_param('/cars/throttle/max_speed')
+        self._MIN_CURVATURE = -tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
+        self._MAX_CURVATURE =  tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
+
+        # Action space overrides
+        if rospy.has_param('~action_space/velocity/min'):
+            min_velocity = rospy.get_param('~action_space/velocity/min')
+            assert min_velocity > self._MIN_VELOCITY
+            self._MIN_VELOCITY = min_velocity
+        if rospy.has_param('~action_space/velocity/max'):
+            max_velocity = rospy.get_param('~action_space/velocity/max')
+            assert max_velocity < self._MAX_VELOCITY
+            self._MAX_VELOCITY = max_velocity
+        if rospy.has_param('~action_space/curvature/min'):
+            min_curvature = rospy.get_param('~action_space/curvature/min')
+            assert min_curvature > self._MIN_CURVATURE
+            self._MIN_CURVATURE = min_curvature
+        if rospy.has_param('~action_space/curvature/max'):
+            max_curvature = rospy.get_param('~action_space/curvature/max')
+            assert max_curvature < self._MAX_CURVATURE
+            self._MAX_CURVATURE = max_curvature
 
         # Observations
         self._FIELD_WIDTH = rospy.get_param('/field/width')
@@ -51,7 +69,7 @@ class RocketLeagueInterface(ROSInterface):
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
 
         # Publishers
-        self._effort_pub = rospy.Publisher('cars/car0/effort', ControlEffort, queue_size=1)
+        self._command_pub = rospy.Publisher('cars/car0/command', ControlCommand, queue_size=1)
         self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
         # State variables
@@ -74,10 +92,10 @@ class RocketLeagueInterface(ROSInterface):
         return Box(
             # throttle, steering
             low=np.array([
-                self._MIN_THROTTLE_EFFORT, self._MIN_STEERING_EFFORT],
+                self._MIN_VELOCITY, self._MIN_CURVATURE],
                 dtype=np.float32),
             high=np.array([
-                self._MAX_THROTTLE_EFFORT, self._MAX_STEERING_EFFORT],
+                self._MAX_VELOCITY, self._MAX_CURVATURE],
                 dtype=np.float32))
 
     @property
@@ -174,13 +192,13 @@ class RocketLeagueInterface(ROSInterface):
         """Publish an action to the ROS network."""
         assert self.action_space.contains(action)
 
-        throttle, steering = np.split(action, action.size)
+        velocity, curvature = np.split(action, action.size)
 
-        msg = ControlEffort()
+        msg = ControlCommand()
         msg.header.stamp = rospy.Time.now()
-        msg.throttle = throttle
-        msg.steering = steering
-        self._effort_pub.publish(msg)
+        msg.velocity = velocity
+        msg.curvature = curvature
+        self._command_pub.publish(msg)
 
     def _car_odom_cb(self, odom_msg):
         """Callback for odometry of car."""
