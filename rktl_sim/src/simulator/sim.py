@@ -211,13 +211,16 @@ class Sim(object):
                 car.step(car_cmd, p_dt)
             p.stepSimulation()
 
-    def getCarPose(self):
+    def getCarPose(self, add_noise=False):
         cars = list(self._cars.values())
         if len(cars) == 0:
             return None
 
         # TODO: Provide translation from ARC IDs to Sim IDs
-        return cars[0].getPose(noise=self.car_noise)
+        if add_noise:
+            return cars[0].getPose(noise=self.car_noise)
+        else:
+            return cars[0].getPose(noise=None)
 
     def getCarVelocity(self):
         cars = list(self._cars.values())
@@ -227,12 +230,12 @@ class Sim(object):
         # TODO: Provide translation from ARC IDs to Sim IDs
         return cars[0].getVelocity()
 
-    def getBallPose(self):
+    def getBallPose(self, add_noise=False):
         if self._ballID is None:
             return None
         pos, _ = p.getBasePositionAndOrientation(self._ballID)
-        
-        if self.ball_noise:
+
+        if add_noise and self.ball_noise:
             pos = np.random.normal(
                 pos, self.ball_noise['pos'])
         return pos, p.getQuaternionFromEuler([0, 0, 0])

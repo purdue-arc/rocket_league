@@ -90,10 +90,11 @@ class SimulatorROS(object):
             init_speed=ball_init_speed, noise=ball_noise)
         
         if self.mode == SimulatorMode.REALISTIC:
-            self.ball_pub = rospy.Publisher('/ball/pose_sync_early',
+            self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
                 PoseWithCovarianceStamped, queue_size=1)
+            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth', Odometry, queue_size=1)
         elif self.mode == SimulatorMode.IDEAL:
-            self.ball_pub = rospy.Publisher('/ball/odom', Odometry, queue_size=1)
+            self.ball_odom_pub = rospy.Publisher('/ball/odom', Odometry, queue_size=1)
 
         # Creating a single car
         car_properties = {}
@@ -114,11 +115,12 @@ class SimulatorROS(object):
             props=car_properties)
 
         if self.mode == SimulatorMode.REALISTIC:
-            self.car_pub = rospy.Publisher('/cars/car0/pose_sync_early',
+            self.car_pose_pub = rospy.Publisher('/cars/car0/pose_sync_early',
                 PoseWithCovarianceStamped, queue_size=1)
             rospy.Subscriber('/cars/car0/effort_delayed', ControlEffort, self.effort_cb)
+            self.car_odom_pub = rospy.Publisher('/cars/car0/odom_truth', Odometry, queue_size=1)
         elif self.mode == SimulatorMode.IDEAL:
-            self.car_pub = rospy.Publisher('/cars/car0/odom', Odometry, queue_size=1)
+            self.car_odom_pub = rospy.Publisher('/cars/car0/odom', Odometry, queue_size=1)
             rospy.Subscriber('/cars/car0/command', ControlCommand, self.cmd_cb)
 
         # Node data
@@ -194,7 +196,7 @@ class SimulatorROS(object):
                 ball_msg = PoseWithCovarianceStamped()
                 ball_msg.header.stamp = now
                 ball_msg.header.frame_id = self.frame_id
-                ball_pos, ball_quat = self.sim.getBallPose()
+                ball_pos, ball_quat = self.sim.getBallPose(add_noise=True)
                 ball_msg.pose.pose.position.x = ball_pos[0]
                 ball_msg.pose.pose.position.y = ball_pos[1]
                 ball_msg.pose.pose.position.z = ball_pos[2]
@@ -202,13 +204,13 @@ class SimulatorROS(object):
                 ball_msg.pose.pose.orientation.y = ball_quat[1]
                 ball_msg.pose.pose.orientation.z = ball_quat[2]
                 ball_msg.pose.pose.orientation.w = ball_quat[3]
-                self.ball_pub.publish(ball_msg)
+                self.ball_pose_pub.publish(ball_msg)
 
                 # Publish car sync pose
                 car_msg = PoseWithCovarianceStamped()
                 car_msg.header.stamp = now
                 car_msg.header.frame_id = self.frame_id
-                car_pos, car_quat = self.sim.getCarPose()
+                car_pos, car_quat = self.sim.getCarPose(add_noise=True)
                 car_msg.pose.pose.position.x = car_pos[0]
                 car_msg.pose.pose.position.y = car_pos[1]
                 car_msg.pose.pose.position.z = car_pos[2]
@@ -216,50 +218,49 @@ class SimulatorROS(object):
                 car_msg.pose.pose.orientation.y = car_quat[1]
                 car_msg.pose.pose.orientation.z = car_quat[2]
                 car_msg.pose.pose.orientation.w = car_quat[3]
-                self.car_pub.publish(car_msg)
+                self.car_pose_pub.publish(car_msg)
 
-            elif self.mode == SimulatorMode.IDEAL:
-                # Publish ball odometry
-                ball_msg = Odometry()
-                ball_msg.header.stamp = now
-                ball_msg.header.frame_id = self.frame_id
-                ball_pos, ball_quat = self.sim.getBallPose()
-                ball_msg.pose.pose.position.x = ball_pos[0]
-                ball_msg.pose.pose.position.y = ball_pos[1]
-                ball_msg.pose.pose.position.z = ball_pos[2]
-                ball_msg.pose.pose.orientation.x = ball_quat[0]
-                ball_msg.pose.pose.orientation.y = ball_quat[1]
-                ball_msg.pose.pose.orientation.z = ball_quat[2]
-                ball_msg.pose.pose.orientation.w = ball_quat[3]
-                ball_linear, ball_angular = self.sim.getBallVelocity()
-                ball_msg.twist.twist.linear.x = ball_linear[0]
-                ball_msg.twist.twist.linear.y = ball_linear[1]
-                ball_msg.twist.twist.linear.z = ball_linear[2]
-                ball_msg.twist.twist.angular.x = ball_angular[0]
-                ball_msg.twist.twist.angular.y = ball_angular[1]
-                ball_msg.twist.twist.angular.z = ball_angular[2]
-                self.ball_pub.publish(ball_msg)
+            # Publish ball odometry
+            ball_msg = Odometry()
+            ball_msg.header.stamp = now
+            ball_msg.header.frame_id = self.frame_id
+            ball_pos, ball_quat = self.sim.getBallPose()
+            ball_msg.pose.pose.position.x = ball_pos[0]
+            ball_msg.pose.pose.position.y = ball_pos[1]
+            ball_msg.pose.pose.position.z = ball_pos[2]
+            ball_msg.pose.pose.orientation.x = ball_quat[0]
+            ball_msg.pose.pose.orientation.y = ball_quat[1]
+            ball_msg.pose.pose.orientation.z = ball_quat[2]
+            ball_msg.pose.pose.orientation.w = ball_quat[3]
+            ball_linear, ball_angular = self.sim.getBallVelocity()
+            ball_msg.twist.twist.linear.x = ball_linear[0]
+            ball_msg.twist.twist.linear.y = ball_linear[1]
+            ball_msg.twist.twist.linear.z = ball_linear[2]
+            ball_msg.twist.twist.angular.x = ball_angular[0]
+            ball_msg.twist.twist.angular.y = ball_angular[1]
+            ball_msg.twist.twist.angular.z = ball_angular[2]
+            self.ball_odom_pub.publish(ball_msg)
 
-                # Publish bot odometry
-                car_msg = Odometry()
-                car_msg.header.stamp = now
-                car_msg.header.frame_id = self.frame_id
-                car_pos, car_quat = self.sim.getCarPose()
-                car_msg.pose.pose.position.x = car_pos[0]
-                car_msg.pose.pose.position.y = car_pos[1]
-                car_msg.pose.pose.position.z = car_pos[2]
-                car_msg.pose.pose.orientation.x = car_quat[0]
-                car_msg.pose.pose.orientation.y = car_quat[1]
-                car_msg.pose.pose.orientation.z = car_quat[2]
-                car_msg.pose.pose.orientation.w = car_quat[3]
-                car_linear, car_angular = self.sim.getCarVelocity()
-                car_msg.twist.twist.linear.x = car_linear[0]
-                car_msg.twist.twist.linear.y = car_linear[1]
-                car_msg.twist.twist.linear.z = car_linear[2]
-                car_msg.twist.twist.angular.x = car_angular[0]
-                car_msg.twist.twist.angular.y = car_angular[1]
-                car_msg.twist.twist.angular.z = car_angular[2]
-                self.car_pub.publish(car_msg)
+            # Publish bot odometry
+            car_msg = Odometry()
+            car_msg.header.stamp = now
+            car_msg.header.frame_id = self.frame_id
+            car_pos, car_quat = self.sim.getCarPose()
+            car_msg.pose.pose.position.x = car_pos[0]
+            car_msg.pose.pose.position.y = car_pos[1]
+            car_msg.pose.pose.position.z = car_pos[2]
+            car_msg.pose.pose.orientation.x = car_quat[0]
+            car_msg.pose.pose.orientation.y = car_quat[1]
+            car_msg.pose.pose.orientation.z = car_quat[2]
+            car_msg.pose.pose.orientation.w = car_quat[3]
+            car_linear, car_angular = self.sim.getCarVelocity()
+            car_msg.twist.twist.linear.x = car_linear[0]
+            car_msg.twist.twist.linear.y = car_linear[1]
+            car_msg.twist.twist.linear.z = car_linear[2]
+            car_msg.twist.twist.angular.x = car_angular[0]
+            car_msg.twist.twist.angular.y = car_angular[1]
+            car_msg.twist.twist.angular.z = car_angular[2]
+            self.car_odom_pub.publish(car_msg)
 
         self.last_time = now
         self.reset_lock.release()
