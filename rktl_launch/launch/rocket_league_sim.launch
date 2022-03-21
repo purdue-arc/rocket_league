@@ -1,9 +1,7 @@
 <launch>
     <arg name="render" default="true"/>
     <arg name="pybullet_render" default="false"/>
-    <arg name="simulate_car_effort" default="false" />
-    <arg name="simulate_filter" default="false" />
-
+    <arg name="sim_mode" default="realistic"/> # Either realistic or ideal (check docs)
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
 
     <!-- Simulation -->

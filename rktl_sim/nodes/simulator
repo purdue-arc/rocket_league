@@ -17,10 +17,15 @@ import os
 import rospy
 from std_srvs.srv import Empty, EmptyResponse
 from threading import Lock
+from enum import Enum
 
 # Local library
 import simulator
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
+
+class SimulatorMode(Enum):
+    IDEAL = 1
+    REALISTIC = 2
 
 class SimulatorROS(object):
     """ROS wrapper for the simulator."""
@@ -28,11 +33,18 @@ class SimulatorROS(object):
     def __init__(self):
         rospy.init_node('simulator')
 
+        mode = rospy.get_param('~mode')
+        if mode == 'ideal':
+            self.mode = SimulatorMode.IDEAL
+        elif mode == 'realistic':
+            self.mode = SimulatorMode.REALISTIC
+        else:
+            rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
+
         render_enabled = rospy.get_param('~render', False)
         rate = rospy.Rate(rospy.get_param('~rate', 30))
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 10)
-        self.simulate_filter = rospy.get_param('~simulate_filter', True)
 
         # Setting up field
         fw = rospy.get_param('/field/width')
@@ -71,40 +83,42 @@ class SimulatorROS(object):
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
         ball_noise = rospy.get_param('~ball/sensor_noise', None)
+        if self.mode == SimulatorMode.IDEAL:
+            ball_noise = None
+
         self.sim.create_ball('ball', init_pose=ball_init_pose,
             init_speed=ball_init_speed, noise=ball_noise)
         
-        if not self.simulate_filter:
+        if self.mode == SimulatorMode.REALISTIC:
             self.ball_pub = rospy.Publisher('/ball/pose_sync',
                 PoseWithCovarianceStamped, queue_size=1)
-        else:
+        elif self.mode == SimulatorMode.IDEAL:
             self.ball_pub = rospy.Publisher('/ball/odom', Odometry, queue_size=1)
 
         # Creating a single car
-        self.simulate_car_effort = rospy.get_param('~simulate_car_effort')
-
         car_properties = {}
         car_properties['length'] = rospy.get_param('/cars/length')
         car_properties['max_speed'] = rospy.get_param('/cars/throttle/max_speed')
         car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
         car_properties['steering_throw'] = rospy.get_param('/cars/steering/max_throw')
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
-        car_properties['simulate_effort'] = self.simulate_car_effort
+        car_properties['simulate_effort'] = self.mode == SimulatorMode.REALISTIC
         
+        noise = rospy.get_param('~car/sensor_noise', None)
+        if self.mode == SimulatorMode.IDEAL:
+            noise = None
+
         self.sim.create_car('car', 
             init_pose=rospy.get_param('~car/init_pose', None),
-            noise=rospy.get_param('~car/sensor_noise', None),
+            noise=noise,
             props=car_properties)
 
-        if not self.simulate_filter:
+        if self.mode == SimulatorMode.REALISTIC:
             self.car_pub = rospy.Publisher('/cars/car0/pose_sync',
                 PoseWithCovarianceStamped, queue_size=1)
-        else:
-            self.car_pub = rospy.Publisher('/cars/car0/odom', Odometry, queue_size=1)
-
-        if self.simulate_car_effort:
             rospy.Subscriber('/cars/car0/effort', ControlEffort, self.effort_cb)
-        else:
+        elif self.mode == SimulatorMode.IDEAL:
+            self.car_pub = rospy.Publisher('/cars/car0/odom', Odometry, queue_size=1)
             rospy.Subscriber('/cars/car0/command', ControlCommand, self.cmd_cb)
 
         # Node data
@@ -175,7 +189,7 @@ class SimulatorROS(object):
 
             self.sim.step(self.car_cmd, delta_t)
 
-            if not self.simulate_filter:
+            if self.mode == SimulatorMode.REALISTIC:
                 # Publish ball sync pose
                 ball_msg = PoseWithCovarianceStamped()
                 ball_msg.header.stamp = now
@@ -203,7 +217,8 @@ class SimulatorROS(object):
                 car_msg.pose.pose.orientation.z = car_quat[2]
                 car_msg.pose.pose.orientation.w = car_quat[3]
                 self.car_pub.publish(car_msg)
-            else:
+
+            elif self.mode == SimulatorMode.IDEAL:
                 # Publish ball odometry
                 ball_msg = Odometry()
                 ball_msg.header.stamp = now
