@@ -1,9 +1,55 @@
 <launch>
     <arg name="render" default="true"/>
     <arg name="pybullet_render" default="false"/>
+    <arg name="sim_mode" default="realistic"/> <!-- Either realistic or ideal (check docs) -->
+    <arg name="input_delay" default="0.15"/>
+    <arg name="output_delay" default="0.15"/>
 
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
 
+    <!-- Visualizer -->
+    <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch"/>
+    <group if="$(eval sim_mode == 'realistic')" ns="truth">
+        <remap from="/cars/car0/odom" to="/cars/car0/odom_truth"/>
+        <remap from="/ball/odom" to="/ball/odom_truth"/>
+        <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch"/>
+    </group>
+
+    <!-- Simulator -->
     <include file="$(find rktl_sim)/launch/simulator.launch" pass_all_args="true"/>
-    <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch" pass_all_args="true"/>
+
+    <!-- Transport Delays -->
+    <group if="$(eval sim_mode == 'realistic')">
+        <!-- Ball -->
+        <node ns="ball" pkg="rktl_launch" type="topic_delay" name="pose_delay"
+            args="pose_sync_early pose_sync
+            geometry_msgs/PoseWithCovarianceStamped $(arg input_delay)"/>
+
+        <!-- Car -->
+        <node ns="cars/car0" pkg="rktl_launch" type="topic_delay" name="pose_delay"
+            args="pose_sync_early pose_sync
+            geometry_msgs/PoseWithCovarianceStamped $(arg input_delay)"/>
+
+        <!-- Effort -->
+        <node ns="cars/car0" pkg="rktl_launch" type="topic_delay" name="effort_delay"
+            args="effort effort_delayed
+            rktl_msgs/ControlEffort $(arg output_delay)"/>
+    </group>
+
+    <!-- Control & Filtering Stack -->
+    <group if="$(eval sim_mode == 'realistic')">
+        <!-- Ball -->
+        <include file="$(find rktl_control)/launch/ball.launch"/>
+
+        <!-- Cars -->
+        <include file="$(find rktl_control)/launch/car.launch">
+            <arg name="car_name" value="car0"/>
+        </include>
+    </group>
+
+    <!-- Agents -->
+    <include file="$(find rktl_planner)/launch/simple_agent.launch">
+        <arg name="agent_name" value="agent0"/>
+        <arg name="car_name" value="car0"/>
+    </include>
 </launch>

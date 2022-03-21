@@ -9,8 +9,7 @@ License:
 import pygame
 
 # Local modules
-from visualizer.asset import Image, Rectangle
-
+from visualizer.asset import Image, Rectangle, Lines, Circle
 
 class Window(object):
     """Interfaces PyGame for rendering."""
@@ -38,11 +37,16 @@ class Window(object):
         self._screen = pygame.display.set_mode(
             (self.window_width, self.window_length))
 
-    def createAsset(self, id, width, length, initPos=None, imgPath=None, color=None):
+    def createAsset(self, id, width, length, initPos=None, imgPath=None, color=None, radius=None, lines=False, circle=False):
         width = int(width * self.scaling)
         length = int(length * self.scaling)
 
-        if imgPath is None:
+        if lines:
+            self.assets[id] = Lines(color)
+        elif circle:
+            radius = int(radius * self.scaling)
+            self.assets[id] = Circle(color, radius)
+        elif imgPath is None:
             self.assets[id] = Rectangle(width, length, color)
         else:
             self.assets[id] = Image(width, length, imgPath)
@@ -58,8 +62,15 @@ class Window(object):
             (int(y * self.scaling) + (self.window_width // 2))
         self.assets[id].setPos(y, x)
 
+    def updateAssetRadius(self, id, radius):
+        radius = int(radius * self.scaling)
+        self.assets[id].setRadius(radius)
+
     def updateAssetAngle(self, id, angle):
         self.assets[id].setAngle(angle)
+    
+    def resetAssetLines(self, id):
+        self.assets[id].resetPoints()
 
     def show(self):
         for event in pygame.event.get():
