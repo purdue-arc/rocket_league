@@ -25,6 +25,8 @@ This launch file has two arguments:
 - `agent_name`: Determines namespace of this planning agent: `/agents/{agent_name}`.
 - `car_name`: Car that this agent is responsible for (e.g. `/cars/{car_name}`).
 
+In order for `path_planner` to generate a path, you need to call the `/agents/{agent_name}/reset_planner` service. This is an empty service which needs to be called each time you want a new path.
+
 ## Implementation Details
 
 TODO
