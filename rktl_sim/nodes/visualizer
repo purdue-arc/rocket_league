@@ -11,16 +11,17 @@ TODO:
 
 # 3rd party modules
 import math
+from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 import rospy
 from tf.transformations import euler_from_quaternion
 from threading import Lock
+import numpy as np
 
 # Local library
 import visualizer
-from geometry_msgs.msg import PoseWithCovarianceStamped
-from rktl_msgs.msg import Path
-
+from rktl_msgs.msg import Path, BezierPathList
+from rktl_planner import BezierPath
 
 class VisualizerROS(object):
     """ROS wrapper for the visualizer."""
@@ -122,17 +123,24 @@ class VisualizerROS(object):
             self.goal2_id, -((field_length / 2) + (wall_thickness / 2)), 0)
         id += 1
 
+        self.lines_id = 11
+        self.window.createAsset(self.lines_id, 0, 0, color=(255, 0, 0), lines=True)
+
+        self.circle_id = 12
+        self.window.createAsset(self.circle_id, 0, 0, circle=True, color=(255,0,0), radius=0.25)
+
         self.lock = Lock()
         self.last_time = None
         self.path = None
 
         # Subscribers
-        rospy.Subscriber("ball/odom", Odometry, self.ball_odom_cb)
-        rospy.Subscriber("cars/car0/odom", Odometry, self.car_odom_cb)
-        rospy.Subscriber("cars/car0/path", Path, self.path_arr_cb)
+        rospy.Subscriber("/ball/odom", Odometry, self.ball_odom_cb)
+        rospy.Subscriber("/cars/car0/odom", Odometry, self.car_odom_cb)
+        rospy.Subscriber("/cars/car0/path", Path, self.path_arr_cb)
         rospy.Subscriber(
-            "cars/car0/lookahead_pnt", PoseWithCovarianceStamped, self.lookahead_cb
+            "/cars/car0/lookahead_pnt", Float32, self.lookahead_cb
         )
+        rospy.Subscriber("/agents/agent0/bezier_path", BezierPathList, self.bezier_path_cb)
 
         while not rospy.is_shutdown():
             try:
@@ -153,31 +161,37 @@ class VisualizerROS(object):
         heading = heading * 180. / math.pi
         self.window.updateAssetPos(self.car_id, x, y)
         self.window.updateAssetAngle(self.car_id, heading)
+        self.window.updateAssetPos(self.circle_id, x, y)
 
     def ball_odom_cb(self, odom_msg):
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
         self.window.updateAssetPos(self.ball_id, x, y)
 
-    def path_arr_cb(self, path_arr_msg):
+    def path_arr_cb(self, path_msg: Path):
         """Callback for path array messages."""
-        self.path = path_arr_msg.waypoint
-        self.path_points = []
-
+        self.window.resetAssetLines(self.lines_id)
+        self.path = path_msg.waypoint
         for point in self.path:
             x = point.pose.position.x
             y = point.pose.position.y
-            self.path_points.append((x, y))
+            self.window.updateAssetPos(self.lines_id, x, y)
+    
+    def bezier_path_cb(self, msg: BezierPathList):
+        """Callback for bezier path messages."""
+        self.window.resetAssetLines(self.lines_id)
+        paths = [BezierPath(x) for x in msg.paths]
+        for path in paths:
+            #for point in path.bezier_curve.control_points:
+            #    self.window.updateAssetPos(self.lines_id, point.x, point.y)
+            sec = path.duration.to_sec()
+            for t in np.linspace(0., sec, int(50 * sec + 0.5)):
+                point = path.at(t)
+                self.window.updateAssetPos(self.lines_id, point.x, point.y)
 
-        if self.path_points is None:
-            self.path_points = [(0, 0)]
-
-    def lookahead_cb(self, pose_msg):
+    def lookahead_cb(self, msg: Float32):
         """Callback for lookahead_pnt messages."""
-        x = pose_msg.pose.pose.position.x
-        y = pose_msg.pose.pose.position.y
-        self.lookahead = (x, y)
-
+        self.window.updateAssetRadius(self.circle_id, msg.data)
 
 if __name__ == "__main__":
     VisualizerROS()

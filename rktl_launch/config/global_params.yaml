@@ -5,7 +5,6 @@ field:
   width: 3
   length: 4.25
   wall_thickness: 0.25
-
   goal:
     width: 1
 
