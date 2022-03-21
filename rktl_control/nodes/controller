@@ -69,7 +69,7 @@ class LeadLagController(object):
                 (error + self.BETA_LEAD * self.prev_error) *
                 (error + self.ALPHA_LAG * self.prev_error) /
                 (error + self.BETA_LAG * self.prev_error))
-        except ZeroDivisionError as _:
+        except ZeroDivisionError:
             effort = 0.0
         self.prev_error = error
 
