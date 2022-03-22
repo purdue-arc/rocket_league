@@ -7,7 +7,7 @@ License:
 
 # package
 from rktl_autonomy import ROSInterface
-from gym.spaces import Box
+from gym.spaces import Box, Discrete
 
 # ROS
 import rospy
@@ -89,36 +89,26 @@ class RocketLeagueInterface(ROSInterface):
     @property
     def action_space(self):
         """The Space object corresponding to valid actions."""
-        return Box(
-            # throttle, steering
-            low=np.array([
-                self._MIN_VELOCITY, self._MIN_CURVATURE],
-                dtype=np.float32),
-            high=np.array([
-                self._MAX_VELOCITY, self._MAX_CURVATURE],
-                dtype=np.float32))
+        # left, right
+        return Discrete(2)
 
     @property
     def observation_space(self):
         """The Space object corresponding to valid observations."""
         return Box(
-            # x, y, theta, v, omega (car)
-            # x, y, vx, vy (ball)
+            # x, y, theta (car)
+            # x, y (ball)
             low=np.array([
                 -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
-                -self._FIELD_WIDTH/2,
-                -pi, -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
+                -self._FIELD_WIDTH/2, -pi,
                 -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
-                -self._FIELD_WIDTH/2,
-                -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
+                -self._FIELD_WIDTH/2],
                 dtype=np.float32),
             high=np.array([
                 (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
-                self._FIELD_WIDTH/2,
-                pi, self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
+                self._FIELD_WIDTH/2, pi,
                 (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
-                self._FIELD_WIDTH/2,
-                self._MAX_OBS_VEL, self._MAX_OBS_VEL],
+                self._FIELD_WIDTH/2],
                 dtype=np.float32))
 
     def _reset_env(self):
@@ -175,9 +165,7 @@ class RocketLeagueInterface(ROSInterface):
             else:
                 reward += self._LOSS_REWARD
 
-        x, y, __, v, __ = self._car_odom
-        if v < 0:
-            reward += self._REVERSE_REWARD
+        x, y, __ = self._car_odom
 
         if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
             abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
@@ -192,12 +180,14 @@ class RocketLeagueInterface(ROSInterface):
         """Publish an action to the ROS network."""
         assert self.action_space.contains(action)
 
-        velocity, curvature = np.split(action, action.size)
-
         msg = ControlCommand()
+        if action == 0:
+            msg.curvature = self._MIN_CURVATURE
+        else:
+            msg.curvature = self._MAX_CURVATURE
+
         msg.header.stamp = rospy.Time.now()
-        msg.velocity = velocity
-        msg.curvature = curvature
+        msg.velocity = self._MAX_VELOCITY / 2.0
         self._command_pub.publish(msg)
 
     def _car_odom_cb(self, odom_msg):
@@ -209,12 +199,9 @@ class RocketLeagueInterface(ROSInterface):
             odom_msg.pose.pose.orientation.y,
             odom_msg.pose.pose.orientation.z,
             odom_msg.pose.pose.orientation.w))
-        v = odom_msg.twist.twist.linear.x
-        omega = odom_msg.twist.twist.angular.z
 
         self._car_odom = (
-            x, y, yaw,
-            v, omega)
+            x, y, yaw)
 
         with self._cond:
             self._cond.notify_all()
@@ -223,11 +210,9 @@ class RocketLeagueInterface(ROSInterface):
         """Callback for odometry of ball."""
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
-        vx = odom_msg.twist.twist.linear.x
-        vy = odom_msg.twist.twist.linear.y
 
         self._ball_odom = (
-            x, y, vx, vy)
+            x, y)
 
         with self._cond:
             self._cond.notify_all()
