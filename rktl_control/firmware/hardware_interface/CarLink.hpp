@@ -15,23 +15,27 @@ License:
 
 class CarLink {
     public:
-    CarLink(const ros::NodeHandle& nh, const char *const topic, const int pin);
+    CarLink(ros::NodeHandle *const nh, const char *const prefix, const int pin);
     ~CarLink();
-
-    int throttle_throw;
-    int steering_center;
-    int steering_left;
-    int steering_right;
 
     void enable();
     void disable();
+    bool update_params();
 
     private:
     const int THROTTLE_ZERO = 1500;
     const int THROTTLE_CHANNEL = 1;
     const int STEERING_CHANNEL = 2;
 
+    ros::NodeHandle *const nh;
+    const String prefix;
+
+    int throttle_throw;
+    int steering_center;
+    int steering_left;
+    int steering_right;
     bool enabled;
+
     PulsePositionOutput ppm_out;
     ros::Subscriber<rktl_msgs::ControlEffort, CarLink> effort_sub;
 
