@@ -57,3 +57,33 @@ class Rectangle(Asset):
 
     def blit(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
+
+class Lines(Asset):
+    def __init__(self, color):
+        self.color = color
+        self.points = []
+    
+    def resetPoints(self):
+        self.points = []
+
+    def setPos(self, x, y):
+        self.points.append((x, y))
+
+    def blit(self, screen):
+        if len(self.points) > 1:
+            pygame.draw.lines(screen, self.color, False, self.points)
+
+class Circle(Asset):
+    def __init__(self, color, radius):
+        self.color = color
+        self.radius = radius
+        self.pos = (0, 0)
+
+    def setPos(self, x, y):
+        self.pos = (x, y)
+    
+    def setRadius(self, radius):
+        self.radius = radius
+
+    def blit(self, screen):
+        pygame.draw.circle(screen, self.color, self.pos, self.radius, 5)
