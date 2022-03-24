@@ -27,7 +27,7 @@ for COMMIT in "$@"; do
 
     # checkout code
     echo "beginning experiment $SHORTCOMMIT"
-    git checkout $COMMIT > /dev/null
+    git checkout $COMMIT &> /dev/null
     git show -s HEAD | awk 'NF'
 
     # create log file
