@@ -44,7 +44,7 @@ for commit in "$@"; do
     echo "launching container $CONTAINER_NAME"
     $WS_DIR/$DOCKER_DIR/docker-run.sh --gpus all -d > /dev/null
 
-    # get run id
+    # get run id (will print to terminal)
     until grep "RUN ID:" $LOG_FILE; do
         sleep 1
     done
@@ -55,6 +55,9 @@ for commit in "$@"; do
         sleep 1
     done
 
-    # print RUN ID
+    # make symlink
+    ln -s $WS_DIR/$TRAIN_LOG_DIR/$RUN_ID $WS_DIR/$LOG_DIR/$UUID.dir
+    echo "created symlink to $WS_DIR/$TRAIN_LOG_DIR/$RUN_ID as $WS_DIR/$LOG_DIR/$UUID/$commit.dir"
+
     echo "training successfully started"
 done
