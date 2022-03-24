@@ -19,7 +19,7 @@ reward:
     threshold: 0.25
 
 # duration when the episode will be terminated. Unit is seconds (sim time)
-max_episode_time: 7.5
+max_episode_time: 15
 
 log:
   base_dir: "~/catkin_ws/data/rocket_league/"
