@@ -15,12 +15,12 @@ License:
 ros::NodeHandle nh;
 
 // radio links to each car
-CarLink car0{&nh, "~car0/", 23};
-CarLink car1{&nh, "~car1/", 22};
-CarLink car2{&nh, "~car2/", 21};
-CarLink car3{&nh, "~car3/", 20};
-CarLink car4{&nh, "~car4/", 10};
-CarLink car5{&nh, "~car5/", 9};
+CarLink car0{&nh, 0, 23};
+CarLink car1{&nh, 1, 22};
+CarLink car2{&nh, 2, 21};
+CarLink car3{&nh, 3, 20};
+CarLink car4{&nh, 4, 10};
+CarLink car5{&nh, 5, 9};
 
 // helper functions
 void enable_all() {

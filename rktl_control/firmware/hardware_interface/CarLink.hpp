@@ -15,7 +15,7 @@ License:
 
 class CarLink {
     public:
-    CarLink(ros::NodeHandle *const nh, const char *const prefix, const int pin);
+    CarLink(ros::NodeHandle *const nh, const int car_num, const int pin);
     ~CarLink();
 
     void enable();
@@ -28,7 +28,8 @@ class CarLink {
     const int STEERING_CHANNEL = 2;
 
     ros::NodeHandle *const nh;
-    const String prefix;
+    const int car_num;
+    const String topic;
 
     int throttle_throw;
     int steering_center;
