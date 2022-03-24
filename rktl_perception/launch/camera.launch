@@ -39,7 +39,7 @@
             <param name="buffer_size" type="int" value="300" />
             <param name="ball_sub_topic" type="str" value="ball_vec" />
             <param name="ball_pub_topic" type="str" value="/ball/pose" />
-            <param name="ball_radius" type="double" value="0.05" />
+            <param name="ball_radius" type="double" value="0.03" />
             <param name="pub_topic" type="str" value="pose" />
             <rosparam param="pub_topics">
                 '0,1,2,3,4,5,6,7': /origin/pose
@@ -50,12 +50,12 @@
         <!-- Ball tracking -->
         <node pkg="rktl_perception" type="ball_detection" name="ball_detection">
             <param name="publishThresh" value="true" />
-            <param name="min_hue" value="50" />
-            <param name="min_sat" value="50" />
-            <param name="min_vib" value="50" />
-            <param name="max_hue" value="80" />
-            <param name="max_sat" value="255" />
-            <param name="max_vib" value="210" />
+            <param name="min_hue" value="55" />
+            <param name="min_sat" value="30" />
+            <param name="min_vib" value="30" />
+            <param name="max_hue" value="100" />
+            <param name="max_sat" value="200" />
+            <param name="max_vib" value="80" />
         </node>
     </group>
 </launch>
