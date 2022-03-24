@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to automate running several training containers all at once
-# Usage:
+# Usage: <script> <list of git commit hashes to run>
 
 set -e
 
@@ -21,27 +21,27 @@ echo "logging to $WS_DIR/$LOG_DIR/$UUID"
 mkdir -p $WS_DIR/$LOG_DIR/$UUID
 
 echo "running a batch of $# experiments"
-for commit in "$@"; do
+for COMMIT in "$@"; do
     echo "" # newline
+    SHORTCOMMIT=$($COMMIT | cut -c1-8)
 
     # checkout code
-    echo "checking out git commit $commit"
-    git checkout $commit > /dev/null
-    git show -s HEAD
+    echo "beginning experiment $SHORTCOMMIT"
+    git checkout $COMMIT > /dev/null
+    git show -s HEAD | awk 'NF'
 
     # create log file
-    LOG_FILE="$WS_DIR/$LOG_DIR/$UUID/$commit.log"
+    LOG_FILE="$WS_DIR/$LOG_DIR/$UUID/$SHORTCOMMIT.log"
     touch $LOG_FILE
-    echo "logging to $LOG_FILE"
 
     # set arguments for container
-    DOCKER_CMD="$TRAIN_CMD &> catkin_ws/$LOG_DIR/$UUID/$commit.log"
+    DOCKER_CMD="$TRAIN_CMD &> catkin_ws/$LOG_DIR/$UUID/$SHORTCOMMIT.log"
     export DOCKER_CMD
-    CONTAINER_NAME="$UUID""_$commit"
+    CONTAINER_NAME="$UUID-$SHORTCOMMIT"
     export CONTAINER_NAME
 
     # launch container
-    echo "launching container $CONTAINER_NAME"
+    echo "launching with name $CONTAINER_NAME"
     $WS_DIR/$DOCKER_DIR/docker-run.sh --gpus all -d > /dev/null
 
     # get run id (will print to terminal)
@@ -50,14 +50,11 @@ for commit in "$@"; do
     done
     RUN_ID=$(grep "RUN ID: " $LOG_FILE | cut -d' ' -f 3)
 
-    # wait until done launching
+    # wait until done launching, then make symlink
     until [ -d $WS_DIR/$TRAIN_LOG_DIR/$RUN_ID ]; do
         sleep 1
     done
-
-    # make symlink
-    ln -s $WS_DIR/$TRAIN_LOG_DIR/$RUN_ID $WS_DIR/$LOG_DIR/$UUID.dir
-    echo "created symlink to $WS_DIR/$TRAIN_LOG_DIR/$RUN_ID as $WS_DIR/$LOG_DIR/$UUID/$commit.dir"
+    ln -s $WS_DIR/$TRAIN_LOG_DIR/$RUN_ID $LOG_FILE"dir"
 
     echo "training successfully started"
 done
