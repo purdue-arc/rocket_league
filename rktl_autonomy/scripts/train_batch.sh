@@ -26,7 +26,7 @@ for commit in "$@"; do
 
     # checkout code
     echo "checking out git commit $commit"
-    git checkout $commit
+    git checkout $commit > /dev/null
     git show -s HEAD
 
     # create log file
