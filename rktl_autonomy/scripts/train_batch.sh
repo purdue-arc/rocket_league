@@ -23,7 +23,7 @@ mkdir -p $WS_DIR/$LOG_DIR/$UUID
 echo "running a batch of $# experiments"
 for COMMIT in "$@"; do
     echo "" # newline
-    SHORTCOMMIT=$($COMMIT | cut -c1-7)
+    SHORTCOMMIT=$(echo $COMMIT | cut -c1-7)
 
     # checkout code
     echo "beginning experiment $SHORTCOMMIT"
