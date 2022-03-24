@@ -90,7 +90,7 @@ class RocketLeagueInterface(ROSInterface):
     def action_space(self):
         """The Space object corresponding to valid actions."""
         # left, right
-        return Discrete(2)
+        return Discrete(3)
 
     @property
     def observation_space(self):
@@ -183,11 +183,15 @@ class RocketLeagueInterface(ROSInterface):
         msg = ControlCommand()
         if action == 0:
             msg.curvature = self._MIN_CURVATURE
-        else:
+            msg.velocity = self._MAX_VELOCITY / 2.0
+        elif action == 1:
             msg.curvature = self._MAX_CURVATURE
+            msg.velocity = self._MAX_VELOCITY / 2.0
+        else:
+            msg.curvature = 0.0
+            msg.velocity = -self._MAX_VELOCITY / 2.0
 
         msg.header.stamp = rospy.Time.now()
-        msg.velocity = self._MAX_VELOCITY / 2.0
         self._command_pub.publish(msg)
 
     def _car_odom_cb(self, odom_msg):
