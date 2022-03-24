@@ -20,13 +20,17 @@ UUID=$(uuidgen)
 echo "logging to $WS_DIR/$LOG_DIR/$UUID"
 mkdir -p $WS_DIR/$LOG_DIR/$UUID
 
+# remember git branch for later
+BRANCH=$(git symbolic-ref --short HEAD)
+
 echo "running a batch of $# experiments"
+echo ""
+
 for COMMIT in "$@"; do
-    echo "" # newline
     SHORTCOMMIT=$(echo $COMMIT | cut -c1-7)
+    echo "beginning experiment $SHORTCOMMIT"
 
     # checkout code
-    echo "beginning experiment $SHORTCOMMIT"
     git checkout $COMMIT &> /dev/null
     git show -s HEAD | awk 'NF'
 
@@ -57,4 +61,9 @@ for COMMIT in "$@"; do
     ln -s $WS_DIR/$TRAIN_LOG_DIR/$RUN_ID $LOG_FILE"dir"
 
     echo "training successfully started"
+    echo ""
 done
+
+# go back to initial git state
+echo "returning to initial branch $BRANCH"
+git checkout $BRANCH &> /dev/null
