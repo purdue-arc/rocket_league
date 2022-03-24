@@ -89,8 +89,7 @@ class RocketLeagueInterface(ROSInterface):
     @property
     def action_space(self):
         """The Space object corresponding to valid actions."""
-        # left, right
-        return Discrete(3)
+        return Discrete(7)
 
     @property
     def observation_space(self):
@@ -181,15 +180,27 @@ class RocketLeagueInterface(ROSInterface):
         assert self.action_space.contains(action)
 
         msg = ControlCommand()
-        if action == 0:
-            msg.curvature = self._MIN_CURVATURE
-            msg.velocity = self._MAX_VELOCITY / 2.0
-        elif action == 1:
-            msg.curvature = self._MAX_CURVATURE
-            msg.velocity = self._MAX_VELOCITY / 2.0
-        else:
+        if action == 0:         # stop
             msg.curvature = 0.0
-            msg.velocity = -self._MAX_VELOCITY / 2.0
+            msg.velocity = 0.0
+        elif action == 1:       # forward, left
+            msg.curvature = self._MAX_CURVATURE
+            msg.velocity = self._MAX_VELOCITY
+        elif action == 2:       # forward, right
+            msg.curvature = self._MIN_CURVATURE
+            msg.velocity = self._MAX_VELOCITY
+        elif action == 3:       # forward
+            msg.curvature = 0.0
+            msg.velocity = self._MAX_VELOCITY
+        elif action == 4:       # reverse, left
+            msg.curvature = self._MAX_CURVATURE
+            msg.velocity = self._MIN_VELOCITY
+        elif action == 5:       # reverse, right
+            msg.curvature = self._MIN_CURVATURE
+            msg.velocity = self._MIN_VELOCITY
+        else:                   # reverse
+            msg.curvature = 0.0
+            msg.velocity = self._MIN_VELOCITY
 
         msg.header.stamp = rospy.Time.now()
         self._command_pub.publish(msg)
