@@ -27,6 +27,7 @@ for commit in "$@"; do
     # checkout code
     echo "checking out git commit $commit"
     git checkout $commit
+    git show -s HEAD
 
     # create log file
     LOG_FILE="$WS_DIR/$LOG_DIR/$UUID/$commit.log"
