@@ -95,19 +95,23 @@ class RocketLeagueInterface(ROSInterface):
     def observation_space(self):
         """The Space object corresponding to valid observations."""
         return Box(
-            # x, y, theta (car)
-            # x, y (ball)
+            # x, y, theta, v, omega (car)
+            # x, y, vx, vy (ball)
             low=np.array([
                 -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
                 -self._FIELD_WIDTH/2, -pi,
+                -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
                 -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
-                -self._FIELD_WIDTH/2],
+                -self._FIELD_WIDTH/2,
+                -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
                 dtype=np.float32),
             high=np.array([
                 (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
                 self._FIELD_WIDTH/2, pi,
+                self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
                 (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
-                self._FIELD_WIDTH/2],
+                self._FIELD_WIDTH/2,
+                self._MAX_OBS_VEL, self._MAX_OBS_VEL],
                 dtype=np.float32))
 
     def _reset_env(self):
@@ -164,8 +168,9 @@ class RocketLeagueInterface(ROSInterface):
             else:
                 reward += self._LOSS_REWARD
 
-        x, y, __ = self._car_odom
-
+        x, y, __, v, __ = self._car_odom
+        if v < 0:
+            reward += self._REVERSE_REWARD
         if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
             abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
@@ -214,9 +219,10 @@ class RocketLeagueInterface(ROSInterface):
             odom_msg.pose.pose.orientation.y,
             odom_msg.pose.pose.orientation.z,
             odom_msg.pose.pose.orientation.w))
+        v = odom_msg.twist.twist.linear.x
+        omega = odom_msg.twist.twist.angular.z
 
-        self._car_odom = (
-            x, y, yaw)
+        self._car_odom = (x, y, yaw, v, omega)
 
         with self._cond:
             self._cond.notify_all()
@@ -225,9 +231,10 @@ class RocketLeagueInterface(ROSInterface):
         """Callback for odometry of ball."""
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
+        vx = odom_msg.twist.twist.linear.x
+        vy = odom_msg.twist.twist.linear.y
 
-        self._ball_odom = (
-            x, y)
+        self._ball_odom = (x, y, vx, vy)
 
         with self._cond:
             self._cond.notify_all()
