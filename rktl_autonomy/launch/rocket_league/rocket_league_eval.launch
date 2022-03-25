@@ -2,7 +2,8 @@
     <!-- arguments -->
     <arg name="plot_log"      default="false"/>
     <arg name="render"        default="true"/>
-    <arg name="weights"       default="~/catkin_ws/data/rocket_league/weights"/>
+    <arg name="sim_mode"      default="ideal"/>
+    <arg name="weights"       default="~/catkin_ws/data/rocket_league/model"/>
 
     <!-- constants -->
     <arg name="rate"          value="10.0"/>
