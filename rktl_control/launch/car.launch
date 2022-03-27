@@ -14,8 +14,8 @@
         </node>
 
         <!-- Controller -->
-        <node pkg="rktl_control" type="velocity_controller" name="velocity_controller" output="screen">
-            <rosparam command="load" file="$(find rktl_control)/config/velocity_controller.yaml"/>
+        <node pkg="rktl_control" type="controller" name="controller" output="screen">
+            <rosparam command="load" file="$(find rktl_control)/config/controller.yaml"/>
         </node>
     </group>
 </launch>

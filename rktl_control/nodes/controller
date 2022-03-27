@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+"""Customizable controller for the car.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+import rospy
+from nav_msgs.msg import Odometry
+from rktl_msgs.msg import ControlCommand, ControlEffort
+from math import atan, cos, sin
+
+class PIDController(object):
+    """A very basic PID controller."""
+    def __init__(self, kp, ki, kd, anti_windup, deadband, delta_t):
+        # Constants
+        self.KP = kp
+        self.KI = ki
+        self.KD = kd
+        self.ANTI_WINDUP = anti_windup
+        self.DEADBAND = deadband
+        self.DELTA_T = delta_t
+
+        # State variables
+        self.integral = 0.0
+        self.last_error = 0.0
+        self.last_output = 0.0
+
+    def step(self, error):
+        """One time step."""
+        if abs(error) < self.DEADBAND:
+            return self.last_output
+
+        kk = self.KP * error
+        if abs(error) < self.ANTI_WINDUP:
+            self.integral += error * self.DELTA_T
+        ii = self.KI * self.integral
+        dd = self.KD * (error - self.last_error) / self.DELTA_T
+
+        output = kk + ii + dd
+        self.last_output = output
+        return output
+
+    def reset(self):
+        """Reset to initial state."""
+        self.integral = 0.0
+        self.last_error = 0.0
+        self.last_output = 0.0
+
+class LeadLagController(object):
+    """A simple discrete lead-lag controller."""
+    def __init__(self, k_lead, a_lead, b_lead, a_lag, b_lag):
+        # Constants
+        self.GAIN_LEAD = k_lead
+        self.ALPHA_LEAD = a_lead
+        self.BETA_LEAD = b_lead
+        self.ALPHA_LAG = a_lag
+        self.BETA_LAG = b_lag
+        
+        # State variables
+        self.prev_error = 0
+
+    def step(self, error):
+        """One time step."""
+        # effort = k(z+a)/(z+b)_lead*(z+a)/(z+b)_lag
+        effort = (self.GAIN_LEAD *
+            (error + self.ALPHA_LEAD * self.prev_error) /
+            (error + self.BETA_LEAD * self.prev_error) *
+            (error + self.ALPHA_LAG * self.prev_error) /
+            (error + self.BETA_LAG * self.prev_error))
+        self.prev_error = error
+
+        return effort
+
+    def reset(self):
+        """Reset to initial state."""
+        self.prev_error = 0
+
+class Controller(object):
+    """Controller for car."""
+    def __init__(self):
+        rospy.init_node('controller')
+
+        # Constants
+        self.STEERING_THROW = rospy.get_param('/car/steering/throw')
+        self.BODY_LENGTH = rospy.get_param('/car/length')
+
+        self.MIN_THROTTLE_EFFORT = rospy.get_param('~limits/throttle/min', -1.0)
+        self.MAX_THROTTLE_EFFORT = rospy.get_param('~limits/throttle/max',  1.0)
+        self.MIN_STEERING_EFFORT = rospy.get_param('~limits/steering/min', -1.0)
+        self.MAX_STEERING_EFFORT = rospy.get_param('~limits/steering/max',  1.0)
+
+        # Make closed loop velocity controller
+        if rospy.get_param('controller_type') == 'lead_lag':
+            self.controller = LeadLagController(
+                rospy.get_param('~lead/gain'),
+                rospy.get_param('~lead/alpha'),
+                rospy.get_param('~lead/beta'),
+                rospy.get_param('~lag/alpha'),
+                rospy.get_param('~lag/beta'))
+        elif rospy.get_param('controller_type') == 'pid':
+            self.controller = PIDController(
+                rospy.get_param('~pid/kp'),
+                rospy.get_param('~pid/ki'),
+                rospy.get_param('~pid/kd'),
+                rospy.get_param('~pid/anti_windup'),
+                rospy.get_param('~pid/deadband'),
+                1.0 / rospy.get_param('~rate', 10.0))
+        else:
+            raise NotImplementedError(f"unrecognized controller type: {rospy.get_param('controller_type')}")
+
+        # State variables
+        self.vr_ref = 0.0
+        self.psi_ref = 0.0
+
+        # Publishers
+        self.pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber('command', ControlCommand, self.command_cb)
+        rospy.Subscriber('odom', Odometry, self.odom_cb)
+
+        # trust that odom_cb runs at proper rate
+        rospy.spin()
+
+    def command_cb(self, cmd_msg):
+        """Callback for command messages for car."""
+        # calculate reference steering angle and rear wheel velocities
+        cos_beta = cos(sin(cmd_msg.curvature * self.BODY_LENGTH / 2.0))
+        self.vr_ref = cmd_msg.velocity * cos_beta
+        self.psi_ref = atan(self.BODY_LENGTH * cmd_msg.curvature / cos_beta)
+
+    def odom_cb(self, odom_msg):
+        """Callback for odom messages from car."""
+        # calculate throttle effort (closed loop)
+        error = self.vr_ref - odom_msg.twist.twist.linear.x
+        throttle_effort = self.controller.step(error)
+        throttle_effort = max(min(throttle_effort, self.MAX_THROTTLE_EFFORT), self.MIN_THROTTLE_EFFORT)
+
+        # calculate steering effort (open loop)
+        steering_effort = self.psi_ref / self.STEERING_THROW
+        steering_effort = max(min(steering_effort, self.MAX_STEERING_EFFORT), self.MIN_STEERING_EFFORT)
+
+        # publish actuator efforts
+        msg = ControlEffort()
+        msg.header.stamp = odom_msg.header.stamp
+        msg.throttle = throttle_effort
+        msg.steering = steering_effort
+        self.pub.publish(msg)
+
+if __name__ == "__main__":
+    Controller()
