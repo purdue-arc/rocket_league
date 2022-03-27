@@ -15,8 +15,8 @@ lag:
   beta:  0.0
 # parameters for pid
 pid:
-  kp: 1.0
-  ki: 0.0
+  kp: 1.5
+  ki: 0.5
   kd: 0.0
   anti_windup: 0.0
   deadband: 0.0
