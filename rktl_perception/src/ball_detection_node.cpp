@@ -68,6 +68,9 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             /* find largest contour */
             cv::Moments moment = cv::moments(contours.at(getMaxAreaContourId(contours)));
 
+
+            if (cv::contourArea(contours.at(getMaxAreaContourId(contours))) < 50) return;
+
             /* calculates the center of the contour*/
             double centerX = moment.m10 / moment.m00;
             double centerY = moment.m01 / moment.m00;
