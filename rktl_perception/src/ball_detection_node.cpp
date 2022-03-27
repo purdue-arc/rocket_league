@@ -54,8 +54,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
 
         /* Detect the object based on HSV Range Values */
         inRange(frame_HSV, cv::Scalar(minHue, minSat, minVib), cv::Scalar(maxHue, maxSat, maxVib), frame_threshold);
-        erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
-        dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 2, 1, 1);
+        erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 4, 1, 1);
+        dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 5, 1, 1);
 
         /* find all the contours */
         std::vector<std::vector<cv::Point> > contours;
@@ -80,7 +80,13 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             /* create camera model and project the pixel to a vector */
             camera.fromCameraInfo(info);
             cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
-            
+
+            /* turn the vector into a unit vector */
+            double magnitude = sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z);
+            cam.x /= magnitude;
+            cam.y /= magnitude;
+            cam.z /= magnitude;
+
             /* create the vector to publish */
             vec.vector.x = cam.x;
             vec.vector.y = cam.y;

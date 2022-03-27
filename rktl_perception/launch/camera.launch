@@ -39,7 +39,7 @@
             <param name="buffer_size" type="int" value="300" />
             <param name="ball_sub_topic" type="str" value="ball_vec" />
             <param name="ball_pub_topic" type="str" value="/ball/pose" />
-            <param name="ball_radius" type="double" value="0.05" />
+            <param name="ball_radius" type="double" value="0.03" />
             <param name="pub_topic" type="str" value="pose" />
             <rosparam param="pub_topics">
                 '0,1,2,3,4,5,6,7': /origin/pose
@@ -56,6 +56,7 @@
             <param name="max_sat" value="180" />
             <param name="min_vib" value="40" />
             <param name="max_vib" value="100" />
+
         </node>
     </group>
 </launch>

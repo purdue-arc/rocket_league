@@ -1,3 +1,4 @@
 Header header
 string child_frame_id
-rktl_msgs/Waypoint[] waypoint
+float64 velocity
+rktl_msgs/Waypoint[] waypoints
