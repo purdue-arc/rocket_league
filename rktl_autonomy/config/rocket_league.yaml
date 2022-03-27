@@ -1,14 +1,14 @@
 reward:
   # reward to be given each frame
-  # constant: 0.0
+  constant: 0.0
   # reward as a function of squared distance from the ball
   ball_dist_sq: -0.5
   # reward as a function of squared distance from the ball to the goal
-  # goal_dist_sq: -1.0
+  goal_dist_sq: -1.0
   # reward given when the episode ends with the car scoring the proper goal
-  # win: 50000
+  win: 50000
   # reward given when the episode ends with the car scoring on the wrong goal
-  # loss: -50000
+  loss: -50000
   # reward given each frame when the car is in reverse
   # reverse: -25
   # reward given each frame when the car is near the walls
