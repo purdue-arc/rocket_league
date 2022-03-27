@@ -11,7 +11,7 @@ License:
 CarLink::CarLink(ros::NodeHandle *const nh, const int car_num, const int pin) :
         nh{nh},
         car_num{car_num},
-        topic{String("~/car") + String(car_num) + String("/effort")},
+        topic{String("car") + String(car_num) + String("/effort")},
         throttle_throw{0},
         steering_center{1500},
         steering_left{1500},
@@ -40,10 +40,10 @@ void CarLink::disable() {
 
 bool CarLink::update_params() {
     if (nh->connected()
-            && nh->getParam((String("~/car") + String(car_num) + String("/throttle_throw")).c_str(),    &throttle_throw)
-            && nh->getParam((String("~/car") + String(car_num) + String("/steering_center")).c_str(),   &steering_center)
-            && nh->getParam((String("~/car") + String(car_num) + String("/steering_left")).c_str(),     &steering_left)
-            && nh->getParam((String("~/car") + String(car_num) + String("/steering_right")).c_str(),    &steering_right)) {
+            && nh->getParam((String("~car") + String(car_num) + String("/throttle_throw")).c_str(),    &throttle_throw)
+            && nh->getParam((String("~car") + String(car_num) + String("/steering_center")).c_str(),   &steering_center)
+            && nh->getParam((String("~car") + String(car_num) + String("/steering_left")).c_str(),     &steering_left)
+            && nh->getParam((String("~car") + String(car_num) + String("/steering_right")).c_str(),    &steering_right)) {
         return true;
     } else {
         throttle_throw = 0;
