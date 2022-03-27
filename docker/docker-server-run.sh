@@ -11,6 +11,11 @@ then
     TTY_OPTS="-it"
 fi
 
+if [ "$(docker ps -a | grep $USER-$CONTAINER_NAME)" ]
+then
+    docker kill $USER-$CONTAINER_NAME
+fi
+
 $WS_DIR/src/rocket_league/docker/docker-build.sh
 
 docker run --rm \
@@ -30,5 +35,4 @@ docker run --rm \
     $REPO_NAME:local-$USER \
     ${DOCKER_CMD:+/bin/zsh -c "$DOCKER_CMD"}
 
-docker kill $REPO_NAME:local-$USER
-docker rmi $REPO_NAME:local-$USER
+docker rmi -f $REPO_NAME:local-$USER
