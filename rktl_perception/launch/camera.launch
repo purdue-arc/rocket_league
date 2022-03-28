@@ -4,7 +4,7 @@
     <arg name="manager_threads" default="4" />
     <arg name="camera_name" default="cam0" />
 
-    <group ns="cams/$(arg camera_name)" output="screen">
+    <group ns="cams/$(arg camera_name)">
         <!-- nodelet manager -->
         <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager"
             output="screen">
