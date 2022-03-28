@@ -1,5 +1,6 @@
 <launch>
-    <!-- Use hardcoded values -->
+    <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
+    <!-- Use hardcoded values for ones needed for check -->
     <rosparam>
         field:
             width: 3.5
