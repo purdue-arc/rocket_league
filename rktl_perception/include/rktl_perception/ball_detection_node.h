@@ -26,6 +26,7 @@
 #include <geometry_msgs/Vector3Stamped.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <std_msgs/Int8.h>
 
 /* math & vectors */
 #include <vector>
@@ -45,7 +46,7 @@ private:
     image_transport::ImageTransport image_transport;
     image_transport::CameraSubscriber camera_subscriber;
     image_transport::Publisher imgPub;
-    ros::Publisher vecPub;
+    ros::Publisher vecPub, sizePub;
     ros::Subscriber detectionSub;
     int minHue, minSat, minVib, maxHue, maxSat, maxVib, minSize;
     double originX, originY;
