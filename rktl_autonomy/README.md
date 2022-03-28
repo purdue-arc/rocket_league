@@ -235,7 +235,7 @@ Since the batch script runs all these containers in the background then exits,
 `CTRL+C` won't do anything. Get either the container name or ID using methods
 discussed above, then use the following command to stop it:
 ```
-docker kill <name or id>
+docker container kill <name or id>
 ```
 
 ### Hyperparameter Searching
