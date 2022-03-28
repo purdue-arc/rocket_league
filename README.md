@@ -12,6 +12,8 @@ This package contains all code for the "High Level Planner" section. It provides
 an interface between ROS and OpenAI Gym, and is therefore capable of running a
 deep reinforcement learning agent capable of controlling the car.
 
+For further information see its specific [`README.md`](rktl_autonomy/README.md) file.
+
 ### rktl_planner
 This package contains the "Mid Level Software" group. It provides an alternative
 method to the `rktl_autonomy` stack to control the car.
