@@ -57,9 +57,9 @@ bool CarLink::update_params() {
 void CarLink::effort_cb(const rktl_msgs::ControlEffort& effort) {
     // throttle
     if (enabled) {
-        ppm_out.write(THROTTLE_CHANNEL, THROTTLE_ZERO);
-    } else {
         ppm_out.write(THROTTLE_CHANNEL, THROTTLE_ZERO + throttle_throw * effort.throttle);
+    } else {
+        ppm_out.write(THROTTLE_CHANNEL, THROTTLE_ZERO);
     }
 
     // steering
