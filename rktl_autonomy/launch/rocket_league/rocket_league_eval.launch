@@ -2,10 +2,12 @@
     <!-- arguments -->
     <arg name="plot_log"      default="false"/>
     <arg name="render"        default="true"/>
-    <arg name="weights"       default="~/catkin_ws/data/rocket_league/weights"/>
+    <arg name="sim_mode"      default="ideal"/>
+    <arg name="weights"       default="~/catkin_ws/data/rocket_league/model"/>
 
     <!-- constants -->
     <arg name="rate"          value="10.0"/>
+    <arg name="run_agent"     value="false"/>
 
     <!-- environment -->
     <include file="$(find rktl_launch)/launch/rocket_league_sim.launch" pass_all_args="true"/>
