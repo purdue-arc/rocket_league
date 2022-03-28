@@ -2,7 +2,7 @@
     <arg name="load_manager" default="true" />
     <arg name="manager_name" default="camera_manager" />
     <arg name="manager_threads" default="4" />
-    <arg name="camera_name" default="cam2" />
+    <arg name="camera_name" default="cam0" />
 
     <group ns="cams/$(arg camera_name)">
         <!-- nodelet manager -->
@@ -56,7 +56,7 @@
             <param name="max_sat" value="180" />
             <param name="min_vib" value="40" />
             <param name="max_vib" value="100" />
-
+            <param name="min_size" value="50" />
         </node>
     </group>
 </launch>
