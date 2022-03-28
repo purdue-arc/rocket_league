@@ -44,7 +44,10 @@ to customize it to a specific ROS network's environment. Three such environments
 are provided.
 
 ### Rocket League
-This the main environment intended for use.
+This the main environment intended for use. It interfaces the agent with the
+mess of other nodes that exist in this repository. Look at higher level
+documentation to learn more about the inputs and outputs from this node and how
+they are consumed or created by others.
 
 ### Snake Game
 This provides an interface to the snake game created in the [ARC Tutorials](https://github.com/purdue-arc/arc_tutorials/tree/snake_dqn).
@@ -63,10 +66,95 @@ confirmed that they both behave the same way.
 ## Training
 Training is the process for determining the weights used in the agent's neural
 network. As discussed earlier, it needs to mess with sim-time, so there is a
-specific way to launch it. You should not manually use any ROS commands when
-launching for training.
+specific way to launch it. **You should not manually use any ROS commands when
+launching for training.**
 
 ### Training Script
+There are scripts for each environment listed above. This will describe the
+Rocket League one, but the others are very similar.
+
+This script basically does everything to get an agent training. It will generate
+a UUID (used for logging weights / progress), build the environment(s) (which
+will internally handle everything with ROS), set it up to periodically log, then
+kick it off in a training loop that will run for a very long time.
+
+If you want to modify the type of agent or hyperparameters, this is the place to
+do it. There is no reason there can't be several different scripts to train
+several different types of agents.
+
+#### Implementation details
+When you look under the hood into how `ROSInterface` launches the different
+ROS networks, things get a little messy. This will explain how that works,
+mainly so that it can be fixed if it ever breaks.
+
+When you instantiate a `ROSInterface` in training mode, it launches the entire
+ROS network needed for training, then makes itself a node in that network. This
+is done by giving it a launch file. These are appended with `_train` in the
+launch file directory in this package. If you want to modify the environment
+from a ROS perspective, edit that. From the training script, you can pass in
+ROS arguments (like on the command line), so you can have different options
+exposed that way.
+
+Things get messy when you want to use vectorized environments to run several
+environments at once for a single agent. This increases the amount of data it
+receives per time-step and can increase the training speed.
+
+Therefore, running vectorized environments means you need multiple ROS networks
+running at once (since each entire network is an environment). This is OK since
+ROS can run on ports other than the default of 11311.
+
+Each physical process on the computer can only be one ROS node in one ROS
+network. Therefore, the training script itself needs to spawn multiple
+subprocesses for each environment. This is easily done through StableBaselines3's
+`SubprocVecEnv` class.
+
+These separate processes now need to each get their own unique port to run a ROS
+network on. This is done through negotiation with temporary files. One
+environment will end up with the default port of 11311 (useful so your ROS
+commands work without needing to change `ROS_MASTER_URI`) and the others will be
+scattered on random free ports. To prevent deadlocks, it is configured to launch
+only one environment at a time. This can be a little slow, but it is robust.
+
+An issue arises when you want to terminate training early. There might be a bug
+in `SubprocVecEnv` or in our own code, but when you kill the training early with
+`CTRL+C`, there are sometimes processes left hanging around that shouldn't be
+there. You can kill these using terminal commands, or you can just kill the
+Docker container and start a new one.
+
+If different environments are run in different containers, negotiating ports is
+not an issue since each container has its own virtual network.
+
+#### Checking in on training
+Since the environment is ultimately a ROS network, you can use all your regular
+ROS commands to see what is happening. If you have a terminal into the Docker
+container, you can run the visualizer: `roslaunch rktl_sim visualizer.launch`.
+
+Keep in mind that the timescale of the simulation window will vary according to
+CPU load for reasons discussed above. You can safely close the visualizer and
+launch it again later.
+
+The environment also has a node that generates a plot of performance over time.
+These save into a logging folder `catkin_ws/data/rocket_league/<UUID>` by
+default. There will typically be one plot, `plot_11311.png` by default. If using
+vectorized environments, you can make it produce a plot for each environment if
+desired, but they should all have equivalent behavior.
+
+The StableBaselines3 library is also configured to output data on the training
+progress, which saves to a text and csv file in that same folder. That is
+sometimes less helpful to look at since it is harder to interpret.
+
+There will also be many zip files in the same folder. These are the saved model
+weights, which can be loaded in order to run the agent in evaluation mode later.
+See below.
+
+#### Stopping training
+Simply `CTRL+C` the training script. Since it has to run for a long period of
+time to train, you probably want to use `tmux`. As noted in **Implementation details**
+above, it might leave a mess you need to clean up.
+
+After stopping training, all the log files noted in the above section will still
+exist, and you can even resume training using the zip files if you had to. This
+isn't implemented in the training script now, but it should be possible.
 
 ### Batch Train Script
 This script exists to simplify the process of checking out the proper code,
@@ -107,7 +195,43 @@ useful), then run the following command on the machine:
 - Copy-paste the output to some place you'll remember.
 
 #### Checking in on training
+You can use all of the methods discussed in the regular training script to check
+on progress. The only difference is that you need to know where to find the
+files and how to connect to the Docker container.
 
+To find the files, you can do one of two things. Either look at the output from
+when you ran the batch train script and look for the run ID of each specific
+experiment. You'll find these logs in the usual spot.
+
+Alternatively, you can go to the log directory listed at the very top of the
+batch script output. It'll be something like: `catkin_ws/data/rocket_league/batch_logs/<UUID>`.
+Inside there, there will be symlinks (shortcuts) to the logging folders for each
+experiment being run, named by the first 7 digits of the git commit has. Note
+that the UUID for the experiment and for the batch script will be different.
+
+To connect to the Docker container, again, there are a few different ways. You
+must look at the output of the script to see what name in gave the container.
+The container name will the the batch script's UUID, then the first seven digits
+of the git commit hash, separated by a hyphen.
+
+You can also run `docker container ls` and look at the container names and IDs.
+You may be able to guess which line is your container given the naming scheme
+and seeing how long it has been running. You can either use the ID or name. The
+ID will be shorter but the name follows the naming convention noted in the above
+paragraph.
+
+Then you can attach your terminal to it with the following command:
+```
+docker exec -it <name or id> zsh
+```
+
+#### Stopping training
+Since the batch script runs all these containers in the background then exits,
+`CTRL+C` won't do anything. Get either the container name or ID using methods
+discussed above, then use the following command to stop it:
+```
+docker kill <name or id>
+```
 
 ### Hyperparameter Searching
 TODO
