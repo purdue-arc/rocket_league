@@ -14,7 +14,6 @@ BallDetection::BallDetection() :
     pnh{"~"},
     image_transport{nh},
     vecPub{nh.advertise<geometry_msgs::Vector3Stamped>("ball_vec", 10)},
-    sizePub{nh.advertise<std_msgs::Int8>("ball_size", 10)},
     imgPub{image_transport.advertise("threshold_img", 1)},
     camera_subscriber{image_transport.subscribeCamera("image_rect_color", 10, &BallDetection::BallCallback, this)},
 
@@ -88,10 +87,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             vec.header = msg->header;
             vecPub.publish(vec);
 
-            /* publish the size of the contour */
-            std_msgs::Int8 size;
-            size.data = cv::contourArea(largestContour);
-            sizePub.publish(size);
+            /* debug the size of the countour */
+            ROS_INFO("Size of the largest ball: %.0f\n", cv::contourArea(largestContour));
             
             /* publishes the threshold image */
             if (publishThresh) {

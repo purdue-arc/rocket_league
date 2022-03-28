@@ -4,7 +4,7 @@
     <arg name="manager_threads" default="4" />
     <arg name="camera_name" default="cam0" />
 
-    <group ns="cams/$(arg camera_name)">
+    <group ns="cams/$(arg camera_name)" output="screen">
         <!-- nodelet manager -->
         <node if="$(arg load_manager)" pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager"
             output="screen">
@@ -48,15 +48,8 @@
         </node>
 
         <!-- Ball tracking -->
-        <node pkg="rktl_perception" type="ball_detection" name="ball_detection">
-            <param name="publishThresh" value="true" />
-            <param name="min_hue" value="50" />
-            <param name="max_hue" value="100" />
-            <param name="min_sat" value="70" />
-            <param name="max_sat" value="180" />
-            <param name="min_vib" value="40" />
-            <param name="max_vib" value="100" />
-            <param name="min_size" value="50" />
+        <node pkg="rktl_perception" type="ball_detection" name="ball_detection" output="screen">
+            <rosparam command="load" file="$(find rktl_perception)/config/ball_settings.yaml" />
         </node>
     </group>
 </launch>

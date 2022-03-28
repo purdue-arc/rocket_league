@@ -1,0 +1,8 @@
+publishThresh: true
+min_hue: 50
+max_hue: 100 
+min_sat: 70 
+max_sat: 180 
+min_vib: 40
+max_vib: 100
+min_size: 250
