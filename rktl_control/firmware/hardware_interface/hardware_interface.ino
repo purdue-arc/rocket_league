@@ -30,6 +30,7 @@ void enable_all() {
     car3.enable();
     car4.enable();
     car5.enable();
+    digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void disable_all() {
@@ -39,6 +40,7 @@ void disable_all() {
     car3.disable();
     car4.disable();
     car5.disable();
+    digitalWrite(LED_BUILTIN, LOW);
 }
 
 bool update_all() {
@@ -50,22 +52,29 @@ bool update_all() {
         && car5.update_params();
 }
 
+// flag for if params have been properly set
+bool configured = false;
+
 // enabled / disable callback and subscriber
 void enable_callback(const std_msgs::Bool& enable) {
-    if (enable.data) {
+    if (enable.data && configured) {
         enable_all();
     } else {
        disable_all();
     }
 }
+
+// subscriber object
 ros::Subscriber<std_msgs::Bool> enable_sub{"enable", enable_callback};
 
-// flag for updating params on comms loss
-bool comms_loss = false;
-
 void setup() {
+    // LED pin
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, LOW);
+    
     // init node
     nh.initNode();
+    nh.subscribe(enable_sub);
 
     // wait until connected
     while (!nh.connected()) {
@@ -73,19 +82,15 @@ void setup() {
     }
 
     // get params
-    update_all();
-
-    // allow movement
-    nh.subscribe(enable_sub);
+    configured = update_all();
 }
 
 void loop() {
     if (!nh.connected()) {
+        configured = false;
         disable_all();
-        comms_loss = true;
-    } else if (comms_loss) {
-        update_all();
-        comms_loss = false;
+    } else if (!configured) {
+        configured = update_all();
     }
 
     nh.spinOnce();
