@@ -7,7 +7,7 @@ License:
 
 # package
 from rktl_autonomy import ROSInterface
-from gym.spaces import Box
+from gym.spaces import Box, Discrete
 
 # ROS
 import rospy
@@ -89,14 +89,7 @@ class RocketLeagueInterface(ROSInterface):
     @property
     def action_space(self):
         """The Space object corresponding to valid actions."""
-        return Box(
-            # throttle, steering
-            low=np.array([
-                self._MIN_VELOCITY, self._MIN_CURVATURE],
-                dtype=np.float32),
-            high=np.array([
-                self._MAX_VELOCITY, self._MAX_CURVATURE],
-                dtype=np.float32))
+        return Discrete(7)
 
     @property
     def observation_space(self):
@@ -106,16 +99,16 @@ class RocketLeagueInterface(ROSInterface):
             # x, y, vx, vy (ball)
             low=np.array([
                 -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
-                -self._FIELD_WIDTH/2,
-                -pi, -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
+                -self._FIELD_WIDTH/2, -pi,
+                -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
                 -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
                 -self._FIELD_WIDTH/2,
                 -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
                 dtype=np.float32),
             high=np.array([
                 (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
-                self._FIELD_WIDTH/2,
-                pi, self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
+                self._FIELD_WIDTH/2, pi,
+                self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
                 (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
                 self._FIELD_WIDTH/2,
                 self._MAX_OBS_VEL, self._MAX_OBS_VEL],
@@ -178,7 +171,6 @@ class RocketLeagueInterface(ROSInterface):
         x, y, __, v, __ = self._car_odom
         if v < 0:
             reward += self._REVERSE_REWARD
-
         if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
             abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
@@ -192,12 +184,30 @@ class RocketLeagueInterface(ROSInterface):
         """Publish an action to the ROS network."""
         assert self.action_space.contains(action)
 
-        velocity, curvature = np.split(action, action.size)
-
         msg = ControlCommand()
+        if action == 0:         # stop
+            msg.curvature = 0.0
+            msg.velocity = 0.0
+        elif action == 1:       # forward, left
+            msg.curvature = self._MAX_CURVATURE
+            msg.velocity = self._MAX_VELOCITY
+        elif action == 2:       # forward, right
+            msg.curvature = self._MIN_CURVATURE
+            msg.velocity = self._MAX_VELOCITY
+        elif action == 3:       # forward
+            msg.curvature = 0.0
+            msg.velocity = self._MAX_VELOCITY
+        elif action == 4:       # reverse, left
+            msg.curvature = self._MAX_CURVATURE
+            msg.velocity = self._MIN_VELOCITY
+        elif action == 5:       # reverse, right
+            msg.curvature = self._MIN_CURVATURE
+            msg.velocity = self._MIN_VELOCITY
+        else:                   # reverse
+            msg.curvature = 0.0
+            msg.velocity = self._MIN_VELOCITY
+
         msg.header.stamp = rospy.Time.now()
-        msg.velocity = velocity
-        msg.curvature = curvature
         self._command_pub.publish(msg)
 
     def _car_odom_cb(self, odom_msg):
@@ -212,9 +222,7 @@ class RocketLeagueInterface(ROSInterface):
         v = odom_msg.twist.twist.linear.x
         omega = odom_msg.twist.twist.angular.z
 
-        self._car_odom = (
-            x, y, yaw,
-            v, omega)
+        self._car_odom = (x, y, yaw, v, omega)
 
         with self._cond:
             self._cond.notify_all()
@@ -226,8 +234,7 @@ class RocketLeagueInterface(ROSInterface):
         vx = odom_msg.twist.twist.linear.x
         vy = odom_msg.twist.twist.linear.y
 
-        self._ball_odom = (
-            x, y, vx, vy)
+        self._ball_odom = (x, y, vx, vy)
 
         with self._cond:
             self._cond.notify_all()
