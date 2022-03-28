@@ -225,6 +225,11 @@ Then you can attach your terminal to it with the following command:
 docker exec -it <name or id> zsh
 ```
 
+You can also use the join script if you want:
+```
+CONTAINER_NAME=<name or id> ./docker/docker-join.sh
+```
+
 #### Stopping training
 Since the batch script runs all these containers in the background then exits,
 `CTRL+C` won't do anything. Get either the container name or ID using methods
@@ -237,3 +242,15 @@ docker kill <name or id>
 TODO
 
 ## Real-Time Evaluation
+At this point, you should have trained your network and have a zip file with
+model weights. To evaluate, you can simply run the launch file for the
+evaluation ROS network:
+```
+roslaunch rktl_autonomy rocket_league_eval.launch
+```
+
+You should rename the zip file as `catkin_ws/data/rocket_league/model.zip` or
+use a command line argument to tell it to use another location:
+```
+roslaunch rktl_autonomy rocket_league_eval.launch weights:=<path and name minus '.zip'>
+```
