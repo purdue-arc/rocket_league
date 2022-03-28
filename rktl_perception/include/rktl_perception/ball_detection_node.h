@@ -9,6 +9,7 @@
 
 /* ros */
 #include <ros/ros.h>
+#include <ros/console.h>
 
 /* image */
 #include <image_transport/image_transport.h>
@@ -47,7 +48,7 @@ private:
     image_transport::Publisher imgPub;
     ros::Publisher vecPub;
     ros::Subscriber detectionSub;
-    int minHue, minSat, minVib, maxHue, maxSat, maxVib;
+    int minHue, minSat, minVib, maxHue, maxSat, maxVib, minSize;
     double originX, originY;
     bool publishThresh;
     image_geometry::PinholeCameraModel camera;
