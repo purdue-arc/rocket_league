@@ -18,7 +18,20 @@ from std_srvs.srv import Empty
 # System
 import numpy as np
 from tf.transformations import euler_from_quaternion
+from enum import IntEnum, unique, auto
 from math import pi, tan
+
+@unique
+class CarActions(IntEnum):
+    """Possible actions for car."""
+    STOP = 0
+    FWD_LEFT = auto()
+    FWD_RIGHT = auto()
+    FWD = auto()
+    REV_LEFT = auto()
+    REV_RIGHT = auto()
+    REV = auto()
+    SIZE = auto()
 
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
@@ -89,7 +102,7 @@ class RocketLeagueInterface(ROSInterface):
     @property
     def action_space(self):
         """The Space object corresponding to valid actions."""
-        return Discrete(7)
+        return Discrete(CarActions.SIZE)
 
     @property
     def observation_space(self):
@@ -185,29 +198,28 @@ class RocketLeagueInterface(ROSInterface):
         assert self.action_space.contains(action)
 
         msg = ControlCommand()
-        if action == 0:         # stop
-            msg.curvature = 0.0
-            msg.velocity = 0.0
-        elif action == 1:       # forward, left
-            msg.curvature = self._MAX_CURVATURE
-            msg.velocity = self._MAX_VELOCITY
-        elif action == 2:       # forward, right
-            msg.curvature = self._MIN_CURVATURE
-            msg.velocity = self._MAX_VELOCITY
-        elif action == 3:       # forward
-            msg.curvature = 0.0
-            msg.velocity = self._MAX_VELOCITY
-        elif action == 4:       # reverse, left
-            msg.curvature = self._MAX_CURVATURE
-            msg.velocity = self._MIN_VELOCITY
-        elif action == 5:       # reverse, right
-            msg.curvature = self._MIN_CURVATURE
-            msg.velocity = self._MIN_VELOCITY
-        else:                   # reverse
-            msg.curvature = 0.0
-            msg.velocity = self._MIN_VELOCITY
-
         msg.header.stamp = rospy.Time.now()
+
+        if (    action == CarActions.FWD or
+                action == CarActions.FWD_RIGHT or
+                action == CarActions.FWD_LEFT):
+            msg.velocity = self._MAX_VELOCITY
+        elif (  action == CarActions.REV or
+                action == CarActions.REV_RIGHT or
+                action == CarActions.REV_LEFT):
+            msg.velocity = self._MIN_VELOCITY
+        else:
+            msg.velocity = 0.0
+
+        if (    action == CarActions.FWD_LEFT or
+                action == CarActions.REV_LEFT):
+            msg.curvature = self._MAX_CURVATURE
+        elif (  action == CarActions.FWD_RIGHT or
+                action == CarActions.REV_RIGHT):
+            msg.curvature = self._MIN_CURVATURE
+        else:
+            msg.curvature = 0.0
+
         self._command_pub.publish(msg)
 
     def _car_odom_cb(self, odom_msg):
