@@ -59,26 +59,26 @@ class LeadLagController(object):
         self.BETA_LAG = b_lag
         
         # State variables
-        self.prev_error = 0.0
+        self.prev_R_lead = 0.0
+        self.prev_R_lag = 0.0
 
     def step(self, error):
         """One time step."""
-        # effort = k(z+a)/(z+b)_lead*(z+a)/(z+b)_lag * error
-        try:
-            effort = (self.GAIN_LEAD *
-                (error + self.ALPHA_LEAD * self.prev_error) /
-                (error + self.BETA_LEAD * self.prev_error) *
-                (error + self.ALPHA_LAG * self.prev_error) /
-                (error + self.BETA_LAG * self.prev_error))
-        except ZeroDivisionError:
-            effort = 0.0
-        self.prev_error = error
+        R_lead = error - self.BETA_LEAD * self.prev_R_lead
+        U_lead = R_lead + self.ALPHA_LEAD * self.prev_R_lead
+        R_lag = U_lead - self.BETA_LAG * self.prev_R_lag
+        U_lag = R_lag + self.ALPHA_LAG * self.prev_R_lag
+        effort = self.GAIN_LEAD * U_lag
+
+        self.prev_R_lead = R_lead
+        self.prev_R_lag = R_lag
 
         return effort
 
     def reset(self):
         """Reset to initial state."""
-        self.prev_error = 0
+        self.prev_R_lead = 0.0
+        self.prev_R_lag = 0.0
 
 class Controller(object):
     """Controller for car."""
