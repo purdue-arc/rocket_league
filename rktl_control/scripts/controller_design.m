@@ -22,9 +22,9 @@ G_zoh = c2d(G, ts, 'zoh');
 
 % frequency domain, lead lag controller design
 % Inputs
-sse = 0.01; % steady state error. Percent error wrt velocity input
-PM = 60;    % desired phase margin. Degrees. Higher increases stability. 30 is suggested minimum
-w0 = 5.0;   % desired gain crossover frequency. Rad/s. Higher increases speed
+sse = 0.05; % steady state error. Percent error wrt velocity input
+PM = 45;    % desired phase margin. Degrees. Higher increases stability. 30 is suggested minimum
+w0 = 2.0;   % desired gain crossover frequency. Rad/s. Higher increases speed
 
 % Calculate required controller gain
 Kc = (1/sse - 1)/K;
@@ -35,7 +35,7 @@ phi_0 = p + 180;        % deg
 M0 = 20*log10(m * Kc);  % dB
 
 % Lead controller
-phi_m = PM - phi_0 + 5;
+phi_m = PM - phi_0 + 5;     % can tweak the 5 degree fudge factor if desired
 gamma = (1+sind(phi_m)) / (1-sind(phi_m));
 wz = w0 / sqrt(gamma);
 wp = w0 * sqrt(gamma);
@@ -51,7 +51,16 @@ G_lag = 1/Gamma * tf([1 wz], [1 wp]);
 
 % Full lead-lag controller
 C = Kc * G_lead * G_lag;
-figure, margin(C*G)
+% figure, margin(C*G)
 
 % simulate
-figure, step(feedback(C*G, 1))
+figure, step(feedback(C*G, 1)), grid, hold
+
+% discretize
+Cd = c2d(C, ts, 'zoh');
+step(feedback(Cd*G_zoh, 1))
+
+Cdr = c2d(C, ts, 'tustin');
+step(feedback(Cdr*G_zoh, 1))
+
+legend(["Analog Controller", "Rectangular Integration", "Trapezoidal Integration"])
