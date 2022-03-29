@@ -37,17 +37,17 @@ M0 = 20*log10(m * Kc);  % dB
 % Lead controller
 phi_m = PM - phi_0 + 5;     % can tweak the 5 degree fudge factor if desired
 gamma = (1+sind(phi_m)) / (1-sind(phi_m));
-wz = w0 / sqrt(gamma);
-wp = w0 * sqrt(gamma);
-G_lead = gamma * tf([1 wz], [1 wp]);
+wz_lead = w0 / sqrt(gamma);
+wp_lead = w0 * sqrt(gamma);
+G_lead = gamma * tf([1 wz_lead], [1 wp_lead]);
 
 % Lag controller
 M_lead = 10*log10(gamma);
 M_lag = -(M0 + M_lead);
 Gamma = 10^(M_lag/-20);
-wz = w0 / 10;
-wp = wz / Gamma;
-G_lag = 1/Gamma * tf([1 wz], [1 wp]);
+wz_lag = w0 / 10;
+wp_lag = wz_lag / Gamma;
+G_lag = 1/Gamma * tf([1 wz_lag], [1 wp_lag]);
 
 % Full lead-lag controller
 C = Kc * G_lead * G_lag;
