@@ -22,12 +22,13 @@ BallDetection::BallDetection() :
      */
 
     publishThresh{pnh.param<bool>("publishThresh", false)},
-    minHue{pnh.param<int>("min_hue", 060)},
-    minSat{pnh.param<int>("min_sat", 135)},
-    minVib{pnh.param<int>("min_vib", 050)},
-    maxHue{pnh.param<int>("max_hue", 150)},
-    maxSat{pnh.param<int>("max_sat", 255)},
-    maxVib{pnh.param<int>("max_vib", 255)}
+    minHue{pnh.param<int>("min_hue", 050)},
+    maxHue{pnh.param<int>("max_hue", 100)},
+    minSat{pnh.param<int>("min_sat", 075)},
+    maxSat{pnh.param<int>("max_sat", 180)},
+    minVib{pnh.param<int>("min_vib", 040)},
+    maxVib{pnh.param<int>("max_vib", 100)},
+    minSize{pnh.param<int>("min_size", 50)}
     {}
 
 void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info) {
@@ -39,11 +40,6 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
         cv::Mat current_frame = cv_ptr->image;
         cv::Mat frame_HSV, frame_threshold;
-        
-        #if false /* shouldn't be necessary on the new computers */
-        /* resize image for performance */
-        cv::resize(current_frame, current_frame, cv::Size(), 0.5, 0.5);
-        #endif
 
         /* Convert from BGR to HSV colorspace */
         cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
@@ -66,7 +62,11 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
         if (contours.size() != 0) {
 
             /* find largest contour */
-            cv::Moments moment = cv::moments(contours.at(getMaxAreaContourId(contours)));
+            std::vector<cv::Point> largestContour = contours.at(getMaxAreaContourId(contours));
+            cv::Moments moment = cv::moments(largestContour);
+
+            /* do not include contours below a certain size */
+            if (cv::contourArea(largestContour) < minSize) return;
 
             /* calculates the center of the contour*/
             double centerX = moment.m10 / moment.m00;
@@ -78,21 +78,18 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             camera.fromCameraInfo(info);
             cv::Point3d cam = camera.projectPixelTo3dRay(cv::Point2d(centerX, centerY));
 
-            /* turn the vector into a unit vector */
-            double magnitude = sqrt(cam.x*cam.x + cam.y*cam.y + cam.z*cam.z);
-            cam.x /= magnitude;
-            cam.y /= magnitude;
-            cam.z /= magnitude;
-
             /* create the vector to publish */
             vec.vector.x = cam.x;
             vec.vector.y = cam.y;
             vec.vector.z = cam.z;
-            
+
             /* publish the location vector */
             vec.header = msg->header;
             vecPub.publish(vec);
 
+            /* debug the size of the countour */
+            ROS_INFO("Size of the largest ball: %.0f\n", cv::contourArea(largestContour));
+            
             /* publishes the threshold image */
             if (publishThresh) {
                 sensor_msgs::Image threshImg;
