@@ -23,24 +23,20 @@ G_zoh = c2d(G, ts, 'zoh');
 % frequency domain, lead lag controller design
 % Inputs
 sse = 0.01; % steady state error. Percent error wrt velocity input
-PM = 50;    % desired phase margin. Degrees. Higher increases stability. 30 is suggested minimum
-w0 = 10.0;   % desired gain crossover frequency. Rad/s. Higher increases speed
+PM = 60;    % desired phase margin. Degrees. Higher increases stability. 30 is suggested minimum
+w0 = 5.0;   % desired gain crossover frequency. Rad/s. Higher increases speed
 
 % Calculate required controller gain
 Kc = (1/sse - 1)/K;
 
 % Find existing phase and gain at w0
-phi_0 = angle(evalfr(G, w0*1i)) + pi;       % radians
-if phi_0 > pi
-    % only valid until phase is below -360 (w0 a bit over 10 rad/s)
-    % after that, need to subtract another 2*pi
-    phi_0 = phi_0 - 2*pi;
-end
-M0 = 20*log10(Kc * abs(evalfr(G, w0*1i)));  % dB
+[m, p] = bode(G, w0);
+phi_0 = p + 180;        % deg
+M0 = 20*log10(m * Kc);  % dB
 
 % Lead controller
 phi_m = PM - phi_0 + 5;
-gamma = (1+sin(phi_m)) / (1-sin(phi_m));
+gamma = (1+sind(phi_m)) / (1-sind(phi_m));
 wz = w0 / sqrt(gamma);
 wp = w0 * sqrt(gamma);
 G_lead = gamma * tf([1 wz], [1 wp]);
@@ -50,7 +46,7 @@ M_lead = 10*log10(gamma);
 M_lag = -(M0 + M_lead);
 Gamma = 10^(M_lag/-20);
 wz = w0 / 10;
-wp = w0 / Gamma;
+wp = wz / Gamma;
 G_lag = 1/Gamma * tf([1 wz], [1 wp]);
 
 % Full lead-lag controller
