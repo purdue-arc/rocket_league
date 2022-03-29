@@ -63,7 +63,7 @@ class LeadLagController(object):
 
     def step(self, error):
         """One time step."""
-        # effort = k(z+a)/(z+b)_lead*(z+a)/(z+b)_lag
+        # effort = k(z+a)/(z+b)_lead*(z+a)/(z+b)_lag * error
         try:
             effort = (self.GAIN_LEAD *
                 (error + self.ALPHA_LEAD * self.prev_error) /

@@ -57,10 +57,13 @@ C = Kc * G_lead * G_lag;
 figure, step(feedback(C*G, 1)), grid, hold
 
 % discretize
-Cd = c2d(C, ts, 'zoh');
-step(feedback(Cd*G_zoh, 1))
+Cd_rect = c2d(C, ts, 'zoh');
+step(feedback(Cd_rect*G_zoh, 1))
 
-Cdr = c2d(C, ts, 'tustin');
-step(feedback(Cdr*G_zoh, 1))
+Cd_trap = c2d(C, ts, 'tustin');
+step(feedback(Cd_trap*G_zoh, 1))
 
 legend(["Analog Controller", "Rectangular Integration", "Trapezoidal Integration"])
+
+% output
+zpk(Cd_trap)
