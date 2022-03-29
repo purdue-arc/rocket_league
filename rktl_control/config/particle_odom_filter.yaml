@@ -1,5 +1,12 @@
 rate: 10.0
-num_particles: 200
+num_particles: 500
 measurement_error:
   location: 0.05
-  orientation: 0.0872664 # 5 degrees
+  orientation: 0.09
+efforts:
+  throttle:
+    max:  1.5
+    min: -1.5
+  steering:
+    max:  1.0
+    min: -1.0

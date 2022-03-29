@@ -38,6 +38,10 @@ class ParticleOdomFilter(object):
         self.NUM_PARTICLES = rospy.get_param('~num_particles', 1000)
         self.DELTA_T = 1.0/rospy.get_param('~rate', 10.0)
         self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
+        self.MAX_THROTTLE = rospy.get_param('~efforts/throttle/max',  1.0)
+        self.MIN_THROTTLE = rospy.get_param('~efforts/throttle/min', -1.0)
+        self.MAX_STEERING = rospy.get_param('~efforts/steering/max',  1.0)
+        self.MIN_STEERING = rospy.get_param('~efforts/steering/min', -1.0)
 
         # variables
         self.filter = ParticleFilter(
@@ -130,11 +134,17 @@ class ParticleOdomFilter(object):
     def particle_dynamics(self, particles, controls=None):
         """Extrapolate all particles to future state, including random control noise."""
         if controls is None:
-            # create random control noise
-            # efforts uniformly distributed between -1.0 and +1.0
+            # create random control noise using uniformly distributed efforts
             rng = np.random.default_rng()
-            v_rear_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
-            psi_ref = rng.random(self.NUM_PARTICLES) * 2.0 - 1.0
+            v_rear_ref = self.MAX_SPEED * (
+                rng.random(self.NUM_PARTICLES)
+                * (self.MAX_THROTTLE - self.MIN_THROTTLE)
+                + self.MIN_THROTTLE)
+
+            psi_ref = self.STEERING_THROW * (
+                rng.random(self.NUM_PARTICLES)
+                * (self.MAX_STEERING - self.MIN_STEERING)
+                + self.MIN_STEERING)
         else:
             # use the provided control noise (likely for testing)
             v_rear_ref = controls[:,0]
