@@ -1,5 +1,5 @@
 rate: 10.0
-num_particles: 500
+num_particles: 200
 measurement_error:
   location: 0.05
   orientation: 0.09
