@@ -32,14 +32,14 @@ class Delay(object):
         self.buffer = deque()
 
         while not rospy.is_shutdown():
-            try:
+            if len(self.buffer) > 0:
                 time, msg = self.buffer.popleft()
                 wait = delay - (rospy.Time.now() - time).to_sec()
                 if wait > 0:
                     sleep(wait)
                 pub.publish(msg)
-            except IndexError:
-                pass
+            else:
+                sleep(delay/2)
 
     def msg_cb(self, msg):
         """Callback for enqueuing new message"""
