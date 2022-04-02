@@ -41,6 +41,7 @@ class ParticleOdomFilter(object):
         self.MIN_THROTTLE = rospy.get_param('~efforts/throttle/min', -1.0)
         self.MAX_STEERING = rospy.get_param('~efforts/steering/max',  1.0)
         self.MIN_STEERING = rospy.get_param('~efforts/steering/min', -1.0)
+        self.EXTRAPOLATE = rospy.get_param('~extrapolate', False)
 
         # additional parameters
         num_particles = rospy.get_param('~num_particles', 1000)
@@ -52,6 +53,7 @@ class ParticleOdomFilter(object):
             dynamics_fn=self.particle_dynamics,
             observe_fn=self.particle_observation,
             weight_fn=self.particle_weight,
+            transform_fn=self.particle_extrapolate,
             n_particles=num_particles,
             resample_proportion=resample_proportion)
 
@@ -79,9 +81,19 @@ class ParticleOdomFilter(object):
         ])
         observation = np.array([x, y, yaw])
 
+        # wildly extrapolate to present time if requested
+        # stash the required delta_t for extrapolation function
+        if self.EXTRAPOLATE:
+            self.extrapolate_delta_t = (rospy.Time.now() - pose_msg.header.stamp).to_sec()
+
         # filter
         self.filter.update(observation)
         state = self.filter.mean_state
+
+        # wildly extrapolate to present time if requested
+        # pull the result of the extrapolation function
+        if self.EXTRAPOLATE:
+            state = self.filter.transformed_particles
 
         # convert to odometry
         beta = atan(tan(state[4]) / 2.0)
@@ -130,8 +142,18 @@ class ParticleOdomFilter(object):
             # publish PoseArray msg
             self.cloud_pub.publish(cloud_msg)
 
-    def particle_dynamics(self, particles, controls=None):
+    def particle_extrapolate(self, particles, weights):
+        """Provide a mean state extrapolated to the present."""
+        particles = self.particle_dynamics(
+            particles,
+            delta_t=self.extrapolate_delta_t)
+        return np.sum(particles.T * weights, axis=-1).T
+
+    def particle_dynamics(self, particles, controls=None, delta_t=None):
         """Extrapolate all particles to future state, including random control noise."""
+        if delta_t is None:
+            delta_t = self.DELTA_T
+
         if controls is None:
             # create random control noise using uniformly distributed efforts
             rng = np.random.default_rng()
@@ -157,22 +179,22 @@ class ParticleOdomFilter(object):
         psi = particles[:,4]
 
         # update rear wheel velocity using 1st order model
-        v_rear = (v_rear - v_rear_ref) * exp(-self.DELTA_T/self.THROTTLE_TAU) + v_rear_ref
+        v_rear = (v_rear - v_rear_ref) * exp(-delta_t/self.THROTTLE_TAU) + v_rear_ref
 
         # update steering angle using massless acceleration to a fixed rate
-        psi = np.where(np.abs(psi_ref - psi) < self.STEERING_RATE*self.DELTA_T,
+        psi = np.where(np.abs(psi_ref - psi) < self.STEERING_RATE*delta_t,
             psi_ref,
             np.where(psi_ref > psi,
-                psi + self.STEERING_RATE*self.DELTA_T,
-                psi - self.STEERING_RATE*self.DELTA_T
+                psi + self.STEERING_RATE*delta_t,
+                psi - self.STEERING_RATE*delta_t
             )
         )
 
         # using bicycle model, extrapolate future state
         return np.array([
-            x + self.DELTA_T * v_rear * np.cos(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
-            y + self.DELTA_T * v_rear * np.sin(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
-            theta + self.DELTA_T * v_rear * np.tan(psi) / self.CAR_LENGTH,
+            x + delta_t * v_rear * np.cos(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
+            y + delta_t * v_rear * np.sin(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
+            theta + delta_t * v_rear * np.tan(psi) / self.CAR_LENGTH,
             v_rear,
             psi]).T
 
