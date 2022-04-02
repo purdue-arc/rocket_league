@@ -156,7 +156,7 @@ class Sim(object):
                     0.0,
                 ]
             else:
-                ballVelX = random.Uniform(-self.ball_speed_bound, self.ball_speed_bound)
+                ballVelX = random.uniform(-self.ball_speed_bound, self.ball_speed_bound)
                 ballVel = [
                     ballVelX,
                     math.sqrt(self.ball_speed_bound**2 - ballVelX**2),
@@ -293,7 +293,7 @@ class Sim(object):
                     0.0,
                 ]
             else:
-                ballVelX = random.Uniform(-self.ball_speed_bound, self.ball_speed_bound)
+                ballVelX = random.uniform(-self.ball_speed_bound, self.ball_speed_bound)
                 ballVel = [
                     ballVelX,
                     math.sqrt(self.ball_speed_bound**2 - ballVelX**2),
