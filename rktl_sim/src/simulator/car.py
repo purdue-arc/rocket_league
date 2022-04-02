@@ -22,6 +22,7 @@ class Car(object):
         self._STEERING_THROW = car_properties['steering_throw']
         self._STEERING_RATE = car_properties['steering_rate']
         self._MAX_CURVATURE = math.tan(self._STEERING_THROW) / self._LENGTH
+        print("Max curvature:", self._MAX_CURVATURE)
 
         # urdf configuration
         self.body_link_id = 1

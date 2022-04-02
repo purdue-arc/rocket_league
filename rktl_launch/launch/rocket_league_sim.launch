@@ -1,7 +1,7 @@
 <launch>
     <arg name="render" default="true"/>
     <arg name="pybullet_render" default="false"/>
-    <arg name="sim_mode" default="realistic"/> <!-- Either realistic or ideal (check docs) -->
+    <arg name="sim_mode" default="ideal"/> <!-- Either realistic or ideal (check docs) -->
     <arg name="input_delay" default="0.15"/>
     <arg name="output_delay" default="0.15"/>
 

@@ -70,8 +70,15 @@ def bezier_path_server(req: CreateBezierPathRequest):
                 durations.append(segment.duration.to_sec())
 
     res = CreateBezierPathResponse()
+
     res.bezier_paths = [x.to_msg() for x in bezier_segments]
     res.linear_path = PathMsg()
+
+    max_curv = 0.0
+    for x in bezier_segments:
+        max_curv = max(max_curv, x.find_max_curvature())
+
+    res.linear_path.max_curvature = max_curv
     res.linear_path.velocity = velocity
 
     duration = durations[-1]

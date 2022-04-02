@@ -6,7 +6,7 @@ from rktl_msgs.msg import BezierPath as BezierPathMsg
 from rospy import Duration
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import Duration as DurationMsg
-
+import numpy as np
 
 class BezierPath:
     def __init__(self, *args, **kwargs):
@@ -96,6 +96,20 @@ class BezierPath:
         vel = self.vel_at(secs)
         accel = self.accel_at(secs)
         return (vel.x * accel.x - vel.y * accel.y) / (vel.x ** 2 + vel.y ** 2)
+
+    def find_max_curvature(self):
+        max_curv = 0.0
+        for i in range(0, 100):
+            sec = self.duration * (i / 100.0)
+            vel = self.vel_at(sec)
+            vel = np.array([vel.x, vel.y])
+            accel = self.accel_at(sec)
+            accel = np.array([accel.x, accel.y])
+            num = np.linalg.norm(np.cross(vel, accel))
+            den = np.linalg.norm(vel)**3
+            curv = num / den
+            max_curv = max(max_curv, curv)
+        return max_curv
 
     def to_msg(self):
         duration_msg = DurationMsg(self.duration)

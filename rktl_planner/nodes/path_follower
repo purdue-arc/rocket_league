@@ -92,7 +92,7 @@ class PathFollower(object):
             i = self.last_pose_idx
             pnts_checked = 0
             while pnts_checked < lookahead_pnts:
-                if i == len(self.path) - 1:
+                if i >= len(self.path) - 1:
                     i = 0
 
                 start_pos, _ = convert.pose_to_array(self.path[i].pose)

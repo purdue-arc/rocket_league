@@ -65,8 +65,6 @@ def calculate_turn_rad(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     bot_line_y = math.sin(bot_yaw) * lookahead_dist
     bot_line = np.array([bot_line_x, bot_line_y, 0])
     sign = np.sign(np.cross(intersect_pos - bot_pos, bot_line))[2]
-    if bkw:
-        sign *= -1
 
     return radius * sign
 
