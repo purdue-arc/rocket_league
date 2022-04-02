@@ -1,6 +1,7 @@
 rate: 10.0
 num_particles: 1000
 publish_particles: true
+resample_proportion: 0.1
 measurement_error:
   location: 0.05
   orientation: 0.09

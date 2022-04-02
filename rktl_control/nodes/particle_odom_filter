@@ -35,7 +35,6 @@ class ParticleOdomFilter(object):
         self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
         self.MEAS_LOC_STD_DEV = rospy.get_param('~measurement_error/location', 0.05)
         self.MEAS_DIR_STD_DEV = rospy.get_param('~measurement_error/orientation', np.deg2rad(5))
-        self.NUM_PARTICLES = rospy.get_param('~num_particles', 1000)
         self.DELTA_T = 1.0/rospy.get_param('~rate', 10.0)
         self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
         self.MAX_THROTTLE = rospy.get_param('~efforts/throttle/max',  1.0)
@@ -43,14 +42,18 @@ class ParticleOdomFilter(object):
         self.MAX_STEERING = rospy.get_param('~efforts/steering/max',  1.0)
         self.MIN_STEERING = rospy.get_param('~efforts/steering/min', -1.0)
 
+        # additional parameters
+        num_particles = rospy.get_param('~num_particles', 1000)
+        resample_proportion = rospy.get_param('~resample_proportion', 0.1)
+
         # variables
         self.filter = ParticleFilter(
             prior_fn=self.particle_init,
             dynamics_fn=self.particle_dynamics,
             observe_fn=self.particle_observation,
             weight_fn=self.particle_weight,
-            n_particles=self.NUM_PARTICLES,
-            resample_proportion=0.1)
+            n_particles=num_particles,
+            resample_proportion=resample_proportion)
 
         # pubs / subs
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
@@ -112,11 +115,7 @@ class ParticleOdomFilter(object):
             # create PoseArray msg to hold all particles' poses
             cloud_msg = PoseArray()
             cloud_msg.header = pose_msg.header
-            for i in range(self.NUM_PARTICLES):
-                # extract particle states
-                x = self.filter.hypotheses[i,0]
-                y = self.filter.hypotheses[i,1]
-                theta = self.filter.hypotheses[i,2]
+            for x, y, theta in self.filter.hypotheses:
                 # create Pose msg
                 particle_msg = Pose()
                 particle_msg.position.x = x
@@ -137,12 +136,12 @@ class ParticleOdomFilter(object):
             # create random control noise using uniformly distributed efforts
             rng = np.random.default_rng()
             v_rear_ref = self.MAX_SPEED * (
-                rng.random(self.NUM_PARTICLES)
+                rng.random(particles.shape[0])
                 * (self.MAX_THROTTLE - self.MIN_THROTTLE)
                 + self.MIN_THROTTLE)
 
             psi_ref = self.STEERING_THROW * (
-                rng.random(self.NUM_PARTICLES)
+                rng.random(particles.shape[0])
                 * (self.MAX_STEERING - self.MIN_STEERING)
                 + self.MIN_STEERING)
         else:
