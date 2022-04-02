@@ -82,12 +82,14 @@ class SimulatorROS(object):
         # Creating the ball
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
+        ball_direct_at_object = rospy.get_param('~ball/direct_at_object', None)
         ball_noise = rospy.get_param('~ball/sensor_noise', None)
         if self.mode == SimulatorMode.IDEAL:
             ball_noise = None
 
         self.sim.create_ball('ball', init_pose=ball_init_pose,
-            init_speed=ball_init_speed, noise=ball_noise)
+            init_speed=ball_init_speed, direct_at_object=ball_direct_at_object,
+            noise=ball_noise)
         
         if self.mode == SimulatorMode.REALISTIC:
             self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',

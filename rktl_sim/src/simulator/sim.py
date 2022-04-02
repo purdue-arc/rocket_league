@@ -103,6 +103,8 @@ class Sim(object):
             p.changeDynamics(bodyUniqueId=brBackwallID, linkIndex=-1, restitution=1.0)
             self._walls[brBackwallID] = True
 
+        self.field_setup = field_setup
+
         self._cars = {}
         self._ballID = None
 
@@ -113,7 +115,8 @@ class Sim(object):
         p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
         p.setGravity(0, 0, -10)
 
-    def create_ball(self, urdf_name, init_pose=None, init_speed=None, noise=None):
+    def create_ball(self, urdf_name, init_pose=None, init_speed=None,
+        direct_at_object=None, noise=None):
         if urdf_name in self.urdf_paths:
             zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
             if init_pose:
@@ -139,12 +142,26 @@ class Sim(object):
             )
 
             # initize ball with some speed
-            self._speed_bound = math.sqrt(2.0) * init_speed
-            ballVel = [
-                random.uniform(-self._speed_bound, self._speed_bound),
-                random.uniform(-self._speed_bound, self._speed_bound),
-                0.0,
-            ]
+            self.ball_speed_bound = init_speed
+            self.direct_ball_at_object = direct_at_object
+            if direct_at_object:
+                if direct_at_object not in self.field_setup:
+                    raise ValueError(
+                        "direct_at_object must exist in field_setup"
+                    )
+                objPos = self.field_setup[direct_at_object]
+                ballVel = [
+                    (objPos[0] - ballPos[0]) * self.ball_speed_bound,
+                    (objPos[1] - ballPos[1]) * self.ball_speed_bound,
+                    0.0,
+                ]
+            else:
+                ballVelX = random.Uniform(-self.ball_speed_bound, self.ball_speed_bound)
+                ballVel = [
+                    ballVelX,
+                    math.sqrt(self.ball_speed_bound**2 - ballVelX**2),
+                    0.0,
+                ]
             p.resetBaseVelocity(self._ballID, ballVel, zeroOrient)
             self.ball_noise = noise
             return self._ballID
@@ -262,11 +279,26 @@ class Sim(object):
                 self._ballID, ballPos, p.getQuaternionFromEuler([0, 0, 0])
             )
 
-            ballVel = [
-                random.uniform(-self._speed_bound, self._speed_bound),
-                random.uniform(-self._speed_bound, self._speed_bound),
-                0.0,
-            ]
+            if self.direct_ball_at_object:
+                if self.direct_ball_at_object not in self.field_setup:
+                    raise ValueError(
+                        "direct_at_object must exist in field_setup"
+                    )
+                objPos = self.field_setup[self.direct_ball_at_object]
+                vec = [objPos[0] - ballPos[0], objPos[1] - ballPos[1], 0.0]
+                vec = np.array(vec) / np.linalg.norm(vec)
+                ballVel = [
+                    vec[0] * self.ball_speed_bound,
+                    vec[1] * self.ball_speed_bound,
+                    0.0,
+                ]
+            else:
+                ballVelX = random.Uniform(-self.ball_speed_bound, self.ball_speed_bound)
+                ballVel = [
+                    ballVelX,
+                    math.sqrt(self.ball_speed_bound**2 - ballVelX**2),
+                    0.0,
+                ]
             p.resetBaseVelocity(self._ballID, ballVel, [0, 0, 0])
 
         for car in self._cars.values():
