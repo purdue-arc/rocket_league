@@ -1,5 +1,6 @@
 rate: 10.0
-num_particles: 200
+num_particles: 1000
+publish_particles: true
 measurement_error:
   location: 0.05
   orientation: 0.09
