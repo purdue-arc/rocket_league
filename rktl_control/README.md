@@ -189,7 +189,10 @@ These are all by Brian Douglas, who has many useful videos on control concepts.
 This takes a [`ControlEffort.msg`](../rktl_msgs/msg/ControlEffort.msg)
 message and sends it to a physical car. The efforts in the message range from
 -1.0 to +1.0 corresponding to full reverse for full forward motor speed,
-or full left or full right steering angle respectively.
+or full left or full right steering angle respectively. Technically, you can
+also feed in values with an absolute value greater than 1.0. This is useful for
+having higher actuator saturation limits in the controller, or perhaps
+implementing a "boost" for human controlled cars.
 
 Physically, the interface code runs on a [Teensy 3.2](https://www.pjrc.com/store/teensy32.html)
 microcontroller. The microcontroller is connected to a computer via USB, and
@@ -204,29 +207,18 @@ computer, launch the docker container with `./docker/docker-run.sh --privileged`
 roslaunch rktl_control hardware_interface.launch
 ```
 
-To use a different serial port (check `ls /dev` to see what it is named), launch
-with the following command:
+To use a different serial port (check `ls /dev` to see what it is named), modify
+the config file.
+
+You can enable the cars with:
 ```
-roslaunch rktl_control hardware_interface.launch serial_port:=<port>
+rostopic pub /cars/enable std_msgs/Bool "data: true"
 ```
 
-You can then manually feed it controls with:
+Then manually feed it controls with:
 ```
 roslaunch rktl_control keyboard_control.launch
 ```
-
-### Known bugs
-For some reason, you need to launch the computer side hardware interface code
-twice. The first time, the car will stop moving, but steer fully to one side.
-The second time, it will send the efforts from ROS to the car.
-
-This isn't a bug necessarily, but it is odd. The parameters are loaded when the
-node launches. The node launches when the device is powered. If you change the
-parameters and relaunch the computer side hardware interface, they won't be
-loaded in, because the node didn't re-launch. To fix this, power cycle the
-board after changing parameters.
-
-Perhaps this can be improved in the future using `dynamic reconfigure`.
 
 ### Building and Uploading
 Unfortunately, there are several steps required to build and upload code.
@@ -243,8 +235,6 @@ Copy the generated `ros_lib` folder to `<Arduino Location>/libraries/`
 
 Lastly, launch the Arduino IDE, load the `hardware_interface.ino` project inside the
 `scripts` folder, set the target board to the Teensy 3.2, and click upload.
-
-In the future, perhaps this can be improved: <http://wiki.ros.org/rosserial_arduino/Tutorials/CMake>
 
 ### Further Information
 `Teensyduino`, software that lets you program the Teensy using the Arduino IDE, is described here: <https://www.pjrc.com/teensy/teensyduino.html>
