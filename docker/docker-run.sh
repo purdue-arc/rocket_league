@@ -2,7 +2,7 @@
 
 WS_DIR=$(realpath $(dirname $0)/../../../)
 REPO_NAME="purduearc/rocket-league"
-CONTAINER_NAME="${CONTAINER_NAME:$USER-arc-rocket-league-dev}"
+CONTAINER_NAME="${CONTAINER_NAME:-$USER-arc-rocket-league-dev}"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
 # tty-specific options
