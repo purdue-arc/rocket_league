@@ -2,7 +2,7 @@
 """Training script for the Rocket League project.
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
@@ -20,12 +20,15 @@ import sys
 from stable_baselines3.common.vec_env import VecCheckNan
 
 
-run_id = str(uuid.uuid4())  # ALL running environments must share this
-step = 0
-study = optuna.create_study()
+
+timesteps = 2000 # Timesteps that the model will train on before getting assessed and tuned
+episodes_per_trial = 7 # Number of times the model will be evaluated per tuning trial after training.
+total_trials = 10000 # Number of optimization attempts optuna will make to the hyperparams.
+parallel_jobs = 24 # Number of parallel envs the script will run and use at once.
+
 
 def optimize_ppo2(trial):
-    """ Learning hyperparamters we want to optimise"""
+    """ Learning hyperparamters we want to optimize"""
     return {
         'n_steps': int(trial.suggest_loguniform('n_steps', 16, 2048)),
         'gamma': trial.suggest_loguniform('gamma', 0.9, 0.9997),
@@ -40,22 +43,23 @@ def optimize_ppo2(trial):
     }
 
 
+
+### Global variables. Not for modification.
+run_id = str(uuid.uuid4())  # ALL running environments must share this id
+step = 0 # Keeps track of tuning steps, i.e. how many unique hyperparam sets it has run.
+study = optuna.create_study() # Creates optuna study.
+
+### Train the model and optimize it.
 def optimize_agent(trial):
     
     global step
     global study
     
-    env_count = 1 # Number of environments to run in parallel (keep at 1 for now)
-    timesteps = 2000 # Timesteps that the model will train on before getting assessed and tuned
-    episodes_per_trial = 7 # Number of episode attempts (runs) per trial
-    
-    ### Train the model and optimize it.
-    
     # Hyperparams are determined by Optuna.
     model_params = optimize_ppo2(trial)
     
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id' : run_id, 'launch_args': ['render:=false', 'plot_log:=false']},
-            n_envs= env_count , vec_env_cls=SubprocVecEnv) # Creates the env
+            n_envs= 1 , vec_env_cls=SubprocVecEnv) # Creates the env
             
     env = VecCheckNan(env, raise_exception=True)
     
@@ -72,14 +76,12 @@ def optimize_agent(trial):
     
         if np.isnan(obs).any():
             print("Best Params:" + str(study.best_params))
-            #print("\n\n OBS IS NAN\n\n")
             sys.exit("OBS is NAN")
   
         action, _ = model.predict(obs)
                
         if np.isnan(action).any():
             print("Best Params:" + str(study.best_params))
-            #print("\n\n ACTION IS NAN\n\n")
             sys.exit("ACTION IS NAN")
                
         obs, reward, done, _ = env.step(action)
@@ -113,12 +115,10 @@ def optimize_agent(trial):
     
 
 
-
 if __name__ == '__main__':      # this is required due to forking processes
-    #study = optuna.create_study()
     
-    try:
-        study.optimize(optimize_agent, n_trials=10000, n_jobs=24)
+    try: # Begins the optimizer with total trials and number of parallel jobs specified.
+        study.optimize(optimize_agent, n_trials=total_trials, n_jobs=parallel_jobs)
         print("\n")
         print("Best Params:" + str(study.best_params))
     except KeyboardInterrupt:

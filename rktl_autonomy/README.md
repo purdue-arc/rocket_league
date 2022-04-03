@@ -239,7 +239,14 @@ docker container kill <name or id>
 ```
 
 ### Hyperparameter Tuning
-To further improve the performance of the network, you can run the `tune_rocket_league.py` script
+To further improve the performance of the network, you can run the `tune_rocket_league.py` script as an executable (`./scripts/tune_rocket_league.py`). 
+
+This script will take the current game settings (rewards, episode length, simulation parameters) as is, and only experiment with hyperparameters of the PPO model. 
+
+These hyperparameters will be fed into the PPO initialization function as `model_params` at the start of each tuning attempt. The choice of hyperparameters is determined by Optuna based on the ranges given in the `optimize_ppo2()` function`. All of the chosen hyperparameter ranges can be modified directly in the function's code.
+
+Within the script, there are also 4 tuning variables that can be modified to change the rate at which the tuning and training-batches occur.
+
 
 ## Real-Time Evaluation
 At this point, you should have trained your network and have a zip file with
