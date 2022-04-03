@@ -247,6 +247,8 @@ These hyperparameters will be fed into the PPO initialization function as `model
 
 Within the script, there are also 4 tuning variables that can be modified to change the rate at which the tuning and training-batches occur.
 
+The tuning script will output progress in the command window it was executed in. Every 5 tuning attempts, it will print out the best hyperparameters that it has found so far. These can later be copied and used in the `train_rocket_league.py` script.
+
 
 ## Real-Time Evaluation
 At this point, you should have trained your network and have a zip file with
