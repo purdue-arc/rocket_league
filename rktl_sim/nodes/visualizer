@@ -127,7 +127,7 @@ class VisualizerROS(object):
         self.window.createAsset(self.lines_id, 0, 0, color=(255, 0, 0), lines=True)
 
         self.circle_id = 12
-        self.window.createAsset(self.circle_id, 0, 0, circle=True, color=(255,0,0), radius=0.25)
+        self.window.createAsset(self.circle_id, 0, 0, circle=True, color=(255,0,0), radius=0)
 
         self.lock = Lock()
         self.last_time = None
