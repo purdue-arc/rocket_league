@@ -10,7 +10,7 @@ RUN apt update && \
     pylint clang-format jq swig zsh libeigen3-dev python3-catkin-tools && \
     # pip
     pip3 install --upgrade pip && \
-    pip3 install scipy numpy matplotlib \
+    pip3 install scipy numpy matplotlib optuna \
     pandas jupyterlab autopep8 pyflakes && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
