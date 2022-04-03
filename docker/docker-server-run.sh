@@ -13,7 +13,8 @@ fi
 
 if [ "$(docker ps -a | grep $USER-$CONTAINER_NAME)" ]
 then
-    docker kill $USER-$CONTAINER_NAME
+    printf "\x1b[1;31mcontainer already running\nyou can rejoin it with:\x1b[1;36m docker-join.sh\x1b[1;31m\nor kill the current container with:\x1b[1;36m docker kill $USER-$CONTAINER_NAME\n"
+    exit
 fi
 
 $WS_DIR/src/rocket_league/docker/docker-build.sh

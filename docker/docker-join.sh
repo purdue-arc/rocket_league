@@ -1,6 +1,6 @@
 #!/bin/bash
 
-XAUTHORITY_PATH=`echo /home/$USER/.docker.tmp/.Xauthority`
+XAUTHORITY_PATH="/home/$USER/.docker.tmp/.Xauthority"
 if [ -f $XAUTHORITY_PATH ]; then 
     MAGIC_COOKIE=`xauth list $DISPLAY | awk '{print $3}'`
     X11PORT=`echo $DISPLAY | sed 's/^[^:]*:\([^\.]\+\).*/\1/'`
