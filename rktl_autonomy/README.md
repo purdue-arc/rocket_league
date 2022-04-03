@@ -238,8 +238,8 @@ discussed above, then use the following command to stop it:
 docker container kill <name or id>
 ```
 
-### Hyperparameter Searching
-TODO
+### Hyperparameter Tuning
+To further improve the performance of the network, you can run the `tune_rocket_league.py` script
 
 ## Real-Time Evaluation
 At this point, you should have trained your network and have a zip file with
