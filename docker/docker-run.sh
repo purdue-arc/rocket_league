@@ -2,7 +2,7 @@
 
 WS_DIR=$(realpath $(dirname $0)/../../../)
 REPO_NAME="purduearc/rocket-league"
-CONTAINER_NAME="${CONTAINER_NAME:-arc-rocket-league-dev}"
+CONTAINER_NAME="${CONTAINER_NAME:-$USER-arc-rocket-league-dev}"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
 # tty-specific options
@@ -23,5 +23,5 @@ docker run --rm \
     -v ~/.ssh:/home/$USER/.ssh:ro \
     --name $CONTAINER_NAME \
     $@ \
-    $REPO_NAME:local \
+    $REPO_NAME:local-$USER \
     ${DOCKER_CMD:+/bin/zsh -c "$DOCKER_CMD"}
