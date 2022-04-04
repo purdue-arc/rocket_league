@@ -8,7 +8,7 @@ docker build --build-arg USER=$USER \
              --build-arg UID=$(id -u) \
              --build-arg GID=$(id -g) \
              --build-arg ROS_DEPS="$ROS_DEPS" \
-             -t $REPO_NAME:local \
+             -t $REPO_NAME:local-$USER \
              -f $DOCKER_DIR/Dockerfile.local \
              $@ \
              $DOCKER_DIR

@@ -22,7 +22,7 @@ class Window(object):
         """Exception for when pygame is shut down"""
         pass
 
-    def __init__(self, map_width, map_length, wall_thickness):
+    def __init__(self, map_width, map_length, wall_thickness, name='Rocket League Visualizer'):
         # Support for 1080p monitors
         self.scaling = 1080 * 0.5 / (map_length + (wall_thickness*2.))
 
@@ -34,6 +34,7 @@ class Window(object):
         self.assets = {}
 
         pygame.display.init()
+        pygame.display.set_caption(name)
         self._screen = pygame.display.set_mode(
             (self.window_width, self.window_length))
 
