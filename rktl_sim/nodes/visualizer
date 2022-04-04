@@ -39,8 +39,10 @@ class VisualizerROS(object):
         car_length = rospy.get_param("/cars/length")
 
         # Creating pygame render
+        
         self.window = visualizer.Window(
-            field_width, field_length, wall_thickness)
+            field_width, field_length, wall_thickness,
+            rospy.get_param('~window_name', 'Rocket League Visualizer'))
 
         # Collecting private parameters
         self.frame_id = rospy.get_param("~frame_id", "map")
