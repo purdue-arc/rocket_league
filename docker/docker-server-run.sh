@@ -45,4 +45,5 @@ docker run --rm \
     ${DOCKER_CMD:+/bin/zsh -c "ln -s $HOME/.docker.tmp/.Xauthority $HOME/.Xauthority"} \
     ${DOCKER_CMD:+/bin/zsh -c "$DOCKER_CMD"}
 
-
+#Remove image to save space
+docker rmi $REPO_NAME:local-$USER
