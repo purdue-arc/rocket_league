@@ -10,7 +10,7 @@ RUN apt update && \
     pylint clang-format jq swig zsh libeigen3-dev python3-catkin-tools && \
     # pip
     pip3 install --upgrade pip && \
-    pip3 install scipy numpy matplotlib optuna \
+    pip3 install scipy numpy matplotlib \
     pandas jupyterlab autopep8 pyflakes && \
     # Clean Up to reduce image size
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
@@ -27,7 +27,7 @@ RUN apt update && \
     ros-$ROS_DISTRO-rosserial-arduino \
     ros-$ROS_DISTRO-rosbridge-server && \
     # pip
-    pip3 install pybullet gym[box2d] stable-baselines3 pfilter && \
+    pip3 install pybullet gym[box2d] stable-baselines3 pfilter optuna && \
     # clean up
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
