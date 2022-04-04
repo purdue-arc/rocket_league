@@ -41,9 +41,8 @@ class ParticleOdomFilter(object):
         self.MIN_THROTTLE = rospy.get_param('~efforts/throttle/min', -1.0)
         self.MAX_STEERING = rospy.get_param('~efforts/steering/max',  1.0)
         self.MIN_STEERING = rospy.get_param('~efforts/steering/min', -1.0)
-        self.EXTRAPOLATE = rospy.get_param('~extrapolate', False)
-
-        # additional parameters
+        self.PREDICT_ENABLE = rospy.get_param('~prediction/enable', False)
+        self.PREDICT_TIME = rospy.get_param('~prediction/delta_t', 0.0)
         num_particles = rospy.get_param('~num_particles', 1000)
         resample_proportion = rospy.get_param('~resample_proportion', 0.1)
 
@@ -53,7 +52,7 @@ class ParticleOdomFilter(object):
             dynamics_fn=self.particle_dynamics,
             observe_fn=self.particle_observation,
             weight_fn=self.particle_weight,
-            transform_fn=self.particle_extrapolate,
+            transform_fn=self.save_original_weights,
             n_particles=num_particles,
             resample_proportion=resample_proportion)
 
@@ -81,19 +80,20 @@ class ParticleOdomFilter(object):
         ])
         observation = np.array([x, y, yaw])
 
-        # wildly extrapolate to present time if requested
-        # stash the required delta_t for extrapolation function
-        if self.EXTRAPOLATE:
-            self.extrapolate_delta_t = (rospy.Time.now() - pose_msg.header.stamp).to_sec()
-
         # filter
         self.filter.update(observation)
         state = self.filter.mean_state
 
         # wildly extrapolate to present time if requested
-        # pull the result of the extrapolation function
-        if self.EXTRAPOLATE:
-            state = self.filter.transformed_particles
+        if self.PREDICT_ENABLE:
+            # grab the particles and weights from before any resampling ocurred
+            particles = self.filter.original_particles
+            weights = self.filter.original_weights
+            # predict the future state of the particles and get the new mean_state
+            particles = self.particle_dynamics(particles, delta_t=self.PREDICT_TIME)
+            state = np.sum(particles.T * weights, axis=-1).T
+            # update the message timestamp
+            pose_msg.header.stamp += rospy.Duration(self.PREDICT_TIME)
 
         # convert to odometry
         beta = atan(tan(state[4]) / 2.0)
@@ -142,12 +142,10 @@ class ParticleOdomFilter(object):
             # publish PoseArray msg
             self.cloud_pub.publish(cloud_msg)
 
-    def particle_extrapolate(self, particles, weights):
-        """Provide a mean state extrapolated to the present."""
-        particles = self.particle_dynamics(
-            particles,
-            delta_t=self.extrapolate_delta_t)
-        return np.sum(particles.T * weights, axis=-1).T
+    def save_original_weights(self, particles, weights):
+        """Hacky way to save the original particle weights before resampling."""
+        self.filter.original_weights = weights
+        return particles
 
     def particle_dynamics(self, particles, controls=None, delta_t=None):
         """Extrapolate all particles to future state, including random control noise."""
