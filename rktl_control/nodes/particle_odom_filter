@@ -46,6 +46,11 @@ class ParticleOdomFilter(object):
         num_particles = rospy.get_param('~num_particles', 1000)
         resample_proportion = rospy.get_param('~resample_proportion', 0.1)
 
+        self.GEN_LOC_STD_DEV = None
+        self.GEN_DIR_STD_DEV = None
+        self.GEN_VEL_STD_DEV = None
+        self.GEN_PSI_STD_DEV = None
+
         # variables
         self.filter = ParticleFilter(
             prior_fn=self.particle_init,
@@ -222,24 +227,40 @@ class ParticleOdomFilter(object):
         # use Bayes rule to get probability of particle given measurement
         return prob_z_x * self.filter.weights / prob_z
 
-    def particle_init(self, num_particles):
+    def particle_init(self, num_particles, initial_guess=None):
         """Initial guesses for particle states."""
-        rng = np.random.default_rng()
-        # states uniformly distributed across all valid ranges
-        return (
-            rng.random((num_particles, 5))
-            * np.array([
-                self.FIELD_WIDTH,
-                self.FIELD_HEIGHT,
-                2.0*pi,
-                2.0*self.MAX_SPEED,
-                2.0*self.STEERING_THROW])
-            - np.array([
-                self.FIELD_WIDTH/2.0,
-                self.FIELD_HEIGHT/2.0,
-                pi,
-                self.MAX_SPEED,
-                self.STEERING_THROW]))
+        if initial_guess is not None:
+            # return states with a gaussian distribution around the guess
+            return (
+                self.rng.normal(
+                    initial_guess,
+                    np.array([
+                        self.GEN_LOC_STD_DEV,
+                        self.GEN_LOC_STD_DEV,
+                        self.GEN_DIR_STD_DEV,
+                        self.GEN_VEL_STD_DEV,
+                        self.GEN_PSI_STD_DEV
+                    ]),
+                    (num_particles, 5)))
+        else:
+            # states uniformly distributed across all valid ranges
+            return (
+                self.rng.uniform(
+                    np.array([
+                        -self.FIELD_WIDTH/2.0,
+                        -self.FIELD_HEIGHT/2.0,
+                        -pi,
+                        -self.MAX_SPEED,
+                        -self.STEERING_THROW
+                    ]),
+                    np.array([
+                        self.FIELD_WIDTH/2.0,
+                        self.FIELD_HEIGHT/2.0,
+                        pi,
+                        self.MAX_SPEED,
+                        self.STEERING_THROW
+                    ]),
+                    (num_particles, 5)))
 
 if __name__ == "__main__":
     ParticleOdomFilter()
