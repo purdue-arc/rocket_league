@@ -297,9 +297,7 @@ class ParticleOdomFilter(object):
         """Weigh each particle based off difference between observed and expected measurements."""
         # compute error (and minimize angles)
         error = expected - observed
-        error[:,2] = np.fmod(error[:,2], 2.0*pi)
-        error[:,2] = np.where(error[:,2] > +pi, 2.0*pi - error[:,2], error[:,2])
-        error[:,2] = np.where(error[:,2] < -pi, 2.0*pi + error[:,2], error[:,2])
+        error[:,2] = np.arctan2(np.sin(error[:,2]), np.cos(error[:,2]))
 
         # use a standard normal distribution to calculate probability of measurement given each particle
         sigma = np.array([self.MEAS_LOC_STD_DEV, self.MEAS_LOC_STD_DEV, self.MEAS_DIR_STD_DEV])
