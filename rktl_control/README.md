@@ -90,6 +90,8 @@ standard deviations of the data going in to the filter. Lowering these numbers
 will make it more trusting of incoming data, increasing these numbers will make
 it more trusting of it's own physics model for the car.
 
+A good resource I found on particle filters is here: <https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/12-Particle-Filters.ipynb>
+
 #### Alternative algorithms
 [Kalman filters](https://www.kalmanfilter.net/default.aspx) were also considered.
 This is similar to a particle filter in that it is cognizant of measurement noise

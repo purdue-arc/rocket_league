@@ -21,7 +21,7 @@ class ParticleOdomFilter(object):
     def __init__(self):
         rospy.init_node('particle_odom_filter')
 
-        # global constants
+        # physical constants (global)
         self.FIELD_WIDTH = rospy.get_param('/field/width')
         self.FIELD_HEIGHT = rospy.get_param('/field/length')
         self.CAR_LENGTH = rospy.get_param('/cars/length')
@@ -30,26 +30,39 @@ class ParticleOdomFilter(object):
         self.STEERING_THROW = rospy.get_param('/cars/steering/max_throw')
         self.STEERING_RATE = rospy.get_param('/cars/steering/rate')
 
-        # private constants
+        # node configuration
         self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
         self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
-        self.MEAS_LOC_STD_DEV = rospy.get_param('~measurement_error/location', 0.05)
-        self.MEAS_DIR_STD_DEV = rospy.get_param('~measurement_error/orientation', np.deg2rad(5))
         self.DELTA_T = 1.0/rospy.get_param('~rate', 10.0)
         self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
+
+        # prediction options (to fight latency)
+        self.PREDICT_ENABLE = rospy.get_param('~prediction/enable', False)
+        self.PREDICT_TIME = rospy.get_param('~prediction/delta_t', 0.0)
+
+        # filter tuning options
+        num_particles = rospy.get_param('~num_particles', 1000)
+        resample_proportion = rospy.get_param('~resample_proportion', 0.1)
+
+        # standard deviation of incoming measurements used to assign particle weights
+        self.MEAS_LOC_STD_DEV = rospy.get_param('~measurement_error/location',    0.05)
+        self.MEAS_DIR_STD_DEV = rospy.get_param('~measurement_error/orientation', np.deg2rad(5))
+
+        # standard deviation when generating random states based off current guess
+        self.GEN_LOC_STD_DEV = rospy.get_param('~generator_noise/location',       0.05)
+        self.GEN_DIR_STD_DEV = rospy.get_param('~generator_noise/orientation',    0.05)
+        self.GEN_VEL_STD_DEV = rospy.get_param('~generator_noise/velocity',       0.05)
+        self.GEN_PSI_STD_DEV = rospy.get_param('~generator_noise/steering_angle', np.deg2rad(1))
+
+        # standard deviation to add noise to effort when control is known
+        self.THR_EFFORT_STD_DEV = rospy.get_param('~effort/throttle/noise', 0.05)
+        self.STR_EFFORT_STD_DEV = rospy.get_param('~effort/steering/noise', 0.05)
+
+        # max and min for uniform effort distribution when control is not known
         self.MAX_THROTTLE = rospy.get_param('~efforts/throttle/max',  1.0)
         self.MIN_THROTTLE = rospy.get_param('~efforts/throttle/min', -1.0)
         self.MAX_STEERING = rospy.get_param('~efforts/steering/max',  1.0)
         self.MIN_STEERING = rospy.get_param('~efforts/steering/min', -1.0)
-        self.PREDICT_ENABLE = rospy.get_param('~prediction/enable', False)
-        self.PREDICT_TIME = rospy.get_param('~prediction/delta_t', 0.0)
-        num_particles = rospy.get_param('~num_particles', 1000)
-        resample_proportion = rospy.get_param('~resample_proportion', 0.1)
-
-        self.GEN_LOC_STD_DEV = None
-        self.GEN_DIR_STD_DEV = None
-        self.GEN_VEL_STD_DEV = None
-        self.GEN_PSI_STD_DEV = None
 
         # variables
         self.rng = np.random.default_rng()
@@ -235,13 +248,13 @@ class ParticleOdomFilter(object):
         # use Bayes rule to get probability of particle given measurement
         return prob_z_x * self.filter.weights / prob_z
 
-    def particle_init(self, num_particles, initial_guess=None):
+    def particle_init(self, num_particles):
         """Initial guesses for particle states."""
-        if initial_guess is not None:
-            # return states with a gaussian distribution around the guess
+        if self.filter.mean_state is not None:
+            # return states with a gaussian distribution around the most recent state
             return (
                 self.rng.normal(
-                    initial_guess,
+                    self.filter.mean_state,
                     np.array([
                         self.GEN_LOC_STD_DEV,
                         self.GEN_LOC_STD_DEV,
