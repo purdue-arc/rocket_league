@@ -1,17 +1,24 @@
 rate: 10.0
-num_particles: 1000
 publish_particles: true
-prediction:
-  enable: true
-  delta_t: 0.3
+num_particles: 1000
 resample_proportion: 0.1
+delay:
+  compensate: true
+  total_cycles: 3
 measurement_error:
   location: 0.05
   orientation: 0.09
+generator_noise:
+  location: 0.05
+  orientation: 0.05
+  velocity: 0.05
+  steering_angle: 0.02
 efforts:
   throttle:
+    noise: 0.05
     max:  1.5
     min: -1.5
   steering:
+    noise: 0.05
     max:  1.0
     min: -1.0

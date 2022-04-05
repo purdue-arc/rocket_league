@@ -1,5 +1,5 @@
 prediction:
-  enable: true
+  enable: false
   delta_t: 0.3
 buffer_size:
   position: 3
