@@ -5,8 +5,11 @@ clear
 % Plant constants
 T = 0.4174;     % Time constant, sec
 K = 0.7756;     % Static gain, m/s
-t_di = 0.15;    % input delay, sec
-t_do = 0.15;    % output delay, sec
+
+%t_di = 0.15;    % input delay, sec
+%t_do = 0.15;    % output delay, sec
+t_di = 0;
+t_do = 0;
 
 % System contants
 ts = 0.1;       % Sample time, sec
@@ -23,8 +26,8 @@ G_zoh = c2d(G, ts, 'zoh');
 % frequency domain, lead lag controller design
 % Inputs
 sse = 0.05; % steady state error. Percent error wrt velocity input
-PM = 45;    % desired phase margin. Degrees. Higher increases stability. 30 is suggested minimum
-w0 = 2.0;   % desired gain crossover frequency. Rad/s. Higher increases speed
+PM = 80;    % desired phase margin. Degrees. Higher increases stability. 30 is suggested minimum
+w0 = 8;   % desired gain crossover frequency. Rad/s. Higher increases speed
 
 % Calculate required controller gain
 Kc = (1/sse - 1)/K;
