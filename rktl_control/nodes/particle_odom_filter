@@ -210,7 +210,7 @@ class ParticleOdomFilter(object):
         error[:,2] = np.where(error[:,2] < -pi, 2.0*pi + error[:,2], error[:,2])
 
         # use a standard normal distribution to calculate probability of measurement given each particle
-        sigma = np.array([self.MEAS_DIR_STD_DEV, self.MEAS_DIR_STD_DEV, self.MEAS_LOC_STD_DEV])
+        sigma = np.array([self.MEAS_LOC_STD_DEV, self.MEAS_LOC_STD_DEV, self.MEAS_DIR_STD_DEV])
         base = 1.0 / (sigma * sqrt(2.0*pi))
         prob_z_x = base * np.exp(np.square(error / sigma) / -2.0)
         # assume each state is independent
