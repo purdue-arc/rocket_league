@@ -102,12 +102,12 @@ class ParticleOdomFilter(object):
             pose_msg.header.stamp += rospy.Duration(self.PREDICT_TIME)
 
         # convert to odometry
-        beta = atan(tan(state[4]) / 2.0)
-        v_body = state[3] / cos(beta)
+        beta = atan(tan(state[5]) / 2.0)
+        v_body = state[4] / cos(beta)
         curvature = 2.0 * sin(beta) / self.CAR_LENGTH
         x = state[0]
         y = state[1]
-        theta = state[2]
+        theta = np.atan2(state[2], state[3])
         vx_body = v_body * cos(beta)
         vy_body = v_body * sin(beta)
         omega = v_body * curvature
@@ -177,9 +177,11 @@ class ParticleOdomFilter(object):
         # extract current states from particles matrix
         x = particles[:,0]
         y = particles[:,1]
-        theta = particles[:,2]
-        v_rear = particles[:,3]
-        psi = particles[:,4]
+        theta = np.atan2(
+            particles[:,2],
+            particles[:,3])
+        v_rear = particles[:,4]
+        psi = particles[:,5]
 
         # update rear wheel velocity using 1st order model
         v_rear = (v_rear - v_rear_ref) * exp(-delta_t/self.THROTTLE_TAU) + v_rear_ref
@@ -197,14 +199,20 @@ class ParticleOdomFilter(object):
         return np.array([
             x + delta_t * v_rear * np.cos(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
             y + delta_t * v_rear * np.sin(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
-            theta + delta_t * v_rear * np.tan(psi) / self.CAR_LENGTH,
+            sin(theta + delta_t * v_rear * np.tan(psi) / self.CAR_LENGTH),
+            cos(theta + delta_t * v_rear * np.tan(psi) / self.CAR_LENGTH),
             v_rear,
             psi]).T
 
     def particle_observation(self, particles):
         """Calculate expected measurements for each particle."""
         # measurement is x, y, theta
-        return particles[:,0:3]
+        return np.array([
+            particles[:,0:2],
+            np.atan2(
+                particles[:,2],
+                particles[:,3])
+        ])
 
     def particle_weight(self, expected, observed):
         """Weigh each particle based off difference between observed and expected measurements."""
@@ -237,11 +245,12 @@ class ParticleOdomFilter(object):
                     np.array([
                         self.GEN_LOC_STD_DEV,
                         self.GEN_LOC_STD_DEV,
-                        self.GEN_DIR_STD_DEV,
+                        self.GEN_DIR_STD_DEV,   # this is very wrong
+                        self.GEN_DIR_STD_DEV,   # but OK for now
                         self.GEN_VEL_STD_DEV,
                         self.GEN_PSI_STD_DEV
                     ]),
-                    (num_particles, 5)))
+                    num_particles))
         else:
             # states uniformly distributed across all valid ranges
             return (
@@ -249,18 +258,20 @@ class ParticleOdomFilter(object):
                     np.array([
                         -self.FIELD_WIDTH/2.0,
                         -self.FIELD_HEIGHT/2.0,
-                        -pi,
+                        -1.0,   # this is wrong but OK for now
+                        -1.0,   # will bias to diagonals
                         -self.MAX_SPEED,
                         -self.STEERING_THROW
                     ]),
                     np.array([
                         self.FIELD_WIDTH/2.0,
                         self.FIELD_HEIGHT/2.0,
-                        pi,
+                        1.0,    # this is wrong but OK for now
+                        1.0,    # will bias to diagonals
                         self.MAX_SPEED,
                         self.STEERING_THROW
                     ]),
-                    (num_particles, 5)))
+                    num_particles))
 
 if __name__ == "__main__":
     ParticleOdomFilter()
