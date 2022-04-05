@@ -11,6 +11,7 @@ import rospy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from rktl_msgs.msg import ControlEffort
+from std_srvs.srv import Empty
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 import numpy as np
@@ -85,12 +86,13 @@ class ParticleOdomFilter(object):
             resample_proportion=resample_proportion)
         self.filter.mean_state = None
 
-        # pubs / subs
+        # pubs / subs / srvs
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
         rospy.Subscriber('pose_sync', PoseWithCovarianceStamped, self.pose_cb)
         rospy.Subscriber('effort', ControlEffort, self.effort_cb)
         if self.PUB_PARTICLES:
             self.cloud_pub = rospy.Publisher('odom_particles', PoseArray, queue_size=1)
+        rospy.Service('~reset', Empty, self.reset_cb)
 
         # main loop
         rospy.spin()
@@ -162,7 +164,7 @@ class ParticleOdomFilter(object):
         curvature = 2.0 * sin(beta) / self.CAR_LENGTH
         x = state[0]
         y = state[1]
-        theta = np.atan2(state[2], state[3])
+        theta = np.arctan2(state[2], state[3])
         vx_body = v_body * cos(beta)
         vy_body = v_body * sin(beta)
         omega = v_body * curvature
@@ -228,23 +230,23 @@ class ParticleOdomFilter(object):
                 v_rear_ref = self.MAX_SPEED * self.rng.normal(
                     effort.throttle,
                     self.THR_EFFORT_STD_DEV,
-                    particles.shape[0])
+                    self.filter.n_particles)
 
                 psi_ref = self.STEERING_THROW * self.rng.normal(
                     effort.steering,
                     self.STR_EFFORT_STD_DEV,
-                    particles.shape[0])
+                    self.filter.n_particles)
             else:
                 # create random control noise using uniformly distributed efforts
                 v_rear_ref = self.MAX_SPEED * self.rng.uniform(
                     self.MIN_THROTTLE,
                     self.MAX_THROTTLE,
-                    particles.shape[0])
+                    self.filter.n_particles)
 
                 psi_ref = self.STEERING_THROW * self.rng.uniform(
                     self.MIN_STEERING,
                     self.MAX_STEERING,
-                    particles.shape[0])
+                    self.filter.n_particles)
         else:
             # use the provided control noise (likely for testing)
             v_rear_ref = controls[:,0]
@@ -253,7 +255,7 @@ class ParticleOdomFilter(object):
         # extract current states from particles matrix
         x = particles[:,0]
         y = particles[:,1]
-        theta = np.atan2(
+        theta = np.arctan2(
             particles[:,2],
             particles[:,3])
         v_rear = particles[:,4]
@@ -275,8 +277,8 @@ class ParticleOdomFilter(object):
         return np.array([
             x + self.DELTA_T * v_rear * np.cos(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
             y + self.DELTA_T * v_rear * np.sin(theta + np.arctan(np.tan(psi) / 2.0)) * np.sqrt(np.square(np.tan(psi)) / 4.0 + 1),
-            sin(theta + self.DELTA_T * v_rear * np.tan(psi) / self.CAR_LENGTH),
-            cos(theta + self.DELTA_T * v_rear * np.tan(psi) / self.CAR_LENGTH),
+            np.sin(theta + self.DELTA_T * v_rear * np.tan(psi) / self.CAR_LENGTH),
+            np.cos(theta + self.DELTA_T * v_rear * np.tan(psi) / self.CAR_LENGTH),
             v_rear,
             psi]).T
 
@@ -284,11 +286,12 @@ class ParticleOdomFilter(object):
         """Calculate expected measurements for each particle."""
         # measurement is x, y, theta
         return np.array([
-            particles[:,0:2],
-            np.atan2(
+            particles[:,0],
+            particles[:,1],
+            np.arctan2(
                 particles[:,2],
                 particles[:,3])
-        ])
+        ]).T
 
     def particle_weight(self, expected, observed):
         """Weigh each particle based off difference between observed and expected measurements."""
@@ -313,7 +316,7 @@ class ParticleOdomFilter(object):
 
     def particle_init(self, num_particles):
         """Initial guesses for particle states."""
-        if self.filter.mean_state is not None:
+        if hasattr(self, 'filter') and self.filter.mean_state is not None:
             # return states with a gaussian distribution around the most recent state
             return (
                 self.rng.normal(
@@ -326,7 +329,7 @@ class ParticleOdomFilter(object):
                         self.GEN_VEL_STD_DEV,
                         self.GEN_PSI_STD_DEV
                     ]),
-                    num_particles))
+                    (num_particles, 6)))
         else:
             # states uniformly distributed across all valid ranges
             return (
@@ -347,7 +350,7 @@ class ParticleOdomFilter(object):
                         self.MAX_SPEED,
                         self.STEERING_THROW
                     ]),
-                    num_particles))
+                    (num_particles, 6)))
 
 if __name__ == "__main__":
     ParticleOdomFilter()
