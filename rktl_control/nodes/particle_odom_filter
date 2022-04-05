@@ -52,6 +52,7 @@ class ParticleOdomFilter(object):
         self.GEN_PSI_STD_DEV = None
 
         # variables
+        self.rng = np.random.default_rng()
         self.filter = ParticleFilter(
             prior_fn=self.particle_init,
             dynamics_fn=self.particle_dynamics,
@@ -159,16 +160,15 @@ class ParticleOdomFilter(object):
 
         if controls is None:
             # create random control noise using uniformly distributed efforts
-            rng = np.random.default_rng()
-            v_rear_ref = self.MAX_SPEED * (
-                rng.random(particles.shape[0])
-                * (self.MAX_THROTTLE - self.MIN_THROTTLE)
-                + self.MIN_THROTTLE)
+            v_rear_ref = self.MAX_SPEED * self.rng.uniform(
+                self.MIN_THROTTLE,
+                self.MAX_THROTTLE,
+                particles.shape[0])
 
-            psi_ref = self.STEERING_THROW * (
-                rng.random(particles.shape[0])
-                * (self.MAX_STEERING - self.MIN_STEERING)
-                + self.MIN_STEERING)
+            psi_ref = self.STEERING_THROW * self.rng.uniform(
+                self.MIN_STEERING,
+                self.MAX_STEERING,
+                particles.shape[0])
         else:
             # use the provided control noise (likely for testing)
             v_rear_ref = controls[:,0]
