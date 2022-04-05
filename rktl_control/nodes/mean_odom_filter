@@ -72,11 +72,10 @@ class MeanOdomFilter(object):
 
         # wildly extrapolate to a future time if requested
         if self.PREDICT_ENABLE:
-            # perform a very simple prediction of location
+            # perform a very simple prediction of location / orientation
             x += vx * self.PREDICT_TIME
             y += vy * self.PREDICT_TIME
-            # update the message timestamp
-            pose_msg.header.stamp += rospy.Duration(self.PREDICT_TIME)
+            yaw += omega * self.PREDICT_TIME
 
         # publish message
         odom_msg = Odometry()
