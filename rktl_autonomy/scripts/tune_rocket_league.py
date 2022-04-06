@@ -75,18 +75,18 @@ def optimize_agent(trial):
 
     obs = env.reset()
     while n_episodes < episodes_per_trial:
-    
-        if np.isnan(obs).any():
-            print("Best Params:" + str(study.best_params))
-            #print("\n\n OBS IS NAN\n\n")
-            sys.exit("OBS is NAN")
+        
+        # if np.isnan(obs).any():
+        #     print("Best Params:" + str(study.best_params))
+        #     #print("\n\n OBS IS NAN\n\n")
+        #     sys.exit("OBS is NAN")
   
         action, _ = model.predict(obs)
                
-        if np.isnan(action).any():
-            print("Best Params:" + str(study.best_params))
-            #print("\n\n ACTION IS NAN\n\n")
-            sys.exit("ACTION IS NAN")
+        # if np.isnan(action).any():
+        #     print("Best Params:" + str(study.best_params))
+        #     #print("\n\n ACTION IS NAN\n\n")
+        #     sys.exit("ACTION IS NAN")
                
         obs, reward, done, _ = env.step(action)
         
