@@ -1,5 +1,13 @@
 <launch>
+    <arg name="render"  default="true"/>
+
+    <arg name="agent_type"          default="planner"/> <!-- Either planner or autonomy -->
+    <arg name="autonomy_weights"    default="model"/>
+
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
+
+    <!-- Visualizer -->
+    <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch"/>
 
     <!-- Ball -->
     <include file="$(find rktl_control)/launch/ball.launch"/>
@@ -10,9 +18,11 @@
     </include>
     <include file="$(find rktl_control)/launch/hardware_interface.launch"/>
 
-    <!-- Agents -->
-    <include file="$(find rktl_planner)/launch/simple_agent.launch">
+    <include if="$(eval agent_type == 'planner')" file="$(find rktl_planner)/launch/simple_agent.launch">
         <arg name="agent_name" value="agent0"/>
         <arg name="car_name" value="car0"/>
+    </include>
+    <include if="$(eval agent_type == 'autonomy')" file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_agent.launch">
+        <arg name="weights_name" value="$(arg autonomy_weights)"/>
     </include>
 </launch>
