@@ -2,9 +2,9 @@ rate: 10.0
 publish_particles: true
 num_particles: 1000
 resample_proportion: 0.1
-boundary_check: false
+boundary_check: true
 delay:
-  compensate: true
+  compensate: false
   total_cycles: 3
 measurement_error:
   location: 0.05
