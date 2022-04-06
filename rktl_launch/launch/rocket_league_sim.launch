@@ -22,7 +22,9 @@
     </group>
 
     <!-- Simulator -->
-    <include file="$(find rktl_sim)/launch/simulator.launch"/>
+    <include file="$(find rktl_sim)/launch/simulator.launch">
+        <arg name="sim_mode" value="$(arg sim_mode)"/>
+    </include>
 
     <!-- Transport Delays -->
     <group if="$(eval sim_mode == 'realistic')">
