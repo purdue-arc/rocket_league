@@ -1,6 +1,6 @@
-prediction:
-  enable: false
-  delta_t: 0.3
+delay:
+  compensate: false
+  duration: 0.3
 buffer_size:
   position: 3
   velocity: 3
