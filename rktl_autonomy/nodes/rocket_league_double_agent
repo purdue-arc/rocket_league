@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Real-time evaluation of the agent trained for the Rocket League project.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+from rktl_autonomy import RocketLeagueInterface
+from stable_baselines3 import PPO
+from os.path import expanduser
+import rospy, math
+
+# create interface (and init ROS)
+env = RocketLeagueInterface(eval=True)
+
+# pull some parameters
+FIELD_WIDTH = rospy.get_param('/field/width')
+FIELD_LENGTH = rospy.get_param('/field/length')
+
+# load the model
+weights = expanduser(rospy.get_param('~scoring_weights'))
+scoring_model = PPO.load(weights)
+
+weights = expanduser(rospy.get_param('~running_weights'))
+running_model = PPO.load(weights)
+
+running = True
+
+# evaluate in real-time
+obs = env.reset()
+while True:
+    # obs is a np array with following indices:
+      # x, y, theta, v, omega (car)
+      # x, y, vx, vy (ball)
+
+    ball_dist = math.sqrt((obs[0] - obs[5]) ** 2 + (obs[1] - obs[6]) ** 2)
+    if ball_dist < 0.5:
+        # use the regular model to win
+        running = False
+    elif ball_dist > 2.0:
+        # use the running model to make noisy
+        running = True
+
+    if running:
+        action, __ = running_model.predict(obs)
+    else:
+        action, __ = scoring_model.predict(obs)
+
+    # send to network
+    try:
+        obs, __, __, __ = env.step(action)
+    except rospy.ROSInterruptException:
+        exit()

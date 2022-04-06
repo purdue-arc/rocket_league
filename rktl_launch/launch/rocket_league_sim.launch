@@ -60,7 +60,7 @@
         <arg name="agent_name" value="agent0"/>
         <arg name="car_name" value="car0"/>
     </include>
-    <include if="$(eval agent_type == 'autonomy')" file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_agent.launch">
-        <arg name="weights_name" value="$(arg autonomy_weights)"/>
+    <include if="$(eval agent_type == 'autonomy')" file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_double_agent.launch">
+        <!-- <arg name="weights_name" value="$(arg autonomy_weights)"/> -->
     </include>
 </launch>
