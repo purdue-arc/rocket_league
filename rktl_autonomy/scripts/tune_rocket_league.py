@@ -113,11 +113,12 @@ def optimize_agent(trial):
     
     # Optuna maximizes negative reward, so we need to negate the reward here
     trial.report(-1 * mean_reward, step)
-    
-    return -1 * mean_reward
-    
-    
 
+    #Prune trial based on trial.report
+    if trial.should_prune():
+            raise optuna.exceptions.TrialPruned()
+
+    return -1 * mean_reward
 
 
 if __name__ == '__main__':      # this is required due to forking processes
