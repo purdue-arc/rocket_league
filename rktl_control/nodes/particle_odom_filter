@@ -315,40 +315,53 @@ class ParticleOdomFilter(object):
     def particle_init(self, num_particles):
         """Initial guesses for particle states."""
         if hasattr(self, 'filter') and self.filter.mean_state is not None:
-            # return states with a gaussian distribution around the most recent state
-            return (
-                self.rng.normal(
-                    self.filter.mean_state,
-                    np.array([
-                        self.GEN_LOC_STD_DEV,
-                        self.GEN_LOC_STD_DEV,
-                        self.GEN_DIR_STD_DEV,   # this is very wrong
-                        self.GEN_DIR_STD_DEV,   # but OK for now
-                        self.GEN_VEL_STD_DEV,
-                        self.GEN_PSI_STD_DEV
-                    ]),
-                    (num_particles, 6)))
+            # return states with a gaussian distribution around the most recent state estimate
+            random_location = self.rng.normal(
+                self.filter.mean_state[0:2],
+                self.GEN_LOC_STD_DEV,
+                (num_particles, 2))
+            mean_orientation = np.arctan2(
+                self.filter.mean_state[2],
+                self.filter.mean_state[3])
+            random_orientation = self.rng.normal(
+                mean_orientation,
+                self.GEN_DIR_STD_DEV,
+                (num_particles, 1))
+            random_internal = self.rng.normal(
+                self.filter.mean_state[4:6],
+                (self.GEN_VEL_STD_DEV,
+                 self.GEN_PSI_STD_DEV),
+                (num_particles, 2))
+            return np.concatenate((
+                random_location,
+                np.sin(random_orientation),
+                np.cos(random_orientation),
+                random_internal),
+                axis=1)
         else:
             # states uniformly distributed across all valid ranges
-            return (
-                self.rng.uniform(
-                    np.array([
-                        -self.FIELD_WIDTH/2.0,
-                        -self.FIELD_HEIGHT/2.0,
-                        -1.0,   # this is wrong but OK for now
-                        -1.0,   # will bias to diagonals
-                        -self.MAX_SPEED,
-                        -self.STEERING_THROW
-                    ]),
-                    np.array([
-                        self.FIELD_WIDTH/2.0,
-                        self.FIELD_HEIGHT/2.0,
-                        1.0,    # this is wrong but OK for now
-                        1.0,    # will bias to diagonals
-                        self.MAX_SPEED,
-                        self.STEERING_THROW
-                    ]),
-                    (num_particles, 6)))
+            random_location = self.rng.uniform(
+                (-self.FIELD_WIDTH/2.0,
+                 -self.FIELD_HEIGHT/2.0),
+                (self.FIELD_WIDTH/2.0,
+                 self.FIELD_HEIGHT/2.0),
+                (num_particles, 2))
+            random_orientation = self.rng.uniform(
+                -pi,
+                 pi,
+                (num_particles, 1))
+            random_internal = self.rng.uniform(
+                (-self.MAX_SPEED,
+                 -self.STEERING_THROW),
+                (self.MAX_SPEED,
+                 self.STEERING_THROW),
+                (num_particles, 2))
+            return np.concatenate((
+                random_location,
+                np.sin(random_orientation),
+                np.cos(random_orientation),
+                random_internal),
+                axis=1)
 
 if __name__ == "__main__":
     ParticleOdomFilter()
