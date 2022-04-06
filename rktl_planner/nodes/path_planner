@@ -1,164 +1,42 @@
 #!/usr/bin/env python3
 
-from cgitb import reset
 import math
 import rospy
 import numpy as np
-from tf.transformations import quaternion_from_euler, euler_from_quaternion
-from std_msgs.msg import Duration
+from tf.transformations import  euler_from_quaternion
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Pose
+from std_msgs.msg import Bool
 from rktl_msgs.msg import BezierPathList, Path
-from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
-from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest
+from rktl_planner.srv import CreateBezierPath
+from rktl_planner import path_requests
+from enum import Enum
 
-def create_simple_path_req(car_odom, ball_odom, goal_pos):
-    req = CreateBezierPathRequest()
+class GameState(Enum):
+    IN_POSITION = 0
+    TURNED_AROUND = 1
+    PAST_BALL = 2
 
-    req.velocity = 0.5
-    req.bezier_segment_duration.data = rospy.Duration(0.5)
-    req.linear_segment_duration.data = rospy.Duration(0.01)
-
-    # Target 0 (car pos)
-    pose0 = Pose()
-    pose0.position.x = car_odom.pose.pose.position.x
-    pose0.position.y = car_odom.pose.pose.position.y
-    pose0.position.z = 0.0
-    pose0.orientation = car_odom.pose.pose.orientation
-    req.target_poses.append(pose0)
-    req.target_durations.append(Duration(data=rospy.Duration(5.0)))
-
-    # Target 1 (ball pos)
-    final_vec_x = goal_pos[0] - ball_odom.pose.pose.position.x
-    final_vec_y = goal_pos[1] - ball_odom.pose.pose.position.y
-    final_quat = quaternion_from_euler(
-        0., 0., math.atan2(final_vec_y, final_vec_x))
-    final_vec_len = math.sqrt(final_vec_x ** 2 + final_vec_y ** 2)
-    pose1 = Pose()
-    pose1.position.x = ball_odom.pose.pose.position.x
-    pose1.position.y = ball_odom.pose.pose.position.y
-    pose1.position.z = 0.0
-    pose1.orientation.x = final_quat[0]
-    pose1.orientation.y = final_quat[1]
-    pose1.orientation.z = final_quat[2]
-    pose1.orientation.w = final_quat[3]
-    req.target_poses.append(pose1)
-    req.target_durations.append(Duration(data=rospy.Duration(1.0)))
-
-    # Target 2 (stop)
-    pose2 = Pose()
-    pose2.position.x = pose1.position.x + final_vec_x / final_vec_len / 2
-    pose2.position.y = pose1.position.y + final_vec_y / final_vec_len / 2
-    pose2.position.z = 0.0
-    pose2.orientation = pose2.orientation
-    req.target_poses.append(pose2)
-
-    return req
-
-def create_backup_path_req(car_odom, ball_odom, goal_pos):
-    req = CreateBezierPathRequest()
-    req.velocity = -0.5
-    req.bezier_segment_duration.data = rospy.Duration(0.5)
-    req.linear_segment_duration.data = rospy.Duration(0.01)
-
-    # Target 0 (car pos)
-    pose0 = Pose()
-    pose0.position.x = car_odom.pose.pose.position.x
-    pose0.position.y = car_odom.pose.pose.position.y
-    pose0.position.z = 0.0
-    pose0.orientation = car_odom.pose.pose.orientation
-    req.target_poses.append(pose0)
-    req.target_durations.append(Duration(data=rospy.Duration(1.0)))
-
-    # Target 1 (in front of goal)
-    final_vec_x = 0.25
-    final_vec_y = 0
-    final_quat = quaternion_from_euler(
-        0., 0., math.atan2(final_vec_y, final_vec_x))
-    pose1 = Pose()
-    pose1.position.x = goal_pos[0] - 4.0
-    pose1.position.y = goal_pos[1]
-    pose1.position.z = 0.0
-    pose1.orientation.x = final_quat[0]
-    pose1.orientation.y = final_quat[1]
-    pose1.orientation.z = final_quat[2]
-    pose1.orientation.w = final_quat[3]
-    req.target_poses.append(pose1)
-
-    return req
-
-def create_dislodge_path_req(car_odom, ball_odom):
-    req = CreateBezierPathRequest()
-    req.velocity = 0.25
-    req.bezier_segment_duration.data = rospy.Duration(0.5)
-    req.linear_segment_duration.data = rospy.Duration(0.01)
-
-    # Target 0 (car pos)
-    pose0 = Pose()
-    pose0.position.x = car_odom.pose.pose.position.x
-    pose0.position.y = car_odom.pose.pose.position.y
-    pose0.position.z = 0.0
-    pose0.orientation = car_odom.pose.pose.orientation
-    req.target_poses.append(pose0)
-    req.target_durations.append(Duration(data=rospy.Duration(1.0)))
-
-    # Target 1 (ball pos)
-    final_vec_x = 0.5
-    final_vec_y = 0
-    final_vec_len = math.sqrt(final_vec_x ** 2 + final_vec_y ** 2)
-    final_quat = quaternion_from_euler(
-        0., 0., math.atan2(final_vec_y, final_vec_x))
-    pose1 = Pose()
-    pose1.position.x = ball_odom.pose.pose.position.x
-    pose1.position.y = ball_odom.pose.pose.position.y
-    pose1.position.z = 0.0
-    pose1.orientation.x = final_quat[0]
-    pose1.orientation.y = final_quat[1]
-    pose1.orientation.z = final_quat[2]
-    pose1.orientation.w = final_quat[3]
-    req.target_durations.append(Duration(data=rospy.Duration(1.0)))
-    req.target_poses.append(pose1)
-
-    # Target 2 (stop)
-    pose2 = Pose()
-    pose2.position.x = pose1.position.x + final_vec_x / final_vec_len / 2
-    pose2.position.y = pose1.position.y + final_vec_y / final_vec_len / 2
-    pose2.position.z = 0.0
-    pose2.orientation = pose2.orientation
-    req.target_poses.append(pose2)
-
-    return req
-
-def create_complex_path_req(car_odom, ball_odom, goal_pos):
-    car_orient = car_odom.pose.pose.orientation
-    car_yaw = euler_from_quaternion(
-        np.array([car_orient.x, car_orient.y, car_orient.z, car_orient.w]))[2]
-    car_x = car_odom.pose.pose.position.x
-    ball_x = ball_odom.pose.pose.position.x
-    if (car_yaw < math.pi/2 or car_yaw > 3*math.pi/2) and (car_x > (ball_x-0.25)):
-        return create_backup_path_req(car_odom, ball_odom, goal_pos)
-    else:
-        return create_simple_path_req(car_odom, ball_odom, goal_pos)
+class PlannerState(Enum):
+    READY = 0
+    EXECUTE_SCORE = 1
+    EXECUTE_BACKUP = 2
+    EXECUTE_TURN = 3
+    EXECUTE_DISLODGE = 4
 
 class PathPlanner(object):
     def __init__(self):
         rospy.init_node('path_planner')
 
-        planner_type = rospy.get_param('~planner_type', 'simple')
-        if planner_type == 'simple':
-            self.path_req = create_simple_path_req
-        elif planner_type == 'complex':
-            self.path_req = create_complex_path_req
-        else:
-            raise NotImplementedError(f'unrecognized planner type: {rospy.get_param("~planner_type")}')
+        self.state = PlannerState.READY
 
         # Subscribers
         car_name = rospy.get_param('~car_name')
         rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.car_odom_cb)
+        rospy.Subscriber(f'/cars/{car_name}/following_path', Bool, self.car_following_path_cb)
         rospy.Subscriber('/ball/odom', Odometry, self.ball_odom_cb)
 
         # Services
-        self.reset_server = rospy.Service('reset_planner', Empty, self.reset)
+        rospy.wait_for_service('create_bezier_path')
         self.path_client = rospy.ServiceProxy('create_bezier_path', CreateBezierPath)
 
         # Publishers
@@ -172,6 +50,7 @@ class PathPlanner(object):
 
         self.goal_pos = (rospy.get_param('/field/length', 1) / 2, 0.)
         self.time_left = 0.0
+        self.car_following_path = False
 
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
@@ -181,6 +60,9 @@ class PathPlanner(object):
             except rospy.ROSInterruptException:
                 pass
 
+    def car_following_path_cb(self, data: Bool):
+        self.car_following_path = data.data
+
     def car_odom_cb(self, data: Odometry):
         self.car_odom = data
 
@@ -188,29 +70,31 @@ class PathPlanner(object):
         self.ball_odom = data
 
     def loop_once(self):
-        if self.time_left <= 0.0:
-            self.time_left = 5.0
+        car_orient = self.car_odom.pose.pose.orientation
+        car_yaw = euler_from_quaternion(
+            np.array([car_orient.x, car_orient.y, car_orient.z, car_orient.w]))[2]
+        car_x = self.car_odom.pose.pose.position.x
+        ball_x = self.ball_odom.pose.pose.position.x
 
-            car_orient = self.car_odom.pose.pose.orientation
-            car_yaw = euler_from_quaternion(
-                np.array([car_orient.x, car_orient.y, car_orient.z, car_orient.w]))[2]
-            car_x = self.car_odom.pose.pose.position.x
-            ball_x = self.ball_odom.pose.pose.position.x
-            if car_x > ball_x-0.5:
-                if car_yaw < math.pi/2 or car_yaw > 3*math.pi/2:
-                    res = self.path.client(
-                        create_backup_path_req(self.car_odom, self.ball_odom, self.goal_pos)
-                    )
-                else: 
-                req = create_backup_path_req(self.car_odom, self.ball_odom, self.goal_pos)
-                res = self.path_client(req)
-            else:
-                req = create_simple_path_req(self.car_odom, self.ball_odom, self.goal_pos)
-                res = self.path_client(req)
+        game_state = GameState.IN_POSITION
+        if car_x > ball_x - 0.5:
+            game_state = GameState.PAST_BALL
+        if car_yaw > math.pi/2 and car_yaw < 3*math.pi/2:
+            game_state = GameState.TURNED_AROUND
 
-                if res.linear_path.max_curvature > 5.0:
-                    req = create_dislodge_path_req(self.car_odom, self.ball_odom)
-                    res = self.path_client(req)
+        if self.state == PlannerState.READY or not self.car_following_path:
+            if game_state == GameState.IN_POSITION:
+                self.state = PlannerState.EXECUTE_SCORE
+                req = path_requests.create_score_path_req(self.car_odom, self.ball_odom, self.goal_pos)
+                res = self.path_client(req)
+            elif game_state == GameState.PAST_BALL:
+                self.state = PlannerState.EXECUTE_BACKUP
+                req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos)
+                res = self.path_client(req)
+            elif game_state == GameState.TURNED_AROUND:
+                self.state = PlannerState.EXECUTE_TURN
+                req = path_requests.create_turn_path_req(self.car_odom)
+                res = self.path_client(req)
 
             if self.linear_path_pub:
                 self.linear_path_pub.publish(res.linear_path)
@@ -219,19 +103,6 @@ class PathPlanner(object):
                 bezier_path_list = BezierPathList()
                 bezier_path_list.paths = res.bezier_paths
                 self.bezier_path_pub.publish(bezier_path_list)
-
-        self.time_left -= (1.0 / 10.0)
-
-    def reset(self, _: EmptyRequest):
-        req = self.path_req(self.car_odom, self.ball_odom, self.goal_pos)
-        res = self.path_client(req)
-        if self.linear_path_pub:
-            self.linear_path_pub.publish(res.linear_path)
-        if self.bezier_path_pub:
-            bezier_path_list = BezierPathList()
-            bezier_path_list.paths = res.bezier_paths
-            self.bezier_path_pub.publish(bezier_path_list)
-        return EmptyResponse()
 
 if __name__ == '__main__':
     PathPlanner()

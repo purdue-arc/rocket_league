@@ -12,12 +12,12 @@ import numpy as np
 import math
 import time
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Bool
 
 # Local modules
 import rktl_planner.convert as convert
 import rktl_planner.pure_pursuit as pursuit
 from rktl_msgs.msg import Path, ControlCommand
-
 
 class PathFollower(object):
     """A node to ensure the car follows a given trajectory."""
@@ -49,6 +49,8 @@ class PathFollower(object):
         car_name = rospy.get_param('~car_name')
         self.bot_velocity_cmd = rospy.Publisher(f'/cars/{car_name}/command',
             ControlCommand, queue_size=1)
+        self.bot_following_path = rospy.Publisher(f'/cars/{car_name}/following_path',
+            Bool, queue_size=1)
 
         # Subscribers
         rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
@@ -123,6 +125,7 @@ class PathFollower(object):
             if intersect is None:
                 self.bot_velocity_cmd.publish(ControlCommand())
                 rospy.logwarn("No intersection could be found.")
+                self.bot_following_path.publish(False)
                 return
 
             # Calculate curvature
@@ -134,6 +137,7 @@ class PathFollower(object):
             cmd.velocity = goal_vel
             cmd.curvature = -(1.0 / turn_rad)
             self.bot_velocity_cmd.publish(cmd)
+            self.bot_following_path.publish(True)
 
 
 if __name__ == "__main__":
