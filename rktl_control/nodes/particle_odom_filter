@@ -47,6 +47,9 @@ class ParticleOdomFilter(object):
         # should the filter compensate for delay by trying to predict the future?
         self.PREDICT = rospy.get_param('~delay/compensate', False)
 
+        # should the filter weigh particles based on a boundary check?
+        boundary_check = rospy.get_param('~boundary_check', False)
+
         # filter tuning options
         num_particles = rospy.get_param('~num_particles', 1000)
         resample_proportion = rospy.get_param('~resample_proportion', 0.1)
@@ -81,6 +84,7 @@ class ParticleOdomFilter(object):
             dynamics_fn=self.particle_dynamics,
             observe_fn=self.particle_observation,
             weight_fn=self.particle_weight,
+            internal_weight_fn=self.particle_boundary_check if boundary_check else None,
             transform_fn=self.save_original_weights,
             n_particles=num_particles,
             resample_proportion=resample_proportion)
@@ -312,6 +316,12 @@ class ParticleOdomFilter(object):
 
         # use Bayes rule to get probability of particle given measurement
         return prob_z_x * self.filter.weights / prob_z
+
+    def particle_boundary_check(self, particles, __):
+        """Apply a boundary check as an additional multiplicative weight on each particle."""
+        return 1.0 * (
+            1.0 * (np.abs(particles[:,1]) < self.FIELD_HEIGHT/2.0) *
+            1.0 * (np.abs(particles[:,2]) < self.FIELD_WIDTH/2.0))
 
     def particle_init(self, num_particles):
         """Initial guesses for particle states."""
