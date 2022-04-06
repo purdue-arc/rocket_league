@@ -216,10 +216,11 @@ class ParticleOdomFilter(object):
             # see if the true control efforts are known
             try:
                 effort = self.effort_buffer.popleft()
-                while effort.header.stamp < self.last_time:
+                target_time = self.last_time - rospy.Duration(self.DELTA_T * self.TOTAL_DELAY_CYCLES)
+                while effort.header.stamp < target_time - rospy.Duration(0.5*self.DELTA_T):
                     # effort is too old, discard
                     effort = self.effort_buffer.popleft()
-                if effort.header.stamp > self.last_time:
+                if effort.header.stamp > target_time + rospy.Duration(0.5*self.DELTA_T):
                     # effort is too new, put back
                     self.effort_buffer.appendleft(effort)
                     effort = None
