@@ -342,10 +342,10 @@ class ParticleOdomFilter(object):
         else:
             # states uniformly distributed across all valid ranges
             random_location = self.rng.uniform(
-                (-self.FIELD_WIDTH/2.0,
-                 -self.FIELD_HEIGHT/2.0),
-                (self.FIELD_WIDTH/2.0,
-                 self.FIELD_HEIGHT/2.0),
+                (-self.FIELD_HEIGHT/2.0,
+                 -self.FIELD_WIDTH/2.0),
+                (self.FIELD_HEIGHT/2.0,
+                 self.FIELD_WIDTH/2.0),
                 (num_particles, 2))
             random_orientation = self.rng.uniform(
                 -pi,
