@@ -3,11 +3,11 @@
     <arg name="plot_log"      default="true"/>
     <arg name="agent_name"    default="rocket_league_agent"/>
     <arg name="render"        default="false"/>
+    <arg name="sim_mode"      default="ideal"/>
 
     <!-- constants -->
     <arg name="rate"          value="10.0"/>
-    <arg name="sim_mode"      value="ideal"/>
-    <arg name="run_agent"     value="false"/>
+    <arg name="agent_type"    value="none"/>
 
     <param name="/use_sim_time" value="true"/>
 
@@ -18,7 +18,11 @@
     </group>
 
     <!-- environment -->
-    <include file="$(find rktl_launch)/launch/rocket_league_sim.launch" pass_all_args="true"/>
+    <include file="$(find rktl_launch)/launch/rocket_league_sim.launch">
+        <arg name="render"      value="$(arg render)"/>
+        <arg name="sim_mode"    value="$(arg sim_mode)"/>
+        <arg name="agent_type"  value="$(arg agent_type)"/>
+    </include>
 
     <!-- plot performance -->
     <node if="$(arg plot_log)" type="plotter" pkg="rktl_autonomy" name="plotter" output="screen">
