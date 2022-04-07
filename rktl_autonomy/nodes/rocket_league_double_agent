@@ -9,7 +9,7 @@ License:
 from rktl_autonomy import RocketLeagueInterface
 from stable_baselines3 import PPO
 from os.path import expanduser
-import rospy, math
+import rospy, math, numpy
 
 # create interface (and init ROS)
 env = RocketLeagueInterface(eval=True)
@@ -18,36 +18,44 @@ env = RocketLeagueInterface(eval=True)
 FIELD_WIDTH = rospy.get_param('/field/width')
 FIELD_LENGTH = rospy.get_param('/field/length')
 
-# load the model
+# load the models
 weights = expanduser(rospy.get_param('~scoring_weights'))
 scoring_model = PPO.load(weights)
 
-weights = expanduser(rospy.get_param('~running_weights'))
-running_model = PPO.load(weights)
+weights = expanduser(rospy.get_param('~chasing_weights'))
+chasing_model = PPO.load(weights)
 
-running = True
+# default is to chase
+chasing = True
 
 # evaluate in real-time
 obs = env.reset()
 while True:
     # obs is a np array with following indices:
-      # x, y, theta, v, omega (car)
-      # x, y, vx, vy (ball)
+    #   x, y, theta, v, omega (car)
+    #   x, y, vx, vy (ball)
+    x_car, y_car, theta_car, v_car, omega_car, x_ball, y_ball, vx_ball, vy_ball = numpy.split(obs, 9)
 
-    ball_dist = math.sqrt((obs[0] - obs[5]) ** 2 + (obs[1] - obs[6]) ** 2)
+    ball_dist = math.sqrt(pow(x_car-x_ball, 2) + pow(y_car-y_ball, 2))
     if ball_dist < 0.5:
         # use the regular model to win
-        running = False
+        chasing = False
     elif ball_dist > 2.0:
-        # use the running model to make noisy
-        running = True
+        # use the chasing model to make noisy
+        chasing = True
 
-    if running:
-        action, __ = running_model.predict(obs)
+    # additional cases can go here
+    #   ex: random chance
+    #   ex: ball position
+
+    if chasing:
+        print("using chasing weights")
+        action, __ = chasing_model.predict(obs)
     else:
+        print("using scoring weights")
         action, __ = scoring_model.predict(obs)
 
-    # send to network
+    # send to network, get new obs
     try:
         obs, __, __, __ = env.step(action)
     except rospy.ROSInterruptException:

@@ -2,14 +2,14 @@
     <!-- arguments -->
     <arg name="plot_log"      default="false"/>
     <arg name="weights_dir"   default="~/catkin_ws/data/rocket_league/"/>
-    <arg name="scoring_weights_name"    default="model_5"/>
-    <arg name="running_weights_name"    default="model_running"/>
+    <arg name="scoring_weights_name"    default="model_6"/>
+    <arg name="chasing_weights_name"    default="model_chasing"/>
 
     <!-- agent -->
     <node type="rocket_league_double_agent" pkg="rktl_autonomy" name="rocket_league_agent" output="screen">
         <rosparam command="load" file="$(find rktl_autonomy)/config/rocket_league.yaml"/>
         <param name="scoring_weights"   value="$(eval weights_dir + scoring_weights_name)"/>
-        <param name="running_weights"   value="$(eval weights_dir + running_weights_name)"/>
+        <param name="chasing_weights"   value="$(eval weights_dir + chasing_weights_name)"/>
     </node>
 
     <!-- plot performance -->
