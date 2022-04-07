@@ -3,7 +3,7 @@
     <arg name="plot_log"      default="false"/>
     <arg name="weights_dir"   default="~/catkin_ws/data/rocket_league/"/>
     <arg name="scoring_weights_name"    default="model_6"/>
-    <arg name="chasing_weights_name"    default="model_chasing"/>
+    <arg name="chasing_weights_name"    default="model_chasing_dynamic"/>
 
     <!-- agent -->
     <node type="rocket_league_double_agent" pkg="rktl_autonomy" name="rocket_league_agent" output="screen">

@@ -37,10 +37,10 @@ while True:
     x_car, y_car, theta_car, v_car, omega_car, x_ball, y_ball, vx_ball, vy_ball = numpy.split(obs, 9)
 
     ball_dist = math.sqrt(pow(x_car-x_ball, 2) + pow(y_car-y_ball, 2))
-    if ball_dist < 0.5:
+    if ball_dist < 1.5:
         # use the regular model to win
         chasing = False
-    elif ball_dist > 2.0:
+    elif ball_dist > 3.0:
         # use the chasing model to make noisy
         chasing = True
 
