@@ -20,10 +20,15 @@ if __name__ == '__main__':      # this is required due to forking processes
     print(f"RUN ID: {run_id}")
 
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
-    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
-            n_envs=24, vec_env_cls=SubprocVecEnv)
+    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id,
+        'launch_args':['sim_mode:=realistic']},
+        n_envs=24, vec_env_cls=SubprocVecEnv)
 
-    model = PPO("MlpPolicy", env)
+    GME_run_id = '72682dec-4168-43b5-8517-0f78d229be14'
+    GME_name = 'rl_model_157497480_steps'
+    weights = expanduser(f'~/catkin_ws/data/rocket_league/{GME_run_id}/{GME_name}')
+    model = PPO.load(weights)
+    model.set_env(env)
 
     # log training progress as CSV
     log_dir = expanduser(f'~/catkin_ws/data/rocket_league/{run_id}')
@@ -31,12 +36,12 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 20833 # save 20 times
+    freq = 20000 # save 50 times
     # freq = steps / (n_saves * n_envs)
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 240000000 # 240M (10M sequential)
+    steps = 24000000 # 24M (1M sequential)
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 
