@@ -5,7 +5,7 @@
     <arg name="input_delay"     default="0.15"/>
     <arg name="output_delay"    default="0.15"/>
 
-    <arg name="agent_type"          default="planner"/> <!-- Either planner or autonomy -->
+    <arg name="agent_type"          default="planner"/> <!-- Either planner, autonomy, or autonomy_double -->
     <arg name="autonomy_weights"    default="model"/>
 
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
@@ -56,11 +56,15 @@
     </group>
 
     <!-- Agents -->
-    <include if="$(eval agent_type == 'planner')" file="$(find rktl_planner)/launch/simple_agent.launch">
+    <include if="$(eval agent_type == 'planner')"
+        file="$(find rktl_planner)/launch/simple_agent.launch">
         <arg name="agent_name" value="agent0"/>
         <arg name="car_name" value="car0"/>
     </include>
-    <include if="$(eval agent_type == 'autonomy')" file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_double_agent.launch">
-        <!-- <arg name="weights_name" value="$(arg autonomy_weights)"/> -->
+    <include if="$(eval agent_type == 'autonomy')"
+        file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_agent.launch">
+        <arg name="weights_name" value="$(arg autonomy_weights)"/>
     </include>
+    <include if="$(eval agent_type == 'autonomy_double')"
+        file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_double_agent.launch"/>
 </launch>
