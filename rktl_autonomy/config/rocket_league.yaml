@@ -1,22 +1,22 @@
 reward:
   # reward to be given each frame
-  constant: 0.0
+  # constant: 0.0
   # reward as a function of squared distance from the ball
-  ball_dist_sq: -0.5
+  # ball_dist_sq: -0.5
   # reward as a function of squared distance from the ball to the goal
-  goal_dist_sq: -1.0
+  # goal_dist_sq: -1.0
   # reward given when the episode ends with the car scoring the proper goal
-  win: 50000
+  win: 100
   # reward given when the episode ends with the car scoring on the wrong goal
-  loss: -50000
+  loss: 100
   # reward given each frame when the car is in reverse
-  reverse: -25
+  # reverse: -25
   # reward given each frame when the car is near the walls
-  walls:
+  # walls:
     # actual reward value
-    value: -50
+    # value: -50
     # threshold distance (meters)
-    threshold: 0.25
+    # threshold: 0.25
 
 # duration when the episode will be terminated. Unit is seconds (sim time)
 max_episode_time: 15
