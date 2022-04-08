@@ -1,7 +1,6 @@
-""" Optuna example that optimizes the hyperparameters of A2C model."""
-from typing import Any
-from typing import Dict
+#!/usr/bin/env python3
 
+from rktl_autonomy import RocketLeagueInterface
 import gym
 import optuna
 from optuna.pruners import MedianPruner
@@ -10,6 +9,14 @@ from stable_baselines3 import A2C
 from stable_baselines3.common.callbacks import EvalCallback
 import torch
 import torch.nn as nn
+import uuid
+
+from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.vec_env import VecCheckNan
+
+from typing import Any
+from typing import Dict
 
 
 N_TRIALS = 100
@@ -18,10 +25,10 @@ N_EVALUATIONS = 2
 N_TIMESTEPS = int(2e4)
 EVAL_FREQ = int(N_TIMESTEPS / N_EVALUATIONS)
 N_EVAL_EPISODES = 3
-
+run_id = str(uuid.uuid4())  # ALL running environments must share this id
 
 DEFAULT_HYPERPARAMS = {
-    "policy": "MlpPolicy",
+
 }
 
 
@@ -102,13 +109,19 @@ class TrialEvalCallback(EvalCallback):
 def objective(trial: optuna.Trial) -> float:
 
     kwargs = DEFAULT_HYPERPARAMS.copy()
+
+    # Create env used for evaluation
+    eval_env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id' : run_id, 'launch_args': ['render:=false', 'plot_log:=false']},
+            n_envs= 1 , vec_env_cls=SubprocVecEnv) # Creates the env
+
+    eval_env = VecCheckNan(eval_env, raise_exception=True)
+
     # Sample hyperparameters
     kwargs.update(sample_a2c_params(trial))
+
     # Create the RL model
-    model = A2C(**kwargs)
-    # Create env used for evaluation
-    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id' : run_id, 'launch_args': ['render:=false', 'plot_log:=false']},
-            n_envs= 24 , vec_env_cls=SubprocVecEnv) # Creates the env
+    model = A2C("MlpPolicy", eval_env, **kwargs)
+   
     # Create the callback that will periodically evaluate
     # and report the performance
     eval_callback = TrialEvalCallback(
