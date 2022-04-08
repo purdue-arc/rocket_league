@@ -112,7 +112,7 @@ def objective(trial: optuna.Trial) -> float:
 
     # Create env used for evaluation
     eval_env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id' : run_id, 'launch_args': ['render:=false', 'plot_log:=false']},
-            n_envs= 1 , vec_env_cls=SubprocVecEnv) # Creates the env
+            n_envs= 1, vec_env_cls=SubprocVecEnv) # Creates the env
 
     eval_env = VecCheckNan(eval_env, raise_exception=True)
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     study = optuna.create_study(sampler=sampler, pruner=pruner, direction="maximize")
     try:
-        study.optimize(objective, n_trials=N_TRIALS, timeout=600)
+        study.optimize(objective, n_trials=N_TRIALS, timeout=600, n_jobs=24)
     except KeyboardInterrupt:
         pass
 
