@@ -8,7 +8,7 @@ reward:
   # reward given when the episode ends with the car scoring the proper goal
   win: 100
   # reward given when the episode ends with the car scoring on the wrong goal
-  loss: -100
+  loss: 100
   # reward given each frame when the car is in reverse
   # reverse: -25
   # # reward given each frame when the car is near the walls
