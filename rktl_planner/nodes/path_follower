@@ -124,7 +124,6 @@ class PathFollower(object):
             # If no intersection found, stop moving
             if intersect is None:
                 self.bot_velocity_cmd.publish(ControlCommand())
-                rospy.logwarn("No intersection could be found.")
                 self.bot_following_path.publish(False)
                 return
 
@@ -138,7 +137,9 @@ class PathFollower(object):
             cmd.curvature = -(1.0 / turn_rad)
             self.bot_velocity_cmd.publish(cmd)
             self.bot_following_path.publish(True)
-
+        else:
+            self.bot_velocity_cmd.publish(ControlCommand())
+            self.bot_following_path.publish(False)
 
 if __name__ == "__main__":
     PathFollower()
