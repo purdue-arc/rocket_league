@@ -21,7 +21,7 @@ if __name__ == '__main__':      # this is required due to forking processes
 
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id,
-        'launch_args':['sim_mode:=realistic']},
+        'launch_args':['sim_mode:=ideal']},
         n_envs=24, vec_env_cls=SubprocVecEnv)
 
     GME_run_id = '72682dec-4168-43b5-8517-0f78d229be14'

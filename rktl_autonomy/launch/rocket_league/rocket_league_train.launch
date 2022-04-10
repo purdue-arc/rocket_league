@@ -6,7 +6,7 @@
     <arg name="sim_mode"      default="ideal"/>
 
     <!-- constants -->
-    <arg name="rate"          value="10.0"/>
+    <arg name="rate"          value="2.0"/>
     <arg name="agent_type"    value="none"/>
 
     <param name="/use_sim_time" value="true"/>
