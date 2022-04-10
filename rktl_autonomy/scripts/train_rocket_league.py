@@ -23,7 +23,8 @@ if __name__ == '__main__':      # this is required due to forking processes
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
             n_envs=24, vec_env_cls=SubprocVecEnv)
 
-    model = PPO("MlpPolicy", env)
+    # model = PPO("MlpPolicy", env)
+    model = A2C("MlpPolicy", env)
 
     # log training progress as CSV
     log_dir = expanduser(f'~/catkin_ws/data/rocket_league/{run_id}')
