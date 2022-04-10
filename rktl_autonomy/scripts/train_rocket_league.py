@@ -7,8 +7,8 @@ License:
 """
 
 from rktl_autonomy import RocketLeagueInterface
-#from stable_baselines3 import PPO
-from stable_baselines3 import A2C
+from stable_baselines3 import PPO
+#from stable_baselines3 import A2C
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.logger import configure
