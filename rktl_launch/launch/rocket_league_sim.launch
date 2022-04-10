@@ -1,10 +1,12 @@
 <launch>
-    <arg name="render" default="true"/>
-    <arg name="pybullet_render" default="false"/>
-    <arg name="sim_mode" default="realistic"/> <!-- Either realistic or ideal (check docs) -->
-    <arg name="input_delay" default="0.15"/>
-    <arg name="output_delay" default="0.15"/>
-    <arg name="run_agent" default="true"/>
+    <arg name="render"  default="true"/>
+
+    <arg name="sim_mode"        default="realistic"/> <!-- Either realistic or ideal (check docs)-->
+    <arg name="input_delay"     default="0.15"/>
+    <arg name="output_delay"    default="0.15"/>
+
+    <arg name="agent_type"          default="planner"/> <!-- Either planner or autonomy -->
+    <arg name="autonomy_weights"    default="model"/>
 
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
 
@@ -20,7 +22,9 @@
     </group>
 
     <!-- Simulator -->
-    <include file="$(find rktl_sim)/launch/simulator.launch" pass_all_args="true"/>
+    <include file="$(find rktl_sim)/launch/simulator.launch">
+        <arg name="sim_mode" value="$(arg sim_mode)"/>
+    </include>
 
     <!-- Transport Delays -->
     <group if="$(eval sim_mode == 'realistic')">
@@ -52,8 +56,11 @@
     </group>
 
     <!-- Agents -->
-    <include if="$(arg run_agent)" file="$(find rktl_planner)/launch/simple_agent.launch">
+    <include if="$(eval agent_type == 'planner')" file="$(find rktl_planner)/launch/simple_agent.launch">
         <arg name="agent_name" value="agent0"/>
         <arg name="car_name" value="car0"/>
+    </include>
+    <include if="$(eval agent_type == 'autonomy')" file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_agent.launch">
+        <arg name="weights_name" value="$(arg autonomy_weights)"/>
     </include>
 </launch>

@@ -28,6 +28,9 @@ class MeanOdomFilter(object):
         self.POS_COUNT = rospy.get_param('~buffer_size/position', 3)
         self.VEL_COUNT = rospy.get_param('~buffer_size/velocity', 3)
 
+        self.PREDICT_ENABLE = rospy.get_param('~delay/compensate', False)
+        self.PREDICT_TIME = rospy.get_param('~delay/duration', 0.0)
+
         # variables
         self.buffer = deque(maxlen=max(self.POS_COUNT, self.VEL_COUNT+1))
 
@@ -66,6 +69,13 @@ class MeanOdomFilter(object):
         # convert velocity to body frame
         body_vx = vx*cos(yaw) + vy*sin(yaw)
         body_vy = vy*cos(yaw) - vx*sin(yaw)
+
+        # wildly extrapolate to a future time if requested
+        if self.PREDICT_ENABLE:
+            # perform a very simple prediction of location / orientation
+            x += vx * self.PREDICT_TIME
+            y += vy * self.PREDICT_TIME
+            yaw += omega * self.PREDICT_TIME
 
         # publish message
         odom_msg = Odometry()

@@ -1,6 +1,6 @@
 <launch>
     <arg name="car_name" default="car0"/>
-    <arg name="use_particle_filter" default="false"/>
+    <arg name="use_particle_filter" default="true"/>
 
     <group ns="cars/$(arg car_name)">
         <!-- Filter -->
