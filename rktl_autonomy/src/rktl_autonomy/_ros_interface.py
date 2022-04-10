@@ -46,7 +46,7 @@ class ROSInterface(Env):
             eval: set true if evaluating an agent in an existing ROS env, set false if training an agent
             launch_file: if training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch'])
             launch_args: if training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10])
-            run_id: if logging, run_id describes where to save files. Default is randomly generated
+            run_id: if training, used to prevent deadlocks. if logging, run_id describes where to save files. Default is randomly generated
         """
         super().__init__()
         self.__EVAL_MODE = eval
@@ -54,6 +54,7 @@ class ROSInterface(Env):
         # ROS initialization
         if not self.__EVAL_MODE:
             assert launch_file is not None
+            assert run_id is not None
             # use temporary files to enforce one environment roslaunching at a time
             while True:
                 try:
@@ -103,6 +104,8 @@ class ROSInterface(Env):
         # additional set up for logging
         if run_id is None:
             run_id = uuid.uuid4()
+        if self.__EVAL_MODE:
+            port = 11311
         self.__LOG_ID = f'{run_id}:{port}'
         self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
         self.__episode = 0

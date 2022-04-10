@@ -17,10 +17,11 @@ import uuid
 
 if __name__ == '__main__':      # this is required due to forking processes
     run_id = str(uuid.uuid4())  # ALL running environments must share this
+    print(f"RUN ID: {run_id}")
 
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
-            n_envs=2, vec_env_cls=SubprocVecEnv)
+            n_envs=24, vec_env_cls=SubprocVecEnv)
 
     model = PPO("MlpPolicy", env)
 
@@ -30,12 +31,12 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 12500 # (time steps in a SINGLE environment)
-    # ex. To save 20 times with 10M timesteps on 10 vec_envs, set to 50k
+    freq = 20833 # save 20 times
+    # freq = steps / (n_saves * n_envs)
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 10000000 # 10M (timesteps accross ALL environments)
+    steps = 240000000 # 240M (10M sequential)
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 

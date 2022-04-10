@@ -35,6 +35,11 @@ are `buffer_size/position` and `buffer_size/velocity`. Note that the velocity
 buffer size is the number of velocity measurements, not position measurements.
 Therefore, the number of position measurements in the buffer is one greater.
 
+It also has predictive abilities, which extrapolate the current position and
+orientation to the future. If used, this should be configured so that it outputs
+an estimate of what the world will be like when the currently being calculated
+controls arrive. This is controlled through the `delay` parameters.
+
 Overall, this filter is simple and works well enough for position as long as
 slight delay is acceptable. For velocity, it runs into problems since the noise
 is greater and the sampling frequency isn't high enough to get a low delay signal.
@@ -63,32 +68,55 @@ This then repeats until the end of time.
 Initially, the particles are randomly distributed all over the field, but they
 eventually converge (pretty quickly) to the real state of the car. To do this,
 the filter will periodically delete bad particles, and replace them with new
-random ones.
+random ones. These random ones are uniformly distributed if there isn't a good
+guess of where the car is (like when the filter first starts), or distributed
+normally about the most recent guess
 
-The specific state of the car is tracked by five variables:
+The specific state of the car is tracked by five-ish variables:
 - x, the x location of the car's center of mass in the field's reference frame
 - y, the y location of the car's center of mass in the field's reference frame
-- theta, the car's heading angle in the field's reference frame
+- sin(theta), the Y component of the car's heading angle in the field's reference frame
+- cos(theta), the X component of the car's heading angle in the field's reference frame
 - v_rear, the linear velocity of the rear tires of the car
 - psi, the steering angle (relative to the car's center)
+
+Theta is split into two state variables to prevent issues with wrap around and
+summation.
 
 From these, a kinematic bicycle model is used to calculate out everything needed
 for an odometry message. Basically, this just assumes there is no side-slip by
 the tires and it uses a lot of trigonometry. Details are in the MATLAB script
 [`bicycle_model.m`](scripts/bicycle_model.m).
 
-When advancing each particle one time-step, a random control vector (steering
-and velocity efforts are produced). These are uniformly distributed between -1.0
-and +1.0. From these, a new wheel velocity and steering angle are predicted
+When advancing each particle one time-step, either the known control vector (
+from listening to controller output) or a random control vector is used. If the
+known vector is used, a small amount of random noise is added. If a completely
+random one is used, they are uniformly distributed between actuator saturation
+limits. From these, a new wheel velocity and steering angle are predicted
 (using a 1st order and 0 order velocity model) and fed into the bicycle model.
 
-The relevant parameters to the filter (defined in [`particle_odom_filter.yaml`](config/particle_odom_filter.yaml))
-are `num_particles` and `measurement_error`. A higher number of particles should
-increase the performance of the filter, but will consume higher computational
-resources. Some tuning may be required. The measurement error parameters are the
-standard deviations of the data going in to the filter. Lowering these numbers
-will make it more trusting of incoming data, increasing these numbers will make
-it more trusting of it's own physics model for the car.
+All parameters to the filter are defined in [`particle_odom_filter.yaml`](config/particle_odom_filter.yaml).
+The relevant ones to tweak are:
+- `boundary_check`: Should the filter artificially punish particles outside of
+the assumed field boundaries?
+- `delay`: The `total_cycles` parameter should be the number of delta_t sized
+delays between an actuation being sent to the vehicle and perception seeing it
+move. The `compensate` parameter means if the filter should try to predict the
+future state of the field, corresponding to when the currently being calculated
+controls would arrive.
+- `num_particles`: A higher number of particles should increase the accuracy of
+the filter, but will consume higher computational resources.
+- `resample_proportion`: The percentage of particles replaced with random guesses
+at every timestep.
+- `measurement_error`: These are the assumed standard deviations of the
+perception data coming in.
+- `generator_noise`: These are the standard deviations of the gaussian noise
+added to the most recent state estimate when producing random new particles.
+- `efforts`: The `max` and `min` values are actuator saturation limits. This
+should match what the controller is allowed to produce. The `noise` value is the
+standard deviation of gaussian noise added if the controls are known.
+
+A good resource I found on particle filters is here: <https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/12-Particle-Filters.ipynb>
 
 #### Alternative algorithms
 [Kalman filters](https://www.kalmanfilter.net/default.aspx) were also considered.
@@ -189,7 +217,10 @@ These are all by Brian Douglas, who has many useful videos on control concepts.
 This takes a [`ControlEffort.msg`](../rktl_msgs/msg/ControlEffort.msg)
 message and sends it to a physical car. The efforts in the message range from
 -1.0 to +1.0 corresponding to full reverse for full forward motor speed,
-or full left or full right steering angle respectively.
+or full left or full right steering angle respectively. Technically, you can
+also feed in values with an absolute value greater than 1.0. This is useful for
+having higher actuator saturation limits in the controller, or perhaps
+implementing a "boost" for human controlled cars.
 
 Physically, the interface code runs on a [Teensy 3.2](https://www.pjrc.com/store/teensy32.html)
 microcontroller. The microcontroller is connected to a computer via USB, and
@@ -204,29 +235,18 @@ computer, launch the docker container with `./docker/docker-run.sh --privileged`
 roslaunch rktl_control hardware_interface.launch
 ```
 
-To use a different serial port (check `ls /dev` to see what it is named), launch
-with the following command:
+To use a different serial port (check `ls /dev` to see what it is named), modify
+the config file.
+
+You can enable the cars with:
 ```
-roslaunch rktl_control hardware_interface.launch serial_port:=<port>
+rostopic pub /cars/enable std_msgs/Bool "data: true"
 ```
 
-You can then manually feed it controls with:
+Then manually feed it controls with:
 ```
 roslaunch rktl_control keyboard_control.launch
 ```
-
-### Known bugs
-For some reason, you need to launch the computer side hardware interface code
-twice. The first time, the car will stop moving, but steer fully to one side.
-The second time, it will send the efforts from ROS to the car.
-
-This isn't a bug necessarily, but it is odd. The parameters are loaded when the
-node launches. The node launches when the device is powered. If you change the
-parameters and relaunch the computer side hardware interface, they won't be
-loaded in, because the node didn't re-launch. To fix this, power cycle the
-board after changing parameters.
-
-Perhaps this can be improved in the future using `dynamic reconfigure`.
 
 ### Building and Uploading
 Unfortunately, there are several steps required to build and upload code.
@@ -243,8 +263,6 @@ Copy the generated `ros_lib` folder to `<Arduino Location>/libraries/`
 
 Lastly, launch the Arduino IDE, load the `hardware_interface.ino` project inside the
 `scripts` folder, set the target board to the Teensy 3.2, and click upload.
-
-In the future, perhaps this can be improved: <http://wiki.ros.org/rosserial_arduino/Tutorials/CMake>
 
 ### Further Information
 `Teensyduino`, software that lets you program the Teensy using the Arduino IDE, is described here: <https://www.pjrc.com/teensy/teensyduino.html>

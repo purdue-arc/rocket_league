@@ -3,6 +3,7 @@
 ## You have to read this
 - Run `docker-build.sh` to build the development image.
 - Run `docker-run.sh` to start the container.
+- Run `docker-server-run.sh` to start the container when running on a remote computer connected via `ssh -Y`.
 - Run `docker-join.sh` to join the currently running container.
 - If you edit `Dockerfile.local`, re-run `docker-build.sh`.
 - To add a ROS dependency, edit `Dockerfile`
@@ -46,6 +47,15 @@ For example:
   --gpus all --net host --priviledged`: Run a specific launch
   file with Nvidia GPU support, host networking, and complete access to
   peripherals
+  
+  ### Server Xauth voodoo explanation
+  - Remove the old temporary xauth folder
+  - Create the temporary xauth folder
+  - Copy the current Xauthority file to temp directory to not pollute the main Xauthority file
+  - Get the port that the display is running on
+  - Get the cookie for the display that needs to be copied
+  - Add the copied cookie to the temporary Xauthority file using the docker interface ip as the display location
+  - Set the display variable for inside the container to use the new display location
 
 ### Other things
 You can also run `docker-join.sh` to attach a shell to the container. You can

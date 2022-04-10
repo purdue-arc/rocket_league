@@ -3,16 +3,24 @@ controller_type: 'pid'
 # parameters for all controllers
 limits:
   throttle:
-    min: -1.0
-    max:  1.0
-# parameters for lead_lag
+    min: -1.5
+    max:  1.5
+# parameters for lead_lag (stable with 0.3 sec delay)
+# lead:
+#   gain:   0.66986
+#   alpha: -0.5097
+#   beta:  -0.9402
+# lag:
+#   alpha: -0.9802
+#   beta:  -0.9956
+# alternate lead_lag (with predictive control)
 lead:
-  gain:  0.0
-  alpha: 0.0
-  beta:  0.0
+  gain:   3.9229
+  alpha: -0.2584
+  beta:  -0.9231
 lag:
-  alpha: 0.0
-  beta:  0.0
+  alpha: -0.573
+  beta:  -0.9786
 # parameters for pid
 pid:
   kp: 1.0

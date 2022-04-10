@@ -48,14 +48,8 @@
         </node>
 
         <!-- Ball tracking -->
-        <node pkg="rktl_perception" type="ball_detection" name="ball_detection">
-            <param name="publishThresh" value="true" />
-            <param name="min_hue" value="55" />
-            <param name="min_sat" value="30" />
-            <param name="min_vib" value="30" />
-            <param name="max_hue" value="100" />
-            <param name="max_sat" value="200" />
-            <param name="max_vib" value="80" />
+        <node pkg="rktl_perception" type="ball_detection" name="ball_detection" output="screen">
+            <rosparam command="load" file="$(find rktl_perception)/config/ball_settings.yaml" />
         </node>
     </group>
 </launch>

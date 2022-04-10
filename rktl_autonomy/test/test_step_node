@@ -14,6 +14,7 @@ from std_srvs.srv import Empty, EmptyResponse
 from rosgraph_msgs.msg import Clock
 import numpy as np
 from rktl_autonomy import RocketLeagueInterface
+import uuid
 
 def easy_odom(x, y, v):
     """Helper to construct Odom msgs."""
@@ -43,7 +44,7 @@ class TestStep(unittest.TestCase):
 
         # initialize code under test
         # would hang if above service was not initialized first
-        env = RocketLeagueInterface(launch_args=['render:=false'])
+        env = RocketLeagueInterface(launch_args=['render:=false'], run_id = str(uuid.uuid4()))
 
         # wait until first clock callback called
         while(self.last_time is None):

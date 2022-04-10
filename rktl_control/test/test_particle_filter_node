@@ -28,6 +28,13 @@ class TestBicycle(unittest.TestCase):
             [-0.0631,    1.4090,    1.6302,    0.2939,   -0.8095],
             [ 0.7147,    1.4172,    0.4889,   -0.7873,   -2.9443]
         ])
+        # adjust to new sin/cos state
+        particles = np.concatenate((
+            particles[:,0:2],
+            np.sin(particles[:,2:3]),
+            np.cos(particles[:,2:3]),
+            particles[:,3:5]),
+            axis=1)
 
         controls = np.array([
             [ 0.6294,   -0.8049],
@@ -44,6 +51,13 @@ class TestBicycle(unittest.TestCase):
             [-0.0437,    1.4572,   -2.8071,    0.4696,   -0.7571],
             [ 0.6785,    1.3915,   -0.6342,   -0.4405,   -2.8919]
         ])
+        # adjust to new sin/cos state
+        expected = np.concatenate((
+            expected[:,0:2],
+            np.sin(expected[:,2:3]),
+            np.cos(expected[:,2:3]),
+            expected[:,3:5]),
+            axis=1)
 
         out = filter.particle_dynamics(particles=particles, controls=controls)
         self.assertTrue(np.allclose(out, expected, atol=0.01),
