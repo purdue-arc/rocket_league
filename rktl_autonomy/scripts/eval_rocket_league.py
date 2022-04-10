@@ -26,16 +26,17 @@ if __name__ == '__main__':      # this is required due to forking processes
         n_envs=24, vec_env_cls=SubprocVecEnv)
 
     assert len(argv) >= 2
-    for model_run_id in argv[1:]:
-        print(f"Evaluating training run: {model_run_id}")
-        print(f"Training Episodes, mean reward, std dev reward")
+    with open(f'eval_log{run_id}.txt', 'w') as f:
+        for model_run_id in argv[1:]:
+            print(f"Evaluating training run: {model_run_id}", file=f)
+            print(f"Training Episodes, mean reward, std dev reward", file=f)
 
-        model_dir = expanduser(f'~/catkin_ws/data/rocket_league/{model_run_id}')
-        for weight in glob(f'{model_dir}/rl_model_*_steps.zip'):
-            model = PPO.load(weight.replace('.zip', ''))
-            mu, sigma = evaluate_policy(model, env, n_eval_episodes=96)
+            model_dir = expanduser(f'~/catkin_ws/data/rocket_league/{model_run_id}')
+            for weight in glob(f'{model_dir}/rl_model_*_steps.zip'):
+                model = PPO.load(weight.replace('.zip', ''))
+                mu, sigma = evaluate_policy(model, env, n_eval_episodes=24)
 
-            episodes = weight.replace(f'{model_dir}/rl_model_', '').replace('_steps.zip', '')
-            print(f"{episodes}\t{mu:.3f}\t{sigma:.3f}")
+                episodes = weight.replace(f'{model_dir}/rl_model_', '').replace('_steps.zip', '')
+                print(f"{episodes}\t{mu:.3f}\t{sigma:.3f}", file=f)
 
     env.close() # this must be done to clean up other processes
