@@ -29,7 +29,12 @@ class Host:
                 s.close()
         else:
             self.is_local = False
-            self.ip = socket.gethostbyname(hostname + '.local')
+            try:
+                self.ip = socket.gethostbyname(hostname)
+                self.hostname_actual = hostname
+            except:
+                self.ip = socket.gethostbyname(hostname + '.local')
+                self.hostname_actual = hostname + '.local'
         self.color = Fore.RESET
         self.running = False
 
@@ -47,11 +52,12 @@ class Host:
         print('{}Starting {}{}'.format(self.color, self.hostname, Fore.RESET))
         argv = self.run_cmd
         if not self.is_local:
-            argv = ['ssh', '-t', '%s@%s.local' %
-                    (self.username, self.hostname), *argv]
+            argv = ['ssh', '-t', '%s@%s' %
+                    (self.username, self.hostname_actual), *argv]
         roscore_host = [x.hostname for x in hosts if x.roscore][0]
         argv += ['--add-host=%s:%s' % (x.hostname, x.ip) for x in hosts]
         argv.append('--env=ROS_MASTER_URI=http://{}:11311'.format(roscore_host))
+        argv.append('--env=ROS_HOSTNAME={}'.format(self.ip))
         self.pid, self.fd = pty.fork()
         if self.pid == 0:
             os.execvp(argv[0], argv)
