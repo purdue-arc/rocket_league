@@ -46,7 +46,7 @@
                 '10': /cars/car0/pose
             </rosparam>
         </node>
-        <node pkg="rktl_perception" type="gen_cam_tf" name="pose2tf">
+        <node pkg="rktl_perception" type="pose_to_tf" name="pose_to_tf">
             <param name="cam_frame_id" value="$(arg camera_name)"/>
         </node>
 
