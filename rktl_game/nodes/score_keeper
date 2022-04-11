@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Use ball location to determine when a goal is scored.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+
+
+# ROS
+import rospy
+from std_msgs.msg import Bool
+from nav_msgs.msg import Odometry
+from rktl_msgs.msg import Score
+
+class ScoreKeeper():
+    def __init__(self):
+        rospy.init_node('score_keeper')
+
+        self.orange_score = 0
+        self.blue_score = 0
+        self.orange_goal = rospy.get_param('/field/length', 1) / 2
+        self.blue_goal = rospy.get_param('/field/length', 1) / -2
+
+        self.enabled = False
+
+        # Publishers
+        self.score_pub = rospy.Publisher('score', Score, queue_size=1)
+        self.active_pub = rospy.Publisher('cars/enable', Bool, queue_size=1)
+        # Subscribers
+        rospy.Subscriber('ball/ball_pose', Odometry, self.check_goal)
+
+        rospy.spin()
+
+
+    def check_goal(self):
+        if self.enabled:
+            # Check if ball is in goal
+            ball_pose = rospy.wait_for_message('ball/ball_pose', Odometry)
+            if ball_pose.pose.x >= self.orange_goal:
+                self.orange_score += 1
+            elif ball_pose.pose.x <= self.blue_goal:
+                self.blue_score += 1
+            self.score_pub.publish(Score(self.orange_score, self.blue_score)) # will this work? no clue!
+            self.active_pub.publish(False)
+            self.enabled = False
+
+if __name__ == "__main__":
+    ScoreKeeper()
