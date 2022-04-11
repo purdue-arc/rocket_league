@@ -22,29 +22,33 @@ class ScoreKeeper():
         self.blue_score = 0
         self.orange_goal = rospy.get_param('/field/length', 1) / 2
         self.blue_goal = rospy.get_param('/field/length', 1) / -2
-
         self.enabled = False
 
         # Publishers
         self.score_pub = rospy.Publisher('score', Score, queue_size=1)
         self.active_pub = rospy.Publisher('cars/enable', Bool, queue_size=1)
         # Subscribers
-        rospy.Subscriber('ball/ball_pose', Odometry, self.check_goal)
+        rospy.Subscriber('ball/odom', Odometry, self.check_goal)
+        rospy.Subscriber('cars/enable', Bool, self.enable)
 
         rospy.spin()
 
 
-    def check_goal(self):
+    def check_goal(self, ball_pose: Odometry):
         if self.enabled:
             # Check if ball is in goal
-            ball_pose = rospy.wait_for_message('ball/ball_pose', Odometry)
-            if ball_pose.pose.x >= self.orange_goal:
+            if ball_pose.pose.pose.position.x >= self.orange_goal:
                 self.orange_score += 1
-            elif ball_pose.pose.x <= self.blue_goal:
+            elif ball_pose.pose.pose.position.x <= self.blue_goal:
                 self.blue_score += 1
-            self.score_pub.publish(Score(self.orange_score, self.blue_score)) # will this work? no clue!
+            self.score_pub.publish(Score(ball_pose.header, self.orange_score, self.blue_score))
             self.active_pub.publish(False)
             self.enabled = False
+
+    def enable(self, data: Bool):
+        # enable after a goal is scored & cars are replaced
+        if data.data:
+            self.enabled = True
 
 if __name__ == "__main__":
     ScoreKeeper()
