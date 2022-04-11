@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+
+    <!-- based off of http://wiki.ros.org/roslibjs/Tutorials/BasicRosFunctionality -->
+    <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js">
+    </script>
+    <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+    <script type="text/javascript" type="text/javascript">
+        // Connecting to ROS
+        // -----------------
+
+        var ros = new ROSLIB.Ros({
+            url: 'ws://localhost:9090'
+        });
+
+        ros.on('connection', function () {
+            console.log('Connected to websocket server.');
+        });
+
+        ros.on('error', function (error) {
+            console.log('Error connecting to websocket server: ', error);
+        });
+
+        ros.on('close', function () {
+            console.log('Connection to websocket server closed.');
+        });
+
+        // Setting cars to disabled on startup
+        // ------------------
+
+        var carEnable = new ROSLIB.Topic({
+            ros: ros,
+            name: '/cars/enable',
+            messageType: 'std_msgs/Bool'
+        });
+
+        var carBool = new ROSLIB.Message({
+            data: false
+        });
+
+        carEnable.publish(carBool);
+
+        // Subscribing to a Topic
+        // ----------------------
+        // Subscribe to the score keeper node
+        var listener = new ROSLIB.Topic({
+            ros: ros,
+            name: '/listener',
+            messageType: 'std_msgs/String'
+        });
+
+        listener.subscribe(function (message) {
+            console.log('Received message on ' + listener.name + ': ' + message.data);
+            listener.unsubscribe();
+        });
+
+        // Calling a service
+        // -----------------
+
+        var addTwoIntsClient = new ROSLIB.Service({
+            ros: ros,
+            name: '/add_two_ints',
+            serviceType: 'rospy_tutorials/AddTwoInts'
+        });
+
+        var request = new ROSLIB.ServiceRequest({
+            a: 1,
+            b: 2
+        });
+
+        addTwoIntsClient.callService(request, function (result) {
+            console.log('Result for service call on ' +
+                addTwoIntsClient.name +
+                ': ' +
+                result.sum);
+        });
+
+        // Getting and setting a param value
+        // ---------------------------------
+
+        ros.getParams(function (params) {
+            console.log(params);
+        });
+
+        var maxVelX = new ROSLIB.Param({
+            ros: ros,
+            name: 'max_vel_y'
+        });
+
+        maxVelX.set(0.8);
+        maxVelX.get(function (value) {
+            console.log('MAX VAL: ' + value);
+        });
+    </script>
+
+    <title>
+        Rocket League Game
+    </title>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+</head>
+
+
+<body>
+
+    <div class="scoreboard">
+        <div class="box">
+            <div class="blue-score">
+                <h2> 1 </h2>
+            </div>
+            <div class="time">
+                <h2> 2:00 </h2>
+            </div>
+            <div class="orange-score">
+                <h2> 1 </h2>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="control">
+        <div class="box3">
+            <button class="button-13 start-button">Start</button>
+            <button class="button-13 pause-button">Pause</button>
+            <button class="button-13 reset-button">Reset</button>
+        </div>
+    </div>
+
+
+    <div class="field">
+
+    </div>
+
+
+    <div class="team-selection">
+
+        <div class="box2">
+            <div class="blue-team">
+                <h1 class="team"> Blue </h1>
+                <div class="dropdown">
+                    <select>
+                        <option value="" disabled selected></option>
+                        <option>Controller 1</option>
+                        <option>Controller 2</option>
+                        <option>Computer</option>
+                    </select>
+                    <select>
+                        <option value="" disabled selected></option>
+                        <option>Controller 1</option>
+                        <option>Controller 2</option>
+                        <option>Computer</option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div class="orange-team">
+                <h1 class="team"> Orange </h1>
+                <div class="dropdown">
+                    <select>
+                        <option value="" disabled selected></option>
+                        <option>Controller 1</option>
+                        <option>Controller 2</option>
+                        <option>Computer</option>
+                    </select>
+                    <select>
+                        <option value="" disabled selected></option>
+                        <option>Controller 1</option>
+                        <option>Controller 2</option>
+                        <option>Computer</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</body>
+
+</html>
