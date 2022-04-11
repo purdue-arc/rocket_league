@@ -23,7 +23,7 @@ if __name__ == '__main__':      # this is required due to forking processes
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id,
         'launch_args':['render:=false', 'plot_log:=false']},
-        n_envs=1, vec_env_cls=SubprocVecEnv)
+        n_envs=24, vec_env_cls=SubprocVecEnv)
 
     assert len(argv) >= 2
     for model_run_id in argv[1:]:
@@ -35,7 +35,7 @@ if __name__ == '__main__':      # this is required due to forking processes
 
             for weight in glob(f'{model_dir}/rl_model_*_steps.zip'):
                 model = PPO.load(weight.replace('.zip', ''))
-                mu, sigma = evaluate_policy(model, env, n_eval_episodes=1)
+                mu, sigma = evaluate_policy(model, env, n_eval_episodes=48)
 
                 episodes = weight.replace(f'{model_dir}/rl_model_', '').replace('_steps.zip', '')
                 logfile.write(f"{episodes}\t{mu:.3f}\t{sigma:.3f}\n")
