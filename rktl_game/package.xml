@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rktl_game/name>
+  <name>rktl_game</name>
   <version>0.0.0</version>
   <description>Perception for ARC Rocket League project</description>
   <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
@@ -12,4 +12,6 @@
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>nodelet</depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>rktl_msgs</exec_depend>
 </package>
