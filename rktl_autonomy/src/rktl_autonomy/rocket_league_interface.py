@@ -97,7 +97,8 @@ class RocketLeagueInterface(ROSInterface):
         rospy.Subscriber('match_status', MatchStatus, self._score_cb)
 
         # block until environment is ready
-        rospy.wait_for_service('sim_reset')
+        if eval:
+            rospy.wait_for_service('sim_reset')
 
     @property
     def action_space(self):
