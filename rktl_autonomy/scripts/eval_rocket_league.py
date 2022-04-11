@@ -23,20 +23,22 @@ if __name__ == '__main__':      # this is required due to forking processes
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id,
         'launch_args':['render:=false', 'plot_log:=false']},
-        n_envs=24, vec_env_cls=SubprocVecEnv)
+        n_envs=1, vec_env_cls=SubprocVecEnv)
 
     assert len(argv) >= 2
-    with open(f'eval_log{run_id}.txt', 'w') as f:
-        for model_run_id in argv[1:]:
-            print(f"Evaluating training run: {model_run_id}", file=f)
-            print(f"Training Episodes, mean reward, std dev reward", file=f)
+    for model_run_id in argv[1:]:
+        print(f"Evaluating training run: {model_run_id}")
+        model_dir = expanduser(f'~/catkin_ws/data/rocket_league/{model_run_id}')
 
-            model_dir = expanduser(f'~/catkin_ws/data/rocket_league/{model_run_id}')
+        with open(f'{model_dir}/eval_log.txt', 'w') as logfile:
+            logfile.write(f"Training Episodes, mean reward, std dev reward")
+
             for weight in glob(f'{model_dir}/rl_model_*_steps.zip'):
                 model = PPO.load(weight.replace('.zip', ''))
-                mu, sigma = evaluate_policy(model, env, n_eval_episodes=24)
+                mu, sigma = evaluate_policy(model, env, n_eval_episodes=1)
 
                 episodes = weight.replace(f'{model_dir}/rl_model_', '').replace('_steps.zip', '')
-                print(f"{episodes}\t{mu:.3f}\t{sigma:.3f}", file=f)
+                logfile.write(f"{episodes}\t{mu:.3f}\t{sigma:.3f}")
+                logfile.flush()
 
     env.close() # this must be done to clean up other processes
