@@ -46,6 +46,9 @@
                 '10': /cars/car0/pose
             </rosparam>
         </node>
+        <node pkg="rktl_perception" type="gen_cam_tf" name="pose2tf">
+            <param name="cam_frame_id" value="$(arg camera_name)"/>
+        </node>
 
         <!-- Ball tracking -->
         <node pkg="rktl_perception" type="ball_detection" name="ball_detection" output="screen">

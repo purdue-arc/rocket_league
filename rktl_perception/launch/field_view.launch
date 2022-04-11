@@ -1,0 +1,19 @@
+<launch>
+    <node ns="cams/cam0" pkg="rktl_launch" type="projector" name="projector">
+        <param name="ground_height" value="0.00"/>
+    </node>
+
+    <node ns="cams/cam1" pkg="rktl_launch" type="projector" name="projector">
+        <param name="ground_height" value="-0.02"/>
+    </node>
+
+    <node ns="cams/cam2" pkg="rktl_launch" type="projector" name="projector">
+        <param name="ground_height" value="-0.01"/>
+    </node>
+
+    <node ns="cams/cam3" pkg="rktl_launch" type="projector" name="projector">
+        <param name="ground_height" value="-0.03"/>
+    </node>
+
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find rktl_launch)/rviz/field.rviz"/>
+</launch>
