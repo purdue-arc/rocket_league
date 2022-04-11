@@ -21,6 +21,7 @@ add_message_files(
   MatchStatus.msg
   Path.msg
   Waypoint.msg
+  Score.msg
 )
 
 ## Generate services in the 'srv' folder
