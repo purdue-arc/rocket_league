@@ -24,7 +24,7 @@ if __name__ == '__main__':      # this is required due to forking processes
         n_envs=24, vec_env_cls=SubprocVecEnv)
 
     GME_run_id = '72682dec-4168-43b5-8517-0f78d229be14'
-    GME_name = 'rl_model_157497480_steps'
+    GME_name = 'rl_model_203996736_steps'
     weights = expanduser(f'~/catkin_ws/data/rocket_league/{GME_run_id}/{GME_name}')
     model = PPO.load(weights)
     model.set_env(env)
@@ -35,12 +35,11 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 20000 # save 50 times
-    # freq = steps / (n_saves * n_envs)
+    freq = 1000000 / 24 # save every 1M steps
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 24000000 # 24M (1M sequential)
+    steps = 75000000 # 75M
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 

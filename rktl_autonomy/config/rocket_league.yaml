@@ -12,11 +12,11 @@ reward:
   # reward given each frame when the car is in reverse
   # reverse: -25
   # reward given each frame when the car is near the walls
-  # walls:
+  walls:
     # actual reward value
-    # value: -50
+    value: -5
     # threshold distance (meters)
-    # threshold: 0.25
+    threshold: 0.25
 
 # duration when the episode will be terminated. Unit is seconds (sim time)
 max_episode_time: 15
