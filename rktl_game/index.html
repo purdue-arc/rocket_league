@@ -49,35 +49,38 @@
         // Subscribe to the score keeper node
         var listener = new ROSLIB.Topic({
             ros: ros,
-            name: '/listener',
-            messageType: 'std_msgs/String'
+            name: '/score',
+            messageType: 'rktl_msgs/Score'
         });
 
-        listener.subscribe(function (message) {
-            console.log('Received message on ' + listener.name + ': ' + message.data);
-            listener.unsubscribe();
-        });
+        // updating the score on a timer
+        const interval = setInterval(function () {
+            listener.subscribe(function (message) {
+                document.getElementById('blue-score').innerHTML = message.blue;
+                document.getElementById('orange-score').innerHTML = message.orange;
+            });
+        }, 1000);
 
-        // Calling a service
-        // -----------------
+        // // Calling a service
+        // // -----------------
 
-        var addTwoIntsClient = new ROSLIB.Service({
-            ros: ros,
-            name: '/add_two_ints',
-            serviceType: 'rospy_tutorials/AddTwoInts'
-        });
+        // var addTwoIntsClient = new ROSLIB.Service({
+        //     ros: ros,
+        //     name: '/add_two_ints',
+        //     serviceType: 'rospy_tutorials/AddTwoInts'
+        // });
 
-        var request = new ROSLIB.ServiceRequest({
-            a: 1,
-            b: 2
-        });
+        // var request = new ROSLIB.ServiceRequest({
+        //     a: 1,
+        //     b: 2
+        // });
 
-        addTwoIntsClient.callService(request, function (result) {
-            console.log('Result for service call on ' +
-                addTwoIntsClient.name +
-                ': ' +
-                result.sum);
-        });
+        // addTwoIntsClient.callService(request, function (result) {
+        //     console.log('Result for service call on ' +
+        //         addTwoIntsClient.name +
+        //         ': ' +
+        //         result.sum);
+        // });
 
         // Getting and setting a param value
         // ---------------------------------
@@ -110,13 +113,13 @@
     <div class="scoreboard">
         <div class="box">
             <div class="blue-score">
-                <h2> 1 </h2>
+                <h2 id="blue-score"> 0 </h2>
             </div>
             <div class="time">
-                <h2> 2:00 </h2>
+                <h2 id="timer"> 2:00 </h2>
             </div>
             <div class="orange-score">
-                <h2> 1 </h2>
+                <h2 id="orange-score"> 0 </h2>
             </div>
         </div>
     </div>
