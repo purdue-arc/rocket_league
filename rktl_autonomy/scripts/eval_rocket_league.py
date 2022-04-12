@@ -31,7 +31,7 @@ if __name__ == '__main__':      # this is required due to forking processes
         model_dir = expanduser(f'~/catkin_ws/data/rocket_league/{model_run_id}')
 
         with open(f'{model_dir}/eval_log_{run_id}.txt', 'w') as logfile:
-            logfile.write(f"Training Episodes\tMean Reward\tStd-Dev Reward\n")
+            logfile.write("Training Episodes\tMean Reward\tStd-Dev Reward\n")
 
             for weight in glob(f'{model_dir}/rl_model_*_steps.zip'):
                 model = PPO.load(weight.replace('.zip', ''))
