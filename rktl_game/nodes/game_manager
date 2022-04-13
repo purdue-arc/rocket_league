@@ -10,7 +10,8 @@ License:
 
 # ROS
 import rospy
-from std_msgs.msg import Bool, UInt16, Int8, Header
+from std_msgs.msg import Bool, UInt16, Int16, Int8, Header
+from std_srvs.srv import Empty, EmptyResponse, Trigger, TriggerResponse
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
 
@@ -23,34 +24,58 @@ class ScoreKeeper():
         self.orange_goal = (rospy.get_param('/field/length', 1) + 0.1) / 2 
         self.blue_goal = (rospy.get_param('/field/length', 1)  + 0.1) / -2
         self.enabled = False
-        self.match_status = Int8(0)
-        self.game_clock = UInt16(0)
+        self.match_status = 0
+        self.game_clock = 90
 
         # Publishers
-        # self.score_pub = rospy.Publisher('score', Score, queue_size=1)
-        # self.active_pub = rospy.Publisher('cars/enable', Bool, queue_size=1)
-        # self.game_clock_pub = rospy.Publisher('game_clock', Int8, queue_size=1)
         self.match_status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
-        
+
         # Subscribers
         rospy.Subscriber('ball/odom', Odometry, self.check_goal)
         rospy.Subscriber('cars/enable', Bool, self.enable)
 
+        # Services
+        rospy.Service('clock_set', Empty, self.set_clock)
+        rospy.Service('unpause_game', Empty, self.unpause)
+        rospy.Service('pause_game', Empty, self.pause)
+
+        # Counts loops and decrements game clock every second
+        self.timer_ctr = 0
+        # self.unpause(self)
         # main loop
         rate = rospy.Rate(10) #10hz
         while not rospy.is_shutdown():
-            rate.sleep()
+            if self.match_status == 1:
+                self.timer_ctr += 1
+                if self.timer_ctr == 10:
+                    self.timer_ctr = 0
+                    self.game_clock -= 1
             self.update_status()
+            rate.sleep()
 
     def update_status(self):
-        if (self.match_status == 0 and self.game_clock == 0):
+        if (self.match_status == 1 and self.game_clock == 0):
             if (self.orange_score > self.blue_score):
-                self.match_status = Int8(3)
+                self.match_status = 3
             else:
-                self.match_status = Int8(4)
+                self.match_status = 4
         score = Score(self.orange_score, self.blue_score)
-        self.match_status_pub.publish(MatchStatus(Header(), self.match_status, self.game_clock, score))
+        self.match_status_pub.publish(MatchStatus(self.match_status, self.game_clock, score))
 
+    def pause(self, _):
+        self.enabled = False
+        self.match_status = 0
+        return EmptyResponse()
+
+    def unpause(self, _):
+        self.enabled = True
+        self.match_status = 1
+        return EmptyResponse()
+
+    def set_clock(self, _):
+        self.pause(self)
+        self.game_clock = 90
+        return EmptyResponse()
 
     def check_goal(self, ball_pose: Odometry):
         if self.enabled:
@@ -59,7 +84,7 @@ class ScoreKeeper():
                 self.orange_score += 1
             elif ball_pose.pose.pose.position.x <= self.blue_goal:
                 self.blue_score += 1
-            self.score_pub.publish(Score(ball_pose.header, self.orange_score, self.blue_score))
+            self.score_pub.publish(Score(self.orange_score, self.blue_score))
             self.active_pub.publish(False)
             self.enabled = False
 

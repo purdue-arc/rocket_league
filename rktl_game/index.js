@@ -35,70 +35,68 @@ ros.on('close', function () {
 // Subscribing to a Topic
 // ----------------------
 // Subscribe to the score keeper node
-var scoreListener = new ROSLIB.Topic({
-    ros: ros,
-    name: '/score',
-    messageType: 'rktl_msgs/Score'
-});
-
-var stateListener = new ROSLIB.Topic({
+var statusListener = new ROSLIB.Topic({
     ros: ros,
     name: '/match_status',
     messageType: 'rktl_msgs/MatchStatus'
 });
 
-var clockListener = new ROSLIB.Topic({
-    ros: ros,
-    name: '/game_clock',
-    messageType: 'std_msgs/Float32'
-});
+// var stateListener = new ROSLIB.Topic({
+//     ros: ros,
+//     name: '/match_status',
+//     messageType: 'rktl_msgs/MatchStatus'
+// });
+
+// var clockListener = new ROSLIB.Topic({
+//     ros: ros,
+//     name: '/game_clock',
+//     messageType: 'std_msgs/Float32'
+// });
 
 // // Calling a service
 // // -----------------
 
-// var addTwoIntsClient = new ROSLIB.Service({
-//     ros: ros,
-//     name: '/add_two_ints',
-//     serviceType: 'rospy_tutorials/AddTwoInts'
-// });
+var pause_srv = new ROSLIB.Service({
+    ros: ros,
+    name: 'pause_game',
+    serviceType: 'std_srvs/Empty'
+});
 
-// var request = new ROSLIB.ServiceRequest({
-//     a: 1,
-//     b: 2
-// });
+var unpause_srv = new ROSLIB.Service({
+    ros: ros,
+    name: 'unpause_game',
+    serviceType: 'std_srvs/Empty'
+});
 
-// addTwoIntsClient.callService(request, function (result) {
-//     console.log('Result for service call on ' +
-// addTwoIntsClient.name +
-// ': ' +
-// result.sum);
-// });
+var reset_srv = new ROSLIB.Service({
+    ros: ros,
+    name: 'clock_set',
+    serviceType: 'std_srvs/Empty'
+});
+
 
 // Getting and setting a param value
 // ---------------------------------
 
-ros.getParams(function (params) {
-    console.log(params);
-});
+// ros.getParams(function (params) {
+//     console.log(params);
+// });
 
-var maxVelX = new ROSLIB.Param({
-    ros: ros,
-    name: 'max_vel_y'
-});
+// var maxVelX = new ROSLIB.Param({
+//     ros: ros,
+//     name: 'max_vel_y'
+// });
 
-maxVelX.set(0.8);
-maxVelX.get(function (value) {
-    console.log('MAX VAL: ' + value);
-});
+// maxVelX.set(0.8);
+// maxVelX.get(function (value) {
+//     console.log('MAX VAL: ' + value);
+// });
 
 // updating the score on a timer
 const interval = setInterval(function () {
-    listener.subscribe(function (message) {
-        document.getElementById('blue-score').innerHTML = message.blue;
-        document.getElementById('orange-score').innerHTML = message.orange;
+    statusListener.subscribe(function (message) {
+        document.getElementById('blue-score').innerHTML = message.score.blue;
+        document.getElementById('orange-score').innerHTML = message.score.orange;
+        document.getElementById('timer').innerHTML = message.clock;
     });
 }, 1000);
-
-// updating game clock while game is running
-const clock = setInterval(function () {
-    listener

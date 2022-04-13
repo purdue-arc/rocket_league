@@ -26,7 +26,7 @@
                 <h2 id="blue-score"> 0 </h2>
             </div>
             <div class="time">
-                <h2 id="timer"> 2:00 </h2>
+                <h2 id="timer"> 0 </h2>
             </div>
             <div class="orange-score">
                 <h2 id="orange-score"> 0 </h2>
@@ -37,9 +37,9 @@
 
     <div id="control">
         <div class="box3">
-            <button class="button-13 start-button">Start</button>
-            <button class="button-13 pause-button">Pause</button>
-            <button class="button-13 reset-button">Reset</button>
+            <button class="button-13 start-button" onclick="unpause_srv.callService()">Start</button>
+            <button class="button-13 pause-button" onclick="pause_srv.callService()">Pause</button>
+            <button class="button-13 reset-button" onclick="reset_srv.callService()">Reset</button>
         </div>
     </div>
 
