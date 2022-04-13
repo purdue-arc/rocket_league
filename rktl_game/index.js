@@ -66,7 +66,14 @@ const interval = setInterval(function () {
     statusListener.subscribe(function (message) {
         document.getElementById('blue-score').innerHTML = message.score.blue;
         document.getElementById('orange-score').innerHTML = message.score.orange;
-        document.getElementById('timer').innerHTML = message.clock;
+        var minutes = Math.floor(message.clock / 60);
+        var seconds = message.clock - minutes * 60;
+        if (seconds < 10) {
+            seconds = '0' + seconds;
+        }
+        var time = minutes + ':' + seconds;
+
+        document.getElementById('timer').innerHTML = time;
         console.log(message.status);
     });
 }, 1000);
