@@ -24,7 +24,7 @@ if __name__ == '__main__':      # this is required due to forking processes
         n_envs=24, vec_env_cls=SubprocVecEnv)
 
     GME_run_id = '72682dec-4168-43b5-8517-0f78d229be14'
-    GME_name = 'rl_model_200496792_steps'
+    GME_name = 'rl_model_150497592_steps'
     weights = expanduser(f'~/catkin_ws/data/rocket_league/{GME_run_id}/{GME_name}')
     model = PPO.load(weights)
     model.set_env(env)
