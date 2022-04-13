@@ -1,9 +1,8 @@
 <launch>
     <arg name="render"  default="true"/>
 
-    <arg name="sim_mode"        default="realistic"/> <!-- Either realistic or ideal (check docs)-->
-    <arg name="input_delay"     default="0.15"/>
-    <arg name="output_delay"    default="0.15"/>
+    <arg name="sim_mode"            default="realistic"/> <!-- Either realistic or ideal (check docs)-->
+    <arg name="perception_delay"    default="0.15"/>
 
     <arg name="agent_type"          default="planner"/> <!-- Either planner or autonomy -->
     <arg name="autonomy_weights"    default="model"/>
@@ -26,22 +25,17 @@
         <arg name="sim_mode" value="$(arg sim_mode)"/>
     </include>
 
-    <!-- Transport Delays -->
+    <!-- Perception Delays -->
     <group if="$(eval sim_mode == 'realistic')">
         <!-- Ball -->
         <node ns="ball" pkg="rktl_launch" type="topic_delay" name="pose_delay"
             args="pose_sync_early pose_sync
-            geometry_msgs/PoseWithCovarianceStamped $(arg input_delay)"/>
+            geometry_msgs/PoseWithCovarianceStamped $(arg perception_delay)"/>
 
         <!-- Car -->
         <node ns="cars/car0" pkg="rktl_launch" type="topic_delay" name="pose_delay"
             args="pose_sync_early pose_sync
-            geometry_msgs/PoseWithCovarianceStamped $(arg input_delay)"/>
-
-        <!-- Effort -->
-        <node ns="cars/car0" pkg="rktl_launch" type="topic_delay" name="effort_delay"
-            args="effort effort_delayed
-            rktl_msgs/ControlEffort $(arg output_delay)"/>
+            geometry_msgs/PoseWithCovarianceStamped $(arg perception_delay)"/>
     </group>
 
     <!-- Control & Filtering Stack -->
