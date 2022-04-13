@@ -44,61 +44,67 @@
 %
 % Originator:        Danylo Malyuta, JPL
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Ammended Instructions:
+%  Record a bag file as instructed above. Then, save the data to a csv
+%  by running "rosbag echo -b calibration.bag -p tag_detections > calibration.csv
+%
+% WARNING:
+%  Make sure that apriltags was configured to detect lone tags, not bundles.
+%  Otherwise, the software may improperly parse the csv and behave unexpectedly.
+%
+% Edited by: James Baxter
+% Date: 2022/04/12
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% User inputs
 
 % Relative directory of calibration bagfile
-calibration_file = 'calibration.bag';
+calibration_file = '../../../../data/bags/calibration.csv';
 
 % Bundle name
-bundle_name = 'my_bundle';
+bundle_name = 'field_origin';
 
 % Master tag's ID
 master_id = 3;
 
-%% Make sure matlab_rosbag is installed
-
-if ~exist('matlab_rosbag-0.5.0-linux64','file')
-    websave('matlab_rosbag', ...
-            ['https://github.com/bcharrow/matlab_rosbag/releases/' ...
-             'download/v0.5/matlab_rosbag-0.5.0-linux64.zip']);
-    unzip('matlab_rosbag');
-    delete matlab_rosbag.zip
-end
-addpath('matlab_rosbag-0.5.0-linux64');
-
 %% Load the tag detections bagfile
 
-bag = ros.Bag.load(calibration_file);
-tag_msg = bag.readAll('/tag_detections');
+bag = readcell(calibration_file);
 
 clear tag_data;
-N = numel(tag_msg);
-t0 = getBagTime(tag_msg{1});
-for i = 1:N
-    tag_data.t(i) = getBagTime(tag_msg{i})-t0;
-    for j = 1:numel(tag_msg{i}.detections)
-        detection = tag_msg{i}.detections(j);
-        if numel(detection.id)>1
-            % Can only use standalone tag detections for calibration!
-            % The math allows for bundles too (e.g. bundle composed of
-            % bundles) but the code does not, and it's not that useful
-            % anyway
-            warning_str = 'Skipping tag bundle detection with IDs';
-            for k = 1:numel(detection.id)
-                warning_str = sprintf('%s %d',warning_str,detection.id(k));
+N = size(bag,1) - 1;
+max_detections = (size(bag,2) - 5) / 48;
+t0 = bag{2,3};
+for i = (1:N)
+    row = i+1;
+    tag_data.t(i) = bag{row,3} - t0;
+
+    % get the number of detections
+    n_detections = 0;
+    for j = 1:max_detections
+        col = 5 + 48*(j-1);
+        if ismissing(bag{row,col})
+            break
+        else
+            n_detections = n_detections + 1;
+            if bag{1,col} ~= strcat('field.detections', int2str(j-1), '.id0')
+                error('CSV does not match expected format')
             end
-            warning(warning_str);
-            continue;
         end
-        tag_data.detection(i).id(j) = detection.id;
-        tag_data.detection(i).size(j) = detection.size;
+    end
+
+    % extract the relevant data
+    for j = 1:n_detections
+        col = 5 + 48*(j-1);
+        tag_data.detection(i).id(j) = bag{row,col};
+        tag_data.detection(i).size(j) = bag{row,col+1};
         % Tag position with respect to camera frame
-        tag_data.detection(i).p(:,j) = detection.pose.pose.pose.position;
+        % [x;y;z] format
+        tag_data.detection(i).p(:,j) = cell2mat(bag(row,col+5:col+7));
         % Tag orientation with respect to camera frame
         % [w;x;y;z] format
-        tag_data.detection(i).q(:,j) = ...
-                         detection.pose.pose.pose.orientation([4,1,2,3]);
+        tag_data.detection(i).q(:,j) = cell2mat(bag(row,[col+11, col+8:col+10]));
     end
 end
 
