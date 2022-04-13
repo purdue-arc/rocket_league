@@ -48,7 +48,7 @@ private:
     image_transport::Publisher imgPub;
     ros::Publisher vecPub;
     ros::Subscriber detectionSub;
-    int minHue, minSat, minVib, maxHue, maxSat, maxVib, minSize;
+    int minHue, minSat, minVib, maxHue, maxSat, maxVib, minSize, erode_amnt, dilate_amnt;
     double originX, originY;
     bool publishThresh;
     image_geometry::PinholeCameraModel camera;

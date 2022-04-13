@@ -28,7 +28,9 @@ BallDetection::BallDetection() :
     maxSat{pnh.param<int>("max_sat", 180)},
     minVib{pnh.param<int>("min_vib", 040)},
     maxVib{pnh.param<int>("max_vib", 100)},
-    minSize{pnh.param<int>("min_size", 50)}
+    minSize{pnh.param<int>("min_size", 50)},
+    erode_amnt{pnh.param<int>("erode", 4)},
+    dilate_amnt{pnh.param<int>("dilate", 5)}
     {}
 
 void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& info) {
@@ -50,8 +52,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
 
         /* Detect the object based on HSV Range Values */
         inRange(frame_HSV, cv::Scalar(minHue, minSat, minVib), cv::Scalar(maxHue, maxSat, maxVib), frame_threshold);
-        erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 4, 1, 1);
-        dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), 5, 1, 1);
+        erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), erode_amnt, 1, 1);
+        dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), dilate_amnt, 1, 1);
 
         /* find all the contours */
         std::vector<std::vector<cv::Point> > contours;
