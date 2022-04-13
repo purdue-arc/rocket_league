@@ -29,13 +29,14 @@ class ScoreKeeper():
 
         # Publishers
         self.match_status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
+        self.active_pub = rospy.Publisher('cars/enable', Bool, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('ball/odom', Odometry, self.check_goal)
         rospy.Subscriber('cars/enable', Bool, self.enable)
 
         # Services
-        rospy.Service('clock_set', Empty, self.set_clock)
+        rospy.Service('reset_game', Empty, self.reset)
         rospy.Service('unpause_game', Empty, self.unpause)
         rospy.Service('pause_game', Empty, self.pause)
 
@@ -65,16 +66,23 @@ class ScoreKeeper():
     def pause(self, _):
         self.enabled = False
         self.match_status = 0
+        self.active_pub.publish(False)
+        return EmptyResponse()
+
+    def reset(self, _):
+        self.orange_score = 0
+        self.blue_score = 0
+        self.enabled = False
+        self.match_status = 0
+        self.game_clock = rospy.get_param('/game_length', 90)
+        self.active_pub.publish(False)
+        self.match_status_pub.publish(MatchStatus(0, self.game_clock, Score(0, 0)))
         return EmptyResponse()
 
     def unpause(self, _):
         self.enabled = True
         self.match_status = 1
-        return EmptyResponse()
-
-    def set_clock(self, _):
-        self.pause(self)
-        self.game_clock = rospy.get_param('/game_length', 90)
+        self.active_pub.publish(True)
         return EmptyResponse()
 
     def check_goal(self, ball_pose: Odometry):
@@ -82,11 +90,10 @@ class ScoreKeeper():
             # Check if ball is in goal
             if ball_pose.pose.pose.position.x >= self.orange_goal:
                 self.orange_score += 1
+                self.pause(self)
             elif ball_pose.pose.pose.position.x <= self.blue_goal:
                 self.blue_score += 1
-            self.score_pub.publish(Score(self.orange_score, self.blue_score))
-            self.active_pub.publish(False)
-            self.enabled = False
+                self.pause(self)
 
     def enable(self, data: Bool):
         # enable after a goal is scored & cars are replaced

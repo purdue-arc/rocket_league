@@ -42,7 +42,7 @@ var unpause_srv = new ROSLIB.Service({
 
 var reset_srv = new ROSLIB.Service({
     ros: ros,
-    name: 'clock_set',
+    name: 'reset_game',
     serviceType: 'std_srvs/Empty'
 });
 
