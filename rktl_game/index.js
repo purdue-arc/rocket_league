@@ -35,19 +35,23 @@ ros.on('close', function () {
 // Subscribing to a Topic
 // ----------------------
 // Subscribe to the score keeper node
-var listener = new ROSLIB.Topic({
+var scoreListener = new ROSLIB.Topic({
     ros: ros,
     name: '/score',
     messageType: 'rktl_msgs/Score'
 });
 
-// updating the score on a timer
-const interval = setInterval(function () {
-    listener.subscribe(function (message) {
-document.getElementById('blue-score').innerHTML = message.blue;
-document.getElementById('orange-score').innerHTML = message.orange;
-    });
-}, 1000);
+var stateListener = new ROSLIB.Topic({
+    ros: ros,
+    name: '/match_status',
+    messageType: 'rktl_msgs/MatchStatus'
+});
+
+var clockListener = new ROSLIB.Topic({
+    ros: ros,
+    name: '/game_clock',
+    messageType: 'std_msgs/Float32'
+});
 
 // // Calling a service
 // // -----------------
@@ -86,3 +90,15 @@ maxVelX.set(0.8);
 maxVelX.get(function (value) {
     console.log('MAX VAL: ' + value);
 });
+
+// updating the score on a timer
+const interval = setInterval(function () {
+    listener.subscribe(function (message) {
+        document.getElementById('blue-score').innerHTML = message.blue;
+        document.getElementById('orange-score').innerHTML = message.orange;
+    });
+}, 1000);
+
+// updating game clock while game is running
+const clock = setInterval(function () {
+    listener
