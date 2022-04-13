@@ -47,11 +47,11 @@
 %
 % Ammended Instructions:
 %  Record a bag file as instructed above. Then, save the data to a csv
-%  by running "rosbag echo -b calibration.bag -p tag_detections > calibration.csv
+%  by running "rostopic echo -b calibration.bag -p tag_detections > calibration.csv"
 %
 % WARNING:
 %  Make sure that apriltags was configured to detect lone tags, not bundles.
-%  Otherwise, the software may improperly parse the csv and behave unexpectedly.
+%  Otherwise, the software will improperly parse the csv and produce incorrect results.
 %
 % Edited by: James Baxter
 % Date: 2022/04/12
@@ -74,7 +74,7 @@ bag = readcell(calibration_file);
 
 clear tag_data;
 N = size(bag,1) - 1;
-max_detections = (size(bag,2) - 5) / 48;
+max_detections = ceil((size(bag,2) - 5) / 48);
 t0 = bag{2,3};
 for i = (1:N)
     row = i+1;
@@ -88,9 +88,6 @@ for i = (1:N)
             break
         else
             n_detections = n_detections + 1;
-            if bag{1,col} ~= strcat('field.detections', int2str(j-1), '.id0')
-                error('CSV does not match expected format')
-            end
         end
     end
 
