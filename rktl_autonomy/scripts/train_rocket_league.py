@@ -35,11 +35,11 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 1000000 / 24 # save every 1M steps
+    freq = 500000 / 24 # save every 500K steps
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 75000000 # 75M
+    steps = 100000000 # 100M
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 
