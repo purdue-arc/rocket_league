@@ -13,6 +13,7 @@ jobs:
       - name: pyflakes
         uses: reviewdog/action-pyflakes@master
         with:
+          fetch-depth: 2
           github_token: ${{ secrets.github_token }}
   changes:
     name: Check for changes to files in docker directory
