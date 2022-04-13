@@ -10,7 +10,8 @@ License:
 
 # ROS
 import rospy
-from std_msgs.msg import Bool, Uint16, Int8, Odometry
+from std_msgs.msg import Bool, UInt16, Int8, Header
+from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
 
 class ScoreKeeper():
@@ -23,7 +24,7 @@ class ScoreKeeper():
         self.blue_goal = (rospy.get_param('/field/length', 1)  + 0.1) / -2
         self.enabled = False
         self.match_status = Int8(0)
-        self.game_clock = Uint16(0)
+        self.game_clock = UInt16(0)
 
         # Publishers
         # self.score_pub = rospy.Publisher('score', Score, queue_size=1)
@@ -39,7 +40,7 @@ class ScoreKeeper():
         rate = rospy.Rate(10) #10hz
         while not rospy.is_shutdown():
             rate.sleep()
-            self.update_status(self)
+            self.update_status()
 
     def update_status(self):
         if (self.match_status == 0 and self.game_clock == 0):
@@ -48,7 +49,7 @@ class ScoreKeeper():
             else:
                 self.match_status = Int8(4)
         score = Score(self.orange_score, self.blue_score)
-        self.match_status_pub.publish(MatchStatus(self.match_status.header, self.match_status, self.game_clock, score))
+        self.match_status_pub.publish(MatchStatus(Header(), self.match_status, self.game_clock, score))
 
 
     def check_goal(self, ball_pose: Odometry):
