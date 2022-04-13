@@ -39,6 +39,7 @@ class ScoreKeeper():
         rate = rospy.Rate(10) #10hz
         while not rospy.is_shutdown():
             rate.sleep()
+            self.update_status(self)
 
     def update_status(self):
         if (self.match_status == 0 and self.game_clock == 0):
