@@ -17,44 +17,16 @@ ros.on('close', function () {
     console.log('Connection to websocket server closed.');
 });
 
-// Setting cars to disabled
-// ------------------
 
-// var carEnable = new ROSLIB.Topic({
-//     ros: ros,
-//     name: '/cars/enable',
-//     messageType: 'std_msgs/Bool'
-// });
+// Subscribe to the game manager node
 
-// var carBool = new ROSLIB.Message({
-//     data: false
-// });
-
-// carEnable.publish(carBool);
-
-// Subscribing to a Topic
-// ----------------------
-// Subscribe to the score keeper node
 var statusListener = new ROSLIB.Topic({
     ros: ros,
     name: '/match_status',
     messageType: 'rktl_msgs/MatchStatus'
 });
 
-// var stateListener = new ROSLIB.Topic({
-//     ros: ros,
-//     name: '/match_status',
-//     messageType: 'rktl_msgs/MatchStatus'
-// });
-
-// var clockListener = new ROSLIB.Topic({
-//     ros: ros,
-//     name: '/game_clock',
-//     messageType: 'std_msgs/Float32'
-// });
-
-// // Calling a service
-// // -----------------
+// Creating the service objects called by the buttons
 
 var pause_srv = new ROSLIB.Service({
     ros: ros,
@@ -74,29 +46,27 @@ var reset_srv = new ROSLIB.Service({
     serviceType: 'std_srvs/Empty'
 });
 
+// Game clock parameters
 
-// Getting and setting a param value
-// ---------------------------------
+var game_time_param = new ROSLIB.Param({
+    ros: ros,
+    name: '/game_length'
+});
 
-// ros.getParams(function (params) {
-//     console.log(params);
-// });
-
-// var maxVelX = new ROSLIB.Param({
-//     ros: ros,
-//     name: 'max_vel_y'
-// });
-
-// maxVelX.set(0.8);
-// maxVelX.get(function (value) {
-//     console.log('MAX VAL: ' + value);
-// });
+function set_game_time() {
+    var time = document.getElementById('time-set').value;
+    time = parseInt(time);
+    game_time_param.set(time);
+    reset_srv.callService();
+}
 
 // updating the score on a timer
+
 const interval = setInterval(function () {
     statusListener.subscribe(function (message) {
         document.getElementById('blue-score').innerHTML = message.score.blue;
         document.getElementById('orange-score').innerHTML = message.score.orange;
         document.getElementById('timer').innerHTML = message.clock;
+        console.log(message.status);
     });
 }, 1000);

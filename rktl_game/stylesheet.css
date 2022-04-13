@@ -116,6 +116,26 @@ h1 {
     border-radius: 12px;
 }
 
+.box4 {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0);
+    color: white;
+    border-radius: 12px;
+}
+
+input {
+    width: 10%;
+    border-radius: 5px;
+    height: 50px;
+}
+
+.box4 button {
+    width: 3%;
+    border-radius: 5px;
+}
 
 
 /* CSS */

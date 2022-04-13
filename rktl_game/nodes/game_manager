@@ -25,7 +25,7 @@ class ScoreKeeper():
         self.blue_goal = (rospy.get_param('/field/length', 1)  + 0.1) / -2
         self.enabled = False
         self.match_status = 0
-        self.game_clock = 90
+        self.game_clock = rospy.get_param('/game_length', 90)
 
         # Publishers
         self.match_status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
@@ -74,7 +74,7 @@ class ScoreKeeper():
 
     def set_clock(self, _):
         self.pause(self)
-        self.game_clock = 90
+        self.game_clock = rospy.get_param('/game_length', 90)
         return EmptyResponse()
 
     def check_goal(self, ball_pose: Odometry):
