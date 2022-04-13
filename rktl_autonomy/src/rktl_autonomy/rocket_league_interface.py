@@ -97,7 +97,8 @@ class RocketLeagueInterface(ROSInterface):
         rospy.Subscriber('match_status', MatchStatus, self._score_cb)
 
         # block until environment is ready
-        rospy.wait_for_service('sim_reset')
+        if not eval:
+            rospy.wait_for_service('sim_reset')
 
     @property
     def action_space(self):
@@ -157,8 +158,15 @@ class RocketLeagueInterface(ROSInterface):
         car = np.asarray(self._car_odom, dtype=np.float32)
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
+
+        # ensure it fits within the observation limits
         if not self.observation_space.contains(observation):
-            rospy.logerr("observation outside of valid bounds:\nObservation: %s", observation)
+            rospy.logwarn_throttle(5, "Coercing observation into valid bounds")
+            np.clip(
+                observation,
+                self.observation_space.low,
+                self.observation_space.high,
+                out=observation)
 
         # check if time exceeded
         if self._start_time is None:

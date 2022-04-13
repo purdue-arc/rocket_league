@@ -14,7 +14,7 @@ from tf2_ros import TransformBroadcaster
 class Publisher(object):
     """Workaround class until TF is implemented"""
     def __init__(self):
-        rospy.init_node('tf_broadcaster', anonymous=True)
+        rospy.init_node('pose_to_tf')
 
         self.broadcaster = TransformBroadcaster()
         self.FRAME = rospy.get_param('~cam_frame_id', 'cam0')
