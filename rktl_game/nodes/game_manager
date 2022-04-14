@@ -10,10 +10,10 @@ License:
 
 # ROS
 import rospy
-from std_msgs.msg import Bool, UInt16, Int16, Int8, Header
-from std_srvs.srv import Empty, EmptyResponse, Trigger, TriggerResponse
+from std_msgs.msg import Bool
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
+from std_srvs.srv import Empty, EmptyResponse
 
 class ScoreKeeper():
     def __init__(self):
