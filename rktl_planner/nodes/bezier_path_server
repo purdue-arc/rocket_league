@@ -7,7 +7,7 @@ from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest, CreateBe
 from rktl_planner import BezierPath
 from rktl_msgs.msg import Path as PathMsg, Waypoint as WaypointMsg
 from geometry_msgs.msg import Pose, Point, Vector3
-
+import numpy as np
 
 def vel(pose: Pose, speed: float):
     q = pose.orientation
@@ -72,34 +72,62 @@ def bezier_path_server(req: CreateBezierPathRequest):
     res = CreateBezierPathResponse()
 
     res.bezier_paths = [x.to_msg() for x in bezier_segments]
+    
     res.linear_path = PathMsg()
-
-    max_curv = 0.0
-    for x in bezier_segments:
-        max_curv = max(max_curv, x.find_max_curvature())
-
-    res.linear_path.max_curvature = max_curv
     res.linear_path.velocity = velocity
 
     duration = durations[-1]
     segment_length = req.linear_segment_duration.data.to_sec()
     num_segments = math.floor(duration / segment_length)
+    max_curv = 0.
     idx = 0
     t = 0.
     for i in range(num_segments):
+        curr_pose = bezier_segments[idx].at(t)
+        if (t - segment_length) > 0 and (t + segment_length < durations[idx]):
+            # Calculate curvature using Menger curvature
+            last_pose = bezier_segments[idx].at(t - segment_length)
+            next_pose = bezier_segments[idx].at(t + segment_length)
+
+            a = np.array([
+                next_pose.x-curr_pose.x,
+                next_pose.y-curr_pose.y,
+                next_pose.z-curr_pose.z])
+            a_len = np.linalg.norm(a)
+            
+            b = np.array([
+                curr_pose.x-last_pose.x,
+                curr_pose.y-last_pose.y,
+                curr_pose.z-last_pose.z])
+            b_len = np.linalg.norm(b)
+
+            c = np.array([
+                last_pose.x-next_pose.x,
+                last_pose.y-next_pose.y,
+                last_pose.z-next_pose.z])
+            c_len = np.linalg.norm(c)
+
+            A = 0.5 * np.linalg.norm(np.cross(a, b))
+
+            if a_len != 0. and b_len != 0. and c_len != 0.:
+                curv = abs(4 * A / (a_len * b_len * c_len))
+                max_curv = max(max_curv, abs(curv))
+        
         heading = bezier_segments[idx].angle_at(t)
         quat = quaternion_from_euler(0, 0, heading)
         wp = WaypointMsg()
-        wp.pose.position = bezier_segments[idx].at(t)
+        wp.pose.position = curr_pose
         wp.pose.orientation.x = quat[0]
         wp.pose.orientation.y = quat[1]
         wp.pose.orientation.z = quat[2]
         wp.pose.orientation.w = quat[3]
-        wp.twist.linear = bezier_segments[idx].vel_at(t)
         res.linear_path.waypoints.append(wp)
+        
         t += segment_length
         if t > durations[idx]:
-            idx += 1
+            idx += 1 
+    res.linear_path.max_curvature = max_curv
+    
     return res
 
 if __name__ == '__main__':
