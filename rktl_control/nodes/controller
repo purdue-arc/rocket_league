@@ -95,6 +95,8 @@ class Controller(object):
         self.MIN_STEERING_EFFORT = rospy.get_param('~limits/steering/min', -1.0)
         self.MAX_STEERING_EFFORT = rospy.get_param('~limits/steering/max',  1.0)
 
+        self.PUBLISH_EARLY = rospy.get_param('~open_loop/publish_early', True)
+
         # Make closed loop velocity controller
         if rospy.get_param('~controller_type') == 'lead_lag':
             self.controller = LeadLagController(
@@ -111,7 +113,7 @@ class Controller(object):
                 rospy.get_param('~pid/anti_windup'),
                 rospy.get_param('~pid/deadband'),
                 1.0 / rospy.get_param('~rate', 10.0))
-        elif rospy.get_param('~controller_type') == 'open':
+        elif rospy.get_param('~controller_type') == 'none':
             self.controller = None
         else:
             raise NotImplementedError(f"unrecognized controller type: {rospy.get_param('controller_type')}")
@@ -138,7 +140,7 @@ class Controller(object):
         self.psi_ref = atan(self.BODY_LENGTH * cmd_msg.curvature / cos_beta)
 
         # get a jump on latency if open loop
-        if self.controller is None:
+        if self.controller is None and self.PUBLISH_EARLY:
             # wipe timestamp so it doesn't interfere with prediction
             cmd_msg.header.stamp = rospy.Time(0)
             self.odom_cb(cmd_msg)
