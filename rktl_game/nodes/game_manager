@@ -2,7 +2,7 @@
 """Use ball location to determine when a goal is scored.
 License:
   BSD 3-Clause License
-  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2010, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
