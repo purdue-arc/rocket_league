@@ -50,7 +50,7 @@ var reset_srv = new ROSLIB.Service({
 
 var game_time_param = new ROSLIB.Param({
     ros: ros,
-    name: '/game_length'
+    name: 'game_length'
 });
 
 function set_game_time() {
