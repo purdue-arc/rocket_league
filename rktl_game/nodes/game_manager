@@ -10,7 +10,7 @@ License:
 
 # ROS
 import rospy
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Header
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
 from std_srvs.srv import Empty, EmptyResponse
@@ -61,7 +61,9 @@ class ScoreKeeper():
             else:
                 self.match_status = 4
         score = Score(self.orange_score, self.blue_score)
-        self.match_status_pub.publish(MatchStatus(self.match_status, self.game_clock, score))
+        header = Header()
+        header.stamp = rospy.Time.now()
+        self.match_status_pub.publish(MatchStatus(header, self.match_status, self.game_clock, score))
 
     def pause(self, _):
         self.enabled = False
@@ -76,7 +78,9 @@ class ScoreKeeper():
         self.match_status = 0
         self.game_clock = rospy.get_param('game_length', 0)
         self.active_pub.publish(False)
-        self.match_status_pub.publish(MatchStatus(0, self.game_clock, Score(0, 0)))
+        header = Header()
+        header.stamp = rospy.Time.now()
+        self.match_status_pub.publish(MatchStatus(header, 0, self.game_clock, Score(0, 0)))
         return EmptyResponse()
 
     def unpause(self, _):
