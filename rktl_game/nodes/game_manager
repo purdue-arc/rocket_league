@@ -25,7 +25,7 @@ class ScoreKeeper():
         self.blue_goal = (rospy.get_param('/field/length', 1)  + 0.1) / -2
         self.enabled = False
         self.match_status = 0
-        self.game_clock = rospy.get_param('game_length', 90)
+        self.game_clock = rospy.get_param('/game_length', 90)
         self.manager_rate = rospy.get_param('manager_rate', 10)
 
         # Publishers
@@ -76,7 +76,7 @@ class ScoreKeeper():
         self.blue_score = 0
         self.enabled = False
         self.match_status = 0
-        self.game_clock = rospy.get_param('game_length', 0)
+        self.game_clock = rospy.get_param('/game_length', 90)
         self.active_pub.publish(False)
         header = Header()
         header.stamp = rospy.Time.now()

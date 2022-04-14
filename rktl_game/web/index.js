@@ -2,7 +2,7 @@
 // -----------------
 
 var ros = new ROSLIB.Ros({
-    url: 'ws://r2d2.local:9090'
+    url: 'ws://172.17.0.2:9090'
 });
 
 ros.on('connection', function () {
@@ -50,7 +50,7 @@ var reset_srv = new ROSLIB.Service({
 
 var game_time_param = new ROSLIB.Param({
     ros: ros,
-    name: 'game_length'
+    name: '/game_length'
 });
 
 function set_game_time() {
