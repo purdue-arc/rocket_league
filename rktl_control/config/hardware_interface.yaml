@@ -3,32 +3,32 @@ port: /dev/ttyACM0
 
 # servo adjustments (uS)
 car0:
-  throttle_throw:   125
-  steering_left:    1100
-  steering_center:  1450
+  throttle_throw:   90
+  steering_left:    1000
+  steering_center:  1400
   steering_right:   1800
 car1:
-  throttle_throw:   125
-  steering_left:    1200
-  steering_center:  1500
+  throttle_throw:   90
+  steering_left:    1000
+  steering_center:  1400
   steering_right:   1800
 car2:
-  throttle_throw:   125
-  steering_left:    1200
-  steering_center:  1500
+  throttle_throw:   90
+  steering_left:    1000
+  steering_center:  1400
   steering_right:   1800
 car3:
-  throttle_throw:   125
-  steering_left:    1200
-  steering_center:  1500
+  throttle_throw:   90
+  steering_left:    1000
+  steering_center:  1400
   steering_right:   1800
 car4:
-  throttle_throw:   125
-  steering_left:    1200
-  steering_center:  1500
+  throttle_throw:   90
+  steering_left:    1000
+  steering_center:  1400
   steering_right:   1800
 car5:
-  throttle_throw:   125
-  steering_left:    1200
-  steering_center:  1500
+  throttle_throw:   90
+  steering_left:    1000
+  steering_center:  1400
   steering_right:   1800
