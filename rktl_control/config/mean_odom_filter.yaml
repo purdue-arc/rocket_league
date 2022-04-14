@@ -1,6 +1,6 @@
 delay:
-  compensate: false
-  duration: 0.3
+  compensate: true
+  duration: 0.2
 buffer_size:
   position: 3
   velocity: 3
