@@ -101,7 +101,9 @@ class ParticleOdomFilter(object):
 
     def effort_cb(self, effort_msg):
         """Callback for new efforts."""
-        self.effort_buffer.append(effort_msg)
+        # discard efforts with zeroed timestamp
+        if effort_msg.header.stamp > rospy.Time(0):
+            self.effort_buffer.append(effort_msg)
 
     def pose_cb(self, pose_msg):
         """Callback for new poses."""

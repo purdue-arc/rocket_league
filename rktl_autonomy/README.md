@@ -239,16 +239,15 @@ docker container kill <name or id>
 ```
 
 ### Hyperparameter Tuning
-To further improve the performance of the network, you can run the `tune_rocket_league.py` script as an executable (`./scripts/tune_rocket_league.py`). 
+To further improve the performance of the network, you can run the `tune_rocket_league.py` script as an executable (`./scripts/tune_rocket_league.py`).
 
-This script will take the current game settings (rewards, episode length, simulation parameters) as is, and only experiment with hyperparameters of the PPO model. 
+This script will take the current game settings (rewards, episode length, simulation parameters) as is, and only experiment with hyperparameters of the PPO model.
 
 These hyperparameters will be fed into the PPO initialization function as `model_params` at the start of each tuning attempt. The choice of hyperparameters is determined by Optuna based on the ranges given in the `optimize_ppo2()` function`. All of the chosen hyperparameter ranges can be modified directly in the function's code.
 
 Within the script, there are also 4 tuning variables that can be modified to change the rate at which the tuning and training-batches occur.
 
 The tuning script will output progress in the command window it was executed in. Every 5 tuning attempts, it will print out the best hyperparameters that it has found so far. These can later be copied and used in the `train_rocket_league.py` script.
-
 
 ## Real-Time Evaluation
 At this point, you should have trained your network and have a zip file with
@@ -263,3 +262,23 @@ use a command line argument to tell it to use another location:
 ```
 roslaunch rktl_autonomy rocket_league_eval.launch weights:=<path and name minus '.zip'>
 ```
+
+### Offline Evaluation
+If you want to evaluate a bunch of models at once, to produce a plot of
+performance over time (perhaps with a different environment or reward set from
+what it was trained on), you can use the `eval_rocket_league.py` convenience
+script.
+
+To use, launch a Docker container and run the script with the following
+command:
+```
+./rktl_autonomy/scripts/eval_rocket_league.py <UUID of run>
+```
+
+`UUID of run` should be a folder in the `data/rocket_league` directory containing
+all the weights you with to evaluate. You can pass in multiple UUIDs separated
+by spaces, and it will run the script multiple times.
+
+For each UUID passed in, the script will generate a file in the same folder
+titled `eval_log_<new UUID>.txt`. This is a tab-delimited file, which you can
+open in Matlab or Excel to produce a plot.
