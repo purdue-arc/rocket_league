@@ -139,6 +139,8 @@ class Controller(object):
 
         # get a jump on latency if open loop
         if self.controller is None:
+            # wipe timestamp so it doesn't interfere with prediction
+            cmd_msg.header.stamp = rospy.Time(0)
             self.odom_cb(cmd_msg)
 
     def odom_cb(self, odom_msg):
