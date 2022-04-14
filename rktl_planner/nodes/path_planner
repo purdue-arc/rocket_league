@@ -118,22 +118,19 @@ class PathPlanner(object):
                         req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom)
                         res = self.path_client(req)
             else:
-                self.state = PlannerState.EXECUTE_DISLODGE
-                req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom)
-                res = self.path_client(req)
-
-                if res.linear_path.max_curvature > 4.0:
-                    req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom, bkw=True)
+                if car_x < ball_x:
+                    self.state = PlannerState.EXECUTE_DISLODGE
+                    req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom)
+                    res = self.path_client(req)
+                
+                else:
+                    self.state = PlannerState.EXECUTE_BACKUP
+                    req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos, bkw=False)
                     res = self.path_client(req)
 
-                # if res.linear_path.max_curvature > 5.0:
-                #     self.state = PlannerState.EXECUTE_BACKUP
-                #     req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos)
-                #     res = self.path_client(req)
-
-                # if res.linear_path.max_curvature > 5.0:
-                #     req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos, bkw=False)
-                #     res = self.path_client(req)
+                    if res.linear_path.max_curvature > 5.0:
+                        req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos)
+                        res = self.path_client(req)
 
         if res is not None:  
             if self.linear_path_pub:
