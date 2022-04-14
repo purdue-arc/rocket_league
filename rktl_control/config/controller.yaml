@@ -1,5 +1,5 @@
 # controller type: 'lead_lag' or 'pid'
-controller_type: 'lead_lag'
+controller_type: 'open'
 # parameters for all controllers
 limits:
   throttle:
