@@ -14,7 +14,7 @@ def create_score_path_req(car_odom, ball_odom, goal_pos, bkw=False):
 
     req.velocity = 0.5
     if bkw:
-        req.velocity = -0.25
+        req.velocity = -0.5
 
     req.bezier_segment_duration.data = rospy.Duration(0.5)
     req.linear_segment_duration.data = rospy.Duration(0.01)
@@ -101,12 +101,12 @@ def create_backup_path_req(car_odom, goal_pos, bkw=True):
     req.target_durations.append(Duration(data=rospy.Duration(1.0)))
 
     # Target 1 (in front of goal)
-    final_vec_x = 0.25
+    final_vec_x = 0.5
     final_vec_y = 0
     final_quat = quaternion_from_euler(
         0., 0., math.atan2(final_vec_y, final_vec_x))
     pose1 = Pose()
-    pose1.position.x = car_odom.pose.pose.position.x - 0.5
+    pose1.position.x = car_odom.pose.pose.position.x - 1.0
     pose1.position.y = car_odom.pose.pose.position.y
     pose1.position.z = 0.0
     pose1.orientation.x = final_quat[0]
@@ -119,9 +119,9 @@ def create_backup_path_req(car_odom, goal_pos, bkw=True):
 
 def create_dislodge_path_req(car_odom, ball_odom, bkw=False):
     req = CreateBezierPathRequest()
-    req.velocity = 0.25
+    req.velocity = 0.5
     if bkw: 
-        req.velocity = -0.25
+        req.velocity = -0.5
     req.bezier_segment_duration.data = rospy.Duration(0.5)
     req.linear_segment_duration.data = rospy.Duration(0.01)
 
@@ -175,7 +175,7 @@ def create_dislodge_path_req(car_odom, ball_odom, bkw=False):
 
 def create_turn_path_req(car_odom):
     req = CreateBezierPathRequest()
-    req.velocity = -0.25
+    req.velocity = -0.5
     req.bezier_segment_duration.data = rospy.Duration(0.5)
     req.linear_segment_duration.data = rospy.Duration(0.01)
 

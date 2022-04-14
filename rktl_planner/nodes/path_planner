@@ -14,7 +14,8 @@ from enum import Enum
 class GameState(Enum):
     IN_POSITION = 0
     TURNED_AROUND = 1
-    PAST_BALL = 2
+    BALL_OFFENSIVE = 2
+    BALL_DEFENSIVE = 3
 
 class PlannerState(Enum):
     READY = 0
@@ -76,63 +77,65 @@ class PathPlanner(object):
         car_x = self.car_odom.pose.pose.position.x
         ball_x = self.ball_odom.pose.pose.position.x
 
-        game_state = GameState.IN_POSITION
-        if car_x > ball_x - 0.5:
-            game_state = GameState.PAST_BALL
+        # game_state = GameState.IN_POSITION
+        # if car_x > ball_x - 1.0:
+        #     game_state = GameState.PAST_BALL
         # if car_yaw > math.pi/2 and car_yaw < 3*math.pi/2:
         #     game_state = GameState.TURNED_AROUND
 
-        if self.state == PlannerState.EXECUTE_DISLODGE:
-            self.state = PlannerState.EXECUTE_SCORE
-            req = path_requests.create_score_path_req(self.car_odom, self.ball_odom, self.goal_pos)
-            res = self.path_client(req)
-
-            if res.linear_path.max_curvature > 5.0:
-                req = path_requests.create_score_path_req(self.car_odom, self.ball_odom, self.goal_pos, bkw=True)
-                res = self.path_client(req)
-            
-            if res.linear_path.max_curvature < 5.0:
-                if self.linear_path_pub:
-                    self.linear_path_pub.publish(res.linear_path)
-
-                if self.bezier_path_pub:
-                    bezier_path_list = BezierPathList()
-                    bezier_path_list.paths = res.bezier_paths
-                    self.bezier_path_pub.publish(bezier_path_list)
-            else:
-                self.state = PlannerState.EXECUTE_DISLODGE
-        elif self.state == PlannerState.READY or not self.car_following_path:
-            if game_state == GameState.IN_POSITION:
-                self.state = PlannerState.EXECUTE_SCORE
-                req = path_requests.create_score_path_req(self.car_odom, self.ball_odom, self.goal_pos)
-                res = self.path_client(req)
-
-                if res.linear_path.max_curvature > 5.0:
-                    req = path_requests.create_score_path_req(self.car_odom, self.ball_odom, self.goal_pos, bkw=True)
-                    res = self.path_client(req)
-
-                if res.linear_path.max_curvature > 5.0:
-                    self.state = PlannerState.EXECUTE_DISLODGE
-                    req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom)
-                    res = self.path_client(req)
-            elif game_state == GameState.PAST_BALL:
-                if car_x < -1.5:
-                    self.state = PlannerState.EXECUTE_DISLODGE
-                    req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom)
-                    res = self.path_client(req)
-                else:
+        res = None
+        if self.state == PlannerState.READY or not self.car_following_path:
+            if ball_x > 0:
+                if car_x > (ball_x-0.5):
                     self.state = PlannerState.EXECUTE_BACKUP
                     req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos)
                     res = self.path_client(req)
 
-                if res.linear_path.max_curvature > 15.0:
-                    req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos, bkw=False)
+                    if res.linear_path.max_curvature > 2.0:
+                        print(res.linear_path.max_curvature)
+                        req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos, bkw=False)
+                        res = self.path_client(req)
+                else:
+                    self.state = PlannerState.EXECUTE_SCORE
+                    req = path_requests.create_score_path_req(self.car_odom, self.ball_odom, self.goal_pos)
                     res = self.path_client(req)
-            elif game_state == GameState.TURNED_AROUND:
-                self.state = PlannerState.EXECUTE_TURN
-                req = path_requests.create_turn_path_req(self.car_odom)
+
+                    if res.linear_path.max_curvature > 2.0:
+                        req = path_requests.create_score_path_req(self.car_odom, self.ball_odom, self.goal_pos, bkw=True)
+                        res = self.path_client(req)
+
+                    if res.linear_path.max_curvature > 2.0:
+                        self.state = PlannerState.EXECUTE_BACKUP
+                        req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos)
+                        res = self.path_client(req)
+                    
+                    if res.linear_path.max_curvature > 2.0:
+                        req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos, bkw=False)
+                        res = self.path_client(req)
+
+                    if res.linear_path.max_curvature > 2.0:
+                        self.state = PlannerState.EXECUTE_DISLODGE
+                        req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom)
+                        res = self.path_client(req)
+            else:
+                self.state = PlannerState.EXECUTE_DISLODGE
+                req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom)
                 res = self.path_client(req)
 
+                if res.linear_path.max_curvature > 4.0:
+                    req = path_requests.create_dislodge_path_req(self.car_odom, self.ball_odom, bkw=True)
+                    res = self.path_client(req)
+
+                # if res.linear_path.max_curvature > 5.0:
+                #     self.state = PlannerState.EXECUTE_BACKUP
+                #     req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos)
+                #     res = self.path_client(req)
+
+                # if res.linear_path.max_curvature > 5.0:
+                #     req = path_requests.create_backup_path_req(self.car_odom, self.goal_pos, bkw=False)
+                #     res = self.path_client(req)
+
+        if res is not None:  
             if self.linear_path_pub:
                 self.linear_path_pub.publish(res.linear_path)
 
