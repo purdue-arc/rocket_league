@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Contains the Pendulum node, a very simple planner.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+import rospy
+from tf.transformations import euler_from_quaternion
+from nav_msgs.msg import Odometry
+from rktl_msgs.msg import ControlCommand
+
+import math
+from angles import shortest_angular_distance as sad
+
+class Pendulum(object):
+    """A very simple strategy for rktl."""
+
+    def __init__(self):
+        rospy.init_node('path_follower')
+
+        # physical constants (global)
+        self.FIELD_WIDTH = rospy.get_param('/field/width')
+        self.FIELD_HEIGHT = rospy.get_param('/field/length')
+        self.MAX_CURVATURE = math.tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('/cars/length')
+
+        # constants
+        self.SPEED = rospy.get_param('~speed', 0.5)
+        self.WALL_MARGIN = rospy.get_param('~wall_margin', 0.5)
+
+        # variables
+        self.ball_position = None
+        self.ball_velocity = None
+
+        # Publishers
+        self.cmd_pub = rospy.Publisher('command', ControlCommand, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber('odom', Odometry, self.car_odom_cb)
+        rospy.Subscriber('/ball/odom', Odometry, self.ball_odom_cb)
+
+        rospy.spin()
+
+    def ball_odom_cb(self, odom_msg):
+        """Callback for ball odometry."""
+        self.ball_position = (
+            odom_msg.pose.pose.position.x,
+            odom_msg.pose.pose.position.y
+        )
+        self.ball_velocity = (
+            odom_msg.twist.twist.linear.x,
+            odom_msg.twist.twist.linear.y,
+        )
+
+    def car_odom_cb(self, odom_msg):
+        """Callback for car odometry."""
+        if self.ball_position is None or self.ball_velocity is None:
+            return
+
+        # extract car's position & heading
+        x = odom_msg.pose.pose.position.x
+        y = odom_msg.pose.pose.position.y
+        __, __, yaw = euler_from_quaternion([
+            odom_msg.pose.pose.orientation.x,
+            odom_msg.pose.pose.orientation.y,
+            odom_msg.pose.pose.orientation.z,
+            odom_msg.pose.pose.orientation.w
+        ])
+
+        # Prep command message for publish
+        cmd_msg = ControlCommand()
+
+        # if the car is near a wall and facing it, reverse
+        if (x >  self.FIELD_HEIGHT/2.0 - self.WALL_MARGIN and abs(sad(yaw,      0.0)) < math.pi/4.0 or
+            x < -self.FIELD_HEIGHT/2.0 + self.WALL_MARGIN and abs(sad(yaw,  math.pi)) < math.pi/4.0 or
+            y >  self.FIELD_WIDTH/2.0  - self.WALL_MARGIN and abs(sad(yaw,  math.pi/2.0)) < math.pi/4.0 or
+            y < -self.FIELD_WIDTH/2.0  + self.WALL_MARGIN and abs(sad(yaw, -math.pi/2.0)) < math.pi/4.0):
+                cmd_msg.velocity = -self.SPEED
+                cmd_msg.curvature = 0.0
+                self.cmd_pub.publish(cmd_msg)
+                return
+
+        # otherwise, assume the car has clearance to try to align with the
+        # desired direction
+
+        # check to see if it is at the top or bottom, where it should be curving
+        if (x >  self.FIELD_HEIGHT/2.0 - 1.5/self.MAX_CURVATURE or
+            x < -self.FIELD_HEIGHT/2.0 + 1.5/self.MAX_CURVATURE):
+                cmd_msg.velocity = self.SPEED
+                cmd_msg.curvature = self.MAX_CURVATURE
+                self.cmd_pub.publish(cmd_msg)
+                return
+
+        # otherwise, assume it is along the right or left wall and wants to go
+        # straight up or down
+
+        if (y > 0.0):
+            # left wall (180 degree heading desired)
+            cmd_msg.velocity = self.SPEED
+            cmd_msg.curvature = self.MAX_CURVATURE * sad(yaw, math.pi)
+            self.cmd_pub.publish(cmd_msg)
+
+        else:
+            # right wall (0.0 heading desired)
+            cmd_msg.velocity = self.SPEED
+            cmd_msg.curvature = self.MAX_CURVATURE * sad(yaw, 0.0)
+            self.cmd_pub.publish(cmd_msg)
+
+if __name__ == "__main__":
+    Pendulum()
