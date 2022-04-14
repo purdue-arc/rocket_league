@@ -17,4 +17,5 @@
   <exec_depend>rktl_planner</exec_depend>
   <exec_depend>rktl_sim</exec_depend>
   <exec_depend>rktl_control</exec_depend>
+  <exec_depend>rqt_gui</exec_depend>
 </package>
