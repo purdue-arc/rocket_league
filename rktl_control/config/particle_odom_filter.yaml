@@ -4,7 +4,7 @@ num_particles: 1000
 resample_proportion: 0.1
 boundary_check: true
 delay:
-  compensate: true
+  compensate: false
   total_cycles: 2
 measurement_error:
   location: 0.05
