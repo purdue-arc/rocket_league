@@ -39,14 +39,15 @@ class Pendulum(object):
         # constants
         self.SPEED = rospy.get_param('~speed', 1.0)
         self.REVERSE_TIME = rospy.get_param('~reverse_time', 0.25)
+        self.SCORE_TIMEOUT = rospy.get_param('~score_time', 5.0)
 
-        self.WALL_MARGIN = rospy.get_param('~margins/wall', 0.25)
+        self.WALL_MARGIN = rospy.get_param('~margins/wall', 0.5)
         self.HEADING_MARGIN = rospy.get_param('~margins/heading', math.pi/4.0)
         self.TURNING_MARGIN = rospy.get_param('~margins/turning', 0.5)
 
         self.CURVATURE_GAIN = rospy.get_param('~gains/curvature', 2.0)
 
-        self.LOOKAHEAD_DIST = rospy.get_param('~lookahead_dist', 0.0)
+        self.LOOKAHEAD_DIST = rospy.get_param('~lookahead_dist', 0.25)
         self.LOOKAHEAD_TIME = rospy.get_param('~lookahead_time', 0.0)
         self.SCORING_MARGIN = rospy.get_param('~margins/scoring', math.pi/8.0)
 
@@ -54,6 +55,7 @@ class Pendulum(object):
         self.ball_position = None
         self.ball_velocity = None
         self.state = States.LOST
+        self.score_time = None
 
         # Publishers
         self.cmd_pub = rospy.Publisher('command', ControlCommand, queue_size=1)
@@ -133,11 +135,9 @@ class Pendulum(object):
                 self.cmd_pub.publish(cmd_msg)
                 return
 
-            # extract ball position and velocity
+            # extract ball position and velocity, adding look-ahead time
             bx, by = self.ball_position
             vbx, vby = self.ball_velocity
-
-            # add a look-ahead time to the ball
             bx += vbx * self.LOOKAHEAD_TIME
             by += vby * self.LOOKAHEAD_TIME
 
@@ -146,8 +146,13 @@ class Pendulum(object):
             gy = 0.0
 
             # add a look-ahead distance to the car
-            cx = x + math.cos(yaw) * self.LOOKAHEAD_DIST
-            cy = y + math.sin(yaw) * self.LOOKAHEAD_DIST
+            # (dependent on fwd or rev direction)
+            if y < 0.0:
+                cx = x + math.cos(yaw) * self.LOOKAHEAD_DIST
+                cy = y + math.sin(yaw) * self.LOOKAHEAD_DIST
+            else:
+                cx = x - math.cos(yaw) * self.LOOKAHEAD_DIST
+                cy = y - math.sin(yaw) * self.LOOKAHEAD_DIST
 
             # check if we are well aligned to score
             # check if the car, ball, and goal are on about the same line
@@ -155,38 +160,34 @@ class Pendulum(object):
             BALL_GOAL_HEADING = math.atan2(gy - by, gx - bx)
             CAR_BALL_HEADING =  math.atan2(by - cy, bx - cx)
 
-            if (abs(sad(BALL_GOAL_HEADING, CAR_BALL_HEADING)) < self.SCORING_MARGIN or
-                abs(sad(BALL_GOAL_HEADING, CAR_BALL_HEADING)) < self.HEADING_MARGIN and self.state == States.SCORING):
+            # check to see if scoring attempt has timed out
+            if self.state == States.SCORING and (rospy.Time.now() - self.score_time).to_sec() > self.SCORE_TIMEOUT:
+                self.state = States.LOST
+                self.score_time = None
+                print("scoring attempt timeout")
+
+            if self.state == States.SCORING or abs(sad(BALL_GOAL_HEADING, CAR_BALL_HEADING)) < self.SCORING_MARGIN:
                 # check to see if we should score in forward or reverse
-                if BALL_GOAL_HEADING > 0.0:
+                if y < 0.0:
                     # score in forward
                     BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING)
                     cmd_msg.velocity = self.SPEED
                     cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
-                    self.cmd_pub.publish(cmd_msg)
-
                 else:
                     # score in reverse
                     BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING + math.pi)
                     cmd_msg.velocity = -self.SPEED
                     cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
-                    self.cmd_pub.publish(cmd_msg)
+
+                self.cmd_pub.publish(cmd_msg)
 
                 # increment state
                 if self.state == States.READY:
-                    print("beginning scoring attempt")
                     self.state = States.SCORING
+                    self.score_time = rospy.Time.now()
+                    print("beginning scoring attempt")
 
                 return
-
-            else:
-                # check for failed scoring attempt
-                if self.state == States.SCORING:
-                    self.state = States.LOST
-                    print("abandoned scoring attempt")
-                else:
-                    # continue the pattern used to initialize
-                    pass
 
         # Follow simple rules to get it in fixed pattern if not already
         # Check to see if it is at the top or bottom, where it should be curving
@@ -195,17 +196,14 @@ class Pendulum(object):
 
                 # check to see if should wait to turn
                 if (x > 0.0 and WEST_WALL_DISTANCE > 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN):
-                    cmd_msg.velocity = self.SPEED
                     cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * WEST_HEADING_ERROR
-                    self.cmd_pub.publish(cmd_msg)
                 elif (x < 0.0 and EAST_WALL_DISTANCE > 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN):
-                    cmd_msg.velocity = self.SPEED
                     cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * EAST_HEADING_ERROR
-                    self.cmd_pub.publish(cmd_msg)
                 else:
-                    cmd_msg.velocity = self.SPEED
                     cmd_msg.curvature = self.MAX_CURVATURE
-                    self.cmd_pub.publish(cmd_msg)
+
+                cmd_msg.velocity = self.SPEED
+                self.cmd_pub.publish(cmd_msg)
 
                 # increment state if still initializing
                 if self.state == States.LOST:
@@ -216,14 +214,13 @@ class Pendulum(object):
         else:   # send it straight north or south otherwise
             if (y > 0.0):
                 # west wall (southern heading desired)
-                cmd_msg.velocity = self.SPEED
                 cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * SOUTH_HEADING_ERROR
-                self.cmd_pub.publish(cmd_msg)
             else:
                 # east wall (northern heading desired)
-                cmd_msg.velocity = self.SPEED
                 cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * NORTH_HEADING_ERROR
-                self.cmd_pub.publish(cmd_msg)
+
+            cmd_msg.velocity = self.SPEED
+            self.cmd_pub.publish(cmd_msg)
 
             # increment state if still initializing
             if self.state == States.INIT_CURVE_ONE:
