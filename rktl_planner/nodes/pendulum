@@ -39,6 +39,7 @@ class Pendulum(object):
         # constants
         self.SPEED = rospy.get_param('~speed', 1.0)
         self.REVERSE_TIME = rospy.get_param('~reverse_time', 0.25)
+        self.DEFEND_TIME = rospy.get_param('~defense_prep_time', 0.5)
         self.SCORE_TIMEOUT = rospy.get_param('~score_time', 5.0)
 
         self.WALL_MARGIN = rospy.get_param('~margins/wall', 0.5)
@@ -195,30 +196,38 @@ class Pendulum(object):
                     return
 
             else:   # defensive
-
-                # if not already trying to hit the ball, wait until at bottom part of pattern
-                if self.state == States.SCORING or abs(EAST_HEADING_ERROR) < self.HEADING_MARGIN:
+                if self.state == States.SCORING:
                     CAR_BALL_HEADING = math.atan2(by - y, bx - x)
+                    # determine if ball should be hit in fwd or rev
                     if by < 0.0:
-                        # hit the ball in forward
                         BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING)
                         cmd_msg.velocity = self.SPEED
                         cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
                     else:
-                        # hit the ball in reverse
                         BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING + math.pi)
                         cmd_msg.velocity = -self.SPEED
                         cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
 
                     self.cmd_pub.publish(cmd_msg)
+                    return
+
+                # if not already trying to hit the ball, wait until at bottom part of pattern
+                elif abs(EAST_HEADING_ERROR) < self.SCORING_MARGIN:
+                    # run fwd or rev so easier to hit ball
+                    if by < 0.0:
+                        cmd_msg.velocity = -self.SPEED
+                    else:
+                        cmd_msg.velocity = self.SPEED
+
+                    cmd_msg.curvature = 0.0
+                    self.cmd_pub.publish(cmd_msg)
 
                     # increment state
-                    if self.state == States.READY:
-                        self.state = States.SCORING
-                        self.score_time = rospy.Time.now()
-                        print("beginning scoring attempt")
-                        print("actually just trying to hit the ball")
+                    self.state = States.SCORING
+                    self.score_time = rospy.Time.now()
+                    print("beginning defensive attempt")
 
+                    time.sleep(self.DEFEND_TIME)
                     return
 
         # Follow simple rules to get it in fixed pattern if not already
