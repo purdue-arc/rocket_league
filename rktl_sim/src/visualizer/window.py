@@ -1,4 +1,4 @@
-"""Contains the Window class.
+"""Handles scaling and renders assets.
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -7,9 +7,6 @@ License:
 
 # 3rd party modules
 import pygame
-
-# Local modules
-from visualizer.asset import Image, Rectangle, Lines, Circle
 
 class Window(object):
     """Interfaces PyGame for rendering."""
@@ -39,9 +36,11 @@ class Window(object):
             (self.window_width, self.window_length))
 
     def addAsset(self, asset):
+        """Store asset for rendering."""
         self.assets.append(asset)
 
     def transformPos(self, x, y):
+        """Transform from field coordinates to screen coordinates."""
         x = self.window_length - \
             (int(x * self.scaling) + (self.window_length // 2))
         y = self.window_width - \
@@ -49,9 +48,11 @@ class Window(object):
         return y, x
 
     def scaleSize(self, s):
+        """Transform from meters to pixels."""
         return s * self.scaling
 
     def show(self):
+        """Render all stored assets."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()

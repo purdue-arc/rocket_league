@@ -48,6 +48,14 @@ class VisualizerROS(object):
         self.timeout = rospy.get_param("~timeout", 10)
         rate = rospy.Rate(rospy.get_param("~rate", 20))
 
+        car_img_path = rospy.get_param('~media/car', None)
+        if car_img_path is not None:
+            rospy.logwarn('no car image specified, not visualizing car')
+
+        ball_img_path = rospy.get_param('~media/ball', None)
+        if ball_img_path is not None:
+            rospy.logwarn('no ball image specified, not visualizing ball')
+
         # Setting up field
         field_img_path = rospy.get_param("~media/field", None)
         if field_img_path is not None:
@@ -59,14 +67,7 @@ class VisualizerROS(object):
             asset.setPos(x, y)
             self.window.addAsset(asset)
 
-        # Setting up car
-        car_img_path = rospy.get_param("~media/car", None)
-
-        # Setting up ball
-        ball_img_path = rospy.get_param("~media/ball", None)
-
         # Setting up goals
-
         asset = visualizer.Rectangle( self.window.scaleSize(goal_width), 
             self.window.scaleSize(wall_thickness), (255,255,255))
         x, y = self.window.transformPos((field_length / 2) + (wall_thickness / 2), 0)
@@ -79,37 +80,54 @@ class VisualizerROS(object):
         asset.setPos(x, y)
         self.window.addAsset(asset)
 
-        self.lock = Lock()
-        self.last_time = None
-        self.path = None
-
-        # Subscribers
+        # Setup assets and subscribers using available topics
         topics = rospy.get_published_topics()
         for topic_name, _ in topics:
             topic_ns = topic_name.split('/')[1:]
+            
             asset = None
-            if topic_ns[0] == "cars" and topic_ns[2] == "odom":
+            if topic_ns[0] == "cars":
                 if car_img_path is not None:
                     width = self.window.scaleSize(car_width)
                     length = self.window.scaleSize(car_length)
-                    asset = visualizer.Image(width, length, car_img_path)
+                    if topic_ns[2] == "odom":
+                        asset = visualizer.Image(width, length, car_img_path)
+                        rospy.Subscriber(topic_name, Odometry,
+                            self.car_odom_cb, asset)
+                    elif topic_ns[2] == "odom_truth":
+                        asset = visualizer.Image(width, length,
+                            car_img_path, opacity=128)
+                        rospy.Subscriber(topic_name, Odometry,
+                            self.car_odom_cb, asset)
+                    elif topic_ns[2] == "lookahead_pnt":
+                        asset = visualizer.Circle((255,0,0), 0)
+                        rospy.Subscriber(topic_name, Float32,
+                            self.lookahead_cb, asset)
+            elif topic_ns[0] == "ball":
+                if ball_img_path is not None:
+                    diameter = self.window.scaleSize(ball_radius * 2)
+                    if topic_ns[1] == "odom":
+                        asset = visualizer.Image(diameter, diameter,
+                            ball_img_path)
+                    elif topic_ns[1] == "odom_truth":
+                        asset = visualizer.Image(diameter, diameter,
+                            ball_img_path, opacity=128)
+                    else:
+                        continue
+
                     rospy.Subscriber(topic_name, Odometry,
-                        self.car_odom_cb, asset)
+                        self.ball_odom_cb, asset)
             elif topic_ns[0] == "agents" and topic_ns[2] == "bezier_path":
                 asset = visualizer.Lines((255,0,0))
                 rospy.Subscriber(topic_name, BezierPathList,
                     self.bezier_path_cb, asset)
-            elif topic_ns[0] == "cars" and topic_ns[2] == "lookahead_pnt":
-                asset = visualizer.Circle((255,0,0), 0)
-                rospy.Subscriber(topic_name, Float32,
-                    self.lookahead_cb, asset)
-            elif topic_ns[0] == "ball" and topic_ns[1] == "odom":
-                diameter = self.window.scaleSize(ball_radius * 2)
-                asset = visualizer.Image(diameter, diameter, ball_img_path)
-                rospy.Subscriber(topic_name, Odometry,
-                    self.ball_odom_cb, asset)
+
             if asset != None:
                 self.window.addAsset(asset)
+
+        self.lock = Lock()
+        self.last_time = None
+        self.path = None
 
         while not rospy.is_shutdown():
             try:
@@ -122,9 +140,10 @@ class VisualizerROS(object):
                 pass
 
     def car_odom_cb(self, odom_msg, asset):
-        x = odom_msg.pose.pose.position.x
-        y = odom_msg.pose.pose.position.y
-        x, y = self.window.transformPos(x, y)
+        """Callback for car odometry messages."""
+        field_x = odom_msg.pose.pose.position.x
+        field_y = odom_msg.pose.pose.position.y
+        x, y = self.window.transformPos(field_x, field_y)
         asset.setPos(x, y)
 
         orient = odom_msg.pose.pose.orientation
@@ -134,9 +153,10 @@ class VisualizerROS(object):
         asset.setAngle(heading)
 
     def ball_odom_cb(self, odom_msg, asset):
-        x = odom_msg.pose.pose.position.x
-        y = odom_msg.pose.pose.position.y
-        x, y = self.window.transformPos(x, y)
+        """Callback for ball odometry messages."""
+        field_x = odom_msg.pose.pose.position.x
+        field_y = odom_msg.pose.pose.position.y
+        x, y = self.window.transformPos(field_x, field_y)
         asset.setPos(x, y)
 
     def path_arr_cb(self, path_msg: Path, asset):
@@ -144,9 +164,9 @@ class VisualizerROS(object):
         asset.resetPoints()
         path = path_msg.waypoint
         for point in path:
-            x = point.pose.position.x
-            y = point.pose.position.y
-            x, y = self.window.transformPos(x, y)
+            field_x = point.pose.position.x
+            field_y = point.pose.position.y
+            x, y = self.window.transformPos(field_x, field_y)
             asset.setPos(x, y)
     
     def bezier_path_cb(self, msg: BezierPathList, asset):

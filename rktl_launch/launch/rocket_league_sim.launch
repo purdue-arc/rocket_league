@@ -11,14 +11,6 @@
 
     <!-- Visualizer -->
     <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch"/>
-    <group if="$(eval sim_mode == 'realistic')" ns="truth">
-        <remap from="/cars/car0/odom" to="/cars/car0/odom_truth"/>
-        <remap from="/ball/odom" to="/ball/odom_truth"/>
-        <group ns="visualizer">
-            <param name="window_name" value="Ground Truth"/>
-        </group>
-        <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch"/>
-    </group>
 
     <!-- Simulator -->
     <include file="$(find rktl_sim)/launch/simulator.launch">

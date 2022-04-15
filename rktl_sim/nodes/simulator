@@ -92,9 +92,11 @@ class SimulatorROS(object):
         if self.mode == SimulatorMode.REALISTIC:
             self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
                 PoseWithCovarianceStamped, queue_size=1)
-            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth', Odometry, queue_size=1)
+            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth',
+                Odometry, queue_size=1)
         elif self.mode == SimulatorMode.IDEAL:
-            self.ball_odom_pub = rospy.Publisher('/ball/odom', Odometry, queue_size=1)
+            self.ball_odom_pub = rospy.Publisher('/ball/odom',
+                Odometry, queue_size=1)
 
         # Creating a single car
         car_properties = {}
@@ -103,7 +105,7 @@ class SimulatorROS(object):
         car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
         car_properties['steering_throw'] = rospy.get_param('/cars/steering/max_throw')
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
-        car_properties['simulate_effort'] = self.mode == SimulatorMode.REALISTIC
+        car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
         
         self.car_ids = {}
         self.car_pose_pubs = {}
@@ -127,17 +129,20 @@ class SimulatorROS(object):
                 'car', init_pose=init_pose, noise=noise, props=car_properties)
 
             car_id = self.car_ids[car_name]
-            self.car_odom_pubs[car_name] = rospy.Publisher(f'/cars/{car_name}/odom',
-                Odometry, queue_size=1)
             rospy.Subscriber(f'/cars/{car_name}/effort', ControlEffort,
-                self.effort_cb, callback_args=self.car_ids[car_name])
+                self.effort_cb, callback_args=car_id)
             rospy.Subscriber(f'/cars/{car_name}/command', Odometry,
-                self.cmd_cb, callback_args=self.car_ids[car_name])
+                self.cmd_cb, callback_args=car_id)
             
             if self.mode == SimulatorMode.REALISTIC:
                 self.car_pose_pubs[car_name] = rospy.Publisher(
                     f'/cars/{car_name}/pose_sync_early',
                     PoseWithCovarianceStamped, queue_size=1)
+                self.car_odom_pubs[car_name] = rospy.Publisher(
+                    f'/cars/{car_name}/odom_truth', Odometry, queue_size=1)
+            elif self.mode == SimulatorMode.IDEAL:
+                self.car_odom_pubs[car_name] = rospy.Publisher(
+                    f'/cars/{car_name}/odom', Odometry, queue_size=1)
 
         # Node data
         self.cmd_lock = Lock()

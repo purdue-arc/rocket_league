@@ -1,4 +1,4 @@
-"""Contains the Asset class.
+"""Represents data to be visualized.
 License:
   BSD 3-Clause License
   Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -26,11 +26,12 @@ class Asset(ABC):
         pass
 
 class Image(Asset):
-    def __init__(self, width, length, img_path):
+    def __init__(self, width, length, img_path, opacity=255):
         self.width = width
         self.length = length
         self.pos = (0, 0)
         self.angle = 0
+        self.opacity = opacity
 
         self.init_img = pygame.image.load(img_path)
         self.init_img = pygame.transform.scale(
@@ -50,6 +51,7 @@ class Image(Asset):
 
     def blit(self, screen):
         rect = self.img.get_rect(center=self.pos)
+        self.img.set_alpha(self.opacity)
         screen.blit(self.img, rect)
 
 
