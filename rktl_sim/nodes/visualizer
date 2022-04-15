@@ -46,11 +46,11 @@ class VisualizerROS(object):
         rate = rospy.Rate(rospy.get_param("~rate", 20))
 
         car_img_path = rospy.get_param('~media/car', None)
-        if car_img_path is not None:
+        if car_img_path is None:
             rospy.logwarn('no car image specified, not visualizing car')
 
         ball_img_path = rospy.get_param('~media/ball', None)
-        if ball_img_path is not None:
+        if ball_img_path is None:
             rospy.logwarn('no ball image specified, not visualizing ball')
 
         # Setting up field
