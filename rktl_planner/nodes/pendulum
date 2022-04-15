@@ -128,11 +128,18 @@ class Pendulum(object):
         # Check if the car is in the desired pattern
         if self.state >= States.READY:
 
-            # requires knowing ball postion
+            # check to see if scoring attempt has timed out
+            if self.state == States.SCORING and (rospy.Time.now() - self.score_time).to_sec() > self.SCORE_TIMEOUT:
+                self.state = States.LOST
+                self.score_time = None
+                print("scoring attempt timeout")
+
+            # check that ball position is known
             if self.ball_position is None or self.ball_velocity is None:
                 cmd_msg.velocity = 0.0
                 cmd_msg.curvature = 0.0
                 self.cmd_pub.publish(cmd_msg)
+                print("ball position unknown")
                 return
 
             # extract ball position and velocity, adding look-ahead time
@@ -141,53 +148,78 @@ class Pendulum(object):
             bx += vbx * self.LOOKAHEAD_TIME
             by += vby * self.LOOKAHEAD_TIME
 
-            # known goal position
-            gx = self.FIELD_HEIGHT/2.0
-            gy = 0.0
+            # check if we should be offensive or defensive
+            if bx > 0.0:
+                # offensive
 
-            # add a look-ahead distance to the car
-            # (dependent on fwd or rev direction)
-            if y < 0.0:
-                cx = x + math.cos(yaw) * self.LOOKAHEAD_DIST
-                cy = y + math.sin(yaw) * self.LOOKAHEAD_DIST
-            else:
-                cx = x - math.cos(yaw) * self.LOOKAHEAD_DIST
-                cy = y - math.sin(yaw) * self.LOOKAHEAD_DIST
+                # known goal position
+                gx = self.FIELD_HEIGHT/2.0
+                gy = 0.0
 
-            # check if we are well aligned to score
-            # check if the car, ball, and goal are on about the same line
-            # done by comparing headings from ball to goal, and car to ball
-            BALL_GOAL_HEADING = math.atan2(gy - by, gx - bx)
-            CAR_BALL_HEADING =  math.atan2(by - cy, bx - cx)
-
-            # check to see if scoring attempt has timed out
-            if self.state == States.SCORING and (rospy.Time.now() - self.score_time).to_sec() > self.SCORE_TIMEOUT:
-                self.state = States.LOST
-                self.score_time = None
-                print("scoring attempt timeout")
-
-            if self.state == States.SCORING or abs(sad(BALL_GOAL_HEADING, CAR_BALL_HEADING)) < self.SCORING_MARGIN:
-                # check to see if we should score in forward or reverse
+                # add a look-ahead distance to the car
+                # (dependent on fwd or rev direction)
                 if y < 0.0:
-                    # score in forward
-                    BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING)
-                    cmd_msg.velocity = self.SPEED
-                    cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+                    cx = x + math.cos(yaw) * self.LOOKAHEAD_DIST
+                    cy = y + math.sin(yaw) * self.LOOKAHEAD_DIST
                 else:
-                    # score in reverse
-                    BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING + math.pi)
-                    cmd_msg.velocity = -self.SPEED
-                    cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+                    cx = x - math.cos(yaw) * self.LOOKAHEAD_DIST
+                    cy = y - math.sin(yaw) * self.LOOKAHEAD_DIST
 
-                self.cmd_pub.publish(cmd_msg)
+                # check if we are well aligned to score
+                # check if the car, ball, and goal are on about the same line
+                # done by comparing headings from ball to goal, and car to ball
+                BALL_GOAL_HEADING = math.atan2(gy - by, gx - bx)
+                CAR_BALL_HEADING =  math.atan2(by - cy, bx - cx)
 
-                # increment state
-                if self.state == States.READY:
-                    self.state = States.SCORING
-                    self.score_time = rospy.Time.now()
-                    print("beginning scoring attempt")
+                if self.state == States.SCORING or abs(sad(BALL_GOAL_HEADING, CAR_BALL_HEADING)) < self.SCORING_MARGIN:
+                    # check to see if we should score in forward or reverse
+                    if y < 0.0:
+                        # score in forward
+                        BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING)
+                        cmd_msg.velocity = self.SPEED
+                        cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+                    else:
+                        # score in reverse
+                        BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING + math.pi)
+                        cmd_msg.velocity = -self.SPEED
+                        cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
 
-                return
+                    self.cmd_pub.publish(cmd_msg)
+
+                    # increment state
+                    if self.state == States.READY:
+                        self.state = States.SCORING
+                        self.score_time = rospy.Time.now()
+                        print("beginning scoring attempt")
+
+                    return
+
+            else:   # defensive
+
+                # if not already trying to hit the ball, wait until at bottom part of pattern
+                if self.state == States.SCORING or abs(EAST_HEADING_ERROR) < self.HEADING_MARGIN:
+                    CAR_BALL_HEADING = math.atan2(by - y, bx - x)
+                    if by < 0.0:
+                        # hit the ball in forward
+                        BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING)
+                        cmd_msg.velocity = self.SPEED
+                        cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+                    else:
+                        # hit the ball in reverse
+                        BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING + math.pi)
+                        cmd_msg.velocity = -self.SPEED
+                        cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+
+                    self.cmd_pub.publish(cmd_msg)
+
+                    # increment state
+                    if self.state == States.READY:
+                        self.state = States.SCORING
+                        self.score_time = rospy.Time.now()
+                        print("beginning scoring attempt")
+                        print("actually just trying to hit the ball")
+
+                    return
 
         # Follow simple rules to get it in fixed pattern if not already
         # Check to see if it is at the top or bottom, where it should be curving
