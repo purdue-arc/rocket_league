@@ -48,7 +48,7 @@ class Pendulum(object):
 
         self.CURVATURE_GAIN = rospy.get_param('~gains/curvature', 2.0)
 
-        self.LOOKAHEAD_DIST = rospy.get_param('~lookahead_dist', 0.25)
+        self.LOOKAHEAD_DIST = rospy.get_param('~lookahead_dist', 1.0)
         self.LOOKAHEAD_TIME = rospy.get_param('~lookahead_time', 0.0)
         self.SCORING_MARGIN = rospy.get_param('~margins/scoring', math.pi/8.0)
 
@@ -150,9 +150,7 @@ class Pendulum(object):
             by += vby * self.LOOKAHEAD_TIME
 
             # check if we should be offensive or defensive
-            if bx > 0.0:
-                # offensive
-
+            if bx > 0.0:    # offensive
                 # known goal position
                 gx = self.FIELD_HEIGHT/2.0
                 gy = 0.0
