@@ -104,6 +104,7 @@ class Sim(object):
             self._walls[brBackwallID] = True
 
         self._cars = {}
+        self._car_data = {}
         self._ballID = None
 
         self.touched_last = None
@@ -155,7 +156,7 @@ class Sim(object):
         if urdf_name in self.urdf_paths:
             zeroPos = [0.0, 0.0, 0.0]
             zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
-            self._carID = p.loadURDF(self.urdf_paths[urdf_name], zeroPos, zeroOrient)
+            carID = p.loadURDF(self.urdf_paths[urdf_name], zeroPos, zeroOrient)
             if init_pose:
                 if "pos" in init_pose:
                     carPos = init_pose["pos"]
@@ -167,8 +168,8 @@ class Sim(object):
                 else:
                     carOrient = zeroOrient
 
-                self.initCarPos = carPos
-                self.initCarOrient = carOrient
+                initCarPos = carPos
+                initCarOrient = carOrient
             else:
                 carPos = [
                     random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
@@ -176,20 +177,25 @@ class Sim(object):
                     random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
                 carOrient = [0.0, 0.0, random.uniform(0, 2 * math.pi)]
-                self.initCarPos = None
-                self.initCarOrient = None
-            self._cars[self._carID] = Car(
-                self._carID,
+                initCarPos = None
+                initCarOrient = None
+
+            self._cars[carID] = Car(
+                carID,
                 carPos,
                 carOrient,
                 props
             )
-            self.car_noise = noise
-            return self._carID
+            self._car_data[carID] = {
+                "posInit": initCarPos,
+                "orientInit": initCarOrient,
+                "noise": noise,
+            }
+            return carID
         else:
             return None
 
-    def step(self, car_cmd, dt):
+    def step(self, dt):
         """Advance one time-step in the sim."""
         if self._ballID is not None:
             ballContacts = p.getContactPoints(bodyA=self._ballID)
@@ -208,27 +214,29 @@ class Sim(object):
         for _ in range(round(dt / p_dt)):
             # Step kinematic objects independently, at max possible rate
             for car in self._cars.values():
-                car.step(car_cmd, p_dt)
+                car.step(p_dt)
             p.stepSimulation()
 
-    def getCarPose(self, add_noise=False):
-        cars = list(self._cars.values())
-        if len(cars) == 0:
+    def getCarPose(self, id, add_noise=False):
+        if id not in self._cars:
             return None
 
-        # TODO: Provide translation from ARC IDs to Sim IDs
         if add_noise:
-            return cars[0].getPose(noise=self.car_noise)
+            return self._cars[id].getPose(noise=self.car_noise)
         else:
-            return cars[0].getPose(noise=None)
+            return self._cars[id].getPose(noise=None)
 
-    def getCarVelocity(self):
-        cars = list(self._cars.values())
-        if len(cars) == 0:
+    def getCarVelocity(self, id):
+        if id not in self._cars:
             return None
 
-        # TODO: Provide translation from ARC IDs to Sim IDs
-        return cars[0].getVelocity()
+        return self._cars[id].getVelocity()
+
+    def setCarCommand(self, id, cmd):
+        if id not in self._cars:
+            return None
+
+        return self._cars[id].setCmd(cmd)
 
     def getBallPose(self, add_noise=False):
         if self._ballID is None:
@@ -270,8 +278,8 @@ class Sim(object):
             p.resetBaseVelocity(self._ballID, ballVel, [0, 0, 0])
 
         for car in self._cars.values():
-            carPos = self.initCarPos
-            carOrient = self.initCarOrient
+            carPos = self._car_data[car.id]["initPos"]
+            carOrient = self._car_data[car.id]["initOrient "]
 
             if carPos is None:
                 carPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
