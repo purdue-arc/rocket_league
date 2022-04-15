@@ -66,7 +66,6 @@ class Sim(object):
             self._walls[rSidewallId] = True
 
         if "backwall" in urdf_paths:
-            # TODO: Improve handling of split walls
             flBackwallID = p.loadURDF(
                 urdf_paths["backwall"],
                 field_setup["flbackwall"],

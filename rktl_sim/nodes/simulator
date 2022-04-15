@@ -4,10 +4,6 @@ License:
   BSD 3-Clause License
   Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
-
-TODO:
-- Scale to support multiple vehicles
-- Add offset for walls
 """
 
 # 3rd party modules
