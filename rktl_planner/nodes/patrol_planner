@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contains the Pendulum node, a very simple planner.
+"""Contains the PatrolPlanner node, a very simple planner.
 License:
   BSD 3-Clause License
   Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -25,8 +25,9 @@ class States(IntEnum):
     READY = auto()              # The car is now in maneuver and ready to score
     SCORING = auto()            # The car is attempting to score
 
-class Pendulum(object):
-    """A very simple strategy for rktl."""
+class PatrolPlanner(object):
+    """A very simple strategy for rktl. Patrol around the field in a circle and
+    make a beeline at the ball if it seems like it would result in a goal."""
 
     def __init__(self):
         rospy.init_node('path_follower')
@@ -269,4 +270,4 @@ class Pendulum(object):
                 print("In pattern")
 
 if __name__ == "__main__":
-    Pendulum()
+    PatrolPlanner()

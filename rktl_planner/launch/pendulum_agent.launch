@@ -1,4 +1,0 @@
-<launch>
-    <arg name="car_name" default="car0"/>
-    <node ns="cars/$(arg car_name)" pkg="rktl_planner" type="pendulum" name="pendulum" output="screen"/>
-</launch>
