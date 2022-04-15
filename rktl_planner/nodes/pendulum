@@ -13,6 +13,16 @@ from rktl_msgs.msg import ControlCommand
 
 import math, time
 from angles import shortest_angular_distance as sad
+from enum import IntEnum, unique, auto
+
+@unique
+class States(IntEnum):
+    """States in FSM"""
+    LOST = 0                    # Initial state. The car could be anywhere
+    INIT_CURVE_ONE = auto()     # The car is doing its first curve at either north or south end
+    INIT_LEG = auto()           # The car is traveling north or south
+    INIT_CURVE_TWO = auto()     # The car is doing its second curve at either north or south end
+    READY = auto()              # The car is now in maneuver and ready to score
 
 class Pendulum(object):
     """A very simple strategy for rktl."""
@@ -38,6 +48,7 @@ class Pendulum(object):
         # variables
         self.ball_position = None
         self.ball_velocity = None
+        self.state = States.LOST
 
         # Publishers
         self.cmd_pub = rospy.Publisher('command', ControlCommand, queue_size=1)
@@ -61,8 +72,6 @@ class Pendulum(object):
 
     def car_odom_cb(self, odom_msg):
         """Callback for car odometry."""
-        if self.ball_position is None or self.ball_velocity is None:
-            return
 
         # extract car's position & heading
         x = odom_msg.pose.pose.position.x
@@ -88,51 +97,80 @@ class Pendulum(object):
         # Prep command message for publish
         cmd_msg = ControlCommand()
 
-        # if the car is near a wall and facing it, reverse
-        if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN or
-            SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN or
-            EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN or
-            WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN):
-                cmd_msg.velocity = -self.SPEED
+        if (self.state >= States.LOST and self.state < States.READY):
 
-                # turn while reversing if jammed in a corner
-                if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN and WEST_WALL_DISTANCE  < self.WALL_MARGIN or
-                    SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN and EAST_WALL_DISTANCE  < self.WALL_MARGIN or
-                    EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN and NORTH_WALL_DISTANCE < self.WALL_MARGIN or
-                    WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_MARGIN):
-                        cmd_msg.curvature = -self.MAX_CURVATURE
-                else:
-                    cmd_msg.curvature = 0.0
+            # if the car is near a wall and facing it, reverse
+            if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN or
+                SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN or
+                EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN or
+                WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN):
+                    cmd_msg.velocity = -self.SPEED
 
-                self.cmd_pub.publish(cmd_msg)
-                time.sleep(self.REVERSE_TIME)   # stay in reverse for a bit
-                return
+                    # turn while reversing if jammed in a corner
+                    if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN and WEST_WALL_DISTANCE  < self.WALL_MARGIN or
+                        SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN and EAST_WALL_DISTANCE  < self.WALL_MARGIN or
+                        EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN and NORTH_WALL_DISTANCE < self.WALL_MARGIN or
+                        WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_MARGIN):
+                            cmd_msg.curvature = -self.MAX_CURVATURE
+                    else:
+                        cmd_msg.curvature = 0.0
 
-        # otherwise, assume the car has clearance to try to align with the
-        # desired direction
+                    self.cmd_pub.publish(cmd_msg)
+                    time.sleep(self.REVERSE_TIME)   # stay in reverse for a bit
+                    return
 
-        # check to see if it is at the top or bottom, where it should be curving
-        if (NORTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN or
-            SOUTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN):
+            # otherwise, assume the car has clearance to try to align with the
+            # desired direction
+
+            # check to see if it is at the top or bottom, where it should be curving
+            if (NORTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN or
+                SOUTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN):
+                    cmd_msg.velocity = self.SPEED
+                    cmd_msg.curvature = self.MAX_CURVATURE
+                    self.cmd_pub.publish(cmd_msg)
+
+                    # increment state
+                    if self.state == States.LOST:
+                        self.state = States.INIT_CURVE_ONE
+                    if self.state == States.INIT_LEG:
+                        self.state = States.INIT_CURVE_TWO
+
+                    return
+
+            # otherwise, assume it is along the right or left wall and wants to go
+            # straight up or down
+
+            if (EAST_WALL_DISTANCE > WEST_WALL_DISTANCE):
+                # left wall (180 degree heading desired)
                 cmd_msg.velocity = self.SPEED
-                cmd_msg.curvature = self.MAX_CURVATURE
+                cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * SOUTH_HEADING_ERROR
+                self.cmd_pub.publish(cmd_msg)
+            else:
+                # right wall (0.0 heading desired)
+                cmd_msg.velocity = self.SPEED
+                cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * NORTH_HEADING_ERROR
+                self.cmd_pub.publish(cmd_msg)
+
+            # increment state
+            if self.state == States.INIT_CURVE_ONE:
+                self.state = States.INIT_LEG
+            if self.state == States.INIT_CURVE_TWO:
+                self.state = States.READY
+
+        # state is READY or greater
+        else:
+
+            # requires knowing ball postion to score
+            if self.ball_position is None or self.ball_velocity is None:
+                cmd_msg.velocity = 0.0
+                cmd_msg.curvature = 0.0
                 self.cmd_pub.publish(cmd_msg)
                 return
 
-        # otherwise, assume it is along the right or left wall and wants to go
-        # straight up or down
-
-        if (EAST_WALL_DISTANCE > WEST_WALL_DISTANCE):
-            # left wall (180 degree heading desired)
-            cmd_msg.velocity = self.SPEED
-            cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * SOUTH_HEADING_ERROR
+            cmd_msg.velocity = 0.0
+            cmd_msg.curvature = 0.0
             self.cmd_pub.publish(cmd_msg)
-
-        else:
-            # right wall (0.0 heading desired)
-            cmd_msg.velocity = self.SPEED
-            cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * NORTH_HEADING_ERROR
-            self.cmd_pub.publish(cmd_msg)
+            return
 
 if __name__ == "__main__":
     Pendulum()
