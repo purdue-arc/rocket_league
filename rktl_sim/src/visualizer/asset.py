@@ -8,7 +8,13 @@ License:
 # 3rd Party Modules
 import pygame
 from abc import ABC, abstractmethod
+from enum import Enum
 
+class AssetType(Enum):
+    ImageAsset = 0
+    RectangleAsset = 1
+    LinesAsset = 2
+    CircleAsset = 3
 
 class Asset(ABC):
     @abstractmethod
@@ -18,7 +24,6 @@ class Asset(ABC):
     @abstractmethod
     def blit(self):
         pass
-
 
 class Image(Asset):
     def __init__(self, width, length, img_path):
@@ -33,6 +38,8 @@ class Image(Asset):
         self.img = self.init_img
 
     def setPos(self, x, y):
+        x = int(x)
+        y = int(y)
         self.pos = (x, y)
 
     def setAngle(self, angle):
@@ -52,6 +59,8 @@ class Rectangle(Asset):
         self.rect = pygame.Rect(0, 0, width, length)
 
     def setPos(self, x, y):
+        x = int(x)
+        y = int(y)
         self.pos = (x, y)
         self.rect.center = self.pos
 
@@ -80,6 +89,8 @@ class Circle(Asset):
         self.pos = (0, 0)
 
     def setPos(self, x, y):
+        x = int(x)
+        y = int(y)
         self.pos = (x, y)
     
     def setRadius(self, radius):

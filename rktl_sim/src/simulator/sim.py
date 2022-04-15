@@ -221,8 +221,9 @@ class Sim(object):
         if id not in self._cars:
             return None
 
+        noise = self._car_data[id]['noise']
         if add_noise:
-            return self._cars[id].getPose(noise=self.car_noise)
+            return self._cars[id].getPose(noise=noise)
         else:
             return self._cars[id].getPose(noise=None)
 

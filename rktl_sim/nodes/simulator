@@ -124,10 +124,10 @@ class SimulatorROS(object):
             car_name = car_config['name']
 
             self.car_ids[car_name] = self.sim.create_car(
-                init_pose=init_pose, noise=noise, props=car_properties,
-            )
+                'car', init_pose=init_pose, noise=noise, props=car_properties)
 
-            self.car_odom_pubs = rospy.Publisher(f'/cars/{car_name}/odom',
+            car_id = self.car_ids[car_name]
+            self.car_odom_pubs[car_name] = rospy.Publisher(f'/cars/{car_name}/odom',
                 Odometry, queue_size=1)
             rospy.Subscriber(f'/cars/{car_name}/effort', ControlEffort,
                 self.effort_cb, callback_args=self.car_ids[car_name])

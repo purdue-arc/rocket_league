@@ -31,47 +31,25 @@ class Window(object):
         self.window_width = int(
             (map_width + (wall_thickness*2.)) * self.scaling)
 
-        self.assets = {}
+        self.assets = []
 
         pygame.display.init()
         pygame.display.set_caption(name)
         self._screen = pygame.display.set_mode(
             (self.window_width, self.window_length))
 
-    def createAsset(self, id, width, length, initPos=None, imgPath=None, color=None, radius=None, lines=False, circle=False):
-        width = int(width * self.scaling)
-        length = int(length * self.scaling)
+    def addAsset(self, asset):
+        self.assets.append(asset)
 
-        if lines:
-            self.assets[id] = Lines(color)
-        elif circle:
-            radius = int(radius * self.scaling)
-            self.assets[id] = Circle(color, radius)
-        elif imgPath is None:
-            self.assets[id] = Rectangle(width, length, color)
-        else:
-            self.assets[id] = Image(width, length, imgPath)
-
-        if initPos is not None:
-            self.updateAssetPos(id, initPos[0], initPos[1])
-
-    def updateAssetPos(self, id, x, y):
-        # Adjust for simulation coordinate frame
+    def transformPos(self, x, y):
         x = self.window_length - \
             (int(x * self.scaling) + (self.window_length // 2))
         y = self.window_width - \
             (int(y * self.scaling) + (self.window_width // 2))
-        self.assets[id].setPos(y, x)
+        return y, x
 
-    def updateAssetRadius(self, id, radius):
-        radius = int(radius * self.scaling)
-        self.assets[id].setRadius(radius)
-
-    def updateAssetAngle(self, id, angle):
-        self.assets[id].setAngle(angle)
-    
-    def resetAssetLines(self, id):
-        self.assets[id].resetPoints()
+    def scaleSize(self, s):
+        return s * self.scaling
 
     def show(self):
         for event in pygame.event.get():
@@ -80,7 +58,7 @@ class Window(object):
                 raise self.ShutdownError()
 
         self._screen.fill(self.BACKGROUND_COLOR)
-        for asset in self.assets.values():
+        for asset in self.assets:
             asset.blit(self._screen)
 
         pygame.display.flip()
