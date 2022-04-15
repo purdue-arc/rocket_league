@@ -11,7 +11,7 @@ from tf.transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import ControlCommand
 
-import math
+import math, time
 from angles import shortest_angular_distance as sad
 
 class Pendulum(object):
@@ -27,6 +27,8 @@ class Pendulum(object):
 
         # constants
         self.SPEED = rospy.get_param('~speed', 0.5)
+        self.REVERSE_TIME = rospy.get_param('~reverse_time', 0.5)
+
         self.WALL_MARGIN = rospy.get_param('~margins/wall', 0.5)
         self.HEADING_MARGIN = rospy.get_param('~margins/heading', math.pi/4.0)
         self.TURNING_MARGIN = rospy.get_param('~margins/turning', 0.5)
@@ -92,8 +94,18 @@ class Pendulum(object):
             EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN or
             WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN):
                 cmd_msg.velocity = -self.SPEED
-                cmd_msg.curvature = 0.0
+
+                # turn while reversing if jammed in a corner
+                if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN and WEST_WALL_DISTANCE  < self.WALL_MARGIN or
+                    SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN and EAST_WALL_DISTANCE  < self.WALL_MARGIN or
+                    EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN and NORTH_WALL_DISTANCE < self.WALL_MARGIN or
+                    WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_MARGIN):
+                        cmd_msg.curvature = -self.MAX_CURVATURE
+                else:
+                    cmd_msg.curvature = 0.0
+
                 self.cmd_pub.publish(cmd_msg)
+                time.sleep(self.REVERSE_TIME)   # stay in reverse for a bit
                 return
 
         # otherwise, assume the car has clearance to try to align with the
