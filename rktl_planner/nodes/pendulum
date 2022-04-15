@@ -27,7 +27,11 @@ class Pendulum(object):
 
         # constants
         self.SPEED = rospy.get_param('~speed', 0.5)
-        self.WALL_MARGIN = rospy.get_param('~wall_margin', 0.5)
+        self.WALL_MARGIN = rospy.get_param('~margins/wall', 0.5)
+        self.HEADING_MARGIN = rospy.get_param('~margins/heading', math.pi/4.0)
+        self.TURNING_MARGIN = rospy.get_param('~margins/turning', 0.5)
+
+        self.CURVATURE_GAIN = rospy.get_param('~gains/curvature', 1.0)
 
         # variables
         self.ball_position = None
@@ -68,14 +72,25 @@ class Pendulum(object):
             odom_msg.pose.pose.orientation.w
         ])
 
+        # calculate distances / errors
+        NORTH_WALL_DISTANCE = abs(x - self.FIELD_HEIGHT/2.0)
+        SOUTH_WALL_DISTANCE = abs(x + self.FIELD_HEIGHT/2.0)
+        EAST_WALL_DISTANCE = abs(y + self.FIELD_WIDTH/2.0)
+        WEST_WALL_DISTANCE = abs(y - self.FIELD_WIDTH/2.0)
+
+        NORTH_HEADING_ERROR = sad(yaw, 0.0)
+        SOUTH_HEADING_ERROR = sad(yaw, math.pi)
+        EAST_HEADING_ERROR = sad(yaw, -math.pi/2.0)
+        WEST_HEADING_ERROR = sad(yaw, +math.pi/2.0)
+
         # Prep command message for publish
         cmd_msg = ControlCommand()
 
         # if the car is near a wall and facing it, reverse
-        if (x >  self.FIELD_HEIGHT/2.0 - self.WALL_MARGIN and abs(sad(yaw,      0.0)) < math.pi/4.0 or
-            x < -self.FIELD_HEIGHT/2.0 + self.WALL_MARGIN and abs(sad(yaw,  math.pi)) < math.pi/4.0 or
-            y >  self.FIELD_WIDTH/2.0  - self.WALL_MARGIN and abs(sad(yaw,  math.pi/2.0)) < math.pi/4.0 or
-            y < -self.FIELD_WIDTH/2.0  + self.WALL_MARGIN and abs(sad(yaw, -math.pi/2.0)) < math.pi/4.0):
+        if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN or
+            SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN or
+            EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN or
+            WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN):
                 cmd_msg.velocity = -self.SPEED
                 cmd_msg.curvature = 0.0
                 self.cmd_pub.publish(cmd_msg)
@@ -85,8 +100,8 @@ class Pendulum(object):
         # desired direction
 
         # check to see if it is at the top or bottom, where it should be curving
-        if (x >  self.FIELD_HEIGHT/2.0 - 1.5/self.MAX_CURVATURE or
-            x < -self.FIELD_HEIGHT/2.0 + 1.5/self.MAX_CURVATURE):
+        if (NORTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN or
+            SOUTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN):
                 cmd_msg.velocity = self.SPEED
                 cmd_msg.curvature = self.MAX_CURVATURE
                 self.cmd_pub.publish(cmd_msg)
@@ -95,16 +110,16 @@ class Pendulum(object):
         # otherwise, assume it is along the right or left wall and wants to go
         # straight up or down
 
-        if (y > 0.0):
+        if (EAST_WALL_DISTANCE > WEST_WALL_DISTANCE):
             # left wall (180 degree heading desired)
             cmd_msg.velocity = self.SPEED
-            cmd_msg.curvature = self.MAX_CURVATURE * sad(yaw, math.pi)
+            cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * SOUTH_HEADING_ERROR
             self.cmd_pub.publish(cmd_msg)
 
         else:
             # right wall (0.0 heading desired)
             cmd_msg.velocity = self.SPEED
-            cmd_msg.curvature = self.MAX_CURVATURE * sad(yaw, 0.0)
+            cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * NORTH_HEADING_ERROR
             self.cmd_pub.publish(cmd_msg)
 
 if __name__ == "__main__":
