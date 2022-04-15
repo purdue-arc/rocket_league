@@ -134,14 +134,14 @@ class PatrolPlanner(object):
             if self.state == States.SCORING and (rospy.Time.now() - self.score_time).to_sec() > self.SCORE_TIMEOUT:
                 self.state = States.LOST
                 self.score_time = None
-                print("scoring attempt timeout")
+                rospy.loginfo("attempt timeout")
 
             # check that ball position is known
             if self.ball_position is None or self.ball_velocity is None:
                 cmd_msg.velocity = 0.0
                 cmd_msg.curvature = 0.0
                 self.cmd_pub.publish(cmd_msg)
-                print("ball position unknown")
+                rospy.logwarn("ball position unknown")
                 return
 
             # extract ball position and velocity, adding look-ahead time
@@ -153,7 +153,7 @@ class PatrolPlanner(object):
             # check if we should be offensive or defensive
             if bx > 0.0:    # offensive
                 # known goal position
-                gx = self.FIELD_HEIGHT/2.0
+                gx = self.FIELD_HEIGHT/2.0 + 0.1
                 gy = 0.0
 
                 # add a look-ahead distance to the car
@@ -190,7 +190,7 @@ class PatrolPlanner(object):
                     if self.state == States.READY:
                         self.state = States.SCORING
                         self.score_time = rospy.Time.now()
-                        print("beginning scoring attempt")
+                        rospy.loginfo("beginning scoring attempt")
 
                     return
 
@@ -224,7 +224,7 @@ class PatrolPlanner(object):
                     # increment state
                     self.state = States.SCORING
                     self.score_time = rospy.Time.now()
-                    print("beginning defensive attempt")
+                    rospy.loginfo("beginning defensive attempt")
 
                     time.sleep(self.DEFEND_TIME)
                     return
@@ -267,7 +267,7 @@ class PatrolPlanner(object):
                 self.state = States.INIT_LEG
             if self.state == States.INIT_CURVE_TWO:
                 self.state = States.READY
-                print("In pattern")
+                rospy.loginfo("In pattern")
 
 if __name__ == "__main__":
     PatrolPlanner()
