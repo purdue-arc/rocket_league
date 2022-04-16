@@ -13,7 +13,6 @@ from rktl_msgs.msg import ControlCommand
 
 import math, time
 from angles import shortest_angular_distance as sad
-from enum import IntEnum, unique, auto
 
 class PatrolPlanner(object):
     """A very simple strategy for rktl. Patrol around the field in a circle and
@@ -30,7 +29,7 @@ class PatrolPlanner(object):
         # constants
         self.SPEED = rospy.get_param('~speed', 1.0)
         self.REVERSE_TIME = rospy.get_param('~reverse_time', 0.25)
-        self.DEFEND_TIME = rospy.get_param('~defense_prep_time', 0.5)
+        self.SLEEP_TIME_GAIN = rospy.get_param('~defense_time_gain', 0.5)
         self.ATTEMPT_TIMEOUT = rospy.get_param('~attempt_timeout', 5.0)
 
         self.WALL_MARGIN = rospy.get_param('~margins/wall', 0.5)
@@ -94,27 +93,6 @@ class PatrolPlanner(object):
 
         # Prep command message for publish
         cmd_msg = ControlCommand()
-
-        # for any state, not running in to walls is top priority
-        # if the car is near a wall and facing it, reverse
-        if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN or
-            SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN or
-            EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN or
-            WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN):
-                cmd_msg.velocity = -self.SPEED
-
-                # turn while reversing if jammed in a corner
-                if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN and WEST_WALL_DISTANCE  < self.WALL_MARGIN or
-                    SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN and EAST_WALL_DISTANCE  < self.WALL_MARGIN or
-                    EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN and NORTH_WALL_DISTANCE < self.WALL_MARGIN or
-                    WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_MARGIN):
-                        cmd_msg.curvature = -self.MAX_CURVATURE
-                else:
-                    cmd_msg.curvature = 0.0
-
-                self.cmd_pub.publish(cmd_msg)
-                time.sleep(self.REVERSE_TIME)   # stay in reverse for a bit
-                return
 
         # check to see if an existing attempt has timed out
         if self.attempt_start_time is not None and (rospy.Time.now() - self.attempt_start_time).to_sec() > self.ATTEMPT_TIMEOUT:
@@ -194,7 +172,7 @@ class PatrolPlanner(object):
                 return
 
             # if not already trying to hit the ball, wait until at bottom part of pattern
-            elif abs(EAST_HEADING_ERROR) < self.SCORING_MARGIN:
+            elif abs(EAST_HEADING_ERROR) < self.SCORING_MARGIN and SOUTH_WALL_DISTANCE < 1.5*self.TURNING_MARGIN:
                 # run fwd or rev so easier to hit ball
                 if by < 0.0:
                     cmd_msg.velocity = -self.SPEED
@@ -207,7 +185,30 @@ class PatrolPlanner(object):
                 # mark attempt start
                 self.attempt_start_time = rospy.Time.now()
                 rospy.loginfo("beginning defensive attempt")
-                time.sleep(self.DEFEND_TIME)
+
+                # reverse for longer, if the ball is nearer to the middle
+                time.sleep((self.FIELD_WIDTH/2.0 - abs(by)) * self.SLEEP_TIME_GAIN)
+                return
+
+        # If not trying to score, prioritize not running in to walls
+        # if the car is near a wall and facing it, reverse
+        if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN or
+            SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN or
+            EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN or
+            WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN):
+                cmd_msg.velocity = -self.SPEED
+
+                # turn while reversing if jammed in a corner
+                if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN and WEST_WALL_DISTANCE  < self.WALL_MARGIN or
+                    SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN and EAST_WALL_DISTANCE  < self.WALL_MARGIN or
+                    EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN and NORTH_WALL_DISTANCE < self.WALL_MARGIN or
+                    WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_MARGIN):
+                        cmd_msg.curvature = -self.MAX_CURVATURE
+                else:
+                    cmd_msg.curvature = 0.0
+
+                self.cmd_pub.publish(cmd_msg)
+                time.sleep(self.REVERSE_TIME)   # stay in reverse for a bit
                 return
 
         # Follow simple rules to make it follow a "patrol"
