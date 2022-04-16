@@ -89,7 +89,7 @@ class Simulator(object):
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
 
-        self.sim.createBall('ball', init_pose=ball_init_pose,
+        self.sim.create_ball('ball', init_pose=ball_init_pose,
             init_speed=ball_init_speed, noise=ball_noise)
         
         if self.mode == SimulatorMode.REALISTIC:
@@ -126,7 +126,7 @@ class Simulator(object):
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
 
-            self.car_ids[car_name] = self.sim.createCar(
+            self.car_ids[car_name] = self.sim.create_car(
                 'car', init_pose=init_pose, noise=car_noise, props=car_properties)
 
             car_id = self.car_ids[car_name]
@@ -206,7 +206,7 @@ class Simulator(object):
                 "orient": [0.0, 0.0, req.init_yaw],
             }
 
-        self.car_ids[req.name] = self.sim.createCar(
+        self.car_ids[req.name] = self.sim.create_car(
             'car', init_pose, noise=self.car_noise, props=self.car_properties) 
 
         car_id = self.car_ids[req.name]
@@ -251,7 +251,7 @@ class Simulator(object):
             del self.car_pose_pubs[req.name]
         
         # Delete the car's body from pybullet
-        res = self.sim.deleteCar(self.car_ids[req.name])
+        res = self.sim.delete_car(self.car_ids[req.name])
         del self.car_ids[req.name]
         
         self.reset_lock.release()
@@ -291,7 +291,7 @@ class Simulator(object):
                 ball_msg = PoseWithCovarianceStamped()
                 ball_msg.header.stamp = now
                 ball_msg.header.frame_id = self.frame_id
-                ball_pos, ball_quat = self.sim.getBallPose(add_noise=True)
+                ball_pos, ball_quat = self.sim.get_ball_pose(add_noise=True)
                 ball_msg.pose.pose.position.x = ball_pos[0]
                 ball_msg.pose.pose.position.y = ball_pos[1]
                 ball_msg.pose.pose.position.z = ball_pos[2]
@@ -305,7 +305,7 @@ class Simulator(object):
                     car_msg = PoseWithCovarianceStamped()
                     car_msg.header.stamp = now
                     car_msg.header.frame_id = self.frame_id
-                    car_pos, car_quat = self.sim.getCarPose(
+                    car_pos, car_quat = self.sim.get_car_pose(
                         self.car_ids[car_name], add_noise=True)
                     car_msg.pose.pose.position.x = car_pos[0]
                     car_msg.pose.pose.position.y = car_pos[1]
@@ -319,7 +319,7 @@ class Simulator(object):
             ball_msg = Odometry()
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id
-            ball_pos, ball_quat = self.sim.getBallPose()
+            ball_pos, ball_quat = self.sim.get_ball_pose()
             ball_msg.pose.pose.position.x = ball_pos[0]
             ball_msg.pose.pose.position.y = ball_pos[1]
             ball_msg.pose.pose.position.z = ball_pos[2]
@@ -327,7 +327,7 @@ class Simulator(object):
             ball_msg.pose.pose.orientation.y = ball_quat[1]
             ball_msg.pose.pose.orientation.z = ball_quat[2]
             ball_msg.pose.pose.orientation.w = ball_quat[3]
-            ball_linear, ball_angular = self.sim.getBallVelocity()
+            ball_linear, ball_angular = self.sim.get_ball_velocity()
             ball_msg.twist.twist.linear.x = ball_linear[0]
             ball_msg.twist.twist.linear.y = ball_linear[1]
             ball_msg.twist.twist.linear.z = ball_linear[2]
@@ -340,7 +340,7 @@ class Simulator(object):
                 car_msg = Odometry()
                 car_msg.header.stamp = now
                 car_msg.header.frame_id = self.frame_id
-                car_pos, car_quat = self.sim.getCarPose(
+                car_pos, car_quat = self.sim.get_car_pose(
                     self.car_ids[car_name])
                 car_msg.pose.pose.position.x = car_pos[0]
                 car_msg.pose.pose.position.y = car_pos[1]
@@ -349,7 +349,7 @@ class Simulator(object):
                 car_msg.pose.pose.orientation.y = car_quat[1]
                 car_msg.pose.pose.orientation.z = car_quat[2]
                 car_msg.pose.pose.orientation.w = car_quat[3]
-                car_linear, car_angular = self.sim.getCarVelocity(
+                car_linear, car_angular = self.sim.get_car_velocity(
                     self.car_ids[car_name])
                 car_msg.twist.twist.linear.x = car_linear[0]
                 car_msg.twist.twist.linear.y = car_linear[1]

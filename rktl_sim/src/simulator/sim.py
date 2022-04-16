@@ -26,81 +26,81 @@ class Sim(object):
         self.urdf_paths = urdf_paths
         self.spawn_bounds = spawn_bounds
     
-        zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
-        self._planeID = None
+        zero_orient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
+        self._plane_id = None
         if "plane" in urdf_paths:
-            self._planeID = p.loadURDF(
-                urdf_paths["plane"], [0, 0, 0], zeroOrient, useFixedBase=1
+            self._plane_id = p.loadURDF(
+                urdf_paths["plane"], [0, 0, 0], zero_orient, useFixedBase=1
             )
-            p.changeDynamics(bodyUniqueId=self._planeID, linkIndex=-1, restitution=1.0)
+            p.changeDynamics(bodyUniqueId=self._plane_id, linkIndex=-1, restitution=1.0)
 
-        self._goalAID = None
-        self._goalBID = None
+        self._goal_a_id = None
+        self._goal_b_id = None
         if "goal" in urdf_paths:
-            self._goalAID = p.loadURDF(
-                urdf_paths["goal"], field_setup["goalA"], zeroOrient, useFixedBase=1
+            self._goal_a_id = p.loadURDF(
+                urdf_paths["goal"], field_setup["goalA"], zero_orient, useFixedBase=1
             )
 
-            self._goalBID = p.loadURDF(
-                urdf_paths["goal"], field_setup["goalB"], zeroOrient, useFixedBase=1
+            self._goal_b_id = p.loadURDF(
+                urdf_paths["goal"], field_setup["goalB"], zero_orient, useFixedBase=1
             )
 
         self._walls = {}
         if "sidewall" in urdf_paths:
-            lSidewallID = p.loadURDF(
+            lsidewall_id = p.loadURDF(
                 urdf_paths["sidewall"],
                 field_setup["lsidewall"],
-                zeroOrient,
+                zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=lSidewallID, linkIndex=-1, restitution=1.0)
-            self._walls[lSidewallID] = True
+            p.changeDynamics(bodyUniqueId=lsidewall_id, linkIndex=-1, restitution=1.0)
+            self._walls[lsidewall_id] = True
 
-            rSidewallId = p.loadURDF(
+            rsidewall_id = p.loadURDF(
                 urdf_paths["sidewall"],
                 field_setup["rsidewall"],
-                zeroOrient,
+                zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=rSidewallId, linkIndex=-1, restitution=1.0)
-            self._walls[rSidewallId] = True
+            p.changeDynamics(bodyUniqueId=rsidewall_id, linkIndex=-1, restitution=1.0)
+            self._walls[rsidewall_id] = True
 
         if "backwall" in urdf_paths:
-            flBackwallID = p.loadURDF(
+            flbackwall_id = p.loadURDF(
                 urdf_paths["backwall"],
                 field_setup["flbackwall"],
-                zeroOrient,
+                zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=flBackwallID, linkIndex=-1, restitution=1.0)
-            self._walls[flBackwallID] = True
+            p.changeDynamics(bodyUniqueId=flbackwall_id, linkIndex=-1, restitution=1.0)
+            self._walls[flbackwall_id] = True
 
-            frBackwallID = p.loadURDF(
+            frbackwall_id = p.loadURDF(
                 urdf_paths["backwall"],
                 field_setup["frbackwall"],
-                zeroOrient,
+                zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=frBackwallID, linkIndex=-1, restitution=1.0)
-            self._walls[frBackwallID] = True
+            p.changeDynamics(bodyUniqueId=frbackwall_id, linkIndex=-1, restitution=1.0)
+            self._walls[frbackwall_id] = True
 
-            blBackwallID = p.loadURDF(
+            blbackwall_id = p.loadURDF(
                 urdf_paths["backwall"],
                 field_setup["blbackwall"],
-                zeroOrient,
+                zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=blBackwallID, linkIndex=-1, restitution=1.0)
-            self._walls[blBackwallID] = True
+            p.changeDynamics(bodyUniqueId=blbackwall_id, linkIndex=-1, restitution=1.0)
+            self._walls[blbackwall_id] = True
 
-            brBackwallID = p.loadURDF(
+            brbackwall_id = p.loadURDF(
                 urdf_paths["backwall"],
                 field_setup["brbackwall"],
-                zeroOrient,
+                zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=brBackwallID, linkIndex=-1, restitution=1.0)
-            self._walls[brBackwallID] = True
+            p.changeDynamics(bodyUniqueId=brbackwall_id, linkIndex=-1, restitution=1.0)
+            self._walls[brbackwall_id] = True
 
         self._cars = {}
         self._car_data = {}
@@ -113,21 +113,21 @@ class Sim(object):
         p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
         p.setGravity(0, 0, -10)
 
-    def createBall(self, urdf_name, init_pose=None, init_speed=None, noise=None):
+    def create_ball(self, urdf_name, init_pose=None, init_speed=None, noise=None):
         if urdf_name in self.urdf_paths:
-            zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
+            zero_orient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
             if init_pose:
-                ballPos = init_pose["pos"]
-                self.initBallPos = ballPos
+                ball_pos = init_pose["pos"]
+                self.init_ball_pos = ball_pos
             else:
-                ballPos = [
+                ball_pos = [
                     random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
                     random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
                     random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
-                self.initBallPos = None
+                self.init_ball_pos = None
             self._ballID = p.loadURDF(
-                self.urdf_paths[urdf_name], ballPos, zeroOrient)
+                self.urdf_paths[urdf_name], ball_pos, zero_orient)
             p.changeDynamics(
                 bodyUniqueId=self._ballID,
                 linkIndex=-1,
@@ -142,81 +142,81 @@ class Sim(object):
 
             # initize ball with some speed
             self._speed_bound = math.sqrt(2.0) * init_speed
-            ballVel = [
+            ball_vel = [
                 random.uniform(-self._speed_bound, self._speed_bound),
                 random.uniform(-self._speed_bound, self._speed_bound),
                 0.0,
             ]
-            p.resetBaseVelocity(self._ballID, ballVel, zeroOrient)
+            p.resetBaseVelocity(self._ballID, ball_vel, zero_orient)
             self.ball_noise = noise
             return self._ballID
         else:
             return None
 
-    def createCar(self, urdf_name, init_pose=None, noise=None, props=None):
+    def create_car(self, urdf_name, init_pose=None, noise=None, props=None):
         if urdf_name in self.urdf_paths:
-            zeroPos = [0.0, 0.0, 0.0]
-            zeroOrient = [0.0, 0.0, 0.0]
-            carID = p.loadURDF(self.urdf_paths[urdf_name], zeroPos, 
-                p.getQuaternionFromEuler(zeroOrient))
+            zero_pos = [0.0, 0.0, 0.0]
+            zero_orient = [0.0, 0.0, 0.0]
+            car_id = p.loadURDF(self.urdf_paths[urdf_name], zero_pos, 
+                p.getQuaternionFromEuler(zero_orient))
             if init_pose:
                 if "pos" in init_pose:
-                    carPos = init_pose["pos"]
+                    car_pos = init_pose["pos"]
                 else:
-                    carPos = zeroPos
+                    car_pos = zero_pos
 
                 if "orient" in init_pose:
-                    carOrient = init_pose["orient"]
+                    car_orient = init_pose["orient"]
                 else:
-                    carOrient = zeroOrient
+                    car_orient = zero_orient
 
-                initCarPos = carPos
-                initCarOrient = carOrient
+                init_car_pos = car_pos
+                init_car_orient = car_orient
             else:
-                carPos = [
+                car_pos = [
                     random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
                     random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
                     random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
-                carOrient = [0.0, 0.0, random.uniform(0, 2 * math.pi)]
-                initCarPos = None
-                initCarOrient = None
+                car_orient = [0.0, 0.0, random.uniform(0, 2 * math.pi)]
+                init_car_pos = None
+                init_car_orient = None
 
-            self._cars[carID] = Car(
-                carID,
-                carPos,
-                carOrient,
+            self._cars[car_id] = Car(
+                car_id,
+                car_pos,
+                car_orient,
                 props
             )
-            self._car_data[carID] = {
-                "initPos": initCarPos,
-                "initOrient": initCarOrient,
+            self._car_data[car_id] = {
+                "init_pos": init_car_pos,
+                "init_orient": init_car_orient,
                 "noise": noise,
             }
-            return carID
+            return car_id
         else:
             return None
 
-    def deleteCar(self, carID):
-        if carID not in self._cars:
+    def delete_car(self, car_id):
+        if car_id not in self._cars:
             return False
 
-        p.removeBody(carID)
-        del self._cars[carID]
-        del self._car_data[carID]
+        p.removeBody(car_id)
+        del self._cars[car_id]
+        del self._car_data[car_id]
         return True
 
     def step(self, dt):
         """Advance one time-step in the sim."""
         if self._ballID is not None:
-            ballContacts = p.getContactPoints(bodyA=self._ballID)
-            for contact in ballContacts:
+            ball_contacts = p.getContactPoints(bodyA=self._ballID)
+            for contact in ball_contacts:
                 if contact[2] in self._cars:
                     self.touchedLast = contact[2]
-                elif contact[2] == self._goalAID:
+                elif contact[2] == self._goal_a_id:
                     self.scored = True
                     self.winner = "A"
-                elif contact[2] == self._goalBID:
+                elif contact[2] == self._goal_b_id:
                     self.scored = True
                     self.winner = "B"
 
@@ -228,29 +228,29 @@ class Sim(object):
                 car.step(p_dt)
             p.stepSimulation()
 
-    def getCarPose(self, id, add_noise=False):
+    def get_car_pose(self, id, add_noise=False):
         if id not in self._cars:
             return None
 
         noise = self._car_data[id]['noise']
         if add_noise:
-            return self._cars[id].getPose(noise=noise)
+            return self._cars[id].get_pose(noise=noise)
         else:
-            return self._cars[id].getPose(noise=None)
+            return self._cars[id].get_pose(noise=None)
 
-    def getCarVelocity(self, id):
+    def get_car_velocity(self, id):
         if id not in self._cars:
             return None
 
-        return self._cars[id].getVelocity()
+        return self._cars[id].get_velocity()
 
-    def setCarCommand(self, id, cmd):
+    def set_car_command(self, id, cmd):
         if id not in self._cars:
             return None
 
         return self._cars[id].setCmd(cmd)
 
-    def getBallPose(self, add_noise=False):
+    def get_ball_pose(self, add_noise=False):
         if self._ballID is None:
             return None
         pos, _ = p.getBasePositionAndOrientation(self._ballID)
@@ -260,7 +260,7 @@ class Sim(object):
                 pos, self.ball_noise['pos'])
         return pos, p.getQuaternionFromEuler([0, 0, 0])
 
-    def getBallVelocity(self):
+    def get_ball_velocity(self):
         if self._ballID is None:
             return None
         return p.getBaseVelocity(self._ballID)
@@ -271,35 +271,35 @@ class Sim(object):
         self.touched_last = None
 
         if self._ballID is not None:
-            ballPos = self.initBallPos
-            if ballPos is None:
-                ballPos = [
+            ball_pos = self.init_ball_pos
+            if ball_pos is None:
+                ball_pos = [
                     random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
                     random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
                     random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
             p.resetBasePositionAndOrientation(
-                self._ballID, ballPos, p.getQuaternionFromEuler([0, 0, 0])
+                self._ballID, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
             )
 
-            ballVel = [
+            ball_vel = [
                 random.uniform(-self._speed_bound, self._speed_bound),
                 random.uniform(-self._speed_bound, self._speed_bound),
                 0.0,
             ]
-            p.resetBaseVelocity(self._ballID, ballVel, [0, 0, 0])
+            p.resetBaseVelocity(self._ballID, ball_vel, [0, 0, 0])
 
         for car in self._cars.values():
-            carPos = self._car_data[car.id]["initPos"]
-            carOrient = self._car_data[car.id]["initOrient"]
+            car_pos = self._car_data[car.id]["init_pos"]
+            car_orient = self._car_data[car.id]["init_orient"]
 
-            if carPos is None:
-                carPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+            if car_pos is None:
+                car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
                           random.uniform(
                               self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
                           random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
 
-            if carOrient is None:
-                carOrient = [0, 0, random.uniform(0, 2 * math.pi)]
+            if car_orient is None:
+                car_orient = [0, 0, random.uniform(0, 2 * math.pi)]
 
-            car.reset(carPos, carOrient)
+            car.reset(car_pos, car_orient)

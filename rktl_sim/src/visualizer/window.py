@@ -35,15 +35,15 @@ class Window(object):
         self._screen = pygame.display.set_mode(
             (self.window_width, self.window_length))
 
-    def resetAssets(self):
+    def reset_assets(self):
         """Reset stored assets."""
         self.assets = []
 
-    def addAsset(self, asset):
+    def add_asset(self, asset):
         """Store asset for rendering."""
         self.assets.append(asset)
 
-    def transformPos(self, x, y):
+    def transform_pos(self, x, y):
         """Transform from field coordinates to screen coordinates."""
         x = self.window_length - \
             (int(x * self.scaling) + (self.window_length // 2))
@@ -51,7 +51,7 @@ class Window(object):
             (int(y * self.scaling) + (self.window_width // 2))
         return y, x
 
-    def scaleSize(self, s):
+    def scale_size(self, s):
         """Transform from meters to pixels."""
         return s * self.scaling
 

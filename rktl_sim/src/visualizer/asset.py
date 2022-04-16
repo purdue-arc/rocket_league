@@ -18,7 +18,7 @@ class AssetType(Enum):
 
 class Asset(ABC):
     @abstractmethod
-    def setPos(self):
+    def set_pos(self):
         pass
 
     @abstractmethod
@@ -38,12 +38,12 @@ class Image(Asset):
             self.init_img, (width, length))
         self.img = self.init_img
 
-    def setPos(self, x, y):
+    def set_pos(self, x, y):
         x = int(x)
         y = int(y)
         self.pos = (x, y)
 
-    def setAngle(self, angle):
+    def set_angle(self, angle):
         if angle < 0:
             angle = 360. + angle
 
@@ -60,7 +60,7 @@ class Rectangle(Asset):
         self.color = color
         self.rect = pygame.Rect(0, 0, width, length)
 
-    def setPos(self, x, y):
+    def set_pos(self, x, y):
         x = int(x)
         y = int(y)
         self.pos = (x, y)
@@ -74,10 +74,10 @@ class Lines(Asset):
         self.color = color
         self.points = []
     
-    def resetPoints(self):
+    def reset_points(self):
         self.points = []
 
-    def setPos(self, x, y):
+    def set_pos(self, x, y):
         self.points.append((x, y))
 
     def blit(self, screen):
@@ -90,12 +90,12 @@ class Circle(Asset):
         self.radius = radius
         self.pos = (0, 0)
 
-    def setPos(self, x, y):
+    def set_pos(self, x, y):
         x = int(x)
         y = int(y)
         self.pos = (x, y)
     
-    def setRadius(self, radius):
+    def set_radius(self, radius):
         self.radius = radius
 
     def blit(self, screen):

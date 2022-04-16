@@ -58,24 +58,24 @@ class VisualizerROS(object):
         field_img_path = rospy.get_param("~media/field", None)
         if field_img_path is not None:
             asset = visualizer.Image(
-                self.window.scaleSize(field_width),
-                self.window.scaleSize(field_length),
+                self.window.scale_size(field_width),
+                self.window.scale_size(field_length),
                 field_img_path)
-            x, y = self.window.transformPos(0, 0)
-            asset.setPos(x, y)
+            x, y = self.window.transform_pos(0, 0)
+            asset.set_pos(x, y)
             self.field_assets.append(asset)
 
         # Setting up goals
-        asset = visualizer.Rectangle( self.window.scaleSize(goal_width), 
-            self.window.scaleSize(wall_thickness), (255,255,255))
-        x, y = self.window.transformPos((field_length / 2) + (wall_thickness / 2), 0)
-        asset.setPos(x, y)
+        asset = visualizer.Rectangle( self.window.scale_size(goal_width), 
+            self.window.scale_size(wall_thickness), (255,255,255))
+        x, y = self.window.transform_pos((field_length / 2) + (wall_thickness / 2), 0)
+        asset.set_pos(x, y)
         self.field_assets.append(asset)
         
-        asset = visualizer.Rectangle( self.window.scaleSize(goal_width), 
-            self.window.scaleSize(wall_thickness), (255,255,255))
-        x, y = self.window.transformPos(-((field_length / 2) + (wall_thickness / 2)), 0)
-        asset.setPos(x, y)
+        asset = visualizer.Rectangle( self.window.scale_size(goal_width), 
+            self.window.scale_size(wall_thickness), (255,255,255))
+        x, y = self.window.transform_pos(-((field_length / 2) + (wall_thickness / 2)), 0)
+        asset.set_pos(x, y)
         self.field_assets.append(asset)
 
         # Setup object assets
@@ -94,9 +94,9 @@ class VisualizerROS(object):
                 pass
 
     def refresh_assets(self, _):
-        self.window.resetAssets()
+        self.window.reset_assets()
         for asset in self.field_assets:
-            self.window.addAsset(asset)
+            self.window.add_asset(asset)
 
         if len(self.object_subs) > 0:
             for sub in self.object_subs:
@@ -110,8 +110,8 @@ class VisualizerROS(object):
             asset = None
             if topic_ns[0] == "cars":
                 if self.car_img_path is not None:
-                    width = self.window.scaleSize(self.car_width)
-                    length = self.window.scaleSize(self.car_length)
+                    width = self.window.scale_size(self.car_width)
+                    length = self.window.scale_size(self.car_length)
                     if topic_ns[2] == "odom":
                         asset = visualizer.Image(width, length,
                             self.car_img_path)
@@ -131,7 +131,7 @@ class VisualizerROS(object):
                             self.lookahead_cb, asset))
             elif topic_ns[0] == "ball":
                 if self.ball_img_path is not None:
-                    diameter = self.window.scaleSize(self.ball_radius * 2)
+                    diameter = self.window.scale_size(self.ball_radius * 2)
                     if topic_ns[1] == "odom":
                         asset = visualizer.Image(diameter, diameter,
                             self.ball_img_path)
@@ -151,53 +151,53 @@ class VisualizerROS(object):
                     self.bezier_path_cb, asset))
 
             if asset != None:
-                self.window.addAsset(asset)
+                self.window.add_asset(asset)
         return EmptyResponse()
 
     def car_odom_cb(self, odom_msg, asset):
         """Callback for car odometry messages."""
         field_x = odom_msg.pose.pose.position.x
         field_y = odom_msg.pose.pose.position.y
-        x, y = self.window.transformPos(field_x, field_y)
-        asset.setPos(x, y)
+        x, y = self.window.transform_pos(field_x, field_y)
+        asset.set_pos(x, y)
 
         orient = odom_msg.pose.pose.orientation
         quat = [orient.x, orient.y, orient.z, orient.w]
         heading = euler_from_quaternion(quat)[2]
         heading = heading * 180. / math.pi
-        asset.setAngle(heading)
+        asset.set_angle(heading)
 
     def ball_odom_cb(self, odom_msg, asset):
         """Callback for ball odometry messages."""
         field_x = odom_msg.pose.pose.position.x
         field_y = odom_msg.pose.pose.position.y
-        x, y = self.window.transformPos(field_x, field_y)
-        asset.setPos(x, y)
+        x, y = self.window.transform_pos(field_x, field_y)
+        asset.set_pos(x, y)
 
     def path_arr_cb(self, path_msg: Path, asset):
         """Callback for path array messages."""
-        asset.resetPoints()
+        asset.reset_points()
         path = path_msg.waypoint
         for point in path:
             field_x = point.pose.position.x
             field_y = point.pose.position.y
-            x, y = self.window.transformPos(field_x, field_y)
-            asset.setPos(x, y)
+            x, y = self.window.transform_pos(field_x, field_y)
+            asset.set_pos(x, y)
     
     def bezier_path_cb(self, msg: BezierPathList, asset):
         """Callback for bezier path messages."""
-        asset.resetPoints()
+        asset.reset_points()
         paths = [BezierPath(x) for x in msg.paths]
         for path in paths:
             sec = path.duration.to_sec()
             for t in np.linspace(0., sec, int(50 * sec + 0.5)):
                 point = path.at(t)
-                x, y = self.window.transformPos(point.x, point.y)
-                asset.setPos(x, y)
+                x, y = self.window.transform_pos(point.x, point.y)
+                asset.set_pos(x, y)
 
     def lookahead_cb(self, msg: Float32, asset):
         """Callback for lookahead_pnt messages."""
-        asset.setRadius(self.window.scaleSize(msg.data))
+        asset.set_radius(self.window.scale_size(msg.data))
 
 if __name__ == "__main__":
     VisualizerROS()

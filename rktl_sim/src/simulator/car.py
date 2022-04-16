@@ -11,8 +11,8 @@ import math
 import numpy as np
 
 class Car(object):
-    def __init__(self, carID, pos, orient, car_properties):
-        self.id = carID
+    def __init__(self, car_id, pos, orient, car_properties):
+        self.id = car_id
         self.simulate_effort = car_properties['simulate_effort']
 
         # physical constants
@@ -49,7 +49,7 @@ class Car(object):
             return
 
         # get current yaw angle
-        _, orient = self.getPose()
+        _, orient = self.get_pose()
         theta = p.getEulerFromQuaternion(orient)[2]
 
         if self.simulate_effort:
@@ -93,7 +93,7 @@ class Car(object):
             controlMode=p.VELOCITY_CONTROL,
             forces=(5000, 5000, 5000))
 
-    def getPose(self, noise=None):
+    def get_pose(self, noise=None):
         pos = p.getLinkState(self.id, self.body_link_id)[0]
         heading = p.getJointState(self.id, self.joint_ids[2])[0]
         orient = (0.0, 0.0, heading)
@@ -104,7 +104,7 @@ class Car(object):
                 orient, noise['orient'])
         return (pos, p.getQuaternionFromEuler(orient))
 
-    def getVelocity(self):
+    def get_velocity(self):
         link_state = p.getLinkState(self.id, self.body_link_id, computeLinkVelocity=1)
         orient = link_state[1]
         linear, angular = link_state[6:8]
