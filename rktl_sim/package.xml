@@ -11,6 +11,8 @@
   <author email="jtockerm@purdue.edu">Jake Tockerman</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
   <test_depend>rosunit</test_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>pygame</exec_depend>

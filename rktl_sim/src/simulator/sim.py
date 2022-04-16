@@ -156,8 +156,9 @@ class Sim(object):
     def createCar(self, urdf_name, init_pose=None, noise=None, props=None):
         if urdf_name in self.urdf_paths:
             zeroPos = [0.0, 0.0, 0.0]
-            zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
-            carID = p.loadURDF(self.urdf_paths[urdf_name], zeroPos, zeroOrient)
+            zeroOrient = [0.0, 0.0, 0.0]
+            carID = p.loadURDF(self.urdf_paths[urdf_name], zeroPos, 
+                p.getQuaternionFromEuler(zeroOrient))
             if init_pose:
                 if "pos" in init_pose:
                     carPos = init_pose["pos"]
@@ -195,6 +196,15 @@ class Sim(object):
             return carID
         else:
             return None
+
+    def deleteCar(self, carID):
+        if carID not in self._cars:
+            return False
+
+        p.removeBody(carID)
+        del self._cars[carID]
+        del self._car_data[carID]
+        return True
 
     def step(self, dt):
         """Advance one time-step in the sim."""

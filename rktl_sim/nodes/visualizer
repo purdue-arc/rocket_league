@@ -81,7 +81,7 @@ class VisualizerROS(object):
         # Setup object assets
         self.object_subs = []
         self.refresh_assets(None)
-        rospy.Service('refresh_visualizer', Empty, self.refresh_assets)
+        rospy.Service('visualizer_refresh', Empty, self.refresh_assets)
 
         while not rospy.is_shutdown():
             try:

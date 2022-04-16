@@ -1,26 +1,29 @@
 rate: 10
 spawn_height: 0.06
 
+sensor_noise:
+  car:
+    pos: [0.01, 0.01, 0.00]
+    orient: [0.0, 0.0, 0.09]
+  ball:
+    pos: [0.01, 0.01, 0.0]
+    orient: [0.0, 0.0, 0.0]
+
 cars:
   - name: "car0"
     # init_pose:
     #   pos: [0.5, 0.0, 0.06]
-    sensor_noise:
-      pos: [0.01, 0.01, 0.00]
-      orient: [0.0, 0.0, 0.09]
 
-  - name: "car1"
-    # init_pose:
-    #   pos: [0.5, 0.0, 0.06]
-    sensor_noise:
-      pos: [0.01, 0.01, 0.00]
-      orient: [0.0, 0.0, 0.09]
+  # - name: "car1"
+  #   # init_pose:
+  #   #   pos: [0.5, 0.0, 0.06]
+  #   sensor_noise:
+  #     pos: [0.01, 0.01, 0.00]
+  #     orient: [0.0, 0.0, 0.09]
 
 ball:
   init_speed: 0.0
   # init_pose:
   #   pos: [0.0, 0.5, 0.06]
   #   orient: [0.0, 0.0, 0.0]
-  sensor_noise:
-    pos: [0.01, 0.01, 0.0]
-    orient: [0.0, 0.0, 0.0]
+    
