@@ -18,7 +18,7 @@
     </group>
 
     <!-- environment -->
-    <include file="$(find rktl_launch)/launch/rocket_league_sim.launch">
+    <include file="$(find rktl_launch)/launch/rocket_league.launch">
         <arg name="render"      value="$(arg render)"/>
         <arg name="sim_mode"    value="$(arg sim_mode)"/>
         <arg name="agent_type"  value="$(arg agent_type)"/>

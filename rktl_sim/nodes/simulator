@@ -82,7 +82,7 @@ class Simulator(object):
         if self.mode == SimulatorMode.IDEAL:
             ball_noise = None
 
-        self.sim.create_ball('ball', init_pose=ball_init_pose,
+        self.sim.createBall('ball', init_pose=ball_init_pose,
             init_speed=ball_init_speed, noise=ball_noise)
         
         if self.mode == SimulatorMode.REALISTIC:
@@ -121,7 +121,7 @@ class Simulator(object):
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
 
-            self.car_ids[car_name] = self.sim.create_car(
+            self.car_ids[car_name] = self.sim.createCar(
                 'car', init_pose=init_pose, noise=noise, props=car_properties)
 
             car_id = self.car_ids[car_name]

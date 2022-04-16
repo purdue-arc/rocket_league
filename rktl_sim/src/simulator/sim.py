@@ -113,7 +113,7 @@ class Sim(object):
         p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
         p.setGravity(0, 0, -10)
 
-    def create_ball(self, urdf_name, init_pose=None, init_speed=None, noise=None):
+    def createBall(self, urdf_name, init_pose=None, init_speed=None, noise=None):
         if urdf_name in self.urdf_paths:
             zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
             if init_pose:
@@ -131,11 +131,13 @@ class Sim(object):
             p.changeDynamics(
                 bodyUniqueId=self._ballID,
                 linkIndex=-1,
+                mass=0.200,
+                lateralFriction=0.4,
+                spinningFriction=0.001,
+                rollingFriction=0.0001,
                 restitution=0.7,
                 linearDamping=0,
                 angularDamping=0,
-                rollingFriction=0.0001,
-                spinningFriction=0.001,
             )
 
             # initize ball with some speed
@@ -151,7 +153,7 @@ class Sim(object):
         else:
             return None
 
-    def create_car(self, urdf_name, init_pose=None, noise=None, props=None):
+    def createCar(self, urdf_name, init_pose=None, noise=None, props=None):
         if urdf_name in self.urdf_paths:
             zeroPos = [0.0, 0.0, 0.0]
             zeroOrient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
@@ -186,8 +188,8 @@ class Sim(object):
                 props
             )
             self._car_data[carID] = {
-                "posInit": initCarPos,
-                "orientInit": initCarOrient,
+                "initPos": initCarPos,
+                "initOrient": initCarOrient,
                 "noise": noise,
             }
             return carID
@@ -279,7 +281,7 @@ class Sim(object):
 
         for car in self._cars.values():
             carPos = self._car_data[car.id]["initPos"]
-            carOrient = self._car_data[car.id]["initOrient "]
+            carOrient = self._car_data[car.id]["initOrient"]
 
             if carPos is None:
                 carPos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),

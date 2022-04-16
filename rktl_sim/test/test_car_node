@@ -34,7 +34,7 @@ class TestCar(unittest.TestCase):
         }
 
         car_init_pose = {"pos": (0.0, 0.0, 0.06), "orient":(0.0, 0.0, 0.0)}
-        cls.sim.create_car('car', 
+        cls.car_id = cls.sim.createCar('car', 
             init_pose=car_init_pose,
             noise=None,
             props=car_properties)
@@ -49,10 +49,11 @@ class TestCar(unittest.TestCase):
         rospy.sleep(rospy.Duration(0.2))
 
         freq = 12.0 # must be evenly divisible by i_wait
+        self.sim.setCarCommand(self.car_id, (i_throttle, 0.0))
         for _ in range(round(i_wait * freq)):
-            self.sim.step((i_throttle, 0.0), 1.0/freq)
+            self.sim.step(1.0/freq)
 
-        vel = self.sim.getCarVelocity()[0][0]
+        vel = self.sim.getCarVelocity(self.car_id)[0][0]
         self.assertLess(vel, e_vel + e_err, 'car moving too fast: ' +
             f'expected velocity {e_vel}, actual velocity {vel}')
     
