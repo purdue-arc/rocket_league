@@ -12,8 +12,8 @@ from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 import rospy
 from tf.transformations import euler_from_quaternion
-from threading import Lock
 import numpy as np
+from std_srvs.srv import Empty, EmptyResponse
 
 # Local library
 import visualizer
@@ -31,9 +31,9 @@ class VisualizerROS(object):
         field_length = rospy.get_param('/field/length')
         wall_thickness = rospy.get_param('/field/wall_thickness')
         goal_width = rospy.get_param('/field/goal/width')
-        ball_radius = rospy.get_param("/ball/radius")
-        car_width = rospy.get_param("/cars/width")
-        car_length = rospy.get_param("/cars/length")
+        self.ball_radius = rospy.get_param("/ball/radius")
+        self.car_width = rospy.get_param("/cars/width")
+        self.car_length = rospy.get_param("/cars/length")
 
         # Creating pygame render
         self.window = visualizer.Window(
@@ -45,15 +45,16 @@ class VisualizerROS(object):
         self.timeout = rospy.get_param("~timeout", 10)
         rate = rospy.Rate(rospy.get_param("~rate", 20))
 
-        car_img_path = rospy.get_param('~media/car', None)
-        if car_img_path is None:
+        self.car_img_path = rospy.get_param('~media/car', None)
+        if self.car_img_path is None:
             rospy.logwarn('no car image specified, not visualizing car')
 
-        ball_img_path = rospy.get_param('~media/ball', None)
-        if ball_img_path is None:
+        self.ball_img_path = rospy.get_param('~media/ball', None)
+        if self.ball_img_path is None:
             rospy.logwarn('no ball image specified, not visualizing ball')
 
         # Setting up field
+        self.field_assets = []
         field_img_path = rospy.get_param("~media/field", None)
         if field_img_path is not None:
             asset = visualizer.Image(
@@ -62,69 +63,25 @@ class VisualizerROS(object):
                 field_img_path)
             x, y = self.window.transformPos(0, 0)
             asset.setPos(x, y)
-            self.window.addAsset(asset)
+            self.field_assets.append(asset)
 
         # Setting up goals
         asset = visualizer.Rectangle( self.window.scaleSize(goal_width), 
             self.window.scaleSize(wall_thickness), (255,255,255))
         x, y = self.window.transformPos((field_length / 2) + (wall_thickness / 2), 0)
         asset.setPos(x, y)
-        self.window.addAsset(asset)
+        self.field_assets.append(asset)
         
         asset = visualizer.Rectangle( self.window.scaleSize(goal_width), 
             self.window.scaleSize(wall_thickness), (255,255,255))
         x, y = self.window.transformPos(-((field_length / 2) + (wall_thickness / 2)), 0)
         asset.setPos(x, y)
-        self.window.addAsset(asset)
+        self.field_assets.append(asset)
 
-        # Setup assets and subscribers using available topics
-        topics = rospy.get_published_topics()
-        for topic_name, _ in topics:
-            topic_ns = topic_name.split('/')[1:]
-            
-            asset = None
-            if topic_ns[0] == "cars":
-                if car_img_path is not None:
-                    width = self.window.scaleSize(car_width)
-                    length = self.window.scaleSize(car_length)
-                    if topic_ns[2] == "odom":
-                        asset = visualizer.Image(width, length, car_img_path)
-                        rospy.Subscriber(topic_name, Odometry,
-                            self.car_odom_cb, asset)
-                    elif topic_ns[2] == "odom_truth":
-                        asset = visualizer.Image(width, length,
-                            car_img_path, opacity=128)
-                        rospy.Subscriber(topic_name, Odometry,
-                            self.car_odom_cb, asset)
-                    elif topic_ns[2] == "lookahead_pnt":
-                        asset = visualizer.Circle((255,0,0), 0)
-                        rospy.Subscriber(topic_name, Float32,
-                            self.lookahead_cb, asset)
-            elif topic_ns[0] == "ball":
-                if ball_img_path is not None:
-                    diameter = self.window.scaleSize(ball_radius * 2)
-                    if topic_ns[1] == "odom":
-                        asset = visualizer.Image(diameter, diameter,
-                            ball_img_path)
-                    elif topic_ns[1] == "odom_truth":
-                        asset = visualizer.Image(diameter, diameter,
-                            ball_img_path, opacity=128)
-                    else:
-                        continue
-
-                    rospy.Subscriber(topic_name, Odometry,
-                        self.ball_odom_cb, asset)
-            elif topic_ns[0] == "agents" and topic_ns[2] == "bezier_path":
-                asset = visualizer.Lines((255,0,0))
-                rospy.Subscriber(topic_name, BezierPathList,
-                    self.bezier_path_cb, asset)
-
-            if asset != None:
-                self.window.addAsset(asset)
-
-        self.lock = Lock()
-        self.last_time = None
-        self.path = None
+        # Setup object assets
+        self.object_subs = []
+        self.refresh_assets(None)
+        rospy.Service('refresh_visualizer', Empty, self.refresh_assets)
 
         while not rospy.is_shutdown():
             try:
@@ -135,6 +92,67 @@ class VisualizerROS(object):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 pass
+
+    def refresh_assets(self, _):
+        self.window.resetAssets()
+        for asset in self.field_assets:
+            self.window.addAsset(asset)
+
+        if len(self.object_subs) > 0:
+            for sub in self.object_subs:
+                sub.unregister()
+
+        self.object_subs = []
+        topics = rospy.get_published_topics()
+        for topic_name, _ in topics:
+            topic_ns = topic_name.split('/')[1:]
+            
+            asset = None
+            if topic_ns[0] == "cars":
+                if self.car_img_path is not None:
+                    width = self.window.scaleSize(self.car_width)
+                    length = self.window.scaleSize(self.car_length)
+                    if topic_ns[2] == "odom":
+                        asset = visualizer.Image(width, length,
+                            self.car_img_path)
+                        self.object_subs.append(
+                            rospy.Subscriber(topic_name, Odometry,
+                            self.car_odom_cb, asset))
+                    elif topic_ns[2] == "odom_truth":
+                        asset = visualizer.Image(width, length,
+                            self.car_img_path, opacity=128)
+                        self.object_subs.append(
+                            rospy.Subscriber(topic_name, Odometry,
+                            self.car_odom_cb, asset))
+                    elif topic_ns[2] == "lookahead_pnt":
+                        asset = visualizer.Circle((255,0,0), 0)
+                        self.object_subs.append(
+                            rospy.Subscriber(topic_name, Float32,
+                            self.lookahead_cb, asset))
+            elif topic_ns[0] == "ball":
+                if self.ball_img_path is not None:
+                    diameter = self.window.scaleSize(self.ball_radius * 2)
+                    if topic_ns[1] == "odom":
+                        asset = visualizer.Image(diameter, diameter,
+                            self.ball_img_path)
+                    elif topic_ns[1] == "odom_truth":
+                        asset = visualizer.Image(diameter, diameter,
+                            self.ball_img_path, opacity=128)
+                    else:
+                        continue
+
+                    self.object_subs.append(
+                        rospy.Subscriber(topic_name, Odometry,
+                        self.ball_odom_cb, asset))
+            elif topic_ns[0] == "agents" and topic_ns[2] == "bezier_path":
+                asset = visualizer.Lines((255,0,0))
+                self.object_subs.append(
+                    rospy.Subscriber(topic_name, BezierPathList,
+                    self.bezier_path_cb, asset))
+
+            if asset != None:
+                self.window.addAsset(asset)
+        return EmptyResponse()
 
     def car_odom_cb(self, odom_msg, asset):
         """Callback for car odometry messages."""

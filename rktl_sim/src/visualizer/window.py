@@ -35,6 +35,10 @@ class Window(object):
         self._screen = pygame.display.set_mode(
             (self.window_width, self.window_length))
 
+    def resetAssets(self):
+        """Reset stored assets."""
+        self.assets = []
+
     def addAsset(self, asset):
         """Store asset for rendering."""
         self.assets.append(asset)
