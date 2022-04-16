@@ -54,27 +54,29 @@ class PoseSynchronizer(object):
         t = pose_msg.header.stamp
         x = pose_msg.pose.pose.position.x
         y = pose_msg.pose.pose.position.y
+        weight = pose_msg.pose.pose.position.z
         __, __, yaw = euler_from_quaternion([
             pose_msg.pose.pose.orientation.x,
             pose_msg.pose.pose.orientation.y,
             pose_msg.pose.pose.orientation.z,
             pose_msg.pose.pose.orientation.w
         ])
-        sample = (t, x, y, yaw)
+        sample = (t, x, y, yaw, weight)
         # append to buffer (thread safe)
         self.buffers[topic].append(sample)
 
     def send_pose(self, topic, now):
         """Callback for processing received poses and publishing"""
-        avg_x = 0
-        avg_y = 0
-        avg_hx = 0
-        avg_hy = 0
+        avg_x = 0.0
+        avg_y = 0.0
+        avg_hx = 0.0
+        avg_hy = 0.0
+        total_weight = 0.0
         samples = 0
 
         # sum and count usable measurements in buffer
         for _ in range(len(self.buffers[topic])):
-            t, x, y, yaw = self.buffers[topic].popleft()
+            t, x, y, yaw, weight = self.buffers[topic].popleft()
             # check if too old
             if t < now - self.DELAY - self.PERIOD/2:
                 rospy.logdebug("%s: discarding pose from %f", topic, t.to_sec())
@@ -86,10 +88,11 @@ class PoseSynchronizer(object):
                 continue
             # add to averages
             else:
-                avg_x += x
-                avg_y += y
-                avg_hx += cos(yaw)
-                avg_hy += sin(yaw)
+                avg_x += x * weight
+                avg_y += y * weight
+                avg_hx += cos(yaw) * weight
+                avg_hy += sin(yaw) * weight
+                total_weight += weight
                 samples += 1
 
         # check there is sufficient data
@@ -98,8 +101,8 @@ class PoseSynchronizer(object):
             return
 
         # take avg
-        avg_x /= samples
-        avg_y /= samples
+        avg_x /= total_weight
+        avg_y /= total_weight
         avg_yaw = atan2(avg_hy, avg_hx)
         rospy.logdebug("%s: using %d samples", topic, samples)
 
