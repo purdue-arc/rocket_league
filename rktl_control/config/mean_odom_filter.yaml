@@ -1,5 +1,5 @@
 delay:
-  compensate: true
+  compensate: false
   duration: 0.2
 buffer_size:
   position: 3

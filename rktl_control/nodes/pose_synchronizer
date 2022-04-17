@@ -23,7 +23,7 @@ class PoseSynchronizer(object):
         self.MAP_FRAME = rospy.get_param('~map_frame', 'map')
         self.TOPICS = rospy.get_param('~topics')
         self.PERIOD = rospy.Duration(1/rospy.get_param('~rate', 10.0))
-        self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.1))
+        self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.15))
 
         # variables
         self.buffers = {
