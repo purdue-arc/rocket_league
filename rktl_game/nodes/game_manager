@@ -21,8 +21,8 @@ class ScoreKeeper():
 
         self.orange_score = 0
         self.blue_score = 0
-        self.orange_goal = (rospy.get_param('/field/length', 1) + 0.1) / 2 
-        self.blue_goal = (rospy.get_param('/field/length', 1)  + 0.1) / -2
+        self.orange_goal = (rospy.get_param('/field/length', 1) - 0.15) / 2 
+        self.blue_goal = (rospy.get_param('/field/length', 1)  - 0.15) / -2
         self.enabled = False
         self.match_status = 0
         self.game_clock = rospy.get_param('/game_length', 90)
