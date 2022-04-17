@@ -24,6 +24,9 @@ class PoseSynchronizer(object):
         self.TOPICS = rospy.get_param('~topics')
         self.PERIOD = rospy.Duration(1/rospy.get_param('~rate', 10.0))
         self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.15))
+        self.USE_WEIGHTS = {
+            topic : rospy.get_param('~use_weights')[i] for i, topic in enumerate(self.TOPICS)
+        }
 
         # variables
         self.buffers = {
@@ -61,9 +64,13 @@ class PoseSynchronizer(object):
             pose_msg.pose.pose.orientation.z,
             pose_msg.pose.pose.orientation.w
         ])
-        sample = (t, x, y, yaw, weight)
+        # override weight if not being used
+        if not self.USE_WEIGHTS[topic]:
+            weight = 1.0
         # append to buffer (thread safe)
+        sample = (t, x, y, yaw, weight)
         self.buffers[topic].append(sample)
+        rospy.loginfo("%s: received with %0.3f sec delay", topic, (rospy.Time.now() - t).to_sec())
 
     def send_pose(self, topic, now):
         """Callback for processing received poses and publishing"""
@@ -79,13 +86,11 @@ class PoseSynchronizer(object):
             t, x, y, yaw, weight = self.buffers[topic].popleft()
             # check if too old
             if t < now - self.DELAY - self.PERIOD/2:
-                rospy.logdebug("%s: discarding pose from %f", topic, t.to_sec())
-                continue
+                rospy.loginfo("%s: discarding pose from %0.3f sec ago", topic, (now - t).to_sec())
             # check if too new
-            if t > now - self.DELAY + self.PERIOD/2:
-                self.buffers[topic].append((t, x, y, yaw))
-                rospy.logdebug("%s: skipping recent pose from %f", topic, t.to_sec())
-                continue
+            elif t > now - self.DELAY + self.PERIOD/2:
+                self.buffers[topic].append((t, x, y, yaw, weight))
+                rospy.loginfo("%s: skipping pose from %0.3f sec ago", topic, (now - t).to_sec())
             # add to averages
             else:
                 avg_x += x * weight
@@ -104,7 +109,7 @@ class PoseSynchronizer(object):
         avg_x /= total_weight
         avg_y /= total_weight
         avg_yaw = atan2(avg_hy, avg_hx)
-        rospy.logdebug("%s: using %d samples", topic, samples)
+        rospy.loginfo("%s: using %d samples", topic, samples)
 
         # publish message
         pose_msg = PoseWithCovarianceStamped()

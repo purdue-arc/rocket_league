@@ -1,0 +1,20 @@
+# rate of the whole perception system (Hz)
+rate: 10.0
+
+# delay in seconds. Lower is better, but AprilTags needs to keep up
+delay: 0.15
+
+# buffer size for each topic.
+# 12 potential detections per update (4 x 30 hz cameras)
+# delay of ~ 2 updates
+buffer_size: 30
+
+# topics to be synchronized
+topics:
+  - cars/car0/pose
+  - ball/pose
+
+# if Z in the message corresponds to a confidence weight
+use_weights:
+  - false
+  - true
