@@ -14,7 +14,7 @@ reward:
   # reward given each frame when the car is near the walls
   walls:
     # actual reward value
-    value: -0.2
+    value: -0.5
     # threshold distance (meters)
     threshold: 0.2
 

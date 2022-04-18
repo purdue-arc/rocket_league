@@ -26,8 +26,8 @@ if __name__ == '__main__':      # this is required due to forking processes
 
     # model = PPO("MlpPolicy", env)
     model = PPO("MlpPolicy", env)
-    GME_run_id = '72682dec-4168-43b5-8517-0f78d229be14'
-    GME_name = 'rl_model_49999200_steps'
+    GME_run_id = '7b920d7b-cb42-4267-a941-b050c80fe7a3'
+    GME_name = 'rl_model_99998400_steps'
     weights = expanduser(f'~/catkin_ws/data/rocket_league/{GME_run_id}/{GME_name}')
     model = PPO.load(weights)
     model.set_env(env)
