@@ -86,11 +86,11 @@ class PoseSynchronizer(object):
             t, x, y, yaw, weight = self.buffers[topic].popleft()
             # check if too old
             if t < now - self.DELAY - self.PERIOD/2:
-                rospy.loginfo("%s: discarding pose from %0.3f sec ago", topic, (now - t).to_sec())
+                rospy.logdebug("%s: discarding pose from %0.3f sec ago", topic, (now - t).to_sec())
             # check if too new
             elif t > now - self.DELAY + self.PERIOD/2:
                 self.buffers[topic].append((t, x, y, yaw, weight))
-                rospy.loginfo("%s: skipping pose from %0.3f sec ago", topic, (now - t).to_sec())
+                rospy.logdebug("%s: skipping pose from %0.3f sec ago", topic, (now - t).to_sec())
             # add to averages
             else:
                 avg_x += x * weight
