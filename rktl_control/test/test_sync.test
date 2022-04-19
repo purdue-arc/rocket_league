@@ -6,6 +6,10 @@
                 - cars/car0/pose
                 - cars/car1/pose
                 - ball/pose
+            use_weights:
+                - false
+                - false
+                - true
         </rosparam>
     </node>
 </launch>
