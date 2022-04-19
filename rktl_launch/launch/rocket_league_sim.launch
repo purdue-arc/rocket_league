@@ -2,7 +2,7 @@
     <arg name="render"  default="true"/>
 
     <arg name="sim_mode"            default="realistic"/> <!-- Either realistic or ideal (check docs)-->
-    <arg name="perception_delay"    default="0.15"/>
+    <arg name="perception_delay"    default="0.10"/>
 
     <arg name="agent_type"          default="planner"/> <!-- Either planner or autonomy -->
     <arg name="autonomy_weights"    default="model"/>
