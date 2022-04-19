@@ -11,7 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: pyflakes
-        uses: reviewdog/action-pyflakes@master
+        uses: jrbaxter0/action-pyflakes@patch-1
         with:
           github_token: ${{ secrets.github_token }}
   changes:

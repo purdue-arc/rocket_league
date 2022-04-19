@@ -15,10 +15,10 @@ ball:
 # car dimensions and physical constants
 cars:
   width: 0.0762 # (3 in)
-  length: 0.2032 # (8 in)
+  length: 0.12  # wheel center to center
   steering:
-    max_throw: 0.26179938 # 15 degrees
-    rate: 0.52359877 # 30 degrees/s
+    max_throw: 0.1826
+    rate: 0.9128
   throttle:
-    max_speed: 1.0
-    tau: 0.25 # (approx 1 sec to reach max speed)
+    max_speed: 2.3
+    tau: 0.2

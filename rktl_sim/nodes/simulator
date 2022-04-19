@@ -117,7 +117,7 @@ class SimulatorROS(object):
         if self.mode == SimulatorMode.REALISTIC:
             self.car_pose_pub = rospy.Publisher('/cars/car0/pose_sync_early',
                 PoseWithCovarianceStamped, queue_size=1)
-            rospy.Subscriber('/cars/car0/effort_delayed', ControlEffort, self.effort_cb)
+            rospy.Subscriber('/cars/car0/effort', ControlEffort, self.effort_cb)
             self.car_odom_pub = rospy.Publisher('/cars/car0/odom_truth', Odometry, queue_size=1)
         elif self.mode == SimulatorMode.IDEAL:
             self.car_odom_pub = rospy.Publisher('/cars/car0/odom', Odometry, queue_size=1)

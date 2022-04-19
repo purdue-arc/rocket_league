@@ -21,4 +21,5 @@
   <depend>cv_bridge</depend>
   <depend>nodelet</depend>
   <exec_depend>camera_calibration</exec_depend>
+  <exec_depend>rviz</exec_depend>
 </package>

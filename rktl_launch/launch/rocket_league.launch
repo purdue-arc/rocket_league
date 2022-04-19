@@ -9,6 +9,9 @@
     <!-- Visualizer -->
     <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch"/>
 
+    <!-- Control GUI -->
+    <node pkg="rqt_gui" type="rqt_gui" name="rqt_gui" args="--perspective-file $(find rktl_launch)/rktl.perspective"/>
+
     <!-- Ball -->
     <include file="$(find rktl_control)/launch/ball.launch"/>
 
