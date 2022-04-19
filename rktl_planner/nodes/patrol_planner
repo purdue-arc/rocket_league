@@ -27,20 +27,26 @@ class PatrolPlanner(object):
         self.MAX_CURVATURE = math.tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('/cars/length')
 
         # constants
+        # general stability parameters
         self.SPEED = rospy.get_param('~speed', 1.0)
-        self.REVERSE_TIME = rospy.get_param('~reverse_time', 0.25)
-        self.SLEEP_TIME_GAIN = rospy.get_param('~defense_time_gain', 0.5)
+        self.CURVATURE_GAIN = rospy.get_param('~curvature_gain', 2.0)
+        self.PATROL_DIST = rospy.get_param('~patrol_wall_dist', 0.25)
+
+        # wall avoidance parameters
+        self.WALL_REVERSE_TIME = rospy.get_param('~wall_avoidance/reverse_time', 0.25)
+        self.WALL_DIST_MARGIN = rospy.get_param('~wall_avoidance/distance_margin', 0.5)
+        self.WALL_HEADING_MARGIN = rospy.get_param('~wall_avoidance/heading_margin', math.pi/4)
+
+        # offense & defense parameters
         self.ATTEMPT_TIMEOUT = rospy.get_param('~attempt_timeout', 5.0)
 
-        self.WALL_MARGIN = rospy.get_param('~margins/wall', 0.5)
-        self.HEADING_MARGIN = rospy.get_param('~margins/heading', math.pi/4.0)
-        self.TURNING_MARGIN = rospy.get_param('~margins/turning', 0.5)
+        # offensive related parameters
+        self.SCORING_MARGIN = rospy.get_param('~scoring/heading_margin', math.pi/8.0)
+        self.LOOKAHEAD_DIST = rospy.get_param('~scoring/car_lookahead_dist', 1.0)
+        self.LOOKAHEAD_TIME = rospy.get_param('~scoring/ball_lookahead_time', 0.0)
 
-        self.CURVATURE_GAIN = rospy.get_param('~gains/curvature', 2.0)
-
-        self.LOOKAHEAD_DIST = rospy.get_param('~lookahead_dist', 1.0)
-        self.LOOKAHEAD_TIME = rospy.get_param('~lookahead_time', 0.0)
-        self.SCORING_MARGIN = rospy.get_param('~margins/scoring', math.pi/8.0)
+        # defense related parameters
+        self.DEFENSE_TIME_GAIN = rospy.get_param('~defense/reverse_time_gain', 0.5)
 
         # variables
         self.ball_position = None
@@ -172,7 +178,7 @@ class PatrolPlanner(object):
                 return
 
             # if not already trying to hit the ball, wait until at bottom part of pattern
-            elif abs(EAST_HEADING_ERROR) < self.SCORING_MARGIN and SOUTH_WALL_DISTANCE < 1.5*self.TURNING_MARGIN:
+            elif abs(EAST_HEADING_ERROR) < self.SCORING_MARGIN and SOUTH_WALL_DISTANCE < 1.5 * self.PATROL_DIST:
                 # run fwd or rev so easier to hit ball
                 if by < 0.0:
                     cmd_msg.velocity = -self.SPEED
@@ -187,38 +193,38 @@ class PatrolPlanner(object):
                 rospy.loginfo("beginning defensive attempt")
 
                 # reverse for longer, if the ball is nearer to the middle
-                time.sleep((self.FIELD_WIDTH/2.0 - abs(by)) * self.SLEEP_TIME_GAIN)
+                time.sleep((self.FIELD_WIDTH/2.0 - abs(by)) * self.DEFENSE_TIME_GAIN)
                 return
 
         # If not trying to score, prioritize not running in to walls
         # if the car is near a wall and facing it, reverse
-        if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN or
-            SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN or
-            EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN or
-            WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN):
+        if (NORTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and abs(NORTH_HEADING_ERROR) < self.WALL_HEADING_MARGIN or
+            SOUTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and abs(SOUTH_HEADING_ERROR) < self.WALL_HEADING_MARGIN or
+            EAST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and abs(EAST_HEADING_ERROR)  < self.WALL_HEADING_MARGIN or
+            WEST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and abs(WEST_HEADING_ERROR)  < self.WALL_HEADING_MARGIN):
                 cmd_msg.velocity = -self.SPEED
 
                 # turn while reversing if jammed in a corner
-                if (NORTH_WALL_DISTANCE < self.WALL_MARGIN and abs(NORTH_HEADING_ERROR) < self.HEADING_MARGIN and WEST_WALL_DISTANCE  < self.WALL_MARGIN or
-                    SOUTH_WALL_DISTANCE < self.WALL_MARGIN and abs(SOUTH_HEADING_ERROR) < self.HEADING_MARGIN and EAST_WALL_DISTANCE  < self.WALL_MARGIN or
-                    EAST_WALL_DISTANCE  < self.WALL_MARGIN and abs(EAST_HEADING_ERROR)  < self.HEADING_MARGIN and NORTH_WALL_DISTANCE < self.WALL_MARGIN or
-                    WEST_WALL_DISTANCE  < self.WALL_MARGIN and abs(WEST_HEADING_ERROR)  < self.HEADING_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_MARGIN):
+                if (NORTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and abs(NORTH_HEADING_ERROR) < self.WALL_HEADING_MARGIN and WEST_WALL_DISTANCE  < self.WALL_DIST_MARGIN or
+                    SOUTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and abs(SOUTH_HEADING_ERROR) < self.WALL_HEADING_MARGIN and EAST_WALL_DISTANCE  < self.WALL_DIST_MARGIN or
+                    EAST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and abs(EAST_HEADING_ERROR)  < self.WALL_HEADING_MARGIN and NORTH_WALL_DISTANCE < self.WALL_DIST_MARGIN or
+                    WEST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and abs(WEST_HEADING_ERROR)  < self.WALL_HEADING_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_DIST_MARGIN):
                         cmd_msg.curvature = -self.MAX_CURVATURE
                 else:
                     cmd_msg.curvature = 0.0
 
                 self.cmd_pub.publish(cmd_msg)
-                time.sleep(self.REVERSE_TIME)   # stay in reverse for a bit
+                time.sleep(self.WALL_REVERSE_TIME)   # stay in reverse for a bit
                 return
 
         # Follow simple rules to make it follow a "patrol"
         # Check to see if it is at the top or bottom, where it should be curving
-        if (NORTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN or
-            SOUTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN):
+        if (NORTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.PATROL_DIST or
+            SOUTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
                 # check to see if should wait to turn
-                if (x > 0.0 and WEST_WALL_DISTANCE > 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN):
+                if (x > 0.0 and WEST_WALL_DISTANCE > 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
                     cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * WEST_HEADING_ERROR
-                elif (x < 0.0 and EAST_WALL_DISTANCE > 1.0/self.MAX_CURVATURE + self.TURNING_MARGIN):
+                elif (x < 0.0 and EAST_WALL_DISTANCE > 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
                     cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * EAST_HEADING_ERROR
                 else:
                     cmd_msg.curvature = self.MAX_CURVATURE
