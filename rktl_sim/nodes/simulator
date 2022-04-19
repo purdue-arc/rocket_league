@@ -173,6 +173,11 @@ class Simulator(object):
         if param is None:
             rospy.signal_shutdown('no urdf path set for "{}"'.format(param))
 
+        i = 0
+        while not os.path.isfile(param) and i < 5:
+            rospy.sleep(0.1) # Wait for xacro build
+            i += 1
+        
         if not os.path.isfile(param):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
@@ -180,14 +185,14 @@ class Simulator(object):
     def effort_cb(self, effort_msg, car_id):
         """Sets a car's effort (overwrites commands)"""
         self.cmd_lock.acquire()
-        self.sim.setCarCommand(car_id,
+        self.sim.set_car_command(car_id,
             (effort_msg.throttle, effort_msg.steering))
         self.cmd_lock.release()
 
     def cmd_cb(self, cmd_msg, car_id):
         """Sets a car's command (overwrites efforts)"""
         self.cmd_lock.acquire()
-        self.sim.setCarCommand(car_id,
+        self.sim.set_car_command(car_id,
             (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
 

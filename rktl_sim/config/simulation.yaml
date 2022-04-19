@@ -1,3 +1,7 @@
+#
+# Simulation settings
+#
+
 rate: 10
 spawn_height: 0.06
 
@@ -8,6 +12,64 @@ sensor_noise:
   ball:
     pos: [0.01, 0.01, 0.0]
     orient: [0.0, 0.0, 0.0]
+
+dynamics:
+  ball:
+    mass: 0.0
+    lateral_friction: 0.0
+    local_inertia_diagonal: [0.0, 0.0, 0.0]
+    local_inertial_pos: [0.0, 0.0, 0.0]
+    local_inertial_orient: [0.0, 0.0, 0.0, 0.0]
+    restitution: 0.0
+    rolling_friction: 0.0
+    spinning_friction: 0.0
+    contact_damping: 0.0
+    contact_stiffness: 0.0
+    body_type: 1
+    collision_margin: 0.0
+  car:
+    mass: 0.0
+    lateral_friction: 0.0
+    local_inertia_diagonal: [0.0, 0.0, 0.0]
+    local_inertial_pos: [0.0, 0.0, 0.0]
+    local_inertial_orient: [0.0, 0.0, 0.0, 0.0]
+    restitution: 0.0
+    rolling_friction: 0.0
+    spinning_friction: 0.0
+    contact_damping: 0.0
+    contact_stiffness: 0.0
+    body_type: 1
+    collision_margin: 0.0
+  wall:
+    mass: 0.0
+    lateral_friction: 0.0
+    local_inertia_diagonal: [0.0, 0.0, 0.0]
+    local_inertial_pos: [0.0, 0.0, 0.0]
+    local_inertial_orient: [0.0, 0.0, 0.0, 0.0]
+    restitution: 0.0
+    rolling_friction: 0.0
+    spinning_friction: 0.0
+    contact_damping: 0.0
+    contact_stiffness: 0.0
+    body_type: 1
+    collision_margin: 0.0
+  floor:
+    mass: 0.0
+    lateral_friction: 0.0
+    local_inertia_diagonal: [0.0, 0.0, 0.0]
+    local_inertial_pos: [0.0, 0.0, 0.0]
+    local_inertial_orient: [0.0, 0.0, 0.0, 0.0]
+    restitution: 0.0
+    rolling_friction: 0.0
+    spinning_friction: 0.0
+    contact_damping: 0.0
+    contact_stiffness: 0.0
+    body_type: 1
+    collision_margin: 0.0
+
+#
+# Object instances
+#
 
 cars:
   - name: "car0"

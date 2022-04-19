@@ -25,7 +25,7 @@ class Sim(object):
 
         self.urdf_paths = urdf_paths
         self.spawn_bounds = spawn_bounds
-    
+
         zero_orient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
         self._plane_id = None
         if "plane" in urdf_paths:
@@ -33,6 +33,11 @@ class Sim(object):
                 urdf_paths["plane"], [0, 0, 0], zero_orient, useFixedBase=1
             )
             p.changeDynamics(bodyUniqueId=self._plane_id, linkIndex=-1, restitution=1.0)
+
+        if "walls" in urdf_paths:
+            self._plane_id = p.loadURDF(
+                urdf_paths["walls"], [0, 0, 0], zero_orient, useFixedBase=1
+            )
 
         self._goal_a_id = None
         self._goal_b_id = None
@@ -44,63 +49,6 @@ class Sim(object):
             self._goal_b_id = p.loadURDF(
                 urdf_paths["goal"], field_setup["goalB"], zero_orient, useFixedBase=1
             )
-
-        self._walls = {}
-        if "sidewall" in urdf_paths:
-            lsidewall_id = p.loadURDF(
-                urdf_paths["sidewall"],
-                field_setup["lsidewall"],
-                zero_orient,
-                useFixedBase=1,
-            )
-            p.changeDynamics(bodyUniqueId=lsidewall_id, linkIndex=-1, restitution=1.0)
-            self._walls[lsidewall_id] = True
-
-            rsidewall_id = p.loadURDF(
-                urdf_paths["sidewall"],
-                field_setup["rsidewall"],
-                zero_orient,
-                useFixedBase=1,
-            )
-            p.changeDynamics(bodyUniqueId=rsidewall_id, linkIndex=-1, restitution=1.0)
-            self._walls[rsidewall_id] = True
-
-        if "backwall" in urdf_paths:
-            flbackwall_id = p.loadURDF(
-                urdf_paths["backwall"],
-                field_setup["flbackwall"],
-                zero_orient,
-                useFixedBase=1,
-            )
-            p.changeDynamics(bodyUniqueId=flbackwall_id, linkIndex=-1, restitution=1.0)
-            self._walls[flbackwall_id] = True
-
-            frbackwall_id = p.loadURDF(
-                urdf_paths["backwall"],
-                field_setup["frbackwall"],
-                zero_orient,
-                useFixedBase=1,
-            )
-            p.changeDynamics(bodyUniqueId=frbackwall_id, linkIndex=-1, restitution=1.0)
-            self._walls[frbackwall_id] = True
-
-            blbackwall_id = p.loadURDF(
-                urdf_paths["backwall"],
-                field_setup["blbackwall"],
-                zero_orient,
-                useFixedBase=1,
-            )
-            p.changeDynamics(bodyUniqueId=blbackwall_id, linkIndex=-1, restitution=1.0)
-            self._walls[blbackwall_id] = True
-
-            brbackwall_id = p.loadURDF(
-                urdf_paths["backwall"],
-                field_setup["brbackwall"],
-                zero_orient,
-                useFixedBase=1,
-            )
-            p.changeDynamics(bodyUniqueId=brbackwall_id, linkIndex=-1, restitution=1.0)
-            self._walls[brbackwall_id] = True
 
         self._cars = {}
         self._car_data = {}

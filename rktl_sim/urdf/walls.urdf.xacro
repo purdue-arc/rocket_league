@@ -1,0 +1,74 @@
+<?xml version="1.0"?> 
+<robot name="walls" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Xacro Args -->
+    <xacro:arg name="field_length" default="false" />
+    <xacro:arg name="field_width" default="false" />
+    <xacro:arg name="goal_size" default="false" />
+
+    <!-- Colors --> 
+    <material name="gray"> 
+        <color rgba="0.1 0.1 0.1 1"/>
+    </material>
+
+    <!-- Base frame of walls -->
+    <link name="base_link">
+        <inertial> 
+            <mass value="0"/>
+            <inertia ixx="0.2" ixy="0" ixz="0" iyy="0.2" iyz="0.0" izz="0.2"/>
+        </inertial> 
+    </link>
+
+    <!-- Sidewall macro -->
+    <xacro:macro name="sidewall" params="name y_dir field_length field_width wall_thickness">
+        <link name="${name}_sidewall_link">
+            <visual>
+                <geometry>
+                    <box size="${field_length} ${wall_thickness} ${wall_thickness}"/>
+                </geometry>
+                <material name="gray"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="${field_length} ${wall_thickness} ${wall_thickness}"/>
+                </geometry>
+            </collision>
+        </link>
+        <joint name="${name}_sidewall_joint" type="fixed">
+            <origin xyz="0 ${y_dir * (field_width + wall_thickness)/2} 0" rpy="0 0 0" />
+            <parent link="base_link" />
+            <child link="${name}_sidewall_link" />
+        </joint>
+    </xacro:macro>
+
+    <!-- Backwall macro -->
+    <xacro:macro name="backwall" params="name x_dir y_dir field_length field_width goal_size wall_thickness">
+        <link name="${name}_backwall_link">
+            <visual>
+                <geometry>
+                    <box size="${wall_thickness} ${(field_width-goal_size)/2.0} ${wall_thickness}"/>
+                </geometry>
+                <material name="gray"/>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="${wall_thickness} ${(field_width-goal_size)/2.0} ${wall_thickness}"/>
+                </geometry>
+            </collision>
+        </link>
+        <joint name="${name}_backwall_joint" type="fixed">
+            <origin xyz="${x_dir * (field_length + wall_thickness)/2} ${y_dir * (field_width - ((field_width-goal_size)/2))/2} 0" rpy="0 0 0" />
+            <parent link="base_link" />
+            <child link="${name}_backwall_link" />
+        </joint>
+    </xacro:macro>
+
+    <xacro:sidewall name="left" y_dir="1" field_length="$(arg field_length)" field_width="$(arg field_width)" wall_thickness="0.15" />
+    <xacro:sidewall name="right" y_dir="-1" field_length="$(arg field_length)" field_width="$(arg field_width)" wall_thickness="0.15" />
+
+    <xacro:backwall name="back_left" x_dir="-1" y_dir="-1" field_length="$(arg field_length)" field_width="$(arg field_width)" goal_size="$(arg goal_size)" wall_thickness="0.15" />
+    <xacro:backwall name="back_right" x_dir="-1" y_dir="1" field_length="$(arg field_length)" field_width="$(arg field_width)" goal_size="$(arg goal_size)" wall_thickness="0.15" />
+    <xacro:backwall name="front_left" x_dir="1" y_dir="-1" field_length="$(arg field_length)" field_width="$(arg field_width)" goal_size="$(arg goal_size)" wall_thickness="0.15" />
+    <xacro:backwall name="front_right" x_dir="1" y_dir="1" field_length="$(arg field_length)" field_width="$(arg field_width)" goal_size="$(arg goal_size)" wall_thickness="0.15" />
+
+</robot>
