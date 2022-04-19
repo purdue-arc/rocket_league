@@ -39,7 +39,7 @@ if __name__ == '__main__':      # this is required due to forking processes
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 100000000 # 100M
+    steps = 10000000 # 100M
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 
