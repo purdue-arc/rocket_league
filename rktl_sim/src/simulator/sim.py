@@ -26,28 +26,29 @@ class Sim(object):
         self.urdf_paths = urdf_paths
         self.spawn_bounds = spawn_bounds
 
+        zero_pos = [0.0, 0.0, 0.0]
         zero_orient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
         self._plane_id = None
         if "plane" in urdf_paths:
             self._plane_id = p.loadURDF(
-                urdf_paths["plane"], [0, 0, 0], zero_orient, useFixedBase=1
+                urdf_paths["plane"], zero_pos, zero_orient, useFixedBase=1
             )
             p.changeDynamics(bodyUniqueId=self._plane_id, linkIndex=-1, restitution=1.0)
 
         if "walls" in urdf_paths:
-            self._plane_id = p.loadURDF(
-                urdf_paths["walls"], [0, 0, 0], zero_orient, useFixedBase=1
+            self._wall_id = p.loadURDF(
+                urdf_paths["walls"], zero_pos, zero_orient, useFixedBase=1
             )
 
         self._goal_a_id = None
         self._goal_b_id = None
-        if "goal" in urdf_paths:
+        if "goal_a" in urdf_paths and "goal_b" in urdf_paths:
             self._goal_a_id = p.loadURDF(
-                urdf_paths["goal"], field_setup["goalA"], zero_orient, useFixedBase=1
+                urdf_paths["goal_a"], zero_pos, zero_orient, useFixedBase=1
             )
 
             self._goal_b_id = p.loadURDF(
-                urdf_paths["goal"], field_setup["goalB"], zero_orient, useFixedBase=1
+                urdf_paths["goal_a"], zero_pos, zero_orient, useFixedBase=1
             )
 
         self._cars = {}

@@ -10,7 +10,8 @@
         <param name="render"        value="$(arg pybullet_render)"/>
         <param name="urdf/ball"     value="$(find rktl_sim)/urdf/ball.urdf"/>
         <param name="urdf/car"      value="$(find rktl_sim)/urdf/car.urdf"/>
-        <param name="urdf/goal"     value="$(find rktl_sim)/urdf/goal.urdf"/>
+        <param name="urdf/goal_a"   value="$(find rktl_sim)/urdf/goal_a.urdf"/>
+        <param name="urdf/goal_b"   value="$(find rktl_sim)/urdf/goal_b.urdf"/>
         <param name="urdf/walls"    value="$(find rktl_sim)/urdf/walls.urdf"/>
         <param name="urdf/plane"    value="$(find rktl_sim)/urdf/plane.urdf"/>
     </node>
