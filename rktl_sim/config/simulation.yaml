@@ -3,19 +3,14 @@
 #
 
 rate: 10
-time_step: 0.001
 spawn_height: 0.06
-max_joint_force: 0.0
-max_joint_vel: 0.0
 
-sensor_noise:
-  car:
-    pos: [0.01, 0.01, 0.00]
-    orient: [0.0, 0.0, 0.09]
-  ball:
-    pos: [0.01, 0.01, 0.0]
-    orient: [0.0, 0.0, 0.0]
+# Directly export to setPhysicsEngineParameters()
+engine:
+  fixedTimeStep: 0.001
+  restitutionVelocityThreshold: 0.0001
 
+# Directly exported to changeDynamics()
 dynamics:
   ball:
     mass: 0.2
@@ -57,6 +52,14 @@ dynamics:
 #
 # Object instances
 #
+
+sensor_noise:
+  car:
+    pos: [0.01, 0.01, 0.00]
+    orient: [0.0, 0.0, 0.09]
+  ball:
+    pos: [0.01, 0.01, 0.0]
+    orient: [0.0, 0.0, 0.0]
 
 cars:
   - name: "car0"

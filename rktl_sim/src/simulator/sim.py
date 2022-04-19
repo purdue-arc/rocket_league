@@ -71,7 +71,8 @@ class Sim(object):
         self.scored = False
         self.winner = None
 
-        p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
+        if 'engine' in self.props:
+            p.setPhysicsEngineParameter(**self.props['engine'])
         p.setGravity(0, 0, -10)
 
     def configure_dynamics(self, body_id, body_type):
