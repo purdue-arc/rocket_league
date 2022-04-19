@@ -23,9 +23,9 @@ if __name__ == '__main__':      # this is required due to forking processes
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id,},
         n_envs=24, vec_env_cls=SubprocVecEnv)
 
-    GME_run_id = '72682dec-4168-43b5-8517-0f78d229be14'
-    GME_name = 'rl_model_50499192_steps'
-    weights = expanduser(f'~/catkin_ws/data/rocket_league/{GME_run_id}/{GME_name}')
+    reuse_run_id = '09411ff9-c3b6-431f-98ec-32ecd225ae6e'
+    reuse_name = 'final_weights'
+    weights = expanduser(f'~/catkin_ws/data/rocket_league/{reuse_run_id}/{reuse_name}')
     model = PPO.load(weights)
     model.set_env(env)
 
@@ -35,7 +35,7 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 500000 / 24 # save every 500K steps
+    freq = 2083 #500000 / 24 # save every 500K steps
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
