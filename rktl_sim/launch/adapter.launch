@@ -1,0 +1,20 @@
+<launch>
+    <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
+    <node pkg="rktl_sim" type="adapter" name="adapter" output="screen" required="true">
+        <param name="bag_file" value="$(find rktl_sim)/bag/2022-04-17-21-36-24.bag"/>
+        <param name="mode" value="realistic"/>
+        <param name="urdf/ball"     value="$(find rktl_sim)/urdf/ball.urdf"/>
+        <param name="urdf/car"      value="$(find rktl_sim)/urdf/car.urdf"/>
+        <param name="urdf/goal_a"   value="$(find rktl_sim)/urdf/goal_a.urdf"/>
+        <param name="urdf/goal_b"   value="$(find rktl_sim)/urdf/goal_b.urdf"/>
+        <param name="urdf/walls"    value="$(find rktl_sim)/urdf/walls.urdf"/>
+        <param name="urdf/plane"    value="$(find rktl_sim)/urdf/plane.urdf"/>
+    </node>
+    <node pkg="rktl_sim" type="visualizer" name="visualizer" output="screen">
+        <rosparam command="load" file="$(find rktl_sim)/config/visualization.yaml"/>
+        <param name="media/ball"    value="$(find rktl_sim)/media/ball.png"/>
+        <param name="media/car"     value="$(find rktl_sim)/media/car.png"/>
+        <param name="media/goal"    value="$(find rktl_sim)/media/goal.png"/>
+        <param name="media/field"   value="$(find rktl_sim)/media/field.jpg"/>
+    </node>
+</launch>

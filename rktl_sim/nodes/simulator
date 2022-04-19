@@ -60,9 +60,7 @@ class Simulator(object):
 
         # Setup simulator properties
         props = {
-            'time_step': rospy.get_param('~time_step', 0.1),
-            'max_joint_force': rospy.get_param('~max_joint_force', 100.0),
-            'max_joint_velocity': rospy.get_param('~max_joint_velocity', 100.0),
+            'engine': rospy.get_param('~engine', None),
             'dynamics': rospy.get_param('~dynamics', None),
         }
 
@@ -109,7 +107,7 @@ class Simulator(object):
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
-        car_configs = rospy.get_param('~cars', None)
+        car_configs = rospy.get_param('~cars', [])
         for car_config in car_configs:
             init_pose = None
             if 'init_pose' in car_config:
