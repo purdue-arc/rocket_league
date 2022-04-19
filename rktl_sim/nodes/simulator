@@ -47,22 +47,7 @@ class Simulator(object):
         fw = rospy.get_param('/field/width')
         fl = rospy.get_param('/field/length')
         wt = rospy.get_param('/field/wall_thickness')
-        gw = rospy.get_param('/field/goal/width')
         spawn_height = rospy.get_param('~spawn_height', 0.06)
-
-        # Setting up field
-        field_setup = {}
-        field_setup["goalA"] = [(fl/2.) + (wt/2.), 0, spawn_height]
-        field_setup["goalB"] = [(-fl/2.) - (wt/2.), 0, spawn_height]
-        field_setup["rsidewall"] = [0, (fw/2) + (wt/2.), spawn_height]
-        field_setup["lsidewall"] = [0, (-fw/2) - (wt/2.), spawn_height]
-
-        bww = (fw-gw)/2
-        offset = (gw+bww)/2
-        field_setup["flbackwall"] = [(fl/2) + (wt/2.), -offset, spawn_height]
-        field_setup["frbackwall"] = [(fl/2) + (wt/2.), offset, spawn_height]
-        field_setup["blbackwall"] = [(-fl/2) - (wt/2.), -offset, spawn_height]
-        field_setup["brbackwall"] = [(-fl/2) - (wt/2.), offset, spawn_height]
 
         # Setup bounds for spawning car and ball
         spawn_bounds = [[-(fl/2) + (2 * wt), (fl/2) - (2 * wt)],
@@ -73,8 +58,16 @@ class Simulator(object):
         for path in urdf_paths.values():
             self.check_urdf(path)
 
+        # Setup simulator properties
+        props = {
+            'time_step': rospy.get_param('~time_step', 0.1),
+            'max_joint_force': rospy.get_param('~max_joint_force', 100.0),
+            'max_joint_velocity': rospy.get_param('~max_joint_velocity', 100.0),
+            'dynamics': rospy.get_param('~dynamics', None),
+        }
+
         # Creating physics simulator
-        self.sim = simulator.Sim(urdf_paths, field_setup, spawn_bounds, render_enabled)
+        self.sim = simulator.Sim(props, urdf_paths, spawn_bounds, render_enabled)
 
         # Setting sensor noise
         sensor_noise = rospy.get_param('~sensor_noise', None)
@@ -127,7 +120,7 @@ class Simulator(object):
             car_name = car_config['name']
 
             self.car_ids[car_name] = self.sim.create_car(
-                'car', init_pose=init_pose, noise=car_noise, props=car_properties)
+                'car', init_pose=init_pose, noise=car_noise, car_props=car_properties)
 
             car_id = self.car_ids[car_name]
             self.car_effort_subs[car_name] = rospy.Subscriber(
