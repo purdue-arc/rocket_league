@@ -12,17 +12,17 @@
         <link name="goal_link">
             <visual>
                 <geometry>
-                    <box size="${goal_size} 0.05 0.25"/>
+                    <box size="0.05 ${goal_size} 0.25"/>
                 </geometry>
             </visual>
             <collision>
                 <geometry>
-                    <box size="${goal_size} 0.05 0.25"/>
+                    <box size="0.05 ${goal_size} 0.25"/>
                 </geometry>
             </collision>
         </link>
         <joint name="goal_joint" type="fixed">
-            <origin xyz="0 ${x_dir*((field_length/2)+0.225)} 0" rpy="0 0 0" />
+            <origin xyz="${x_dir*((field_length/2)+0.175)} 0 0" rpy="0 0 0" />
             <parent link="base_link" />
             <child link="goal_link" />
         </joint>

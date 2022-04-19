@@ -17,12 +17,17 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled):
+    class NoURDFError(Exception):
+        """Exception for when a URDF isn't provided"""
+        pass
+
+    def __init__(self, props, urdf_paths, spawn_bounds, render_enabled):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
             self._client = p.connect(p.DIRECT)
 
+        self.props = props
         self.urdf_paths = urdf_paths
         self.spawn_bounds = spawn_bounds
 
@@ -33,12 +38,17 @@ class Sim(object):
             self._plane_id = p.loadURDF(
                 urdf_paths["plane"], zero_pos, zero_orient, useFixedBase=1
             )
-            p.changeDynamics(bodyUniqueId=self._plane_id, linkIndex=-1, restitution=1.0)
+            self.configure_dynamics(self._plane_id, "floor")
+        else:
+            raise self.NoURDFError()
 
         if "walls" in urdf_paths:
-            self._wall_id = p.loadURDF(
+            self._walls_id = p.loadURDF(
                 urdf_paths["walls"], zero_pos, zero_orient, useFixedBase=1
             )
+            self.configure_dynamics(self._walls_id, "walls")
+        else:
+            raise self.NoURDFError()
 
         self._goal_a_id = None
         self._goal_b_id = None
@@ -48,8 +58,10 @@ class Sim(object):
             )
 
             self._goal_b_id = p.loadURDF(
-                urdf_paths["goal_a"], zero_pos, zero_orient, useFixedBase=1
+                urdf_paths["goal_b"], zero_pos, zero_orient, useFixedBase=1
             )
+        else:
+            return self.NoURDFError()
 
         self._cars = {}
         self._car_data = {}
@@ -61,6 +73,15 @@ class Sim(object):
 
         p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
         p.setGravity(0, 0, -10)
+
+    def configure_dynamics(self, body_id, body_type):
+        if 'dynamics' not in self.props or \
+            body_type not in self.props['dynamics']:
+            return
+
+        num_links = p.getNumJoints(body_id)
+        for i in range(num_links):
+            p.changeDynamics(body_id, i, **self.props['dynamics'][body_type])
 
     def create_ball(self, urdf_name, init_pose=None, init_speed=None, noise=None):
         if urdf_name in self.urdf_paths:
@@ -77,17 +98,7 @@ class Sim(object):
                 self.init_ball_pos = None
             self._ballID = p.loadURDF(
                 self.urdf_paths[urdf_name], ball_pos, zero_orient)
-            p.changeDynamics(
-                bodyUniqueId=self._ballID,
-                linkIndex=-1,
-                mass=0.200,
-                lateralFriction=0.4,
-                spinningFriction=0.001,
-                rollingFriction=0.0001,
-                restitution=0.7,
-                linearDamping=0,
-                angularDamping=0,
-            )
+            self.configure_dynamics(self._ballID, "ball")
 
             # initize ball with some speed
             self._speed_bound = math.sqrt(2.0) * init_speed
@@ -102,7 +113,7 @@ class Sim(object):
         else:
             return None
 
-    def create_car(self, urdf_name, init_pose=None, noise=None, props=None):
+    def create_car(self, urdf_name, init_pose=None, noise=None, car_props=None):
         if urdf_name in self.urdf_paths:
             zero_pos = [0.0, 0.0, 0.0]
             zero_orient = [0.0, 0.0, 0.0]
@@ -135,8 +146,10 @@ class Sim(object):
                 car_id,
                 car_pos,
                 car_orient,
-                props
+                car_props
             )
+            self.configure_dynamics(car_id, "car")
+
             self._car_data[car_id] = {
                 "init_pos": init_car_pos,
                 "init_orient": init_car_orient,
