@@ -14,7 +14,6 @@ ball:
 
 # car dimensions and physical constants
 cars:
-  width: 0.0762 # (3 in)
   length: 0.12  # wheel center to center
   steering:
     max_throw: 0.1826
