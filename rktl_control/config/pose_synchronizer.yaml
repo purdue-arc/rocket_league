@@ -2,7 +2,7 @@
 rate: 10.0
 
 # delay in seconds. Lower is better, but AprilTags needs to keep up
-delay: 0.10
+delay: 0.15
 
 # buffer size for each topic.
 # 12 potential detections per update (4 x 30 hz cameras)
