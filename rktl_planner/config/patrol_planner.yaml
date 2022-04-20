@@ -4,3 +4,9 @@ wall_avoidance:
   distance_margin: 0.375
 
 curvature_gain: 1.5
+
+# X coordinate to switch to defense
+defensive_line: -0.5
+
+# Y coordinate to switch to reverse
+reverse_line: 0.25
