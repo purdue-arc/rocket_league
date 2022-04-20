@@ -1,1 +1,6 @@
-# no overrides
+# tuned params for no prediction at 0.15 delay
+wall_avoidance:
+  reverse_time: 0.125
+  distance_margin: 0.375
+
+curvature_gain: 1.5
