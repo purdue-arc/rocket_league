@@ -2,7 +2,7 @@
 // -----------------
 
 var ros = new ROSLIB.Ros({
-    url: 'ws://r2d2:9090'
+    url: 'ws://r2d2.local:9090'
 });
 
 ros.on('connection', function () {
