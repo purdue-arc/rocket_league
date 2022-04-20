@@ -6,5 +6,5 @@ max_sat: 180
 min_vib: 40
 max_vib: 100
 min_size: 250
-edode: 2
+erode: 2
 dilate: 8

@@ -66,9 +66,9 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             /* find largest contour */
             std::vector<cv::Point> largestContour = contours.at(getMaxAreaContourId(contours));
             cv::Moments moment = cv::moments(largestContour);
-
+            double largestContourArea = cv::contourArea(largestContour);
             /* do not include contours below a certain size */
-            if (cv::contourArea(largestContour) < minSize) return;
+            if (largestContourArea < minSize) return;
 
             /* calculates the center of the contour*/
             double centerX = moment.m10 / moment.m00;
@@ -83,14 +83,14 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
             /* create the vector to publish */
             vec.vector.x = cam.x;
             vec.vector.y = cam.y;
-            vec.vector.z = cam.z;
+            vec.vector.z = largestContourArea;
 
             /* publish the location vector */
             vec.header = msg->header;
             vecPub.publish(vec);
 
             /* debug the size of the countour */
-            ROS_INFO("Size of the largest ball: %.0f\n", cv::contourArea(largestContour));
+            ROS_INFO("Size of the largest ball: %.0f\n", largestContourArea);
             
             /* publishes the threshold image */
             if (publishThresh) {

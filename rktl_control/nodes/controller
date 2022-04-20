@@ -86,6 +86,7 @@ class Controller(object):
         rospy.init_node('controller')
 
         # Constants
+        self.MAX_SPEED = rospy.get_param('/cars/throttle/max_speed')
         self.STEERING_THROW = rospy.get_param('/cars/steering/max_throw')
         self.BODY_LENGTH = rospy.get_param('/cars/length')
 
@@ -93,6 +94,8 @@ class Controller(object):
         self.MAX_THROTTLE_EFFORT = rospy.get_param('~limits/throttle/max',  1.0)
         self.MIN_STEERING_EFFORT = rospy.get_param('~limits/steering/min', -1.0)
         self.MAX_STEERING_EFFORT = rospy.get_param('~limits/steering/max',  1.0)
+
+        self.PUBLISH_EARLY = rospy.get_param('~open_loop/publish_early', True)
 
         # Make closed loop velocity controller
         if rospy.get_param('~controller_type') == 'lead_lag':
@@ -110,6 +113,8 @@ class Controller(object):
                 rospy.get_param('~pid/anti_windup'),
                 rospy.get_param('~pid/deadband'),
                 1.0 / rospy.get_param('~rate', 10.0))
+        elif rospy.get_param('~controller_type') == 'none':
+            self.controller = None
         else:
             raise NotImplementedError(f"unrecognized controller type: {rospy.get_param('controller_type')}")
 
@@ -134,18 +139,30 @@ class Controller(object):
         self.vr_ref = cmd_msg.velocity * cos_beta
         self.psi_ref = atan(self.BODY_LENGTH * cmd_msg.curvature / cos_beta)
 
+        # get a jump on latency if open loop
+        if self.controller is None and self.PUBLISH_EARLY:
+            # wipe timestamp so it doesn't interfere with prediction
+            cmd_msg.header.stamp = rospy.Time(0)
+            self.odom_cb(cmd_msg)
+
     def odom_cb(self, odom_msg):
         """Callback for odom messages from car."""
         if self.vr_ref is None or self.psi_ref is None:
             return
 
-        # calculate throttle effort (closed loop)
-        error = self.vr_ref - odom_msg.twist.twist.linear.x
-        throttle_effort = self.controller.step(error)
-        throttle_effort = max(min(throttle_effort, self.MAX_THROTTLE_EFFORT), self.MIN_THROTTLE_EFFORT)
+        if self.controller is not None:
+            # calculate throttle effort (closed loop)
+            error = self.vr_ref - odom_msg.twist.twist.linear.x
+            throttle_effort = self.controller.step(error)
+        else:
+            # calculate throttle effort (open loop)
+            throttle_effort = self.vr_ref / self.MAX_SPEED
 
         # calculate steering effort (open loop)
         steering_effort = self.psi_ref / self.STEERING_THROW
+
+        # enforce actuator saturation limits
+        throttle_effort = max(min(throttle_effort, self.MAX_THROTTLE_EFFORT), self.MIN_THROTTLE_EFFORT)
         steering_effort = max(min(steering_effort, self.MAX_STEERING_EFFORT), self.MIN_STEERING_EFFORT)
 
         # publish actuator efforts

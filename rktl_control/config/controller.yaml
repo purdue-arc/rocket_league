@@ -1,18 +1,21 @@
-# controller type: 'lead_lag' or 'pid'
-controller_type: 'lead_lag'
+# controller type: 'lead_lag', 'pid', or 'none'
+controller_type: 'none'
 # parameters for all controllers
 limits:
   throttle:
     min: -1.5
     max:  1.5
-# parameters for lead_lag (stable with 0.3 sec delay)
+# parameters for none (open loop)
+open_loop:
+  publish_early: true
+# parameters for lead_lag (stable with 0.2 sec delay)
 # lead:
-#   gain:   0.66986
-#   alpha: -0.5097
-#   beta:  -0.9402
+#   gain:   2.2696
+#   alpha: -0.6146
+#   beta:  -0.7130
 # lag:
-#   alpha: -0.9802
-#   beta:  -0.9956
+#   alpha: -0.9608
+#   beta:  -0.9951
 # alternate lead_lag (with predictive control)
 lead:
   gain:   3.9229
