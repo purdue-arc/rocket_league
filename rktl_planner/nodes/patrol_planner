@@ -142,7 +142,7 @@ class PatrolPlanner(object):
 
             if self.attempt_start_time is not None or abs(sad(BALL_GOAL_HEADING, CAR_BALL_HEADING)) < self.SCORING_MARGIN:
                 # check to see if we should score in forward or reverse
-                if y < 0.0:
+                if by < 0.0:
                     # score in forward
                     BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING)
                     cmd_msg.velocity = self.SPEED
