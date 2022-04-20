@@ -21,15 +21,15 @@ if __name__ == '__main__':      # this is required due to forking processes
 
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id,},
-        n_envs=25, vec_env_cls=SubprocVecEnv)
+        n_envs=24, vec_env_cls=SubprocVecEnv)
 
-    # reuse_run_id = 'e5983de5-4321-49ba-b320-c745df036e8c'
-    # reuse_name = 'final_weights'
-    # weights = expanduser(f'~/catkin_ws/data/rocket_league/{reuse_run_id}/{reuse_name}')
-    # model = PPO.load(weights)
-    # model.set_env(env)
+    reuse_run_id = 'e5983de5-4321-49ba-b320-c745df036e8c'
+    reuse_name = 'final_weights'
+    weights = expanduser(f'~/catkin_ws/data/rocket_league/{reuse_run_id}/{reuse_name}')
+    model = PPO.load(weights)
+    model.set_env(env)
 
-    model = PPO("MlpPolicy", env)
+    # model = PPO("MlpPolicy", env)
 
     # log training progress as CSV
     log_dir = expanduser(f'~/catkin_ws/data/rocket_league/{run_id}')
@@ -37,7 +37,7 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 4000 # save every 100K steps
+    freq = 6250 # save every 150K steps
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
