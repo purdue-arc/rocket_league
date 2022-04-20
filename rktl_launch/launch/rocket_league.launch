@@ -9,6 +9,9 @@
     <!-- Visualizer -->
     <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch"/>
 
+    <!-- Game Manager -->
+    <include file="$(find rktl_game)/launch/game.launch"/>
+
     <!-- Ball -->
     <include file="$(find rktl_control)/launch/ball.launch"/>
 
