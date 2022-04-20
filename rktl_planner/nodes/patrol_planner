@@ -1,0 +1,268 @@
+#!/usr/bin/env python3
+"""Contains the PatrolPlanner node, a very simple planner.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+import rospy
+from tf.transformations import euler_from_quaternion
+from nav_msgs.msg import Odometry
+from rktl_msgs.msg import ControlCommand
+
+import math, time
+from angles import shortest_angular_distance as sad
+
+class PatrolPlanner(object):
+    """A very simple strategy for rktl. Patrol around the field in a circle and
+    make a beeline at the ball if it seems like it would result in a goal."""
+
+    def __init__(self):
+        rospy.init_node('path_follower')
+
+        # physical constants (global)
+        self.FIELD_WIDTH = rospy.get_param('/field/width')
+        self.FIELD_HEIGHT = rospy.get_param('/field/length')
+        self.MAX_CURVATURE = math.tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('/cars/length')
+
+        # constants
+        # general stability parameters
+        self.SPEED = rospy.get_param('~speed', 1.0)
+        self.CURVATURE_GAIN = rospy.get_param('~curvature_gain', 2.0)
+        self.PATROL_DIST = rospy.get_param('~patrol_wall_dist', 0.5)
+
+        # wall avoidance parameters
+        self.WALL_REVERSE_TIME = rospy.get_param('~wall_avoidance/reverse_time', 0.25)
+        self.WALL_DIST_MARGIN = rospy.get_param('~wall_avoidance/distance_margin', 0.5)
+        self.WALL_HEADING_MARGIN = rospy.get_param('~wall_avoidance/heading_margin', math.pi/4)
+
+        # offense & defense parameters
+        self.ATTEMPT_TIMEOUT = rospy.get_param('~attempt_timeout', 5.0)
+        self.DEFENSIVE_LINE = rospy.get_param('~defensive_line', 0.0)
+        self.REVERSE_LINE = rospy.get_param('~reverse_line', 0.0)
+
+        # offensive related parameters
+        self.SCORING_MARGIN = rospy.get_param('~scoring/heading_margin', math.pi/8.0)
+        self.LOOKAHEAD_DIST = rospy.get_param('~scoring/car_lookahead_dist', 1.0)
+        self.LOOKAHEAD_TIME = rospy.get_param('~scoring/ball_lookahead_time', 0.0)
+
+        # defense related parameters
+        self.DEFENSE_TIME_GAIN = rospy.get_param('~defense/reverse_time_gain', 0.5)
+
+        # variables
+        self.ball_position = None
+        self.ball_velocity = None
+        self.attempt_start_time = None
+
+        # Publishers
+        self.cmd_pub = rospy.Publisher('command', ControlCommand, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber('odom', Odometry, self.car_odom_cb)
+        rospy.Subscriber('/ball/odom', Odometry, self.ball_odom_cb)
+
+        rospy.spin()
+
+    def ball_odom_cb(self, odom_msg):
+        """Callback for ball odometry."""
+        self.ball_position = (
+            odom_msg.pose.pose.position.x,
+            odom_msg.pose.pose.position.y
+        )
+        self.ball_velocity = (
+            odom_msg.twist.twist.linear.x,
+            odom_msg.twist.twist.linear.y,
+        )
+
+    def car_odom_cb(self, odom_msg):
+        """Callback for car odometry."""
+
+        # extract car's position & heading
+        x = odom_msg.pose.pose.position.x
+        y = odom_msg.pose.pose.position.y
+        __, __, yaw = euler_from_quaternion([
+            odom_msg.pose.pose.orientation.x,
+            odom_msg.pose.pose.orientation.y,
+            odom_msg.pose.pose.orientation.z,
+            odom_msg.pose.pose.orientation.w
+        ])
+
+        # calculate distances / errors
+        NORTH_WALL_DISTANCE = abs(x - self.FIELD_HEIGHT/2.0)
+        SOUTH_WALL_DISTANCE = abs(x + self.FIELD_HEIGHT/2.0)
+        EAST_WALL_DISTANCE = abs(y + self.FIELD_WIDTH/2.0)
+        WEST_WALL_DISTANCE = abs(y - self.FIELD_WIDTH/2.0)
+
+        NORTH_HEADING_ERROR = sad(yaw, 0.0)
+        SOUTH_HEADING_ERROR = sad(yaw, math.pi)
+        EAST_HEADING_ERROR = sad(yaw, -math.pi/2.0)
+        WEST_HEADING_ERROR = sad(yaw, +math.pi/2.0)
+
+        # Prep command message for publish
+        cmd_msg = ControlCommand()
+
+        # check to see if an existing attempt has timed out
+        if self.attempt_start_time is not None and (rospy.Time.now() - self.attempt_start_time).to_sec() > self.ATTEMPT_TIMEOUT:
+            self.attempt_start_time = None
+            rospy.loginfo("attempt timeout")
+
+        # check that ball position is known
+        if self.ball_position is None or self.ball_velocity is None:
+            cmd_msg.velocity = 0.0
+            cmd_msg.curvature = 0.0
+            self.cmd_pub.publish(cmd_msg)
+            rospy.logwarn("ball position unknown")
+            return
+
+        # extract ball position and velocity, adding look-ahead time
+        bx, by = self.ball_position
+        vbx, vby = self.ball_velocity
+        bx += vbx * self.LOOKAHEAD_TIME
+        by += vby * self.LOOKAHEAD_TIME
+
+        # check if we should be offensive or defensive
+        if bx > self.DEFENSIVE_LINE:    # offensive
+            # known goal position
+            gx = self.FIELD_HEIGHT/2.0 + 0.1
+            gy = 0.0
+
+            # add a look-ahead distance to the car
+            # (dependent on fwd or rev direction)
+            if by < self.REVERSE_LINE:
+                cx = x + math.cos(yaw) * self.LOOKAHEAD_DIST
+                cy = y + math.sin(yaw) * self.LOOKAHEAD_DIST
+            else:
+                cx = x - math.cos(yaw) * self.LOOKAHEAD_DIST
+                cy = y - math.sin(yaw) * self.LOOKAHEAD_DIST
+
+            # check if we are well aligned to score
+            # check if the car, ball, and goal are on about the same line
+            # done by comparing headings from ball to goal, and car to ball
+            BALL_GOAL_HEADING = math.atan2(gy - by, gx - bx)
+            CAR_BALL_HEADING =  math.atan2(by - cy, bx - cx)
+
+            if self.attempt_start_time is not None or abs(sad(BALL_GOAL_HEADING, CAR_BALL_HEADING)) < self.SCORING_MARGIN:
+                # check to see if we should score in forward or reverse
+                if by < self.REVERSE_LINE:
+                    # score in forward
+                    BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING)
+                    cmd_msg.velocity = self.SPEED
+                    cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+                else:
+                    # score in reverse
+                    BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING + math.pi)
+                    cmd_msg.velocity = -self.SPEED
+                    cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+
+                self.cmd_pub.publish(cmd_msg)
+
+                # mark attempt start
+                if self.attempt_start_time is None:
+                    self.attempt_start_time = rospy.Time.now()
+                    rospy.loginfo("beginning scoring attempt")
+                return
+
+        else:   # defensive
+            if self.attempt_start_time is not None:
+                CAR_BALL_HEADING = math.atan2(by - y, bx - x)
+                # determine if ball should be hit in fwd or rev
+                if by < self.REVERSE_LINE:
+                    BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING)
+                    cmd_msg.velocity = self.SPEED
+                    cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+                else:
+                    BALL_HEADING_ERROR = sad(yaw, CAR_BALL_HEADING + math.pi)
+                    cmd_msg.velocity = -self.SPEED
+                    cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+
+                self.cmd_pub.publish(cmd_msg)
+                return
+
+            # if not already trying to hit the ball, wait until at bottom part of pattern
+            elif abs(EAST_HEADING_ERROR) < self.SCORING_MARGIN and SOUTH_WALL_DISTANCE < 1.5 * self.PATROL_DIST:
+                # run fwd or rev so easier to hit ball
+                if by < self.REVERSE_LINE:
+                    cmd_msg.velocity = -self.SPEED
+                else:
+                    cmd_msg.velocity = self.SPEED
+
+                cmd_msg.curvature = 0.0
+                self.cmd_pub.publish(cmd_msg)
+
+                # mark attempt start
+                self.attempt_start_time = rospy.Time.now()
+                rospy.loginfo("beginning defensive attempt")
+
+                # reverse for longer, if the ball is nearer to the middle
+                time.sleep((self.FIELD_WIDTH/2.0 - abs(by)) * self.DEFENSE_TIME_GAIN)
+                return
+
+        # If not trying to score, prioritize not running in to walls
+        # If running into a wall is detected, reverse for a set time limit
+
+        # check if jammed in a corner, where a turn is required to get back on the proper path
+        if (NORTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and WEST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and
+            abs(NORTH_HEADING_ERROR) < self.WALL_HEADING_MARGIN or
+            SOUTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and EAST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and
+            abs(SOUTH_HEADING_ERROR) < self.WALL_HEADING_MARGIN or
+            EAST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and NORTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and
+            abs(EAST_HEADING_ERROR)  < self.WALL_HEADING_MARGIN or
+            WEST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and
+            abs(WEST_HEADING_ERROR)  < self.WALL_HEADING_MARGIN):
+                cmd_msg.velocity = -self.SPEED
+                cmd_msg.curvature = -self.MAX_CURVATURE
+                self.cmd_pub.publish(cmd_msg)
+                time.sleep(self.WALL_REVERSE_TIME)  # stay in reverse for a bit
+                return
+
+        # check if jammed in a corner, anywhere in a 90 degree arc facing the corner
+        if (NORTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and WEST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and
+            NORTH_HEADING_ERROR < 0.0 and WEST_HEADING_ERROR > 0.0 or
+            SOUTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and EAST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and
+            SOUTH_HEADING_ERROR < 0.0 and EAST_HEADING_ERROR > 0.0 or
+            EAST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and NORTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and
+            EAST_HEADING_ERROR < 0.0 and NORTH_HEADING_ERROR > 0.0 or
+            WEST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and SOUTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and
+            WEST_HEADING_ERROR < 0.0 and SOUTH_HEADING_ERROR > 0.0):
+                cmd_msg.velocity = -self.SPEED
+                cmd_msg.curvature = 0.0
+                self.cmd_pub.publish(cmd_msg)
+                time.sleep(self.WALL_REVERSE_TIME)  # stay in reverse for a bit
+                return
+
+        # check if near a wall and facing it
+        if (NORTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and abs(NORTH_HEADING_ERROR) < self.WALL_HEADING_MARGIN or
+            SOUTH_WALL_DISTANCE < self.WALL_DIST_MARGIN and abs(SOUTH_HEADING_ERROR) < self.WALL_HEADING_MARGIN or
+            EAST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and abs(EAST_HEADING_ERROR)  < self.WALL_HEADING_MARGIN or
+            WEST_WALL_DISTANCE  < self.WALL_DIST_MARGIN and abs(WEST_HEADING_ERROR)  < self.WALL_HEADING_MARGIN):
+                cmd_msg.velocity = -self.SPEED
+                cmd_msg.curvature = 0.0
+                self.cmd_pub.publish(cmd_msg)
+                time.sleep(self.WALL_REVERSE_TIME)  # stay in reverse for a bit
+                return
+
+        # Follow simple rules to make it follow a "patrol"
+        # Check to see if it is at the top or bottom, where it should be curving
+        if (NORTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.PATROL_DIST or
+            SOUTH_WALL_DISTANCE < 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
+                # check to see if should wait to turn
+                if (x > 0.0 and WEST_WALL_DISTANCE > 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
+                    cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * WEST_HEADING_ERROR
+                elif (x < 0.0 and EAST_WALL_DISTANCE > 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
+                    cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * EAST_HEADING_ERROR
+                else:
+                    cmd_msg.curvature = self.MAX_CURVATURE
+        else:   # send it straight north or south otherwise
+            if (y > 0.0):
+                # west wall (southern heading desired)
+                cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * SOUTH_HEADING_ERROR
+            else:
+                # east wall (northern heading desired)
+                cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * NORTH_HEADING_ERROR
+
+        cmd_msg.velocity = self.SPEED
+        self.cmd_pub.publish(cmd_msg)
+
+if __name__ == "__main__":
+    PatrolPlanner()

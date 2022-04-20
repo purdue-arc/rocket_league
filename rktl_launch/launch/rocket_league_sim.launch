@@ -4,7 +4,7 @@
     <arg name="sim_mode"            default="realistic"/> <!-- Either realistic or ideal (check docs)-->
     <arg name="perception_delay"    default="0.15"/>
 
-    <arg name="agent_type"          default="planner"/> <!-- Either planner or autonomy -->
+    <arg name="agent_type"          default="patrol"/> <!-- Either planner, autonomy, or patrol-->
     <arg name="autonomy_weights"    default="model"/>
 
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
@@ -56,5 +56,8 @@
     </include>
     <include if="$(eval agent_type == 'autonomy')" file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_agent.launch">
         <arg name="weights_name" value="$(arg autonomy_weights)"/>
+    </include>
+    <include if="$(eval agent_type == 'patrol')" file="$(find rktl_planner)/launch/patrol_agent.launch">
+        <arg name="car_name" value="car0"/>
     </include>
 </launch>
