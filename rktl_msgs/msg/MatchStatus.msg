@@ -8,3 +8,8 @@ int8 VICTORY_TEAM_B=4   # match ends with team B winning
 
 # status of the match using above constants
 int8 status
+
+# time left to play
+int16 clock
+
+Score score

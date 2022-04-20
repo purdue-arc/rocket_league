@@ -13,7 +13,9 @@
   <author email="vvvu@purdue.edu">Vincent Vu</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <depend>rosbridge_server</depend>
   <exec_depend>rktl_perception</exec_depend>
+  <exec_depend>rktl_game</exec_depend>
   <exec_depend>rktl_planner</exec_depend>
   <exec_depend>rktl_sim</exec_depend>
   <exec_depend>rktl_control</exec_depend>
