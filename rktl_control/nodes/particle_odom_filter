@@ -63,11 +63,14 @@ class ParticleOdomFilter(object):
         self.GEN_VEL_STD_DEV = rospy.get_param('~generator_noise/velocity',       0.05)
         self.GEN_PSI_STD_DEV = rospy.get_param('~generator_noise/steering_angle', np.deg2rad(1))
 
-        # standard deviation to add noise to effort when control is known
-        self.THR_EFFORT_STD_DEV = rospy.get_param('~effort/throttle/noise', 0.05)
-        self.STR_EFFORT_STD_DEV = rospy.get_param('~effort/steering/noise', 0.05)
+        # should the filter use historic effort data to get a more accurate idea of where the car is?
+        use_efforts = rospy.get_param('~efforts/enable', False)
 
-        # max and min for uniform effort distribution when control is not known
+        # standard deviation to add noise to effort when effort is known and enabled
+        self.THR_EFFORT_STD_DEV = rospy.get_param('~efforts/throttle/noise', 0.05)
+        self.STR_EFFORT_STD_DEV = rospy.get_param('~efforts/steering/noise', 0.05)
+
+        # max and min for uniform effort distribution when effort is not known or disabled
         self.MAX_THROTTLE = rospy.get_param('~efforts/throttle/max',  1.0)
         self.MIN_THROTTLE = rospy.get_param('~efforts/throttle/min', -1.0)
         self.MAX_STEERING = rospy.get_param('~efforts/steering/max',  1.0)
@@ -92,7 +95,8 @@ class ParticleOdomFilter(object):
         # pubs / subs / srvs
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
         rospy.Subscriber('pose_sync', PoseWithCovarianceStamped, self.pose_cb)
-        rospy.Subscriber('effort', ControlEffort, self.effort_cb)
+        if use_efforts:
+            rospy.Subscriber('effort', ControlEffort, self.effort_cb)
         if self.PUB_PARTICLES:
             self.cloud_pub = rospy.Publisher('odom_particles', PoseArray, queue_size=1)
 

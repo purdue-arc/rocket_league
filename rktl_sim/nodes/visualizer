@@ -35,8 +35,6 @@ class VisualizerROS(object):
         goal_width = rospy.get_param('/field/goal/width')
         wall_thickness = rospy.get_param('/field/wall_thickness')
         ball_radius = rospy.get_param("/ball/radius")
-        car_width = rospy.get_param("/cars/width")
-        car_length = rospy.get_param("/cars/length")
 
         # Creating pygame render
         
@@ -48,6 +46,8 @@ class VisualizerROS(object):
         self.frame_id = rospy.get_param("~frame_id", "map")
         self.timeout = rospy.get_param("~timeout", 10)
         rate = rospy.Rate(rospy.get_param("~rate", 20))
+        car_width = rospy.get_param("~cars/body_width")
+        car_length = rospy.get_param("~cars/body_length")
 
         # Setting up field
         id = 0

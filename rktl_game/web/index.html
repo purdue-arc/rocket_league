@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+
+    <!-- based off of http://wiki.ros.org/roslibjs/Tutorials/BasicRosFunctionality -->
+    <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+    <script type="text/javascript" src="index.js"> </script>
+
+    <title>
+        Rocket League Game
+    </title>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+</head>
+
+
+<body>
+
+    <div class="scoreboard">
+        <div class="box">
+            <div class="blue-score">
+                <h2 id="blue-score"> 0 </h2>
+            </div>
+            <div class="time">
+                <h2 id="timer"> 0:00 </h2>
+            </div>
+            <div class="orange-score">
+                <h2 id="orange-score"> 0 </h2>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="control">
+        <div class="box4">
+            <input id="time-set" type="text" placeholder="Set gametime"/>
+            <button id="time-set-button" onclick="set_game_time()">Set</button>
+        </div>
+        <div class="box3">
+            <button class="button-13 start-button" onclick="unpause_srv.callService()">Start</button>
+            <button class="button-13 pause-button" onclick="pause_srv.callService()">Pause</button>
+            <button class="button-13 reset-button" onclick="reset_srv.callService()">Reset</button>
+        </div>
+    </div>
+
+
+    <div class="field">
+
+    </div>
+
+
+    <div class="team-selection">
+
+        <div class="box2">
+            <div class="blue-team">
+                <h1 class="team"> Blue </h1>
+                <div class="dropdown">
+                    <select>
+                        <option value="" disabled selected></option>
+                        <option>Controller 1</option>
+                        <option>Controller 2</option>
+                        <option>Computer</option>
+                    </select>
+                    <select>
+                        <option value="" disabled selected></option>
+                        <option>Controller 1</option>
+                        <option>Controller 2</option>
+                        <option>Computer</option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div class="orange-team">
+                <h1 class="team"> Orange </h1>
+                <div class="dropdown">
+                    <select>
+                        <option value="" disabled selected></option>
+                        <option>Controller 1</option>
+                        <option>Controller 2</option>
+                        <option>Computer</option>
+                    </select>
+                    <select>
+                        <option value="" disabled selected></option>
+                        <option>Controller 1</option>
+                        <option>Controller 2</option>
+                        <option>Computer</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</body>
+
+</html>
