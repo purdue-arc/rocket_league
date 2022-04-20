@@ -1,14 +1,5 @@
 <launch>
 
-    <arg name="game_clock" default="90" />
-    <arg name="rate" default="10" />
-    <arg name="tolerence" default="0.15" />
-
-
-    <node pkg="rktl_game" type="game_manager" name="game_manager" output="screen">
-        <param name="/game_length" type="int" value="$(arg game_clock)"/>
-        <param name="goal_tolerence" type="double" value="$(arg tolerence)"/>
-        <param name="manager_rate" value="$(arg rate)"/>
-    </node>
+    <node pkg="rktl_game" type="game_manager" name="game_manager" output="screen"/>
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
 </launch>

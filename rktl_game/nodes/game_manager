@@ -21,13 +21,12 @@ class ScoreKeeper():
 
         self.orange_score = 0
         self.blue_score = 0
-        self.tolerence = rospy.get_param('goal_tolerence')
-        self.orange_goal = (rospy.get_param('/field/length') - self.tolerence) / 2 
-        self.blue_goal = (rospy.get_param('/field/length')  - self.tolerence) / -2
+        self.orange_goal = (rospy.get_param('/field/length', 1) - 0.15) / 2 
+        self.blue_goal = (rospy.get_param('/field/length', 1)  - 0.15) / -2
         self.enabled = False
-        self.match_status = MatchStatus.PAUSED
-        self.game_clock = rospy.get_param('/game_length')
-        self.manager_rate = rospy.get_param('manager_rate')
+        self.match_status = 0
+        self.game_clock = rospy.get_param('/game_length', 90)
+        self.manager_rate = rospy.get_param('manager_rate', 10)
 
         # Publishers
         self.match_status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
@@ -56,13 +55,11 @@ class ScoreKeeper():
             rate.sleep()
 
     def update_status(self):
-        if (self.match_status == MatchStatus.ONGOING and self.game_clock == 0):
+        if (self.match_status == 1 and self.game_clock == 0):
             if (self.orange_score > self.blue_score):
-                self.match_status = MatchStatus.VICTORY_TEAM_A
-            elif self.orange_score < self.blue_score:
-                self.match_status = MatchStatus.VICTORY_TEAM_B
+                self.match_status = 3
             else:
-                self.match_status = MatchStatus.STOPPED
+                self.match_status = 4
         score = Score(self.orange_score, self.blue_score)
         header = Header()
         header.stamp = rospy.Time.now()
@@ -70,7 +67,7 @@ class ScoreKeeper():
 
     def pause(self, _):
         self.enabled = False
-        self.match_status = MatchStatus.PAUSED
+        self.match_status = 0
         self.active_pub.publish(False)
         return EmptyResponse()
 
@@ -78,17 +75,17 @@ class ScoreKeeper():
         self.orange_score = 0
         self.blue_score = 0
         self.enabled = False
-        self.match_status = MatchStatus.PAUSED
+        self.match_status = 0
         self.game_clock = rospy.get_param('/game_length', 90)
         self.active_pub.publish(False)
         header = Header()
         header.stamp = rospy.Time.now()
-        self.match_status_pub.publish(MatchStatus(header, MatchStatus.PAUSED, self.game_clock, Score(0, 0)))
+        self.match_status_pub.publish(MatchStatus(header, 0, self.game_clock, Score(0, 0)))
         return EmptyResponse()
 
     def unpause(self, _):
         self.enabled = True
-        self.match_status = MatchStatus.ONGOING
+        self.match_status = 1
         self.active_pub.publish(True)
         return EmptyResponse()
 
