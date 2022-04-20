@@ -1,6 +1,9 @@
 standalone_tags:
   [
     { id: 10, size: 0.07 },
+    { id: 11, size: 0.07 },
+    { id: 12, size: 0.07 },
+    { id: 13, size: 0.07 },
   ]
 tag_bundles:
   [

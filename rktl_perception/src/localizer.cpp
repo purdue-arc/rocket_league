@@ -93,10 +93,17 @@ void Localizer::ballCallback(geometry_msgs::Vector3StampedConstPtr msg) {
   if (camPos.z() == 0)
     return;
 
-  Eigen::Vector4d camVec(msg->vector.x, msg->vector.y, msg->vector.z, 0);
+  /* saves the confidence of the ball position's validity */
+  double confidence = msg->vector.z;
+
+
+  Eigen::Vector4d camVec(msg->vector.x, msg->vector.y, 1, 0); // set tge z to 1 to restore the vector's properties
   Eigen::Vector4d vec = _transform * camVec;
   double t = (_ballRadius - camPos.z()) / vec.z();
   Eigen::Vector4d pos = camPos + t * vec;
+
+  pos.z() = confidence;
+  /* set the z of the new pose to the confidence of the ball position's validity */
 
   Eigen::Matrix4d pose = Eigen::Matrix4d::Identity();
   pose.col(3) << pos;

@@ -11,13 +11,14 @@ from geometry_msgs.msg import PoseWithCovarianceStamped
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import numpy as np
 
-def set_pose(t, x, y, yaw):
+def set_pose(t, x, y, yaw, weight=1.0):
     """Helper to construct pose msgs."""
     pose_msg = PoseWithCovarianceStamped()
     pose_msg.header.frame_id = "map"
     pose_msg.header.stamp = t
     pose_msg.pose.pose.position.x = x
     pose_msg.pose.pose.position.y = y
+    pose_msg.pose.pose.position.z = weight
     x, y, z, w = quaternion_from_euler(0, 0, yaw)
     pose_msg.pose.pose.orientation.x = x
     pose_msg.pose.pose.orientation.y = y
@@ -70,7 +71,7 @@ class TestSync(unittest.TestCase):
         self.assertTrue(self.times_match(), msg='output time is not synchronized')
 
         # case 1
-        rospy.loginfo("testing independence of channels and divide by zero")
+        rospy.loginfo("testing independence of channels, divide by zero, weights")
         t_next = self.last_car0[0] + rospy.Duration(0.1)
         self.clear_poses()
 
@@ -81,8 +82,10 @@ class TestSync(unittest.TestCase):
         car1_pub.publish(set_pose(t_next, -1.0, -1.0, 0.0))
         car1_pub.publish(set_pose(t_next, -1.1, -1.1, -1.5))
 
-        ball_pub.publish(set_pose(t_next, 1.0, -1.0, 1.0))
+        ball_pub.publish(set_pose(t_next, 1.0, -1.0, -1.0))
         ball_pub.publish(set_pose(t_next, 2.0, -2.0, -1.0))
+        ball_pub.publish(set_pose(t_next, 4.0, -4.0, 1.0, weight=2.0))
+        ball_pub.publish(set_pose(t_next, -10, -10, -0.5, weight=0.0))
 
         # wait for response
         while(not self.have_poses()):
@@ -93,7 +96,7 @@ class TestSync(unittest.TestCase):
         self.assertAlmostEqual(self.last_car0[0].to_sec(), t_next.to_sec(), places=2, msg='output time is incorrect')
         self.assertTrue(np.allclose(self.last_car0[1:], [1.05, 1.05, 0.75]), msg='car0 pose is incorrect')
         self.assertTrue(np.allclose(self.last_car1[1:], [-1.05, -1.05, -0.75]), msg='car1 pose is incorrect')
-        self.assertTrue(np.allclose(self.last_ball[1:], [1.5, -1.5, 0.0]), msg='ball pose is incorrect')
+        self.assertTrue(np.allclose(self.last_ball[1:], [2.75, -2.75, 0.0]), msg='ball pose is incorrect')
 
         # case 2
         rospy.loginfo("testing old data rejection, caching of future data")
