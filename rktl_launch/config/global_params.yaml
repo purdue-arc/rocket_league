@@ -14,10 +14,10 @@ ball:
 
 # car dimensions and physical constants
 cars:
-  length: 0.12  # wheel center to center
+  length: 0.12  # front to rear wheel center to center, meters
   steering:
-    max_throw: 0.1826
-    rate: 0.9128
+    max_throw: 0.1826  # center to side, radians
+    rate: 0.9128  # rad/s
   throttle:
-    max_speed: 2.3
-    tau: 0.2
+    max_speed: 2.3  # m/s
+    tau: 0.2  # time constant, seconds
