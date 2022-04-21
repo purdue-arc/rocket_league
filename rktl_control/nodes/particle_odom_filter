@@ -16,6 +16,7 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 import numpy as np
 from pfilter import ParticleFilter
 from collections import deque
+from threading import Lock
 from math import sin, cos, tan, atan, sqrt, pi, exp
 
 class ParticleOdomFilter(object):
@@ -35,13 +36,14 @@ class ParticleOdomFilter(object):
         # node configuration
         self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
         self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
-        self.DELTA_T = 1.0/rospy.get_param('~rate', 10.0)
+        self.DELTA_T = rospy.Duration(1.0/rospy.get_param('~rate', 10.0))
         self.SUPERSAMPLING = rospy.get_param('~supersampling', 1)
         self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
+        self.WATCHDOG_DELTA_T = self.DELTA_T * rospy.get_param('~allowable_latency', 1.2)
 
         # should the filter compensate for delay by trying to predict the future?
         self.PREDICT_ENABLE = rospy.get_param('~delay/compensate', False)
-        self.PREDICT_TIME = rospy.get_param('~delay/duration', 0.0)
+        self.PREDICT_TIME = rospy.Duration(rospy.get_param('~delay/duration', 0.0))
 
         # should the filter weigh particles based on a boundary check?
         boundary_check = rospy.get_param('~boundary_check', False)
@@ -78,6 +80,8 @@ class ParticleOdomFilter(object):
         self.effort_buffer = deque(maxlen=effort_buffer_size)
         self.current_time = None
         self.target_time = None
+        self.watchdog = None
+        self.lock = Lock()
 
         self.rng = np.random.default_rng()
         self.filter = ParticleFilter(
@@ -106,27 +110,26 @@ class ParticleOdomFilter(object):
         """Callback for new efforts."""
         self.effort_buffer.append(effort_msg)
 
+    def watchdog_cb(self, timer_event):
+        """Callback for the watchdog timer for dropped pose messages."""
+        rospy.loginfo("Dropped pose message detected, extrapolating with no measurement")
+
+        with self.lock:
+            # set a new watchdog
+            self.watchdog = rospy.Timer(self.WATCHDOG_DELTA_T, self.watchdog_cb, True)
+
+            # get the exact time since the watchdog was set
+            set_time = timer_event.current_expected - self.WATCHDOG_DELTA_T
+            delta_t = timer_event.current_real - set_time
+
+            # publish an estimate
+            self.target_time = self.current_time + delta_t
+            self.filter.update()
+            self.publish_odom()
+
     def pose_cb(self, pose_msg):
         """Callback for new poses."""
         assert(pose_msg.header.frame_id == self.MAP_FRAME)
-
-        # see if any messages were dropped / car wasn't visible
-        if self.current_time is not None:
-            # if more than 3 messages were dropped, reset
-            if (pose_msg.header.stamp - self.current_time).to_sec() > 3.5*self.DELTA_T:
-                rospy.logwarn("Performing automatic filter reset due to many dropped pose messages")
-                self.filter_reset()
-                self.current_time = None
-            else:
-                # step the filter (without observations) until up-to-date
-                while (pose_msg.header.stamp - self.current_time).to_sec() > 1.5*self.DELTA_T:
-                    rospy.loginfo("Dropped pose message detected")
-                    self.target_time = self.current_time + rospy.Duration(self.DELTA_T)
-                    self.filter.update()
-
-        if self.current_time is None:
-            # initialize the current time (as one update ago)
-            self.current_time = pose_msg.header.stamp - rospy.Duration(self.DELTA_T)
 
         # get observation from message
         x = pose_msg.pose.pose.position.x
@@ -139,27 +142,48 @@ class ParticleOdomFilter(object):
         ])
         observation = np.array([x, y, yaw])
 
-        # step the filter and resample using observation
-        self.target_time = pose_msg.header.stamp
-        self.filter.update(observation)
+        with self.lock:
+            # reset the watchdog
+            if self.watchdog is not None:
+                self.watchdog.shutdown()
+                self.watchdog = rospy.Timer(self.WATCHDOG_DELTA_T, self.watchdog_cb, True)
+
+            # initialize the current time (as one update ago) if needed
+            if self.current_time is None:
+                self.current_time = pose_msg.header.stamp - self.DELTA_T
+
+            # step the filter and resample using observation if it isn't too old
+            if pose_msg.header.stamp > self.current_time:
+                self.target_time = pose_msg.header.stamp
+                self.filter.update(observation)
+                self.publish_odom()
+            else:
+                rospy.logwarn("Incoming measurement out of sync. Possible watchdog runaway. Resetting filter")
+                self.filter_reset()
+
+    def publish_odom(self):
+        """Publish odometry using current filter state."""
         state = self.filter.mean_state
+        assert state is not None
 
         # wildly extrapolate to present time if requested
         if self.PREDICT_ENABLE:
-            # save the current time and buffer since updates are destructive
-            current_time_bk = self.current_time
+            # save the current buffer and times since updates are destructive
             effort_buffer_bk = self.effort_buffer.copy()
+            current_time_bk = self.current_time
+            target_time_bk = self.target_time
             # grab the particles and weights from before any resampling ocurred
             particles = self.filter.original_particles
             weights = self.filter.original_weights
             # predict the future state of the particles
-            self.target_time = self.current_time + rospy.Duration(self.PREDICT_TIME)
+            self.target_time = self.current_time + self.PREDICT_TIME
             particles = self.particle_dynamics_wrapper(particles)
             # get the new mean_state
             state = np.sum(particles.T * weights, axis=-1).T
-            # restore the saved time and buffer
-            self.current_time = current_time_bk
+            # restore the saved buffer and times
             self.effort_buffer = effort_buffer_bk
+            self.current_time = current_time_bk
+            self.target_time = target_time_bk
 
         # validate output
         if np.isnan(state).any():
@@ -180,7 +204,8 @@ class ParticleOdomFilter(object):
 
         # publish message
         odom_msg = Odometry()
-        odom_msg.header = pose_msg.header
+        odom_msg.header.stamp = self.target_time
+        odom_msg.header.frame_id = self.MAP_FRAME
         odom_msg.child_frame_id = self.BODY_FRAME
         odom_msg.pose.pose.position.x = x
         odom_msg.pose.pose.position.y = y
@@ -198,7 +223,8 @@ class ParticleOdomFilter(object):
         if self.PUB_PARTICLES:
             # create PoseArray msg to hold all particles' poses
             cloud_msg = PoseArray()
-            cloud_msg.header = pose_msg.header
+            cloud_msg.header.stamp = self.target_time
+            cloud_msg.header.frame_id = self.MAP_FRAME
             for x, y, theta in self.filter.hypotheses:
                 # create Pose msg
                 particle_msg = Pose()
@@ -216,11 +242,16 @@ class ParticleOdomFilter(object):
 
     def filter_reset(self):
         """Reset the filter."""
+        assert self.lock.locked()
         self.filter.mean_state = None
         self.filter.init_filter()
         self.filter.weights = np.ones(self.filter.n_particles) / self.filter.n_particles
         self.effort_buffer.clear()
-        self.last_time = None
+        self.current_time = None
+        self.target_time = None
+        # kill the watchdog
+        if self.watchdog is not None:
+            self.watchdog.shutdown()
 
     def save_original_weights(self, __, weights):
         """Hacky way to save the original particle weights before resampling."""
@@ -233,7 +264,7 @@ class ParticleOdomFilter(object):
         assert self.target_time is not None
 
         # step the filter as many times as needed to reach the target time
-        while (self.current_time < self.target_time):
+        while (self.current_time + self.DELTA_T/self.SUPERSAMPLING <= self.target_time):
 
             # find the most recent effort that was from a previous time
             effort = None
@@ -268,7 +299,7 @@ class ParticleOdomFilter(object):
 
             # step the particles
             particles = self.particle_dynamics(particles, control)
-            self.current_time += rospy.Duration(self.DELTA_T/self.SUPERSAMPLING)
+            self.current_time += self.DELTA_T/self.SUPERSAMPLING
 
         return particles
 
@@ -291,7 +322,7 @@ class ParticleOdomFilter(object):
                 self.filter.n_particles)
 
         # make the below formulas more readable
-        delta_t = self.DELTA_T/self.SUPERSAMPLING
+        delta_t = (self.DELTA_T/self.SUPERSAMPLING).to_sec()
 
         # extract current states from particles matrix
         x = particles[:,0]
