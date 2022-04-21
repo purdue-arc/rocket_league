@@ -1,11 +1,12 @@
 rate: 10.0
+supersampling: 10
 publish_particles: true
 num_particles: 1000
 resample_proportion: 0.1
 boundary_check: true
 delay:
-  compensate: false
-  total_cycles: 2
+  compensate: true
+  duration: 0.15
 measurement_error:
   location: 0.05
   orientation: 0.1
@@ -15,7 +16,8 @@ generator_noise:
   velocity: 0.1
   steering_angle: 0.05
 efforts:
-  enable: false
+  enable: true
+  buffer_size: 15
   throttle:
     noise: 0.1
     max:  1.5
