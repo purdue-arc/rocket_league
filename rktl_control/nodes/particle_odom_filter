@@ -90,7 +90,6 @@ class ParticleOdomFilter(object):
             observe_fn=self.particle_observation,
             weight_fn=self.particle_weight,
             internal_weight_fn=self.particle_boundary_check if boundary_check else None,
-            transform_fn=self.save_original_weights,
             n_particles=num_particles,
             resample_proportion=resample_proportion)
         self.filter.mean_state = None
@@ -163,7 +162,7 @@ class ParticleOdomFilter(object):
                 self.filter.update(observation)
                 self.publish_odom()
             else:
-                rospy.logwarn("Incoming measurement out of sync. Possible watchdog runaway. Resetting filter")
+                rospy.logwarn("Incoming measurement out of sync. Possible watchdog runaway. Resetting filter. Consider turning down supersampling")
                 self.filter_reset()
 
     def publish_odom(self):
@@ -177,14 +176,11 @@ class ParticleOdomFilter(object):
             effort_buffer_bk = self.effort_buffer.copy()
             current_time_bk = self.current_time
             target_time_bk = self.target_time
-            # grab the particles and weights from before any resampling ocurred
-            particles = self.filter.original_particles
-            weights = self.filter.original_weights
             # predict the future state of the particles
             self.target_time = self.current_time + self.PREDICT_TIME
-            particles = self.particle_dynamics_wrapper(particles)
+            particles = self.particle_dynamics_wrapper(self.filter.particles)
             # get the new mean_state
-            state = np.sum(particles.T * weights, axis=-1).T
+            state = np.sum(particles.T * self.filter.weights, axis=-1).T
             # restore the saved buffer and times
             self.effort_buffer = effort_buffer_bk
             self.current_time = current_time_bk
@@ -258,11 +254,6 @@ class ParticleOdomFilter(object):
         if self.watchdog is not None:
             self.watchdog.shutdown()
             self.watchdog = None
-
-    def save_original_weights(self, __, weights):
-        """Hacky way to save the original particle weights before resampling."""
-        self.filter.original_weights = weights
-        return None
 
     def particle_dynamics_wrapper(self, particles):
         """Extrapolate all particles to future state, including true controls if known."""
