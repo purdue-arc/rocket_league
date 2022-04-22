@@ -21,6 +21,11 @@ reward:
 # duration when the episode will be terminated. Unit is seconds (sim time)
 max_episode_time: 15
 
+action_space:
+  velocity:
+    max: 1.5
+    min: -1.5
+
 log:
   base_dir: "~/catkin_ws/data/rocket_league/"
   # frequency to save progress plot. Unit is episodes
