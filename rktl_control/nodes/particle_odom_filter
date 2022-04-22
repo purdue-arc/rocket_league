@@ -276,32 +276,27 @@ class ParticleOdomFilter(object):
             effort = None
             try:
                 # assume efforts in buffer are in proper order
-                effort = self.effort_buffer.popleft()
-                new_effort = self.effort_buffer.popleft()
-                while new_effort.header.stamp <= self.current_time:
-                    # new_effort is more recent and from previous time
-                    effort = new_effort
-                    new_effort = self.effort_buffer.popleft()
-                # replace the newer one so we can use it next time
-                self.effort_buffer.appendleft(new_effort)
+                if self.effort_buffer[0].header.stamp <= self.current_time:
+                    effort = self.effort_buffer[0]
+
+                    while self.effort_buffer[1].header.stamp <= self.current_time:
+                        self.effort_buffer.popleft()
+                        effort = self.effort_buffer[0]
+
             except IndexError:
                 pass
 
             # convert effort to a control array, if known
-            control = None
-            if effort is not None:
+            if effort is None:
+                control = None
+            else:
                 # add a little bit of noise to the known control
-                v_rear_ref = self.MAX_SPEED * self.rng.normal(
-                    effort.throttle,
-                    self.THR_EFFORT_STD_DEV,
-                    self.filter.n_particles)
-
-                psi_ref = self.STEERING_THROW * self.rng.normal(
-                    effort.steering,
-                    self.STR_EFFORT_STD_DEV,
-                    self.filter.n_particles)
-
-                control = np.stack((v_rear_ref, psi_ref), axis=1)
+                control = self.rng.normal(
+                    (effort.throttle * self.MAX_SPEED,
+                     effort.steering * self.STEERING_THROW),
+                    (self.THR_EFFORT_STD_DEV * self.MAX_SPEED,
+                     self.STR_EFFORT_STD_DEV * self.STEERING_THROW),
+                    (self.filter.n_particles, 2))
 
             # step the particles
             particles = self.particle_dynamics(particles, control)
