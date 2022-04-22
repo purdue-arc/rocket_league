@@ -8,7 +8,7 @@ reward:
   # reward given when the episode ends with the car scoring the proper goal
   win: 100
   # reward given when the episode ends with the car scoring on the wrong goal
-  # loss: -100
+  loss: -100
   # reward given each frame when the car is in reverse
   # reverse: -25
   # reward given each frame when the car is near the walls
@@ -16,7 +16,7 @@ reward:
     # actual reward value
     value: -5
     # threshold distance (meters)
-    threshold: 0.25
+    threshold: 0.5
 
 # duration when the episode will be terminated. Unit is seconds (sim time)
 max_episode_time: 15
