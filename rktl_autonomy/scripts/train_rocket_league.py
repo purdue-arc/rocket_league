@@ -23,13 +23,13 @@ if __name__ == '__main__':      # this is required due to forking processes
     env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id,},
         n_envs=25, vec_env_cls=SubprocVecEnv)
 
-    # reuse_run_id = 'e5983de5-4321-49ba-b320-c745df036e8c'
-    # reuse_name = 'final_weights'
-    # weights = expanduser(f'~/catkin_ws/data/rocket_league/{reuse_run_id}/{reuse_name}')
-    # model = PPO.load(weights)
-    # model.set_env(env)
+    reuse_run_id = '0de5092c-97c2-4aa3-86fb-14150210ba92' # gamefly
+    reuse_name = 'rl_model_36700000_steps'                # latest
+    weights = expanduser(f'~/catkin_ws/data/rocket_league/{reuse_run_id}/{reuse_name}')
+    model = PPO.load(weights)
+    model.set_env(env)
 
-    model = PPO("MlpPolicy", env)
+    # model = PPO("MlpPolicy", env)
 
     # log training progress as CSV
     log_dir = expanduser(f'~/catkin_ws/data/rocket_league/{run_id}')

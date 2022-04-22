@@ -198,7 +198,7 @@ class RocketLeagueInterface(ROSInterface):
 
         # info dict
         info = {
-            'goals' : abs(self._score)}
+            'goals' : max(self._score, 0.0)}
 
         return (observation, reward, done, info)
 
