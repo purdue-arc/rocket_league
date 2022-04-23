@@ -6,9 +6,17 @@
         <!--  joystick driver -->
         <node pkg="joy" type="joy_node" name="joy_node" output="screen">
             <param name="dev" value="$(arg device)"/>
+            <param name="default_trig_val" value="true"/>
         </node>
 
         <!-- interface -->
-        <node pkg="rktl_control" type="xbox_interface" name="xbox_interface" output="screen"/>
+        <node pkg="rktl_control" type="xbox_interface" name="xbox_interface" output="screen">
+            <param name="base_throttle" value=".75"/>
+            <param name="boost_throttle" value="1.25"/>
+            <param name="do_delay" value="false"/>
+            <param name="delay" value=".1"/>
+            <param name="cooldown_ratio" value="3"/>
+            <param name="max_boost" value="2"/>
+        </node>
     </group>
 </launch>
