@@ -9,6 +9,7 @@ License:
 # ROS
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from std_msgs.msg import Float32
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from collections import deque
@@ -24,6 +25,7 @@ class PoseSynchronizer(object):
         self.TOPICS = rospy.get_param('~topics')
         self.PERIOD = rospy.Duration(1/rospy.get_param('~rate', 10.0))
         self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.15))
+        self.PUB_LATENCY = rospy.get_param('~publish_latency', False)
         self.USE_WEIGHTS = {
             topic : rospy.get_param('~use_weights')[i] for i, topic in enumerate(self.TOPICS)
         }
@@ -35,6 +37,10 @@ class PoseSynchronizer(object):
         self.pubs = {
             topic : rospy.Publisher(topic+'_sync', PoseWithCovarianceStamped, queue_size=1) for topic in self.TOPICS
         }
+        if self.PUB_LATENCY:
+            self.latency_pubs = {
+                topic : rospy.Publisher(topic+'_sync_latency', Float32, queue_size=1) for topic in self.TOPICS
+            }
         for topic in self.TOPICS:
             rospy.Subscriber(topic, PoseWithCovarianceStamped,
                 lambda msg, topic=topic: self.recv_pose(topic, msg))
@@ -70,7 +76,10 @@ class PoseSynchronizer(object):
         # append to buffer (thread safe)
         sample = (t, x, y, yaw, weight)
         self.buffers[topic].append(sample)
-        rospy.loginfo("%s: received with %0.3f sec delay", topic, (rospy.Time.now() - t).to_sec())
+        latency = (rospy.Time.now() - t).to_sec()
+        rospy.loginfo("%s: received with %0.3f sec delay", topic, latency)
+        if self.PUB_LATENCY:
+            self.latency_pubs[topic].publish(latency)
 
     def send_pose(self, topic, now):
         """Callback for processing received poses and publishing"""
