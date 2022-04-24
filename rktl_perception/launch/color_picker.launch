@@ -1,0 +1,6 @@
+<launch>
+    <node pkg="rktl_perception" type="ball_color" name="ball_color" ns="cams/cam0" output="screen"/>
+    <!-- <node pkg="rktl_perception" type="ball_color" name="ball_color" ns="cams/cam1" output="screen"/> -->
+    <!-- <node pkg="rktl_perception" type="ball_color" name="ball_color" ns="cams/cam2" output="screen"/> -->
+    <!-- <node pkg="rktl_perception" type="ball_color" name="ball_color" ns="cams/cam3" output="screen"/> -->
+</launch>
