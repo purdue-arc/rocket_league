@@ -18,7 +18,7 @@
             <param name="max_boost" value="2"/>
         </node>
         <!-- delay -->
-        <node pkg="rktl_launch" type="topic_delay" name="controller_delay"
+        <node pkg="rktl_control" type="topic_delay" name="controller_delay"
         args="joy joy_delayed
         sensor_msgs/Joy $(arg delay)"/>
     </group>
