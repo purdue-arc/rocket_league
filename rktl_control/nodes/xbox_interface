@@ -17,8 +17,6 @@ class XboxInterface():
 
         self.base_throttle = rospy.get_param('~base_throttle') # throttle when not boosting
         self.boost_throttle = rospy.get_param('~boost_throttle') # throttle when boosting
-        self.do_delay = rospy.get_param('~do_delay') # should the message be delayed?
-        self.delay = rospy.get_param('~delay') # delay in seconds
         self.cooldown_ratio = rospy.get_param('~cooldown_ratio') # how long should one second of boost take to recharge?
         self.max_boost = rospy.get_param('~max_boost') * self.cooldown_ratio # max time boost can be active
         self.boost_tank = self.max_boost # this is how much boost is left
@@ -28,7 +26,7 @@ class XboxInterface():
         self.effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('joy', Joy, self.callback)
+        rospy.Subscriber('joy_delayed', Joy, self.callback)
 
         # Services
         self.reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
@@ -57,8 +55,6 @@ class XboxInterface():
         else:
             self.is_boosting = False
             msg.throttle *= self.base_throttle
-        if (self.do_delay):
-            rospy.sleep(self.delay)
         self.effort_pub.publish(msg)
 
 if __name__ == "__main__":
