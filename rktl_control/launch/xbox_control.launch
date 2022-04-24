@@ -1,7 +1,7 @@
 <launch>
     <arg name="device" default="/dev/input/js0"/>
     <arg name="car_name" default="car0" />
-    <arg name="delay" default=".2" />
+    <arg name="delay" default="0" />
 
     <group ns="cars/$(arg car_name)">
         <!--  joystick driver -->
