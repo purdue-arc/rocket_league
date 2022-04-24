@@ -76,8 +76,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
         cv::cvtColor(current_frame, frame_HSV, cv::COLOR_BGR2HSV);
         // Detect the object based on HSV Range Values
         cv::inRange(frame_HSV, cv::Scalar(low_H, low_S, low_V), cv::Scalar(high_H, high_S, high_V), frame_threshold);
-        cv::dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), dilate_amnt, 1, 1);
         cv::erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), erode_amnt, 1, 1);
+        cv::dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), dilate_amnt, 1, 1);
 
         // Show the frames
         cv::imshow(window_detection_name, frame_threshold);

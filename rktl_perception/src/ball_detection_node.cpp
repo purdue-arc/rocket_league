@@ -52,8 +52,8 @@ void BallDetection::BallCallback(const sensor_msgs::ImageConstPtr& msg, const se
 
         /* Detect the object based on HSV Range Values */
         inRange(frame_HSV, cv::Scalar(minHue, minSat, minVib), cv::Scalar(maxHue, maxSat, maxVib), frame_threshold);
-        dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), dilate_amnt, 1, 1);
         erode(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), erode_amnt, 1, 1);
+        dilate(frame_threshold, frame_threshold, cv::Mat(), cv::Point(-1, -1), dilate_amnt, 1, 1);
 
         /* find all the contours */
         std::vector<std::vector<cv::Point> > contours;
