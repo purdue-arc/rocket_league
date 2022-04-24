@@ -20,5 +20,4 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>rosserial_arduino</exec_depend>
   <exec_depend>joy</exec_depend>
-  <exec_depend>rktl_launch</exec_depend>
 </package>
