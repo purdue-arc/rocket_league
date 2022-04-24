@@ -40,6 +40,7 @@ class ParticleOdomFilter(object):
         self.SUPERSAMPLING = rospy.get_param('~supersampling', 1)
         self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
         self.WATCHDOG_DELTA_T = self.DELTA_T * rospy.get_param('~allowable_latency', 1.2)
+        self.OPEN_LOOP_LIMIT = rospy.get_param('~open_loop_limit', 10)
 
         # should the filter compensate for delay by trying to predict the future?
         self.PREDICT_ENABLE = rospy.get_param('~delay/compensate', False)
@@ -81,6 +82,7 @@ class ParticleOdomFilter(object):
         self.current_time = None
         self.target_time = None
         self.watchdog = None
+        self.open_loop_count = 0
         self.lock = Lock()
 
         self.rng = np.random.default_rng()
@@ -127,9 +129,14 @@ class ParticleOdomFilter(object):
             delta_t = timer_event.current_real - set_time
 
             # publish an estimate
-            self.target_time = self.current_time + delta_t
-            self.filter.update()
-            self.publish_odom()
+            if self.open_loop_count < self.OPEN_LOOP_LIMIT:
+                self.target_time = self.current_time + delta_t
+                self.filter.update()
+                self.publish_odom()
+                self.open_loop_count += 1
+            else:
+                rospy.logerr("Halting filter due to too many lost poses")
+                self.filter_reset()
 
     def pose_cb(self, pose_msg):
         """Callback for new poses."""
@@ -161,6 +168,7 @@ class ParticleOdomFilter(object):
                 self.target_time = pose_msg.header.stamp
                 self.filter.update(observation)
                 self.publish_odom()
+                self.open_loop_count = 0
             else:
                 rospy.logwarn("Incoming measurement out of sync. Possible watchdog runaway. Resetting filter. Consider turning down supersampling")
                 self.filter_reset()

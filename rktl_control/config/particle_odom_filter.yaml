@@ -7,6 +7,7 @@ boundary_check: true
 delay:
   compensate: true
   duration: 0.1
+open_loop_limit: 10
 measurement_error:
   location: 0.1
   orientation: 0.2
