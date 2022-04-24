@@ -28,12 +28,12 @@
     <!-- Perception Delays -->
     <group if="$(eval sim_mode == 'realistic')">
         <!-- Ball -->
-        <node ns="ball" pkg="rktl_launch" type="topic_delay" name="pose_delay"
+        <node ns="ball" pkg="rktl_control" type="topic_delay" name="pose_delay"
             args="pose_sync_early pose_sync
             geometry_msgs/PoseWithCovarianceStamped $(arg perception_delay)"/>
 
         <!-- Car -->
-        <node ns="cars/car0" pkg="rktl_launch" type="topic_delay" name="pose_delay"
+        <node ns="cars/car0" pkg="rktl_control" type="topic_delay" name="pose_delay"
             args="pose_sync_early pose_sync
             geometry_msgs/PoseWithCovarianceStamped $(arg perception_delay)"/>
     </group>
