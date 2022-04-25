@@ -6,7 +6,9 @@ wall_avoidance:
 
 patrol_wall_dist: 0.75
 
-curvature_gain: 2.0
+curvature_gain:
+  kp: 2.0
+  kd: 0.0
 
 # X coordinate to switch to defense
 defensive_line: -0.5

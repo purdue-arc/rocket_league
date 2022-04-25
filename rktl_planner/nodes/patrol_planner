@@ -29,7 +29,8 @@ class PatrolPlanner(object):
         # constants
         # general stability parameters
         self.SPEED = rospy.get_param('~speed', 1.0)
-        self.CURVATURE_GAIN = rospy.get_param('~curvature_gain', 2.0)
+        self.CURVATURE_P_GAIN = rospy.get_param('~curvature_gain/kp', 1.0)
+        self.CURVATURE_D_GAIN = rospy.get_param('~curvature_gain/kd', 0.0)
         self.PATROL_DIST = rospy.get_param('~patrol_wall_dist', 0.5)
 
         # wall avoidance parameters
@@ -55,6 +56,7 @@ class PatrolPlanner(object):
         self.ball_position = None
         self.ball_velocity = None
         self.attempt_start_time = None
+        self.prev_error = 0.0
 
         # Publishers
         self.cmd_pub = rospy.Publisher('command', ControlCommand, queue_size=1)
@@ -145,18 +147,19 @@ class PatrolPlanner(object):
             if self.attempt_start_time is not None or abs(sad(ball_goal_heading, car_ball_heading_la)) < self.SCORING_MARGIN:
                 # check to see if we should score in forward or reverse
                 if by < self.REVERSE_LINE:  # forward
-                    ball_heading_error = sad(yaw, car_ball_heading)
                     cmd_msg.velocity = self.SPEED
+                    cmd_msg.curvature = self.control_curvature(sad(yaw, car_ball_heading))
                 else:   # reverse
-                    ball_heading_error = sad(yaw, car_ball_heading + math.pi)
                     cmd_msg.velocity = -self.SPEED
-                    cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * ball_heading_error
+                    cmd_msg.curvature = -self.control_curvature(sad(yaw, car_ball_heading + math.pi))
+
 
                 self.cmd_pub.publish(cmd_msg)
 
                 # mark attempt start
                 if self.attempt_start_time is None:
                     self.attempt_start_time = rospy.Time.now()
+                    self.prev_error = 0.0
                     rospy.loginfo("beginning scoring attempt")
                 return
 
@@ -165,9 +168,10 @@ class PatrolPlanner(object):
                 # determine if ball should be hit in fwd or rev
                 if by < self.REVERSE_LINE:  # forward
                     cmd_msg.velocity = self.SPEED
+                    cmd_msg.curvature = self.control_curvature(sad(yaw, car_ball_heading))
                 else:   # reverse
                     cmd_msg.velocity = -self.SPEED
-                    cmd_msg.curvature = -self.MAX_CURVATURE * self.CURVATURE_GAIN * BALL_HEADING_ERROR
+                    cmd_msg.curvature = -self.control_curvature(sad(yaw, car_ball_heading + math.pi))
 
                 self.cmd_pub.publish(cmd_msg)
                 return
@@ -185,6 +189,7 @@ class PatrolPlanner(object):
 
                 # mark attempt start
                 self.attempt_start_time = rospy.Time.now()
+                self.prev_error = 0.0
                 rospy.loginfo("beginning defensive attempt")
 
                 # reverse for longer, if the ball is nearer to the middle
@@ -241,21 +246,30 @@ class PatrolPlanner(object):
             south_wall_dist < 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
                 # check to see if should wait to turn
                 if (x > 0.0 and west_wall_dist > 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
-                    cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * west_heading_error
+                    cmd_msg.curvature = self.control_curvature(west_heading_error)
                 elif (x < 0.0 and east_wall_dist > 1.0/self.MAX_CURVATURE + self.PATROL_DIST):
-                    cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * east_heading_error
+                    cmd_msg.curvature = self.control_curvature(east_heading_error)
                 else:
                     cmd_msg.curvature = self.MAX_CURVATURE
         else:   # send it straight north or south otherwise
             if (y > 0.0):
                 # west wall (southern heading desired)
-                cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * south_heading_error
+                cmd_msg.curvature = self.control_curvature(south_heading_error)
             else:
                 # east wall (northern heading desired)
-                cmd_msg.curvature = self.MAX_CURVATURE * self.CURVATURE_GAIN * north_heading_error
+                cmd_msg.curvature = self.control_curvature(north_heading_error)
 
         cmd_msg.velocity = self.SPEED
         self.cmd_pub.publish(cmd_msg)
+
+    def control_curvature(self, error):
+        """PD controller for curvature."""
+        delta_error = error - self.prev_error
+        curvature = (
+            self.CURVATURE_P_GAIN * error +
+            self.CURVATURE_D_GAIN * delta_error)
+        self.prev_error = error
+        return curvature
 
 if __name__ == "__main__":
     PatrolPlanner()
