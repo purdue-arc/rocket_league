@@ -187,7 +187,9 @@ class PatrolPlanner(object):
                 return
 
             # if not already trying to hit the ball, wait until at bottom part of pattern
-            elif abs(east_heading_error) < self.SCORING_MARGIN and south_wall_dist < 1.5 * self.PATROL_DIST:
+            elif (abs(east_heading_error) < self.SCORING_MARGIN and
+                    south_wall_dist < self.PATROL_DIST + 0.25 and
+                    abs(east_wall_dist - west_wall_dist) < 0.5):
                 # run fwd or rev so easier to hit ball
                 if by < self.REVERSE_LINE:
                     cmd_msg.velocity = -self.SPEED
