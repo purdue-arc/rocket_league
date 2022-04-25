@@ -7,7 +7,7 @@ car:
   sensor_noise:
     pos: [0.01, 0.01, 0.00]
     orient: [0.0, 0.0, 0.09]
-    dropout: 0.05
+    dropout: 0.15
 
 ball:
   init_speed: 0.0

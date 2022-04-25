@@ -1,7 +1,7 @@
 <launch>
     <arg name="render"  default="true"/>
 
-    <arg name="agent_type"          default="planner"/> <!-- Either planner, autonomy, or patrol-->
+    <arg name="agent_type"          default="patrol"/> <!-- Either planner, autonomy, or patrol-->
     <arg name="autonomy_weights"    default="model"/>
 
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
