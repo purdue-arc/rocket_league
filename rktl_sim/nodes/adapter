@@ -150,15 +150,3 @@ while not rospy.is_shutdown():
   last = curr
   curr += rospy.Duration(1/10)
   rate.sleep()
-
-# Create a population of sims with randomly initialized params
-
-# Parse bag
-
-# Run population on bag inputs
-
-# Compare with bag outputs
-
-# Generate offspring
-
-# Repeat
