@@ -193,32 +193,34 @@ class SimulatorROS(object):
 
             if self.mode == SimulatorMode.REALISTIC:
                 # Publish ball sync pose
-                ball_msg = PoseWithCovarianceStamped()
-                ball_msg.header.stamp = now
-                ball_msg.header.frame_id = self.frame_id
                 ball_pos, ball_quat = self.sim.getBallPose(add_noise=True)
-                ball_msg.pose.pose.position.x = ball_pos[0]
-                ball_msg.pose.pose.position.y = ball_pos[1]
-                ball_msg.pose.pose.position.z = ball_pos[2]
-                ball_msg.pose.pose.orientation.x = ball_quat[0]
-                ball_msg.pose.pose.orientation.y = ball_quat[1]
-                ball_msg.pose.pose.orientation.z = ball_quat[2]
-                ball_msg.pose.pose.orientation.w = ball_quat[3]
-                self.ball_pose_pub.publish(ball_msg)
+                if ball_pos is not None:
+                    ball_msg = PoseWithCovarianceStamped()
+                    ball_msg.header.stamp = now
+                    ball_msg.header.frame_id = self.frame_id
+                    ball_msg.pose.pose.position.x = ball_pos[0]
+                    ball_msg.pose.pose.position.y = ball_pos[1]
+                    ball_msg.pose.pose.position.z = ball_pos[2]
+                    ball_msg.pose.pose.orientation.x = ball_quat[0]
+                    ball_msg.pose.pose.orientation.y = ball_quat[1]
+                    ball_msg.pose.pose.orientation.z = ball_quat[2]
+                    ball_msg.pose.pose.orientation.w = ball_quat[3]
+                    self.ball_pose_pub.publish(ball_msg)
 
                 # Publish car sync pose
-                car_msg = PoseWithCovarianceStamped()
-                car_msg.header.stamp = now
-                car_msg.header.frame_id = self.frame_id
                 car_pos, car_quat = self.sim.getCarPose(add_noise=True)
-                car_msg.pose.pose.position.x = car_pos[0]
-                car_msg.pose.pose.position.y = car_pos[1]
-                car_msg.pose.pose.position.z = car_pos[2]
-                car_msg.pose.pose.orientation.x = car_quat[0]
-                car_msg.pose.pose.orientation.y = car_quat[1]
-                car_msg.pose.pose.orientation.z = car_quat[2]
-                car_msg.pose.pose.orientation.w = car_quat[3]
-                self.car_pose_pub.publish(car_msg)
+                if car_pos is not None:
+                    car_msg = PoseWithCovarianceStamped()
+                    car_msg.header.stamp = now
+                    car_msg.header.frame_id = self.frame_id
+                    car_msg.pose.pose.position.x = car_pos[0]
+                    car_msg.pose.pose.position.y = car_pos[1]
+                    car_msg.pose.pose.position.z = car_pos[2]
+                    car_msg.pose.pose.orientation.x = car_quat[0]
+                    car_msg.pose.pose.orientation.y = car_quat[1]
+                    car_msg.pose.pose.orientation.z = car_quat[2]
+                    car_msg.pose.pose.orientation.w = car_quat[3]
+                    self.car_pose_pub.publish(car_msg)
 
             # Publish ball odometry
             ball_msg = Odometry()

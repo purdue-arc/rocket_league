@@ -236,8 +236,11 @@ class Sim(object):
         pos, _ = p.getBasePositionAndOrientation(self._ballID)
 
         if add_noise and self.ball_noise:
-            pos = np.random.normal(
-                pos, self.ball_noise['pos'])
+            if np.random.uniform() < self.ball_noise['dropout']:
+                return None, None
+            else:
+                pos = np.random.normal(pos, self.ball_noise['pos'])
+
         return pos, p.getQuaternionFromEuler([0, 0, 0])
 
     def getBallVelocity(self):

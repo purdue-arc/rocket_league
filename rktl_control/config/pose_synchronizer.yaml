@@ -2,7 +2,7 @@
 rate: 10.0
 
 # delay in seconds. Lower is better, but AprilTags needs to keep up
-delay: 0.15
+delay: 0.1
 
 # should debug info on latency be published?
 publish_latency: true
