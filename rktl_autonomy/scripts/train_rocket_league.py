@@ -24,7 +24,7 @@ if __name__ == '__main__':      # this is required due to forking processes
         n_envs=25, vec_env_cls=SubprocVecEnv)
 
     reuse_run_id = '0de5092c-97c2-4aa3-86fb-14150210ba92' # gamefly
-    reuse_name = 'rl_model_36700000_steps'                # latest
+    reuse_name = 'rl_model_80800000_steps'                # latest
     weights = expanduser(f'~/catkin_ws/data/rocket_league/{reuse_run_id}/{reuse_name}')
     model = PPO.load(weights)
     model.set_env(env)
