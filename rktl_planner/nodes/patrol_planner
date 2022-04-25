@@ -31,6 +31,7 @@ class PatrolPlanner(object):
         self.SPEED = rospy.get_param('~speed', 1.0)
         self.CURVATURE_P_GAIN = rospy.get_param('~curvature_gain/kp', 1.0)
         self.CURVATURE_D_GAIN = rospy.get_param('~curvature_gain/kd', 0.0)
+        self.CURVATURE_GAIN_FALLOFF_SQ = pow(rospy.get_param('~curvature_gain/falloff', 1e-9), 2)
         self.PATROL_DIST = rospy.get_param('~patrol_wall_dist', 0.5)
 
         # wall avoidance parameters
@@ -153,6 +154,10 @@ class PatrolPlanner(object):
                     cmd_msg.velocity = -self.SPEED
                     cmd_msg.curvature = -self.control_curvature(sad(yaw, car_ball_heading + math.pi))
 
+                # apply falloff
+                car_ball_dist_sq = pow(by - y, 2) + pow(bx - x, 2)
+                if car_ball_dist_sq / self.CURVATURE_GAIN_FALLOFF_SQ < 1.0:
+                    cmd_msg.curvature *= car_ball_dist_sq / self.CURVATURE_GAIN_FALLOFF_SQ
 
                 self.cmd_pub.publish(cmd_msg)
 
@@ -172,6 +177,11 @@ class PatrolPlanner(object):
                 else:   # reverse
                     cmd_msg.velocity = -self.SPEED
                     cmd_msg.curvature = -self.control_curvature(sad(yaw, car_ball_heading + math.pi))
+
+                # apply falloff
+                car_ball_dist_sq = pow(by - y, 2.0) + pow(bx - x, 2)
+                if car_ball_dist_sq / self.CURVATURE_GAIN_FALLOFF_SQ < 1.0:
+                    cmd_msg.curvature *= car_ball_dist_sq / self.CURVATURE_GAIN_FALLOFF_SQ
 
                 self.cmd_pub.publish(cmd_msg)
                 return
