@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+"""Contains the MPC Follower Node.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+# 3rd party modules
+import rospy
+import numpy as np
+import do_mpc
+from casadi import sin, cos
+import math
+import time
+from tf.transformations import euler_from_quaternion
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Bool
+
+# Local modules
+import rktl_planner.convert as convert
+import rktl_planner.pure_pursuit as pursuit
+from rktl_msgs.msg import Path, ControlCommand
+
+class MPCFollower(object):
+    """A node to ensure the car follows a given trajectory."""
+
+    def __init__(self):
+        rospy.init_node('mpc_follower')
+
+        self.path = None
+        self.last_pose_idx = None
+        self.start_time = None
+
+        # TODO: Collect rosparams
+
+        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.15)
+        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.035)
+        self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
+        L = rospy.get_param('/cars/length')
+
+        # Setup mpc model
+        self.model = do_mpc.model.Model('continuous')
+
+        X = self.model.set_variable(var_type='_x', var_name='X')
+        Y = self.model.set_variable(var_type='_x', var_name='Y')
+        theta = self.model.set_variable(var_type='_x', var_name='theta')
+
+        X_f = self.model.set_variable(var_type='_x', var_name='X_f')
+        Y_f = self.model.set_variable(var_type='_x', var_name='Y_f')
+
+        v_rear = self.model.set_variable(var_type='_u', var_name='v_rear')
+        psi = self.model.set_variable(var_type='_u', var_name='psi')
+
+        self.model.set_rhs('X', v_rear * cos(psi + theta))
+        self.model.set_rhs('Y', v_rear * sin(psi + theta))
+        self.model.set_rhs('theta', v_rear * sin(psi)/L)
+        self.model.set_rhs('X_f', 0)
+        self.model.set_rhs('Y_f', 0)
+
+        self.model.setup()
+
+        self.mpc = do_mpc.controller.MPC(self.model)
+        setup_mpc = {
+            'n_horizon': 20,
+            'n_robust': 1,
+            'open_loop': 1,
+            't_step': 1.0,
+            'state_discretization': 'collocation',
+            'collocation_type': 'radau',
+            'collocation_deg': 2,
+            'collocation_ni': 2,
+            'store_full_solution': True,
+            # Use MA27 linear solver in ipopt for faster calculations:
+            #'nlpsol_opts': {'ipopt.linear_solver': 'MA27'}
+        }
+        self.mpc.set_param(**setup_mpc)
+
+        mterm = (self.model.x['X_f']-self.model.x['X'])**2 + (self.model.x['Y_f']-self.model.x['Y'])**2
+        lterm = (self.model.x['X_f']-self.model.x['X'])**2 + (self.model.x['Y_f']-self.model.x['Y'])**2
+        self.mpc.set_objective(mterm=mterm, lterm=lterm)
+        self.mpc.set_rterm(v_rear=0.1, psi=0.1)
+        self.mpc.setup()
+
+        # Publishers
+        car_name = rospy.get_param('~car_name')
+        self.bot_velocity_cmd = rospy.Publisher(f'/cars/{car_name}/command',
+            ControlCommand, queue_size=1)
+        self.bot_following_path = rospy.Publisher(f'/cars/{car_name}/following_path',
+            Bool, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
+        rospy.Subscriber('linear_path', Path, self.path_cb)
+
+        rospy.spin()
+
+    def path_cb(self, path_msg: Path):
+        """Creates path using waypoints in Path message."""
+        self.path_start_time = path_msg.header.stamp
+        self.goal_vel = path_msg.velocity
+        self.path = path_msg.waypoints
+        self.last_pnt_idx = 0
+        self.start_time = time.time()
+        
+    def odom_cb(self, odom_msg: Odometry):
+        """Updates car odometry and follows current path."""
+        print('test')
+        if self.path:
+            if self.last_pose_idx == None:
+                self.last_pose_idx = 0
+
+            # Converting odom msg to numpy arrays
+            bot_pos, bot_orient, _ = convert.pose_covar_to_array(odom_msg.pose)
+            bot_linear, bot_angular, _ = convert.twist_covar_to_array(
+                odom_msg.twist)
+
+            # Set lookahead dist by lookahead gain and current speed
+            lookahead_boost = np.linalg.norm(bot_linear) \
+                * self.lookahead_gain
+            lookahead_dist = self.lookahead_dist + lookahead_boost
+
+            # Set number of waypoints to check
+            if self.lookahead_pnts == -1:
+                lookahead_pnts = len(self.path)
+            else:
+                lookahead_pnts = self.lookahead_pnts
+
+            # Find next valid intersection along path
+            intersect = None
+            goal_vel = self.goal_vel
+            i = self.last_pose_idx
+            pnts_checked = 0
+            while pnts_checked < lookahead_pnts:
+                if i >= len(self.path) - 1:
+                    i = 0
+
+                start_pos, _ = convert.pose_to_array(self.path[i].pose)
+                end_pos, _ = convert.pose_to_array(self.path[i + 1].pose)
+
+                path_seg = end_pos - start_pos
+                bot_path = start_pos - bot_pos
+
+                intersect = pursuit.find_intersection(path_seg, bot_path,
+                    lookahead_dist)
+
+                if intersect is not None:
+                    self.last_pose_idx = i
+                    intersect += start_pos
+
+                    # Check if intersection is behind vehicle
+                    d_angle = pursuit.calculate_angle(intersect, bot_pos,
+                        bot_orient, lookahead_dist, goal_vel < 0)
+                    if abs(d_angle) > math.pi/2:                  
+                        intersect = None
+                    else:
+                        break
+
+                i += 1
+                pnts_checked += 1
+
+            # If no intersection found, stop moving
+            if intersect is None:
+                self.bot_velocity_cmd.publish(ControlCommand())
+                self.bot_following_path.publish(False)
+                return
+
+            # Calculate curvature
+            print(intersect)
+            _, _, yaw = euler_from_quaternion(bot_orient)
+            x = np.array([bot_pos[0], bot_pos[1], yaw, intersect[0], intersect[1]]).reshape(-1, 1)
+            print(x)
+            u = self.mpc.make_step(x)
+            print(u)
+
+            # Publish command data
+            cmd = ControlCommand()
+            cmd.velocity = goal_vel
+            cmd.curvature = -(1.0 / turn_rad)
+            # self.bot_velocity_cmd.publish(cmd)
+            # self.bot_following_path.publish(True)
+        else:
+            self.bot_velocity_cmd.publish(ControlCommand())
+            self.bot_following_path.publish(False)
+
+if __name__ == "__main__":
+    MPCFollower()
