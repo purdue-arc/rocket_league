@@ -26,7 +26,7 @@ class XboxInterface():
         self.effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('joy_delayed', Joy, self.callback)
+        rospy.Subscriber('joy', Joy, self.callback)
 
         # Services
         self.reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
