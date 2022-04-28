@@ -9,10 +9,10 @@ patrol_wall_dist: 0.75
 curvature_gain:
   kp: 2.0
   kd: 0.05
-  falloff: 0.5
+  falloff: 0.25
 
 scoring:
-  car_lookahead_dist: 0.5
+  car_lookahead_dist: 0.75
   goal_depth_target: 0.05
 
 # X coordinate to switch to defense
