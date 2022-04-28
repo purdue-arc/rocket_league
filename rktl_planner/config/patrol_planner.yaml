@@ -6,13 +6,20 @@ wall_avoidance:
 
 patrol_wall_dist: 0.75
 
-curvature_gain: 2.0
+curvature_gain:
+  kp: 2.0
+  kd: 0.05
+  falloff: 0.25
+
+scoring:
+  car_lookahead_dist: 0.75
+  goal_depth_target: 0.05
 
 # X coordinate to switch to defense
 defensive_line: -0.5
 
 # Y coordinate to switch to reverse
-reverse_line: 0.25
+reverse_line: 0.0
 
 speed: 1.75
 attempt_timeout: 4.0
