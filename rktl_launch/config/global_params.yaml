@@ -20,5 +20,5 @@ cars:
     max_throw: 0.1826 # 15 degrees
     rate: 0.9128 # 30 degrees/s
   throttle:
-    max_speed: 2.3
+    max_speed: 2.3 # m/s
     tau: 0.2 # (approx 1 sec to reach max speed)

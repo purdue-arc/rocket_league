@@ -8,11 +8,7 @@
     </include>
 
     <node pkg="rktl_control" type="pose_synchronizer" name="pose_sync_node">
-        <rosparam>
-            topics:
-                - cars/car0/pose
-                - ball/pose
-        </rosparam>
+        <rosparam command="load" file="$(find rktl_control)/config/pose_synchronizer.yaml"/>
     </node>
 
     <include file="$(find rktl_launch)/launch/rocket_league.launch"/>

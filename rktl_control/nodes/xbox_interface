@@ -11,18 +11,51 @@ from rktl_msgs.msg import ControlEffort
 from std_srvs.srv import Empty
 from sensor_msgs.msg import Joy
 
-def callback(joy):
-    msg = ControlEffort()
-    msg.header.stamp = rospy.Time.now()
-    if (joy.buttons[6] == 1):
-        reset_srv.call()
-    else:
-        msg.throttle = (joy.axes[5] - joy.axes[2]) / 2
-        msg.steering = joy.axes[0]
-    effort_pub.publish(msg)
+class XboxInterface():
+    def __init__(self):
+        rospy.init_node('xbox_interface')
 
-rospy.init_node('xbox')
-effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
-reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
-rospy.Subscriber('joy', Joy, callback)
-rospy.spin()
+        self.base_throttle = rospy.get_param('~base_throttle') # throttle when not boosting
+        self.boost_throttle = rospy.get_param('~boost_throttle') # throttle when boosting
+        self.cooldown_ratio = rospy.get_param('~cooldown_ratio') # how long should one second of boost take to recharge?
+        self.max_boost = rospy.get_param('~max_boost') * self.cooldown_ratio # max time boost can be active
+        self.boost_tank = self.max_boost # this is how much boost is left
+        self.is_boosting = False # is the car currently boosting?
+
+        # Publishers
+        self.effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
+
+        # Subscribers
+        rospy.Subscriber('joy', Joy, self.callback)
+
+        # Services
+        self.reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
+
+        # Manages the cooldown
+        rate = rospy.Rate(1)
+        while not rospy.is_shutdown():
+            if not self.is_boosting:
+                if self.boost_tank < self.max_boost:
+                    self.boost_tank += 1
+            else:
+                if self.boost_tank > 0:
+                    self.boost_tank -= self.cooldown_ratio
+            rate.sleep()
+
+    def callback(self, joy: Joy):
+        msg = ControlEffort()
+        msg.header.stamp = rospy.Time.now()
+        if (joy.buttons[6] == 1):
+            self.reset_srv.call()
+        msg.throttle = ((joy.axes[2] - joy.axes[5]) / 2)
+        msg.steering = joy.axes[0]
+        if (joy.buttons[0] == 1 and self.boost_tank > 0):
+            self.is_boosting = True
+            msg.throttle *= self.boost_throttle
+        else:
+            self.is_boosting = False
+            msg.throttle *= self.base_throttle
+        self.effort_pub.publish(msg)
+
+if __name__ == "__main__":
+    XboxInterface()

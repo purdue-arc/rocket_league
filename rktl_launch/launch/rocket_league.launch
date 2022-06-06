@@ -17,6 +17,12 @@
         <arg name="sim_mode" value="$(arg sim_mode)"/>
     </include>
 
+    <!-- Game Manager -->
+    <include file="$(find rktl_game)/launch/game.launch"/>
+  
+    <!-- Control GUI -->
+    <node pkg="rqt_gui" type="rqt_gui" name="rqt_gui" args="--perspective-file $(find rktl_launch)/rqt/rktl.perspective"/>
+
     <!-- Ball -->
     <group if="$(eval sim_mode == 'realistic')">
         <node ns="ball" pkg="rktl_launch" type="topic_delay" name="pose_delay"

@@ -1,14 +1,32 @@
 <launch>
     <arg name="device" default="/dev/input/js0"/>
     <arg name="car_name" default="car0" />
+    <arg name="delay" default="0.1" />
 
     <group ns="cars/$(arg car_name)">
         <!--  joystick driver -->
         <node pkg="joy" type="joy_node" name="joy_node" output="screen">
             <param name="dev" value="$(arg device)"/>
+            <param name="default_trig_val" value="true"/>
         </node>
 
         <!-- interface -->
-        <node pkg="rktl_control" type="xbox_interface" name="xbox_interface" output="screen"/>
+        <node pkg="rktl_control" type="xbox_interface" name="xbox_interface" output="screen">
+            <param name="base_throttle" value=".75"/>
+            <param name="boost_throttle" value="1.25"/>
+            <param name="cooldown_ratio" value="3"/>
+            <param name="max_boost" value="2"/>
+            <remap from="joy" to="joy_mux"/>
+        </node>
+
+        <!-- delay -->
+        <node pkg="rktl_control" type="topic_delay" name="controller_delay"
+            args="joy joy_delayed sensor_msgs/Joy $(arg delay)"/>
+
+        <!-- mux (no delay by default)-->
+        <node pkg="topic_tools" type="mux" name="controller_delay_mux"
+            args="joy_mux joy joy_delayed">
+            <remap from="mux" to="controller_delay_mux"/>
+        </node>
     </group>
 </launch>

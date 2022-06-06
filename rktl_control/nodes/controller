@@ -141,9 +141,7 @@ class Controller(object):
 
         # get a jump on latency if open loop
         if self.controller is None and self.PUBLISH_EARLY:
-            # wipe timestamp so it doesn't interfere with prediction
-            cmd_msg.header.stamp = rospy.Time(0)
-            self.odom_cb(cmd_msg)
+            self.odom_cb(None)
 
     def odom_cb(self, odom_msg):
         """Callback for odom messages from car."""
@@ -167,7 +165,7 @@ class Controller(object):
 
         # publish actuator efforts
         msg = ControlEffort()
-        msg.header.stamp = odom_msg.header.stamp
+        msg.header.stamp = rospy.Time.now()
         msg.throttle = throttle_effort
         msg.steering = steering_effort
         self.pub.publish(msg)

@@ -9,6 +9,7 @@ License:
 # ROS
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped
+from std_msgs.msg import Float32
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from collections import deque
@@ -23,7 +24,11 @@ class PoseSynchronizer(object):
         self.MAP_FRAME = rospy.get_param('~map_frame', 'map')
         self.TOPICS = rospy.get_param('~topics')
         self.PERIOD = rospy.Duration(1/rospy.get_param('~rate', 10.0))
-        self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.1))
+        self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.15))
+        self.PUB_LATENCY = rospy.get_param('~publish_latency', False)
+        self.USE_WEIGHTS = {
+            topic : rospy.get_param('~use_weights')[i] for i, topic in enumerate(self.TOPICS)
+        }
 
         # variables
         self.buffers = {
@@ -32,6 +37,10 @@ class PoseSynchronizer(object):
         self.pubs = {
             topic : rospy.Publisher(topic+'_sync', PoseWithCovarianceStamped, queue_size=1) for topic in self.TOPICS
         }
+        if self.PUB_LATENCY:
+            self.latency_pubs = {
+                topic : rospy.Publisher(topic+'_sync_latency', Float32, queue_size=1) for topic in self.TOPICS
+            }
         for topic in self.TOPICS:
             rospy.Subscriber(topic, PoseWithCovarianceStamped,
                 lambda msg, topic=topic: self.recv_pose(topic, msg))
@@ -54,42 +63,50 @@ class PoseSynchronizer(object):
         t = pose_msg.header.stamp
         x = pose_msg.pose.pose.position.x
         y = pose_msg.pose.pose.position.y
+        weight = pose_msg.pose.pose.position.z
         __, __, yaw = euler_from_quaternion([
             pose_msg.pose.pose.orientation.x,
             pose_msg.pose.pose.orientation.y,
             pose_msg.pose.pose.orientation.z,
             pose_msg.pose.pose.orientation.w
         ])
-        sample = (t, x, y, yaw)
+        # override weight if not being used
+        if not self.USE_WEIGHTS[topic]:
+            weight = 1.0
         # append to buffer (thread safe)
+        sample = (t, x, y, yaw, weight)
         self.buffers[topic].append(sample)
+        latency = (rospy.Time.now() - t).to_sec()
+        rospy.loginfo("%s: received with %0.3f sec delay", topic, latency)
+        if self.PUB_LATENCY:
+            self.latency_pubs[topic].publish(latency)
 
     def send_pose(self, topic, now):
         """Callback for processing received poses and publishing"""
-        avg_x = 0
-        avg_y = 0
-        avg_hx = 0
-        avg_hy = 0
+        avg_x = 0.0
+        avg_y = 0.0
+        avg_hx = 0.0
+        avg_hy = 0.0
+        total_weight = 0.0
         samples = 0
 
         # sum and count usable measurements in buffer
         for _ in range(len(self.buffers[topic])):
-            t, x, y, yaw = self.buffers[topic].popleft()
+            t, x, y, yaw, weight = self.buffers[topic].popleft()
             # check if too old
             if t < now - self.DELAY - self.PERIOD/2:
-                rospy.logdebug("%s: discarding pose from %f", topic, t.to_sec())
-                continue
+                rospy.logdebug("%s: discarding pose from %0.3f sec ago", topic, (now - t).to_sec())
             # check if too new
-            if t > now - self.DELAY + self.PERIOD/2:
-                self.buffers[topic].append((t, x, y, yaw))
-                rospy.logdebug("%s: skipping recent pose from %f", topic, t.to_sec())
-                continue
+            elif t > now - self.DELAY + self.PERIOD/2:
+                self.buffers[topic].append((t, x, y, yaw, weight))
+                rospy.logdebug("%s: skipping pose from %0.3f sec ago", topic, (now - t).to_sec())
             # add to averages
             else:
-                avg_x += x
-                avg_y += y
-                avg_hx += cos(yaw)
-                avg_hy += sin(yaw)
+                avg_x += x * weight
+                avg_y += y * weight
+                avg_hx += cos(yaw) * weight
+                avg_hy += sin(yaw) * weight
+                total_weight += weight
                 samples += 1
 
         # check there is sufficient data
@@ -98,10 +115,10 @@ class PoseSynchronizer(object):
             return
 
         # take avg
-        avg_x /= samples
-        avg_y /= samples
+        avg_x /= total_weight
+        avg_y /= total_weight
         avg_yaw = atan2(avg_hy, avg_hx)
-        rospy.logdebug("%s: using %d samples", topic, samples)
+        rospy.loginfo("%s: using %d samples", topic, samples)
 
         # publish message
         pose_msg = PoseWithCovarianceStamped()

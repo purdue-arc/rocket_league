@@ -44,6 +44,8 @@ class VisualizerROS(object):
         self.frame_id = rospy.get_param("~frame_id", "map")
         self.timeout = rospy.get_param("~timeout", 10)
         rate = rospy.Rate(rospy.get_param("~rate", 20))
+        car_width = rospy.get_param("~cars/body_width")
+        car_length = rospy.get_param("~cars/body_length")
 
         self.car_img_path = rospy.get_param('~media/car', None)
         if self.car_img_path is None:

@@ -78,4 +78,7 @@ ball:
   # init_pose:
   #   pos: [0.0, 0.5, 0.06]
   #   orient: [0.0, 0.0, 0.0]
-    
+  sensor_noise:
+    pos: [0.01, 0.01, 0.0]
+    orient: [0.0, 0.0, 0.0]
+    dropout: 0.1

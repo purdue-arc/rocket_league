@@ -1,0 +1,6 @@
+<launch>
+    <arg name="car_name" default="car0"/>
+    <node ns="cars/$(arg car_name)" pkg="rktl_planner" type="patrol_planner" name="patrol_planner" output="screen">
+        <rosparam command="load" file="$(find rktl_planner)/config/patrol_planner.yaml"/>
+    </node>
+</launch>

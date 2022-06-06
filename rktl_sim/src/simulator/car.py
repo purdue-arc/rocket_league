@@ -98,10 +98,12 @@ class Car(object):
         heading = p.getJointState(self.id, self.joint_ids[2])[0]
         orient = (0.0, 0.0, heading)
         if noise:
-            pos = np.random.normal(
-                pos, noise['pos'])
-            orient = np.random.normal(
-                orient, noise['orient'])
+            if np.random.uniform() < noise['dropout']:
+                return None, None
+            else:
+                pos = np.random.normal(pos, noise['pos'])
+                orient = np.random.normal(orient, noise['orient'])
+
         return (pos, p.getQuaternionFromEuler(orient))
 
     def get_velocity(self):
