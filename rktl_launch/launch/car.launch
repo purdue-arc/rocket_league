@@ -12,10 +12,9 @@
     </include>
 
     <node if="$(eval sim_mode == 'realistic')" ns="cars/car$(arg car_id)"
-        pkg="rktl_launch" type="topic_delay" name="pose_delay"
+        pkg="rktl_control" type="topic_delay" name="pose_delay"
         args="pose_sync_early pose_sync
         geometry_msgs/PoseWithCovarianceStamped $(arg perception_delay)"/>
-
 
     <include if="$(eval agent_type == 'planner')" 
         file="$(find rktl_planner)/launch/simple_agent.launch">

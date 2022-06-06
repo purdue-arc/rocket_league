@@ -20,7 +20,7 @@ import visualizer
 from rktl_msgs.msg import Path, BezierPathList
 from rktl_planner import BezierPath
 
-class VisualizerROS(object):
+class Visualizer(object):
     """ROS wrapper for the visualizer."""
 
     def __init__(self):
@@ -114,7 +114,10 @@ class VisualizerROS(object):
                 if self.car_img_path is not None:
                     width = self.window.scale_size(self.car_width)
                     length = self.window.scale_size(self.car_length)
-                    if topic_ns[2] == "odom":
+                    
+                    if len(topic_ns) < 3:
+                        continue
+                    elif topic_ns[2] == "odom":
                         asset = visualizer.Image(width, length,
                             self.car_img_path)
                         self.object_subs.append(
@@ -202,4 +205,4 @@ class VisualizerROS(object):
         asset.set_radius(self.window.scale_size(msg.data))
 
 if __name__ == "__main__":
-    VisualizerROS()
+    Visualizer()

@@ -25,7 +25,7 @@
 
     <!-- Ball -->
     <group if="$(eval sim_mode == 'realistic')">
-        <node ns="ball" pkg="rktl_launch" type="topic_delay" name="pose_delay"
+        <node ns="ball" pkg="rktl_control" type="topic_delay" name="pose_delay"
             args="pose_sync_early pose_sync
             geometry_msgs/PoseWithCovarianceStamped $(arg perception_delay)"/>
         <include file="$(find rktl_control)/launch/ball_filter.launch"/>
