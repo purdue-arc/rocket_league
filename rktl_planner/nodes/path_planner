@@ -18,18 +18,22 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
     req.bezier_segment_duration.data = rospy.Duration(0.5)
     req.linear_segment_duration.data = rospy.Duration(0.01)
 
-    # Target 0 (car pos)
+    # Target 0 (car pos)3
+    #pose: position of the car
+    # the
     pose0 = Pose()
     pose0.position.x = car_odom.pose.pose.position.x
     pose0.position.y = car_odom.pose.pose.position.y
     pose0.position.z = 0.0
     pose0.orientation = car_odom.pose.pose.orientation
+    #append the new pose to the list of positions
     req.target_poses.append(pose0)
     req.target_durations.append(Duration(data=rospy.Duration(5.0)))
 
     # Target 1 (ball pos)
     final_vec_x = goal_pos[0] - ball_odom.pose.pose.position.x
     final_vec_y = goal_pos[1] - ball_odom.pose.pose.position.y
+    #^save the velocities to prevent overlap in them when multithread processes
     final_quat = quaternion_from_euler(
         0., 0., math.atan2(final_vec_y, final_vec_x))
     final_vec_len = math.sqrt(final_vec_x ** 2 + final_vec_y ** 2)
@@ -49,6 +53,7 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
     pose2.position.x = pose1.position.x + final_vec_x / final_vec_len / 2
     pose2.position.y = pose1.position.y + final_vec_y / final_vec_len / 2
     pose2.position.z = 0.0
+    #TODO: what is the point of this line
     pose2.orientation = pose2.orientation
     req.target_poses.append(pose2)
 
@@ -99,8 +104,9 @@ def create_complex_path_req(car_odom, ball_odom, goal_pos):
 
 class PathPlanner(object):
     def __init__(self):
+        #create a node object
         rospy.init_node('path_planner')
-
+        #get the type of run that we are doing
         planner_type = rospy.get_param('~planner_type', 'simple')
         if planner_type == 'simple':
             self.path_req = create_simple_path_req

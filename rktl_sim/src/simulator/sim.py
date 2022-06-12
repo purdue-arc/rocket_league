@@ -74,8 +74,9 @@ class Sim(object):
 
         if 'engine' in self.props and self.props['engine'] is not None:
             p.setPhysicsEngineParameter(**self.props['engine'])
+        #TODO: why gravity not accurete?
         p.setGravity(0, 0, -10)
-
+#TODO: what does this function do?
     def configure_dynamics(self, body_id, body_type):
         if 'dynamics' not in self.props or \
             self.props['dynamics'] is None or \
@@ -94,6 +95,7 @@ class Sim(object):
                 ball_pos = init_pose["pos"]
                 self.init_ball_pos = ball_pos
             else:
+                #TODO: already randomize the ball position by spawn boundds
                 ball_pos = [
                     random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
                     random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
@@ -215,7 +217,7 @@ class Sim(object):
             return None
 
         return self._cars[id].get_velocity()
-
+#TODO: what is the car command nad what are avaliable?
     def set_car_command(self, id, cmd):
         if id not in self._cars:
             return None

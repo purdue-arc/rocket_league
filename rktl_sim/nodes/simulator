@@ -29,7 +29,7 @@ class Simulator(object):
 
     def __init__(self):
         rospy.init_node('simulator')
-
+    #the different nodes determine whether their is noise or not
         mode = rospy.get_param('~mode')
         if mode == 'ideal':
             self.mode = SimulatorMode.IDEAL
@@ -53,7 +53,7 @@ class Simulator(object):
         spawn_bounds = [[-(fl/2) + (2 * wt), (fl/2) - (2 * wt)],
                         [-(fw/2) + (2 * wt), (fw/2) - (2 * wt)],
                         [spawn_height, spawn_height]]
-
+        #TODO: waht is a urdf?
         urdf_paths = rospy.get_param('~urdf')
         for path in urdf_paths.values():
             self.check_urdf(path)
@@ -77,6 +77,7 @@ class Simulator(object):
         self.car_noise = car_noise
 
         # Creating the ball
+        #TODO: need to potentially chagne the init pose here
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
 
@@ -101,7 +102,8 @@ class Simulator(object):
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
         car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
         self.car_properties = car_properties
-        
+
+        #create a list of car properties for each potential car that there could be
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
@@ -172,7 +174,7 @@ class Simulator(object):
         if not os.path.isfile(param):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
-
+#TODO: how do effort_cb and cmd_cb interact?
     def effort_cb(self, effort_msg, car_id):
         """Sets a car's effort (overwrites commands)"""
         self.cmd_lock.acquire()
@@ -252,7 +254,7 @@ class Simulator(object):
         
         self.reset_lock.release()
         return DeleteCarResponse(res)
-
+#TODO: waht is the car_cmd?
     def reset_cb(self, _):
         """Resets simulator"""
         self.reset_lock.acquire()
@@ -311,7 +313,7 @@ class Simulator(object):
                     car_msg.pose.pose.orientation.z = car_quat[2]
                     car_msg.pose.pose.orientation.w = car_quat[3]
                     self.car_pose_pubs[car_name].publish(car_msg)
-
+            #TODO: why not in an else block: publish data twice no?
             ball_msg = Odometry()
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id

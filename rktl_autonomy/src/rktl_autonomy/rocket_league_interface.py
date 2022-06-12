@@ -127,7 +127,7 @@ class RocketLeagueInterface(ROSInterface):
                 self._FIELD_WIDTH/2,
                 self._MAX_OBS_VEL, self._MAX_OBS_VEL],
                 dtype=np.float32))
-
+#TODO: this is the function that is called by the reset to the sim from the rocket_league_interface
     def _reset_env(self):
         """Reset environment for a new training episode."""
         self._reset_srv.call()
