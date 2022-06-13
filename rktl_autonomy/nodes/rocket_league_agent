@@ -10,7 +10,17 @@ from rktl_autonomy import RocketLeagueInterface
 from stable_baselines3 import PPO
 from os.path import expanduser
 import rospy
-
+"""
+overview:
+Load the weights for the specify model (PPO in this case)
+Create instance of the rocket_league_interface
+Reset the model for the rocket_league_interface
+Crete a PPO model based off the weights
+Infinite loop: 
+- predict the action based of the model
+- get the observation
+- step the action for the specific step based on the action 
+"""
 # create interface (and init ROS)
 env = RocketLeagueInterface(eval=True)
 
