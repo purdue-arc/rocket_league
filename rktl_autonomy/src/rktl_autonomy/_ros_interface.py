@@ -15,9 +15,11 @@ import rospy, roslaunch
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
+
 class SimTimeException(Exception):
     """For when advancing sim time does not go as planned."""
     pass
+
 
 class ROSInterface(Env):
     """Extension of the Gym environment class for all specific interfaces
@@ -47,6 +49,19 @@ class ROSInterface(Env):
             launch_file: if training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch'])
             launch_args: if training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10])
             run_id: if training, used to prevent deadlocks. if logging, run_id describes where to save files. Default is randomly generated
+        Overview:
+        If eval = false (training agnet):
+            - training- try to open launch files
+            - generate uuid (our use provided )
+            - roslauch setup and configuration for the specific environment
+            - Init the time space for the node
+            -
+        If eval = true: (in existing ROS env) (not training)
+            - use existing ROS network, and just create a node
+
+        For all:
+        create a log publisher
+        setup generic variables for login
         """
         super().__init__()
         self.__EVAL_MODE = eval
@@ -76,10 +91,11 @@ class ROSInterface(Env):
             ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_id)
             launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
-            launch_args = [f'render:={port==11311}', f'plot_log:={port==11311}'] + launch_args + [f'agent_name:={node_name}']
+            launch_args = [f'render:={port == 11311}', f'plot_log:={port == 11311}'] + launch_args + [
+                f'agent_name:={node_name}']
             launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
             launch.start()
-            self.close = lambda : launch.shutdown()
+            self.close = lambda: launch.shutdown()
             # initialize self
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
             rospy.init_node(node_name)
@@ -91,6 +107,7 @@ class ROSInterface(Env):
 
         # private variables
         self._cond = Condition()
+        # TODO: why cant merge to if statement above?
 
         # additional set up for training
         if not self.__EVAL_MODE:
@@ -114,6 +131,7 @@ class ROSInterface(Env):
 
     def step(self, action):
         """
+        high-level:
         Implementation of gym.Env.step. This function will intentionally block
         if the ROS environment is not ready.
 
@@ -128,16 +146,22 @@ class ROSInterface(Env):
             reward (float) : amount of reward returned after previous action
             done (bool): whether the episode has ended, in which case further step() calls will return undefined results
             info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
+
+        overview:
+        Runs: _clear_state, _publish_action, _step_time_and_wait_for_state (all abstract methods that are implemented by the child)
+        Gets the simulation state via: _get_state
         """
         self._clear_state()
         self._publish_action(action)
         self.__step_time_and_wait_for_state()
         state = self._get_state()
-        self.__net_reward += state[1]   # logging
+        self.__net_reward += state[1]  # logging
         return state
 
     def reset(self):
-        """Resets the environment to an initial state and returns an initial observation.
+        """
+        High-level:
+        Resets the environment to an initial state and returns an initial observation.
 
         Note that this function should not reset the environment's random
         number generator(s); random variables in the environment's state should
@@ -146,13 +170,27 @@ class ROSInterface(Env):
         a new episode, independent of previous episodes.
         Returns:
             observation (object): the initial observation.
+        Overview:
+        Checks if have a new state ready via: _has_state
+        If so: gathers information: episode #, net reward, duration of the episode
+        Update the message log with these parameters by publishing it
+        increment the episode count
+        reset the reward accumulated for the past episode
+
+        reset the sim:
+        if eval = false ( training the agent)
+        - reset the environment with overidden function (abstract method)
+        for all:
+        - reset the ROS interface (abstract method)
+        -
         """
+
         if self._has_state():
             # generate log
             info = {
-                'episode'    : self.__episode,
-                'net_reward' : self.__net_reward,
-                'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
+                'episode': self.__episode,
+                'net_reward': self.__net_reward,
+                'duration': (rospy.Time.now() - self.__start_time).to_sec()
             }
             info.update(self._get_state()[3])
             # send message
@@ -172,8 +210,17 @@ class ROSInterface(Env):
             self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
-        self.__start_time = rospy.Time.now()    # logging
+        self.__start_time = rospy.Time.now()  # logging
         return self._get_state()[0]
+
+    """
+    input: 
+    - number of retries: step time until state is known
+    overview:
+    Increment time and clock, take input of number of tries and do them until figure stuff out
+    Call __wait_once_for_state for the provided number of retries
+    increment the time if retrying wait_once_for_state
+    """
 
     def __step_time_and_wait_for_state(self, max_retries=1):
         """Step time until a state is known."""
@@ -191,10 +238,11 @@ class ROSInterface(Env):
                     retries += 1
         else:
             while not self.__wait_once_for_state():
-                pass    # idle wait
+                pass  # idle wait
 
+    """overview: Wait and allow other threads to run."""
     def __wait_once_for_state(self):
-        """Wait and allow other threads to run."""
+
         with self._cond:
             has_state = self._cond.wait_for(self._has_state, 0.25)
         if rospy.is_shutdown():
@@ -202,44 +250,49 @@ class ROSInterface(Env):
         return has_state
 
     # All the below abstract methods / properties must be implemented by subclasses
+    """overview: The Space object corresponding to valid actions."""
     @property
     @abstractmethod
     def action_space(self):
-        """The Space object corresponding to valid actions."""
+
         raise NotImplementedError
 
+    """Overview: The Space object corresponding to valid observations."""
     @property
     @abstractmethod
     def observation_space(self):
-        """The Space object corresponding to valid observations."""
+
         raise NotImplementedError
 
+    """Overview: Reset environment for a new episode."""
     @abstractmethod
     def _reset_env(self):
-        """Reset environment for a new episode."""
+
         raise NotImplementedError
 
+    """Overview: Reset internally for a new episode."""
     @abstractmethod
     def _reset_self(self):
-        """Reset internally for a new episode."""
+
         raise NotImplementedError
 
+    """Overview: Determine if the new state is ready."""
     @abstractmethod
     def _has_state(self):
-        """Determine if the new state is ready."""
+
         raise NotImplementedError
 
+    """Overview: Clear state variables / flags in preparation for new ones."""
     @abstractmethod
     def _clear_state(self):
-        """Clear state variables / flags in preparation for new ones."""
         raise NotImplementedError
 
+    """Overview: Get state tuple (observation, reward, done, info)."""
     @abstractmethod
     def _get_state(self):
-        """Get state tuple (observation, reward, done, info)."""
         raise NotImplementedError
 
+    """Overview: Publish an action to the ROS network."""
     @abstractmethod
     def _publish_action(self, action):
-        """Publish an action to the ROS network."""
         raise NotImplementedError
