@@ -98,9 +98,8 @@ class Simulator(object):
         self.timeout = rospy.get_param('~timeout', 10)
 
         # Setting up field
-        #TODO: need to add these parameters, but where??
+        # TODO: need to add these parameters, but where??
         randomizefield = rospy.get_param('/field/randomizeField')
-
 
         fw1 = rospy.get_param('/field/width1')
         fl1 = rospy.get_param('/field/length1')
@@ -146,13 +145,15 @@ class Simulator(object):
         # TODO: need to potentially chagne the init pose here
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
+        #TODO: need to add these parameters that I am missing
+        randomize_ball_pos = rospy.get_param('/field/randomizeBallPose')
+        randomize_ball_vel = rospy.get_param('/field/randomizeBallVel')
 
+        if randomize_ball_pos:
+            ball_init_pose = None
+        if randomize_ball_vel:
+            ball_init_speed = None
 
-        randomizeBall = rospy.get_param('/field/randomizeBall')
-
-        if randomizeCar:
-            ball_init_pose = getRandomFieldPosition()
-        randomizeBall = rospy.get_param('/field/randomizeBall')
         self.sim.create_ball('ball', init_pose=ball_init_pose,
                              init_speed=ball_init_speed, noise=ball_noise)
         if self.mode == SimulatorMode.REALISTIC:
@@ -167,9 +168,19 @@ class Simulator(object):
         # Creating cars
         car_properties = {}
         car_properties['length'] = rospy.get_param('/cars/length')
-        car_properties['max_speed'] = rospy.get_param('/cars/throttle/max_speed')
+
+        rand_max_speed = rospy.get_param("/cars/rand_max_speed")
+        if rand_max_speed:
+            max_speed_1 = rospy.get_param('/cars/throttle/max_speed_1')
+            max_speed_2 = rospy.get_param('/cars/throttle/max_speed_2')
+            car_properties['max_speed']=self.get_rand_num_from_range(max_speed_1,max_speed_2)
+        else:
+            car_properties['max_speed']=rospy.get_param('/cars/throttle/max_speed_1')
+
+
+
+
         car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
-        car_properties['steering_throw'] = rospy.get_param('/cars/steering/max_throw')
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
         car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
         self.car_properties = car_properties
@@ -189,6 +200,9 @@ class Simulator(object):
             if 'name' not in car_config:
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
+            #TODO: need to add randomization of position to the car configs
+            if 'randomize_pose' in car_config:
+                init_pose = None
 
             self.car_ids[car_name] = self.sim.create_car(
                 'car', init_pose=init_pose, noise=car_noise, car_props=car_properties)
@@ -231,8 +245,8 @@ class Simulator(object):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 pass
-
-
+    def get_rand_num_from_range(self,v1,v2):
+        return random.randint(v1, v2)
     """
     generates the upper and lower spawn bounds
     fw1: first width bound
@@ -249,14 +263,12 @@ class Simulator(object):
         upperFw = max(fw1, fw2)
         upperFl = max(fl1, fl2)
 
-        return random.randint(lowerFw, upperFw), random.randint(lowerFl, upperFl)
-
+        return self.get_rand_num_from_range(lowerFw, upperFw), self.get_rand_num_from_range(lowerFl, upperFl)
 
     """
     overview: Checks whether you ahvea valid pybullet url for information
     if not, wait for the file to build in .5 seconds
     """
-
 
     def check_urdf(self, param):
         """Validates that a URDF exists, then returns path"""
@@ -272,13 +284,11 @@ class Simulator(object):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
 
-
     # TODO: how do effort_cb and cmd_cb interact?
     """
     Overrides the cmd_cb: calls the car command with the throttle and steering
     TODO: during which state is it called with
     """
-
 
     def effort_cb(self, effort_msg, car_id):
         """Sets a car's effort (overwrites commands)"""
@@ -287,12 +297,10 @@ class Simulator(object):
                                  (effort_msg.throttle, effort_msg.steering))
         self.cmd_lock.release()
 
-
     """
     Overrides the effirt_cd: calls the car
     Command with the velocity and the curvature
     """
-
 
     def cmd_cb(self, cmd_msg, car_id):
         """Sets a car's command (overwrites efforts)"""
@@ -300,7 +308,6 @@ class Simulator(object):
         self.sim.set_car_command(car_id,
                                  (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
-
 
     """
     Add new car to the simulator
@@ -318,7 +325,6 @@ class Simulator(object):
     If ideal mode:
     - Publish to the odometry (with car id)
     """
-
 
     def create_car_cb(self, req):
         """Adds a new car to the simulator"""
@@ -359,14 +365,12 @@ class Simulator(object):
         self.reset_lock.release()
         return CreateCarResponse(True)
 
-
     """
     Remove car from the simulator
     Delete the effort,cmd subs (check if they exist first)
     delete the odom, pose publishers (check if they exist first)
     Delete cars body from pybullet by called sim.delete_car
     """
-
 
     def delete_car_cb(self, req):
         """Removes a car from the simulator"""
@@ -395,7 +399,6 @@ class Simulator(object):
         self.reset_lock.release()
         return DeleteCarResponse(res)
 
-
     # TODO: what is the car_cmd? (velocity and angle maybe?)
     """
     Resets the simulator
@@ -403,7 +406,6 @@ class Simulator(object):
     Rest the time
     Reset the car_cmd
     """
-
 
     def reset_cb(self, _):
         """Resets simulator"""
@@ -413,7 +415,6 @@ class Simulator(object):
         self.last_time = None
         self.reset_lock.release()
         return EmptyResponse()
-
 
     """
     Pause the time
@@ -428,7 +429,6 @@ class Simulator(object):
     For each car, move it forward, get its position and publish it (via Odometry() func)
     Resume the time
     """
-
 
     def loop_once(self):
         """Main loop"""
