@@ -7,6 +7,7 @@ License:
 """
 
 # 3rd party modules
+import random
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 import os
@@ -97,15 +98,27 @@ class Simulator(object):
         self.timeout = rospy.get_param('~timeout', 10)
 
         # Setting up field
-        fw = rospy.get_param('/field/width')
-        fl = rospy.get_param('/field/length')
+        #TODO: need to add these parameters, but where??
+        randomizefield = rospy.get_param('/field/randomizeField')
+
+
+        fw1 = rospy.get_param('/field/width1')
+        fl1 = rospy.get_param('/field/length1')
         wt = rospy.get_param('/field/wall_thickness')
         spawn_height = rospy.get_param('~spawn_height', 0.06)
-
-        # Setup bounds for spawning car and ball
+        if randomizefield:
+            fw2 = rospy.get_param('/field/width2')
+            fl2 = rospy.get_param('/field/length2')
+            fw, fl = self.get_rand_spawn_bounds(fw1, fw2, fl1, fl2)
+        else:
+            fw = fw1
+            fl = fl1
         spawn_bounds = [[-(fl / 2) + (2 * wt), (fl / 2) - (2 * wt)],
                         [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
                         [spawn_height, spawn_height]]
+
+        # Setup bounds for spawning car and ball
+
         # TODO: waht is a urdf?
         urdf_paths = rospy.get_param('~urdf')
         for path in urdf_paths.values():
@@ -134,6 +147,12 @@ class Simulator(object):
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
 
+
+        randomizeBall = rospy.get_param('/field/randomizeBall')
+
+        if randomizeCar:
+            ball_init_pose = getRandomFieldPosition()
+        randomizeBall = rospy.get_param('/field/randomizeBall')
         self.sim.create_ball('ball', init_pose=ball_init_pose,
                              init_speed=ball_init_speed, noise=ball_noise)
         if self.mode == SimulatorMode.REALISTIC:
@@ -212,10 +231,33 @@ class Simulator(object):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 pass
+
+
+    """
+    generates the upper and lower spawn bounds
+    fw1: first width bound
+    fw2: second width bound
+    fl1: first length bound
+    fl2: second length bound
+    returns a tupple where entry 2= random width between fw1/fw2 and entry 1= random length between fl1/2
+    """
+
+    def get_rand_spawn_bounds(self, fw1, fw2, fl1, fl2):
+        lowerFw = min(fw1, fw2);
+        lowerFl = min(fl1, fl2);
+
+        upperFw = max(fw1, fw2)
+        upperFl = max(fl1, fl2)
+
+        return random.randint(lowerFw, upperFw), random.randint(lowerFl, upperFl)
+
+
     """
     overview: Checks whether you ahvea valid pybullet url for information
     if not, wait for the file to build in .5 seconds
     """
+
+
     def check_urdf(self, param):
         """Validates that a URDF exists, then returns path"""
         if param is None:
@@ -230,27 +272,36 @@ class Simulator(object):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
 
+
     # TODO: how do effort_cb and cmd_cb interact?
     """
     Overrides the cmd_cb: calls the car command with the throttle and steering
     TODO: during which state is it called with
     """
+
+
     def effort_cb(self, effort_msg, car_id):
         """Sets a car's effort (overwrites commands)"""
         self.cmd_lock.acquire()
         self.sim.set_car_command(car_id,
                                  (effort_msg.throttle, effort_msg.steering))
         self.cmd_lock.release()
+
+
     """
     Overrides the effirt_cd: calls the car
     Command with the velocity and the curvature
     """
+
+
     def cmd_cb(self, cmd_msg, car_id):
         """Sets a car's command (overwrites efforts)"""
         self.cmd_lock.acquire()
         self.sim.set_car_command(car_id,
                                  (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
+
+
     """
     Add new car to the simulator
     Checks if resetting to random position: 
@@ -267,6 +318,8 @@ class Simulator(object):
     If ideal mode:
     - Publish to the odometry (with car id)
     """
+
+
     def create_car_cb(self, req):
         """Adds a new car to the simulator"""
         self.reset_lock.acquire()
@@ -305,12 +358,16 @@ class Simulator(object):
 
         self.reset_lock.release()
         return CreateCarResponse(True)
-"""
-Remove car from the simulator
-Delete the effort,cmd subs (check if they exist first)
-delete the odom, pose publishers (check if they exist first)
-Delete cars body from pybullet by called sim.delete_car
-"""
+
+
+    """
+    Remove car from the simulator
+    Delete the effort,cmd subs (check if they exist first)
+    delete the odom, pose publishers (check if they exist first)
+    Delete cars body from pybullet by called sim.delete_car
+    """
+
+
     def delete_car_cb(self, req):
         """Removes a car from the simulator"""
         self.reset_lock.acquire()
@@ -338,6 +395,7 @@ Delete cars body from pybullet by called sim.delete_car
         self.reset_lock.release()
         return DeleteCarResponse(res)
 
+
     # TODO: what is the car_cmd? (velocity and angle maybe?)
     """
     Resets the simulator
@@ -345,6 +403,8 @@ Delete cars body from pybullet by called sim.delete_car
     Rest the time
     Reset the car_cmd
     """
+
+
     def reset_cb(self, _):
         """Resets simulator"""
         self.reset_lock.acquire()
@@ -353,19 +413,23 @@ Delete cars body from pybullet by called sim.delete_car
         self.last_time = None
         self.reset_lock.release()
         return EmptyResponse()
-   """
-   Pause the time
-   Step the simulation once step
-   Update the match status: if either team scored, show the winner, if not, continue the match
-   
-   If the simulation mode is realistic:
-   - Write the ball positing and orientation variables (pub)
-   - Write each cars position and orientation variables (pub)
-   For all modes (ideal and realistic):
-   Move the ball forward: get its position, and publish it (via Odometry() func)
-   For each car, move it forward, get its position and publish it (via Odometry() func)
-   Resume the time
-   """
+
+
+    """
+    Pause the time
+    Step the simulation once step
+    Update the match status: if either team scored, show the winner, if not, continue the match
+    
+    If the simulation mode is realistic:
+    - Write the ball positing and orientation variables (pub)
+    - Write each cars position and orientation variables (pub)
+    For all modes (ideal and realistic):
+    Move the ball forward: get its position, and publish it (via Odometry() func)
+    For each car, move it forward, get its position and publish it (via Odometry() func)
+    Resume the time
+    """
+
+
     def loop_once(self):
         """Main loop"""
         self.reset_lock.acquire()
@@ -461,6 +525,7 @@ Delete cars body from pybullet by called sim.delete_car
 
         self.last_time = now
         self.reset_lock.release()
+
 
 """the main function: call the simulator to init the loop and create objects"""
 if __name__ == "__main__":
