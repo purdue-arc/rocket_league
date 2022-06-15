@@ -145,7 +145,7 @@ class Simulator(object):
         # TODO: need to potentially chagne the init pose here
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
-        #TODO: need to add these parameters that I am missing
+        # TODO: need to add these parameters that I am missing
         randomize_ball_pos = rospy.get_param('/field/randomizeBallPose')
         randomize_ball_vel = rospy.get_param('/field/randomizeBallVel')
 
@@ -173,12 +173,17 @@ class Simulator(object):
         if rand_max_speed:
             max_speed_1 = rospy.get_param('/cars/throttle/max_speed_1')
             max_speed_2 = rospy.get_param('/cars/throttle/max_speed_2')
-            car_properties['max_speed']=self.get_rand_num_from_range(max_speed_1,max_speed_2)
+            car_properties['max_speed'] = self.get_rand_num_from_range(max_speed_1, max_speed_2)
         else:
-            car_properties['max_speed']=rospy.get_param('/cars/throttle/max_speed_1')
+            car_properties['max_speed'] = rospy.get_param('/cars/throttle/max_speed_1')
 
-
-
+        rand_steering_throw = rospy.get_param("/cars/rand_steering_throw")
+        if rand_steering_throw:
+            max_steering_throw_1 = rospy.get_param('/cars/throttle/max_steering_throw_1')
+            max_steering_throw_2 = rospy.get_param('/cars/throttle/max_steering_throw_2')
+            car_properties['steering_throw'] = self.get_rand_num_from_range(max_steering_throw_1, max_steering_throw_2)
+        else:
+            car_properties['steering_throw'] = rospy.get_param('/cars/throttle/max_steering_throw_2')
 
         car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
@@ -200,7 +205,7 @@ class Simulator(object):
             if 'name' not in car_config:
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
-            #TODO: need to add randomization of position to the car configs
+            # TODO: need to add randomization of position to the car configs
             if 'randomize_pose' in car_config:
                 init_pose = None
 
@@ -245,8 +250,10 @@ class Simulator(object):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 pass
-    def get_rand_num_from_range(self,v1,v2):
+
+    def get_rand_num_from_range(self, v1, v2):
         return random.randint(v1, v2)
+
     """
     generates the upper and lower spawn bounds
     fw1: first width bound
