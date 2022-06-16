@@ -342,10 +342,13 @@ class Simulator(object):
     def reset_cb(self, _):
         """Resets simulator"""
         self.reset_lock.acquire()
-        # TODO: need to call all of the important functions to create reset for the wanted variables
-        # TODO: need to pass key variables to the rest function located in the sim class
 
-        self.sim.reset()
+        # TODO: need to pass key variables to the rest function located in the sim class
+        spawn_bounds = self.get_spawn_bounds()
+
+        self.generate_car_properties(self.car_noise)
+
+        self.sim.reset(spawn_bounds)
         self.car_cmd = (0.0, 0.0)
         self.last_time = None
         self.reset_lock.release()

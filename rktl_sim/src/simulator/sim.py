@@ -370,11 +370,11 @@ class Sim(object):
     - If the orientation and position were not initialized, then randomize them, and reset the car
     """
 
-    def reset(self):
+    def reset(self,spawn_bounds):
         self.scored = False
         self.winner = None
         self.touched_last = None
-
+        self.spawn_bounds=spawn_bounds
         self.reset_ball()
 
         self.reset_cars()
