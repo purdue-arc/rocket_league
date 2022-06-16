@@ -61,20 +61,7 @@ class Simulator(object):
 
     Initialize the ball object finding the parameter from ~ball/init_pose or init_speed (depend on whether using realistic or ideal model)
     Init the ball odometry depending on whether we are using a realistic model or not
-    Set the car parameters based on those provided in the rospy directory (the properties of the car itself: length, max_speed, throttle, steering, simulate effort, etc)
 
-    Create a list for each car depending on its properties:
-        Car id
-        Car pose publisher
-        Car odom publisher
-        Car effort subscribers
-        Car command subscribers
-    Publisher:
-        match_status
-    Service:
-        Sim_reset
-        Sim_create_car
-        sim_delete_Car
 
     After initializing everything above,
     Loop while rospy is not shutdown
@@ -83,6 +70,7 @@ class Simulator(object):
 
     def __init__(self):
         # create variables for the functions that might initialize them
+        #TODO: can potentially specify them as return values
         self.ball_odom_pub = None
         self.ball_pose_pub = None
         self.car_cmd_subs = None
@@ -159,20 +147,27 @@ class Simulator(object):
                 pass
 
     def get_rand_num_from_range(self, v1, v2):
+        """
+        generates a random integer in the range of v1 and v2
+        @param v1: first bound
+        @param v2: second bound
+        @return: the random integer
+        """
         minVal = min(v1, v2)
         maxval = max(v1, v2)
         return random.randint(minVal, maxval)
 
-    """
-    generates the upper and lower spawn bounds
-    fw1: first width bound
-    fw2: second width bound
-    fl1: first length bound
-    fl2: second length bound
-    returns a tupple where entry 2= random width between fw1/fw2 and entry 1= random length between fl1/2
-    """
 
     def get_rand_spawn_bounds(self, fw1, fw2, fl1, fl2):
+        """
+        generates the upper and lower spawn bounds
+
+        @param fw1: first width bound
+        @param fw2: second width bound
+        @param fl1: first length bound
+        @param fl2: second length bound
+        @return: tupple where entry 2= random width between fw1/fw2 and entry 1= random length between fl1/2
+        """
         lowerFw = min(fw1, fw2);
         lowerFl = min(fl1, fl2);
 
@@ -225,25 +220,25 @@ class Simulator(object):
                                  (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
 
-    """
-    Add new car to the simulator
-    Checks if resetting to random position: 
-    - if not, set it to default
-    - if so, will be reset later in the sim.create_car function
-    
-    Get the car id,
-    Subscribe:
-    - effort cb: args: car_id
-    - command cb: args: car_id
-    If realistic mode:
-    - Publish to the pose sync early (with car id)
-    - Publish to the odometry truth (with car id)
-    If ideal mode:
-    - Publish to the odometry (with car id)
-    """
+
 
     def create_car_cb(self, req):
-        """Adds a new car to the simulator"""
+        """
+        Add new car to the simulator
+        Checks if resetting to random position:
+        - if not, set it to default
+        - if so, will be reset later in the sim.create_car function
+
+        Get the car id,
+        Subscribe:
+        - effort cb: args: car_id
+        - command cb: args: car_id
+        If realistic mode:
+        - Publish to the pose sync early (with car id)
+        - Publish to the odometry truth (with car id)
+        If ideal mode:
+        - Publish to the odometry (with car id)
+        """
         self.reset_lock.acquire()
         if req.name in self.car_ids:
             return CreateCarResponse(False)
@@ -281,15 +276,15 @@ class Simulator(object):
         self.reset_lock.release()
         return CreateCarResponse(True)
 
-    """
-    Remove car from the simulator
-    Delete the effort,cmd subs (check if they exist first)
-    delete the odom, pose publishers (check if they exist first)
-    Delete cars body from pybullet by called sim.delete_car
-    """
+
 
     def delete_car_cb(self, req):
-        """Removes a car from the simulator"""
+        """
+        Remove car from the simulator
+        Delete the effort,cmd subs (check if they exist first)
+        delete the odom, pose publishers (check if they exist first)
+        Delete cars body from pybullet by called sim.delete_car
+        """
         self.reset_lock.acquire()
         if req.name not in self.car_ids:
             return DeleteCarResponse(False)
@@ -315,16 +310,17 @@ class Simulator(object):
         self.reset_lock.release()
         return DeleteCarResponse(res)
 
-    # TODO: what is the car_cmd? (velocity and angle maybe?)
-    """
-    Resets the simulator
-    Reset the sim.py for each car
-    Rest the time
-    Reset the car_cmd
-    """
 
-    def reset_cb(self, _):
-        """Resets simulator"""
+
+    def reset_cb(self):
+        """
+        Resets the simulator
+        Reset the sim.py for each car
+        Rest the time
+        Reset the car_cmd
+        reset the simulator parameters and the sim class itself
+        @return: nothing broke response
+        """
         self.reset_lock.acquire()
 
         # TODO: need to pass key variables to the rest function located in the sim class
@@ -338,22 +334,21 @@ class Simulator(object):
         self.reset_lock.release()
         return EmptyResponse()
 
-    """
-    Pause the time
-    Step the simulation once step
-    Update the match status: if either team scored, show the winner, if not, continue the match
-    
-    If the simulation mode is realistic:
-    - Write the ball positing and orientation variables (pub)
-    - Write each cars position and orientation variables (pub)
-    For all modes (ideal and realistic):
-    Move the ball forward: get its position, and publish it (via Odometry() func)
-    For each car, move it forward, get its position and publish it (via Odometry() func)
-    Resume the time
-    """
 
     def loop_once(self):
-        """Main loop"""
+        """
+        Pause the time
+        Step the simulation once step
+        Update the match status: if either team scored, show the winner, if not, continue the match
+
+        If the simulation mode is realistic:
+        - Write the ball positing and orientation variables (pub)
+        - Write each cars position and orientation variables (pub)
+        For all modes (ideal and realistic):
+        Move the ball forward: get its position, and publish it (via Odometry() func)
+        For each car, move it forward, get its position and publish it (via Odometry() func)
+        Resume the time
+        """
         self.reset_lock.acquire()
         now = rospy.Time.now()
         if self.last_time is not None and self.last_time != now:
@@ -449,12 +444,14 @@ class Simulator(object):
         self.reset_lock.release()
 
     def generate_max_speed(self):
-        # TODO: need to update these paramters in the yaml
         """
         randomize the car max speed
         if randomize, generate an int between the max speeds
         if not, use the first paramter
+        @return: the max speed depending on if it was randomized
         """
+        # TODO: need to update these paramters in the yaml
+
         rand_max_speed = rospy.get_param("/cars/rand_max_speed")
         if rand_max_speed:
             max_speed_1 = rospy.get_param('/cars/throttle/max_speed_1')
@@ -465,10 +462,11 @@ class Simulator(object):
 
     def generate_steering_throw(self):
         """
-                randomize the car steering throw
+         randomize the car steering throw
                 if randomize, generate an int between the steering throws
                 if not, use the first paramter
-                """
+        @return: the steering throw of the car
+        """
         rand_steering_throw = rospy.get_param("/cars/rand_steering_throw")
         if rand_steering_throw:
             max_steering_throw_1 = rospy.get_param('/cars/throttle/max_steering_throw_1')
@@ -478,14 +476,13 @@ class Simulator(object):
             return rospy.get_param('/cars/throttle/max_steering_throw_2')
 
     def get_spawn_bounds(self):
+        """
+        randomly generates the spawn bounds if we specify to generate random ones
+        @return: the spawn bound array
+        """
         # Setting up field
         # TODO: need to add these parameters, but where??
         randomize_field = rospy.get_param('/field/randomize_field')
-        """
-        the default paramters used inthe creation of the field
-        width/length_1: either default, or one of the ranodmization bounds
-
-        """
         fw1 = rospy.get_param('/field/width_1')
         fl1 = rospy.get_param('/field/length_1')
         wt = rospy.get_param('/field/wall_thickness')
@@ -503,6 +500,12 @@ class Simulator(object):
         return spawn_bounds
 
     def get_car_properties(self):
+        """
+        creates a list of car properties and returns it:
+        - generates random max speed and steering throw by calling other functions
+        - used to generate these properties for each car
+        @return:
+        """
         # TODO: possible bug bc generating locations and cars might overlap
         car_properties = {}
         car_properties['length'] = rospy.get_param('/cars/length')
@@ -517,6 +520,23 @@ class Simulator(object):
         return car_properties
 
     def generate_car_properties(self, car_noise):
+        """
+        Set the car parameters based on those provided in the rospy directory (the properties of the car itself: length, max_speed, throttle, steering, simulate effort, etc)
+
+        Create a list for each car depending on its properties:
+            Car id
+            Car pose publisher
+            Car odom publisher
+            Car effort subscribers
+            Car command subscribers
+        Publisher:
+            match_status
+        Service:
+            Sim_reset
+            Sim_create_car
+            sim_delete_Car
+        @param car_noise:
+        """
         car_properties = self.get_car_properties()
         self.car_ids = {}
         self.car_pose_pubs = {}
@@ -558,6 +578,10 @@ class Simulator(object):
                     f'/cars/{car_name}/odom', Odometry, queue_size=1)
 
     def set_sensor_noise(self):
+        """
+        adds the sensor noise for the car and for the ball
+        @return: the sensor noises
+        """
         sensor_noise = rospy.get_param('~sensor_noise', None)
         ball_noise = None
         car_noise = None
@@ -569,7 +593,9 @@ class Simulator(object):
 
     def generate_ball(self, ball_noise):
         """
-        @param ball_noise:
+        check if we want to randomize the ball properties (ball pos and ball vel)
+        if we want to randomize, then we will do so in the sim.py
+        @param ball_noise: the ball noise that is used to generate the ball object
         """
         # TODO: need to potentially chagne the init pose here
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
