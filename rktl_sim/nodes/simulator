@@ -82,6 +82,13 @@ class Simulator(object):
     """
 
     def __init__(self):
+        self.car_cmd_subs = None
+        self.car_effort_subs = None
+        self.car_odom_pubs = None
+        self.car_pose_pubs = None
+        self.car_ids = None
+        self.car_cmd = None
+        self.car_noise = None
         rospy.init_node('simulator')
         # the different nodes determine whether their is noise or not
         mode = rospy.get_param('~mode')
@@ -116,13 +123,7 @@ class Simulator(object):
         self.sim = simulator.Sim(props, urdf_paths, spawn_bounds, render_enabled)
 
         # Setting sensor noise
-        sensor_noise = rospy.get_param('~sensor_noise', None)
-        ball_noise = None
-        car_noise = None
-        if sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
-            ball_noise = sensor_noise.get('ball', None)
-            car_noise = sensor_noise.get('car', None)
-        self.car_noise = car_noise
+        car_noise, ball_noise = self.set_sensor_noise()
 
         # Creating the ball
         # TODO: need to potentially chagne the init pose here
@@ -148,7 +149,7 @@ class Simulator(object):
             self.ball_odom_pub = rospy.Publisher('/ball/odom',
                                                  Odometry, queue_size=1)
 
-        self.init_car_properties(car_noise)
+        self.generate_car_properties(car_noise)
 
         # create a list of car properties for each potential car that there could be
 
@@ -341,7 +342,10 @@ class Simulator(object):
     def reset_cb(self, _):
         """Resets simulator"""
         self.reset_lock.acquire()
-        self.sim.reset(self.car_properties, self.)
+        # TODO: need to call all of the important functions to create reset for the wanted variables
+        # TODO: need to pass key variables to the rest function located in the sim class
+
+        self.sim.reset()
         self.car_cmd = (0.0, 0.0)
         self.last_time = None
         self.reset_lock.release()
@@ -525,7 +529,7 @@ class Simulator(object):
         car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
         return car_properties
 
-    def init_car_properties(self, car_noise):
+    def generate_car_properties(self, car_noise):
         car_properties = self.get_car_properties()
         self.car_ids = {}
         self.car_pose_pubs = {}
@@ -565,6 +569,16 @@ class Simulator(object):
             elif self.mode == SimulatorMode.IDEAL:
                 self.car_odom_pubs[car_name] = rospy.Publisher(
                     f'/cars/{car_name}/odom', Odometry, queue_size=1)
+
+    def set_sensor_noise(self):
+        sensor_noise = rospy.get_param('~sensor_noise', None)
+        ball_noise = None
+        car_noise = None
+        if sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
+            ball_noise = sensor_noise.get('ball', None)
+            car_noise = sensor_noise.get('car', None)
+        self.car_noise = car_noise
+        return car_noise, ball_noise
 
 
 """the main function: call the simulator to init the loop and create objects"""
