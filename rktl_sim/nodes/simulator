@@ -82,6 +82,9 @@ class Simulator(object):
     """
 
     def __init__(self):
+        # create variables for the functions that might initialize them
+        self.ball_odom_pub = None
+        self.ball_pose_pub = None
         self.car_cmd_subs = None
         self.car_effort_subs = None
         self.car_odom_pubs = None
@@ -89,6 +92,7 @@ class Simulator(object):
         self.car_ids = None
         self.car_cmd = None
         self.car_noise = None
+
         rospy.init_node('simulator')
         # the different nodes determine whether their is noise or not
         mode = rospy.get_param('~mode')
@@ -98,7 +102,7 @@ class Simulator(object):
             self.mode = SimulatorMode.REALISTIC
         else:
             rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
-
+        #set the engine environemnt
         render_enabled = rospy.get_param('~render', False)
         rate = rospy.Rate(rospy.get_param('~rate', 30))
         self.frame_id = rospy.get_param('~frame_id', 'map')
@@ -126,28 +130,8 @@ class Simulator(object):
         car_noise, ball_noise = self.set_sensor_noise()
 
         # Creating the ball
-        # TODO: need to potentially chagne the init pose here
-        ball_init_pose = rospy.get_param('~ball/init_pose', None)
-        ball_init_speed = rospy.get_param('~ball/init_speed', None)
-        # TODO: need to add these parameters that I am missing
-        randomize_ball_pos = rospy.get_param('/field/randomize_ball_pose')
-        randomize_ball_vel = rospy.get_param('/field/randomize_ball_vel')
 
-        if randomize_ball_pos:
-            ball_init_pose = None
-        if randomize_ball_vel:
-            ball_init_speed = None
-
-        self.sim.create_ball('ball', init_pose=ball_init_pose,
-                             init_speed=ball_init_speed, noise=ball_noise)
-        if self.mode == SimulatorMode.REALISTIC:
-            self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
-                                                 PoseWithCovarianceStamped, queue_size=1)
-            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth',
-                                                 Odometry, queue_size=1)
-        elif self.mode == SimulatorMode.IDEAL:
-            self.ball_odom_pub = rospy.Publisher('/ball/odom',
-                                                 Odometry, queue_size=1)
+        self.generate_ball(ball_noise)
 
         self.generate_car_properties(car_noise)
 
@@ -582,6 +566,33 @@ class Simulator(object):
             car_noise = sensor_noise.get('car', None)
         self.car_noise = car_noise
         return car_noise, ball_noise
+
+    def generate_ball(self, ball_noise):
+        """
+        @param ball_noise:
+        """
+        # TODO: need to potentially chagne the init pose here
+        ball_init_pose = rospy.get_param('~ball/init_pose', None)
+        ball_init_speed = rospy.get_param('~ball/init_speed', None)
+        # TODO: need to add these parameters that I am missing
+        randomize_ball_pos = rospy.get_param('/field/randomize_ball_pose')
+        randomize_ball_vel = rospy.get_param('/field/randomize_ball_vel')
+
+        if randomize_ball_pos:
+            ball_init_pose = None
+        if randomize_ball_vel:
+            ball_init_speed = None
+
+        self.sim.create_ball('ball', init_pose=ball_init_pose,
+                             init_speed=ball_init_speed, noise=ball_noise)
+        if self.mode == SimulatorMode.REALISTIC:
+            self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
+                                                 PoseWithCovarianceStamped, queue_size=1)
+            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth',
+                                                 Odometry, queue_size=1)
+        elif self.mode == SimulatorMode.IDEAL:
+            self.ball_odom_pub = rospy.Publisher('/ball/odom',
+                                                 Odometry, queue_size=1)
 
 
 """the main function: call the simulator to init the loop and create objects"""
