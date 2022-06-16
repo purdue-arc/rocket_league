@@ -147,18 +147,8 @@ class Simulator(object):
         elif self.mode == SimulatorMode.IDEAL:
             self.ball_odom_pub = rospy.Publisher('/ball/odom',
                                                  Odometry, queue_size=1)
-        # TODO: possible bug bc generating locations and cars might overlap
-        car_properties = {}
-        car_properties['length'] = rospy.get_param('/cars/length')
 
-        # TODO: need to update these paramters in the yaml
-        car_properties['max_speed'] = self.generate_max_speed()
-        car_properties['steering_throw'] = self.generate_steering_throw()
-
-        car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
-        car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
-        car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
-        self.car_properties = car_properties
+        self.car_properties = self.init_car_properties()
 
         # create a list of car properties for each potential car that there could be
         self.car_ids = {}
@@ -558,6 +548,20 @@ class Simulator(object):
                         [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
                         [spawn_height, spawn_height]]
         return spawn_bounds
+
+    def init_car_properties(self):
+        # TODO: possible bug bc generating locations and cars might overlap
+        car_properties = {}
+        car_properties['length'] = rospy.get_param('/cars/length')
+
+        # TODO: need to update these paramters in the yaml
+        car_properties['max_speed'] = self.generate_max_speed()
+        car_properties['steering_throw'] = self.generate_steering_throw()
+
+        car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
+        car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
+        car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
+        return car_properties
 
 
 """the main function: call the simulator to init the loop and create objects"""
