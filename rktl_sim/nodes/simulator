@@ -99,7 +99,7 @@ class Simulator(object):
 
         # Setting up field
         # TODO: need to add these parameters, but where??
-        randomizefield = rospy.get_param('/field/randomize_field')
+        randomize_field = rospy.get_param('/field/randomize_field')
         """
         the default paramters used inthe creation of the field
         width/length_1: either default, or one of the ranodmization bounds
@@ -109,7 +109,7 @@ class Simulator(object):
         fl1 = rospy.get_param('/field/length_1')
         wt = rospy.get_param('/field/wall_thickness')
         spawn_height = rospy.get_param('~spawn_height', 0.06)
-        if randomizefield:
+        if randomize_field:
             fw2 = rospy.get_param('/field/width_2')
             fl2 = rospy.get_param('/field/length_2')
             fw, fl = self.get_rand_spawn_bounds(fw1, fw2, fl1, fl2)
@@ -168,36 +168,13 @@ class Simulator(object):
         elif self.mode == SimulatorMode.IDEAL:
             self.ball_odom_pub = rospy.Publisher('/ball/odom',
                                                  Odometry, queue_size=1)
-
-        # Creating cars
+        # TODO: possible bug bc generating locations and cars might overlap
         car_properties = {}
         car_properties['length'] = rospy.get_param('/cars/length')
+
         # TODO: need to update these paramters in the yaml
-        """
-        randomize the car max speed 
-        if randomize, generate an int between the max speeds 
-        if not, use the first paramter
-        """
-        rand_max_speed = rospy.get_param("/cars/rand_max_speed")
-        if rand_max_speed:
-            max_speed_1 = rospy.get_param('/cars/throttle/max_speed_1')
-            max_speed_2 = rospy.get_param('/cars/throttle/max_speed_2')
-            car_properties['max_speed'] = self.get_rand_num_from_range(max_speed_1, max_speed_2)
-        else:
-            car_properties['max_speed'] = rospy.get_param('/cars/throttle/max_speed_1')
-        # TODO: need to update these paramters in the yaml
-        """
-        randomize the car steering throw 
-        if randomize, generate an int between the steering throws
-        if not, use the first paramter
-        """
-        rand_steering_throw = rospy.get_param("/cars/rand_steering_throw")
-        if rand_steering_throw:
-            max_steering_throw_1 = rospy.get_param('/cars/throttle/max_steering_throw_1')
-            max_steering_throw_2 = rospy.get_param('/cars/throttle/max_steering_throw_2')
-            car_properties['steering_throw'] = self.get_rand_num_from_range(max_steering_throw_1, max_steering_throw_2)
-        else:
-            car_properties['steering_throw'] = rospy.get_param('/cars/throttle/max_steering_throw_2')
+        car_properties['max_speed'] = self.generate_max_speed()
+        car_properties['steering_throw'] = self.generate_steering_throw()
 
         car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
@@ -266,8 +243,8 @@ class Simulator(object):
                 pass
 
     def get_rand_num_from_range(self, v1, v2):
-        minVal = min(v1,v2)
-        maxval = max(v1,v2)
+        minVal = min(v1, v2)
+        maxval = max(v1, v2)
         return random.randint(minVal, maxval)
 
     """
@@ -433,7 +410,7 @@ class Simulator(object):
     def reset_cb(self, _):
         """Resets simulator"""
         self.reset_lock.acquire()
-        self.sim.reset()
+        self.sim.reset(self.car_properties, self.)
         self.car_cmd = (0.0, 0.0)
         self.last_time = None
         self.reset_lock.release()
@@ -548,6 +525,35 @@ class Simulator(object):
 
         self.last_time = now
         self.reset_lock.release()
+
+    def generate_max_speed(self):
+        # TODO: need to update these paramters in the yaml
+        """
+        randomize the car max speed
+        if randomize, generate an int between the max speeds
+        if not, use the first paramter
+        """
+        rand_max_speed = rospy.get_param("/cars/rand_max_speed")
+        if rand_max_speed:
+            max_speed_1 = rospy.get_param('/cars/throttle/max_speed_1')
+            max_speed_2 = rospy.get_param('/cars/throttle/max_speed_2')
+            return self.get_rand_num_from_range(max_speed_1, max_speed_2)
+        else:
+            return rospy.get_param('/cars/throttle/max_speed_1')
+
+    def generate_steering_throw(self):
+        """
+                randomize the car steering throw
+                if randomize, generate an int between the steering throws
+                if not, use the first paramter
+                """
+        rand_steering_throw = rospy.get_param("/cars/rand_steering_throw")
+        if rand_steering_throw:
+            max_steering_throw_1 = rospy.get_param('/cars/throttle/max_steering_throw_1')
+            max_steering_throw_2 = rospy.get_param('/cars/throttle/max_steering_throw_2')
+            return self.get_rand_num_from_range(max_steering_throw_1, max_steering_throw_2)
+        else:
+            return rospy.get_param('/cars/throttle/max_steering_throw_2')
 
 
 """the main function: call the simulator to init the loop and create objects"""

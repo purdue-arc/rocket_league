@@ -60,7 +60,6 @@ class Sim(object):
             self.configure_dynamics(self._plane_id, "floor")
         else:
             raise self.NoURDFError()
-
         if "walls" in urdf_paths:
             self._walls_id = p.loadURDF(
                 urdf_paths["walls"], zero_pos, zero_orient, useFixedBase=1
