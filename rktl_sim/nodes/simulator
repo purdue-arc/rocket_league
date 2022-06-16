@@ -97,28 +97,7 @@ class Simulator(object):
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 10)
 
-        # Setting up field
-        # TODO: need to add these parameters, but where??
-        randomize_field = rospy.get_param('/field/randomize_field')
-        """
-        the default paramters used inthe creation of the field
-        width/length_1: either default, or one of the ranodmization bounds
-        
-        """
-        fw1 = rospy.get_param('/field/width_1')
-        fl1 = rospy.get_param('/field/length_1')
-        wt = rospy.get_param('/field/wall_thickness')
-        spawn_height = rospy.get_param('~spawn_height', 0.06)
-        if randomize_field:
-            fw2 = rospy.get_param('/field/width_2')
-            fl2 = rospy.get_param('/field/length_2')
-            fw, fl = self.get_rand_spawn_bounds(fw1, fw2, fl1, fl2)
-        else:
-            fw = fw1
-            fl = fl1
-        spawn_bounds = [[-(fl / 2) + (2 * wt), (fl / 2) - (2 * wt)],
-                        [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
-                        [spawn_height, spawn_height]]
+        spawn_bounds = self.get_spawn_bounds()
 
         # Setup bounds for spawning car and ball
 
@@ -554,6 +533,31 @@ class Simulator(object):
             return self.get_rand_num_from_range(max_steering_throw_1, max_steering_throw_2)
         else:
             return rospy.get_param('/cars/throttle/max_steering_throw_2')
+
+    def get_spawn_bounds(self):
+        # Setting up field
+        # TODO: need to add these parameters, but where??
+        randomize_field = rospy.get_param('/field/randomize_field')
+        """
+        the default paramters used inthe creation of the field
+        width/length_1: either default, or one of the ranodmization bounds
+
+        """
+        fw1 = rospy.get_param('/field/width_1')
+        fl1 = rospy.get_param('/field/length_1')
+        wt = rospy.get_param('/field/wall_thickness')
+        spawn_height = rospy.get_param('~spawn_height', 0.06)
+        if randomize_field:
+            fw2 = rospy.get_param('/field/width_2')
+            fl2 = rospy.get_param('/field/length_2')
+            fw, fl = self.get_rand_spawn_bounds(fw1, fw2, fl1, fl2)
+        else:
+            fw = fw1
+            fl = fl1
+        spawn_bounds = [[-(fl / 2) + (2 * wt), (fl / 2) - (2 * wt)],
+                        [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
+                        [spawn_height, spawn_height]]
+        return spawn_bounds
 
 
 """the main function: call the simulator to init the loop and create objects"""
