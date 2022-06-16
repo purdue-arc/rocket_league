@@ -148,47 +148,9 @@ class Simulator(object):
             self.ball_odom_pub = rospy.Publisher('/ball/odom',
                                                  Odometry, queue_size=1)
 
-        car_properties = self.init_car_properties()
+        self.init_car_properties(car_noise)
 
         # create a list of car properties for each potential car that there could be
-        self.car_ids = {}
-        self.car_pose_pubs = {}
-        self.car_odom_pubs = {}
-        self.car_effort_subs = {}
-        self.car_cmd_subs = {}
-        car_configs = rospy.get_param('~cars', [])
-        for car_config in car_configs:
-            init_pose = None
-            if 'init_pose' in car_config:
-                init_pose = car_config['init_pose']
-
-            if 'name' not in car_config:
-                rospy.signal_shutdown('no "name" set for car config in sim')
-            car_name = car_config['name']
-            # TODO: need to add randomization of position to the car configs
-            if 'randomize_pose' in car_config:
-                init_pose = None
-
-            self.car_ids[car_name] = self.sim.create_car(
-                'car', init_pose=init_pose, noise=car_noise, car_props=car_properties)
-
-            car_id = self.car_ids[car_name]
-            self.car_effort_subs[car_name] = rospy.Subscriber(
-                f'/cars/{car_name}/effort', ControlEffort,
-                self.effort_cb, callback_args=car_id)
-            self.car_cmd_subs[car_name] = rospy.Subscriber(
-                f'/cars/{car_name}/command', ControlCommand,
-                self.cmd_cb, callback_args=car_id)
-
-            if self.mode == SimulatorMode.REALISTIC:
-                self.car_pose_pubs[car_name] = rospy.Publisher(
-                    f'/cars/{car_name}/pose_sync_early',
-                    PoseWithCovarianceStamped, queue_size=1)
-                self.car_odom_pubs[car_name] = rospy.Publisher(
-                    f'/cars/{car_name}/odom_truth', Odometry, queue_size=1)
-            elif self.mode == SimulatorMode.IDEAL:
-                self.car_odom_pubs[car_name] = rospy.Publisher(
-                    f'/cars/{car_name}/odom', Odometry, queue_size=1)
 
         # Node data
         self.cmd_lock = Lock()
@@ -549,7 +511,7 @@ class Simulator(object):
                         [spawn_height, spawn_height]]
         return spawn_bounds
 
-    def init_car_properties(self):
+    def get_car_properties(self):
         # TODO: possible bug bc generating locations and cars might overlap
         car_properties = {}
         car_properties['length'] = rospy.get_param('/cars/length')
@@ -562,6 +524,47 @@ class Simulator(object):
         car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
         car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
         return car_properties
+
+    def init_car_properties(self, car_noise):
+        car_properties = self.get_car_properties()
+        self.car_ids = {}
+        self.car_pose_pubs = {}
+        self.car_odom_pubs = {}
+        self.car_effort_subs = {}
+        self.car_cmd_subs = {}
+        car_configs = rospy.get_param('~cars', [])
+        for car_config in car_configs:
+            init_pose = None
+            if 'init_pose' in car_config:
+                init_pose = car_config['init_pose']
+
+            if 'name' not in car_config:
+                rospy.signal_shutdown('no "name" set for car config in sim')
+            car_name = car_config['name']
+            # TODO: need to add randomization of position to the car configs
+            if 'randomize_pose' in car_config:
+                init_pose = None
+
+            self.car_ids[car_name] = self.sim.create_car(
+                'car', init_pose=init_pose, noise=car_noise, car_props=car_properties)
+
+            car_id = self.car_ids[car_name]
+            self.car_effort_subs[car_name] = rospy.Subscriber(
+                f'/cars/{car_name}/effort', ControlEffort,
+                self.effort_cb, callback_args=car_id)
+            self.car_cmd_subs[car_name] = rospy.Subscriber(
+                f'/cars/{car_name}/command', ControlCommand,
+                self.cmd_cb, callback_args=car_id)
+
+            if self.mode == SimulatorMode.REALISTIC:
+                self.car_pose_pubs[car_name] = rospy.Publisher(
+                    f'/cars/{car_name}/pose_sync_early',
+                    PoseWithCovarianceStamped, queue_size=1)
+                self.car_odom_pubs[car_name] = rospy.Publisher(
+                    f'/cars/{car_name}/odom_truth', Odometry, queue_size=1)
+            elif self.mode == SimulatorMode.IDEAL:
+                self.car_odom_pubs[car_name] = rospy.Publisher(
+                    f'/cars/{car_name}/odom', Odometry, queue_size=1)
 
 
 """the main function: call the simulator to init the loop and create objects"""
