@@ -114,6 +114,7 @@ class Sim(object):
         num_links = p.getNumJoints(body_id)
         for i in range(num_links):
             p.changeDynamics(body_id, i, **self.props['dynamics'][body_type])
+
     """
     param: 
         urdf_name: the id for the specific pybullet object
@@ -132,6 +133,7 @@ class Sim(object):
     Use pybullet for everything to store the objects with random positions: 
     (rest it with the new ball position and ball velocity)
     """
+
     def create_ball(self, urdf_name, init_pose=None, init_speed=None,
                     noise=None, init_vel=None):
         if urdf_name in self.urdf_paths:
@@ -169,6 +171,7 @@ class Sim(object):
             return self._ball_id
         else:
             return None
+
     """
      param: 
         urdf_name: the id for the specific pybullet object
@@ -191,6 +194,7 @@ class Sim(object):
         _carData: hols init pos, init orientation and noise
         _Cars: holds car id, car pos and car orient and car properties
     """
+
     def create_car(self, urdf_name, init_pose=None, noise=None, car_props=None):
         if urdf_name in self.urdf_paths:
             zero_pos = [0.0, 0.0, 0.0]
@@ -236,6 +240,7 @@ class Sim(object):
             return car_id
         else:
             return None
+
     """
     param:
         car_id: the id of the car to be merked
@@ -246,6 +251,7 @@ class Sim(object):
     Delete from the _car_data list (stores current data)
     Delete from car_list (stores initialization data)
     """
+
     def delete_car(self, car_id):
         if car_id not in self._cars:
             return False
@@ -254,6 +260,7 @@ class Sim(object):
         del self._cars[car_id]
         del self._car_data[car_id]
         return True
+
     """
     param:
         dt: the change in tile (delta-t) provided for this specific step of the sim
@@ -266,6 +273,7 @@ class Sim(object):
     
     Step the simulation time
     """
+
     def step(self, dt):
         """Advance one time-step in the sim."""
         if self._ball_id is not None:
@@ -287,7 +295,9 @@ class Sim(object):
             for car in self._cars.values():
                 car.step(p_dt)
             p.stepSimulation()
+
     """Get the current position of the car from the cars list"""
+
     def get_car_pose(self, id, add_noise=False):
         if id not in self._cars:
             return None
@@ -297,7 +307,9 @@ class Sim(object):
             return self._cars[id].get_pose(noise=noise)
         else:
             return self._cars[id].get_pose(noise=None)
+
     """get the current car velocity"""
+
     def get_car_velocity(self, id):
         if id not in self._cars:
             return None
@@ -306,11 +318,13 @@ class Sim(object):
 
     # TODO: what is the car command and what are avaliable?
     """Returns the command of the car ( maybe some action that the car does)"""
+
     def set_car_command(self, id, cmd):
         if id not in self._cars:
             return None
 
         return self._cars[id].setCmd(cmd)
+
     """
     param: add_noise: (default=False) state whether you want noise to get the ball position
     return: the position of the ball
@@ -320,6 +334,7 @@ class Sim(object):
     if add noise, we currently return None, None
     if not, return the position and the angle for the ball object
     """
+
     def get_ball_pose(self, add_noise=False):
         if self._ball_id is None:
             return None
@@ -332,11 +347,14 @@ class Sim(object):
                 pos = np.random.normal(pos, self.ball_noise['pos'])
 
         return pos, p.getQuaternionFromEuler([0, 0, 0])
+
     """get the current ball velocity"""
+
     def get_ball_velocity(self):
         if self._ball_id is None:
             return None
         return p.getBaseVelocity(self._ball_id)
+
     """
     Set the winner, scored, touch last variables to none
     for the ball:
@@ -352,41 +370,55 @@ class Sim(object):
     - try to get the ini_pos and init_orientation if it was provided
     - If the orientation and position were not initialized, then randomize them, and reset the car
     """
+
     def reset(self):
         self.scored = False
         self.winner = None
         self.touched_last = None
 
-        if self._ball_id is not None:
-            ball_pos = self.init_ball_pos
-            if ball_pos is None:
-                ball_pos = [
-                    random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                    random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
-                ]
-            p.resetBasePositionAndOrientation(
-                self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
-            )
+        self.reset_ball()
 
-            ball_vel = [
-                random.uniform(-self._speed_bound, self._speed_bound),
-                random.uniform(-self._speed_bound, self._speed_bound),
-                0.0,
+        self.reset_cars()
+
+"""
+loops over the cars and generates new init_pos (if it was not specified)
+"""
+
+def reset_cars(self):
+    for car in self._cars.values():
+        car_pos = self._car_data[car.id]["init_pos"]
+        car_orient = self._car_data[car.id]["init_orient"]
+
+        if car_pos is None:
+            car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                       random.uniform(
+                           self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                       random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
+
+        if car_orient is None:
+            car_orient = [0, 0, random.uniform(0, 2 * math.pi)]
+
+        car.reset(car_pos, car_orient)
+
+"""
+resets the ball position (if it was not specified)
+"""
+def reset_ball(self):
+    if self._ball_id is not None:
+        ball_pos = self.init_ball_pos
+        if ball_pos is None:
+            ball_pos = [
+                random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
             ]
-            p.resetBaseVelocity(self._ball_id, ball_vel, [0, 0, 0])
+        p.resetBasePositionAndOrientation(
+            self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
+        )
 
-        for car in self._cars.values():
-            car_pos = self._car_data[car.id]["init_pos"]
-            car_orient = self._car_data[car.id]["init_orient"]
-
-            if car_pos is None:
-                car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                           random.uniform(
-                               self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                           random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
-
-            if car_orient is None:
-                car_orient = [0, 0, random.uniform(0, 2 * math.pi)]
-
-            car.reset(car_pos, car_orient)
+        ball_vel = [
+            random.uniform(-self._speed_bound, self._speed_bound),
+            random.uniform(-self._speed_bound, self._speed_bound),
+            0.0,
+        ]
+        p.resetBaseVelocity(self._ball_id, ball_vel, [0, 0, 0])
