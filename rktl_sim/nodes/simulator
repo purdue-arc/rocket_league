@@ -148,7 +148,7 @@ class Simulator(object):
             self.ball_odom_pub = rospy.Publisher('/ball/odom',
                                                  Odometry, queue_size=1)
 
-        self.car_properties = self.init_car_properties()
+        car_properties = self.init_car_properties()
 
         # create a list of car properties for each potential car that there could be
         self.car_ids = {}
