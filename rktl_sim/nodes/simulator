@@ -70,7 +70,10 @@ class Simulator(object):
 
     def __init__(self):
         # create variables for the functions that might initialize them
-        #TODO: can potentially specify them as return values
+        # TODO: can potentially specify them as return values
+        self.timeout = None
+        self.frame_id = None
+        self.mode = None
         self.ball_odom_pub = None
         self.ball_pose_pub = None
         self.car_cmd_subs = None
@@ -82,25 +85,12 @@ class Simulator(object):
         self.car_noise = None
 
         rospy.init_node('simulator')
-        # the different nodes determine whether their is noise or not
-        mode = rospy.get_param('~mode')
-        if mode == 'ideal':
-            self.mode = SimulatorMode.IDEAL
-        elif mode == 'realistic':
-            self.mode = SimulatorMode.REALISTIC
-        else:
-            rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
-        #set the engine environemnt
-        render_enabled = rospy.get_param('~render', False)
-        rate = rospy.Rate(rospy.get_param('~rate', 30))
-        self.frame_id = rospy.get_param('~frame_id', 'map')
-        self.timeout = rospy.get_param('~timeout', 10)
-
+        #init the simulator and the sim time
+        rate, render_enabled = self.init_sim_environment()
+        # Setup bounds for spawning car and ball
         spawn_bounds = self.get_spawn_bounds()
 
-        # Setup bounds for spawning car and ball
 
-        # TODO: waht is a urdf?
         urdf_paths = rospy.get_param('~urdf')
         for path in urdf_paths.values():
             self.check_urdf(path)
@@ -118,9 +108,8 @@ class Simulator(object):
         car_noise, ball_noise = self.set_sensor_noise()
 
         # Creating the ball
-
         self.generate_ball(ball_noise)
-
+        # generate car properties
         self.generate_car_properties(car_noise)
 
         # create a list of car properties for each potential car that there could be
@@ -157,7 +146,6 @@ class Simulator(object):
         maxval = max(v1, v2)
         return random.randint(minVal, maxval)
 
-
     def get_rand_spawn_bounds(self, fw1, fw2, fl1, fl2):
         """
         generates the upper and lower spawn bounds
@@ -176,13 +164,12 @@ class Simulator(object):
 
         return self.get_rand_num_from_range(lowerFw, upperFw), self.get_rand_num_from_range(lowerFl, upperFl)
 
-    """
-    overview: Checks whether you ahvea valid pybullet url for information
-    if not, wait for the file to build in .5 seconds
-    """
-
     def check_urdf(self, param):
-        """Validates that a URDF exists, then returns path"""
+        """
+        overview: Checks whether you ahvea valid pybullet url for information
+        if not, wait for the file to build in .5 seconds
+        Validates that a URDF exists, then returns path
+        """
         if param is None:
             rospy.signal_shutdown('no urdf path set for "{}"'.format(param))
 
@@ -196,31 +183,28 @@ class Simulator(object):
                 'no urdf file exists at path {}'.format(param))
 
     # TODO: how do effort_cb and cmd_cb interact?
-    """
-    Overrides the cmd_cb: calls the car command with the throttle and steering
-    TODO: during which state is it called with
-    """
 
     def effort_cb(self, effort_msg, car_id):
-        """Sets a car's effort (overwrites commands)"""
+        """
+        Sets a car's effort (overwrites commands)
+        Overrides the cmd_cb: calls the car command with the throttle and steering
+        TODO: during which state is it called with
+        """
         self.cmd_lock.acquire()
         self.sim.set_car_command(car_id,
                                  (effort_msg.throttle, effort_msg.steering))
         self.cmd_lock.release()
 
-    """
-    Overrides the effirt_cd: calls the car
-    Command with the velocity and the curvature
-    """
-
     def cmd_cb(self, cmd_msg, car_id):
-        """Sets a car's command (overwrites efforts)"""
+        """
+        Overrides the effirt_cd: calls the car
+        Command with the velocity and the curvature
+        Sets a car's command (overwrites efforts)
+        """
         self.cmd_lock.acquire()
         self.sim.set_car_command(car_id,
                                  (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
-
-
 
     def create_car_cb(self, req):
         """
@@ -276,8 +260,6 @@ class Simulator(object):
         self.reset_lock.release()
         return CreateCarResponse(True)
 
-
-
     def delete_car_cb(self, req):
         """
         Remove car from the simulator
@@ -310,8 +292,6 @@ class Simulator(object):
         self.reset_lock.release()
         return DeleteCarResponse(res)
 
-
-
     def reset_cb(self):
         """
         Resets the simulator
@@ -333,7 +313,6 @@ class Simulator(object):
         self.last_time = None
         self.reset_lock.release()
         return EmptyResponse()
-
 
     def loop_once(self):
         """
@@ -619,6 +598,28 @@ class Simulator(object):
         elif self.mode == SimulatorMode.IDEAL:
             self.ball_odom_pub = rospy.Publisher('/ball/odom',
                                                  Odometry, queue_size=1)
+
+    def init_sim_environment(self):
+        """
+        initialize the mode of the simulator
+        initialize simulator time
+        @return: the rate at which the simulator runs, and whether the render is enabled
+        """
+        # the different nodes determine whether their is noise or not
+        mode = rospy.get_param('~mode')
+        if mode == 'ideal':
+            self.mode = SimulatorMode.IDEAL
+        elif mode == 'realistic':
+            self.mode = SimulatorMode.REALISTIC
+        else:
+            rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
+
+        # set the engine environemnt
+        render_enabled = rospy.get_param('~render', False)
+        rate = rospy.Rate(rospy.get_param('~rate', 30))
+        self.frame_id = rospy.get_param('~frame_id', 'map')
+        self.timeout = rospy.get_param('~timeout', 10)
+        return rate, render_enabled
 
 
 """the main function: call the simulator to init the loop and create objects"""
