@@ -118,6 +118,7 @@ class Simulator(object):
         self.generate_ball(ball_noise)
         # generate car properties
         self.generate_car_properties(car_noise)
+        self.generate_all_cars()
 
         # create a list of car properties for each potential car that there could be
 
@@ -323,6 +324,8 @@ class Simulator(object):
         spawn_bounds = self.get_spawn_bounds()
 
         self.generate_car_properties(self.car_noise)
+        self.delete_all_cars()
+        self.generate_all_cars()
 
         self.sim.reset(spawn_bounds)
         self.car_cmd = (0.0, 0.0)
@@ -515,8 +518,37 @@ class Simulator(object):
         self.car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
         self.car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
 
+    def delete_all_cars(self):
+        car_configs = rospy.get_param('~cars', [])
+        self.reset_lock.acquire()
+        for car_config in car_configs:
 
-    def generate_cars(self):
+            if 'name' not in car_config:
+                rospy.signal_shutdown('no "name" set for car config in sim')
+            car_name = car_config['name']
+            if 'randomize_pose' in car_config:
+                init_pose = None
+
+            self.sim.delete_car(self.car_ids[car_name])
+
+            # Delete all of hte cars subscribers
+            if car_name in self.car_effort_subs:
+                self.car_effort_subs[car_name].unregister()
+                del self.car_effort_subs[car_name]
+            if car_name in self.car_cmd_subs:
+                self.car_cmd_subs[car_name].unregister()
+                del self.car_cmd_subs[car_name]
+            # delete all of the cars publishers
+            if car_name in self.car_odom_pubs:
+                self.car_odom_pubs[car_name].unregister()
+                del self.car_odom_pubs[car_name]
+            if car_name in self.car_pose_pubs:
+                self.car_pose_pubs[car_name].unregister()
+                del self.car_pose_pubs[car_name]
+        self.reset_lock.release()
+
+
+    def generate_all_cars(self):
         car_configs = rospy.get_param('~cars', [])
         self.car_ids = {}
         self.car_pose_pubs = {}
