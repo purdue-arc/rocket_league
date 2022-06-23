@@ -74,23 +74,12 @@ class Simulator(object):
 
     def __init__(self):
         # create variables for the functions that might initialize them
-        # TODO: can potentially specify them as return values
-        self.timeout = None
-        self.frame_id = None
-        self.mode = None
-        self.ball_odom_pub = None
-        self.ball_pose_pub = None
-        self.car_cmd_subs = None
-        self.car_effort_subs = None
-        self.car_odom_pubs = None
-        self.car_pose_pubs = None
-        self.car_ids = None
+        #TODO: what is the point of the car_cmd?? - only used once...
         self.car_cmd = None
-        self.car_noise = None
 
         rospy.init_node('simulator')
         # init the simulator and the sim time
-        rate, render_enabled = self.init_sim_environment()
+        self.mode, self.frame_id, self.timeout, rate, render_enabled = self.init_sim_environment()
         # Setup bounds for spawning car and ball
         spawn_bounds = self.get_spawn_bounds()
 
@@ -108,16 +97,19 @@ class Simulator(object):
         self.sim = simulator.Sim(props, urdf_paths, spawn_bounds, render_enabled)
 
         # Setting sensor noise
-        car_noise, ball_noise = self.set_sensor_noise()
-        # TODO: not know if need to split up init func
-        # want to keep sourcing of param in all location- want to see all of hte variables and pass it to gen ball
-        # want to add where source param and pass to generate ball function as paramters vs self. assignment
-        # publishers and subscribers: nice to see all of them there in the init function
-        # hard to avoid breaking it down
+        self.car_noise, self.ball_noise = self.set_sensor_noise()
+
         # Creating the ball
-        self.generate_ball(ball_noise)
+        self.ball_pose_pub, self.ball_odom_pub = self.generate_ball()
         # generate car properties
-        self.generate_car_properties(car_noise)
+        self.car_properties = self.generate_car_properties()
+
+        #important variables for the car publishers, subscribers, and so on
+        self.car_ids = {}
+        self.car_pose_pubs = {}
+        self.car_odom_pubs = {}
+        self.car_effort_subs = {}
+        self.car_cmd_subs = {}
         self.generate_all_cars()
 
         # create a list of car properties for each potential car that there could be
@@ -281,12 +273,6 @@ class Simulator(object):
         @return: nothing broke response
         """
         # TODO: want to give lest work with generating car properties
-        # want to break down into even more functions:
-        # have a seperate function for deleting the old cars, generating car properties, and making new ones
-        # their purpose: calling all of the funcitons to get range and get new parameters from range from each path
-        # store that data somewhere int he class
-        # clall another function to reset the car htat passes on that info to make sure that its updated
-        # create new cars with the newly created properties
 
         # OTHER NOTES:
         # parametrsr loaded form ros param server: init value read from config: bc collecting data from paths,
@@ -488,7 +474,7 @@ class Simulator(object):
                         [spawn_height, spawn_height]]
         return spawn_bounds
 
-    def generate_car_properties(self, car_noise):
+    def generate_car_properties(self):
         """
         Set the car parameters based on those provided in the rospy directory (the properties of the car itself: length, max_speed, throttle, steering, simulate effort, etc)
         - generates random max speed and steering throw by calling other functions
@@ -508,15 +494,14 @@ class Simulator(object):
         @param car_noise:
         """
         # general paramters that are the same for every single car
-        self.car_properties = {}
-        self.car_properties['length'] = rospy.get_param('/cars/length')
+        car_properties = {'length': rospy.get_param('/cars/length'),
+                          'max_speed': self.get_rospy_param("/cars/throttle/max_speed"),
+                          'steering_throw': self.get_rospy_param("/cars/throttle/max_steering_throw"),
+                          'throttle_tau': rospy.get_param('/cars/throttle/tau'),
+                          'steering_rate': rospy.get_param('/cars/steering/rate'),
+                          'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
 
-        self.car_properties['max_speed'] = self.get_rospy_param("/cars/throttle/max_speed")
-        self.car_properties['steering_throw'] = self.get_rospy_param("/cars/throttle/max_steering_throw")
-
-        self.car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
-        self.car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
-        self.car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
+        return car_properties
 
     def delete_all_cars(self):
         car_configs = rospy.get_param('~cars', [])
@@ -545,16 +530,15 @@ class Simulator(object):
             if car_name in self.car_pose_pubs:
                 self.car_pose_pubs[car_name].unregister()
                 del self.car_pose_pubs[car_name]
-        self.reset_lock.release()
-
-
-    def generate_all_cars(self):
-        car_configs = rospy.get_param('~cars', [])
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
+        self.reset_lock.release()
+
+    def generate_all_cars(self):
+        car_configs = rospy.get_param('~cars', [])
 
         for car_config in car_configs:
             init_pose = None
@@ -599,10 +583,9 @@ class Simulator(object):
         if sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
             ball_noise = sensor_noise.get('ball', None)
             car_noise = sensor_noise.get('car', None)
-        self.car_noise = car_noise
         return car_noise, ball_noise
 
-    def generate_ball(self, ball_noise):
+    def generate_ball(self):
         """
         check if we want to randomize the ball properties (ball pos and ball vel)
         if we want to randomize, then we will do so in the sim.py
@@ -613,15 +596,19 @@ class Simulator(object):
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
 
         self.sim.create_ball('ball', init_pose=ball_init_pose,
-                             init_speed=ball_init_speed, noise=ball_noise)
+                             init_speed=ball_init_speed, noise=self.ball_noise)
         if self.mode == SimulatorMode.REALISTIC:
-            self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
-                                                 PoseWithCovarianceStamped, queue_size=1)
-            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth',
-                                                 Odometry, queue_size=1)
+            ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
+                                            PoseWithCovarianceStamped, queue_size=1)
+            ball_odom_pub = rospy.Publisher('/ball/odom_truth',
+                                            Odometry, queue_size=1)
+            return ball_pose_pub, ball_odom_pub
         elif self.mode == SimulatorMode.IDEAL:
-            self.ball_odom_pub = rospy.Publisher('/ball/odom',
-                                                 Odometry, queue_size=1)
+            ball_odom_pub = rospy.Publisher('/ball/odom',
+                                            Odometry, queue_size=1)
+            return ball_odom_pub, None
+
+        return None, None
 
     def init_sim_environment(self):
         """
@@ -632,18 +619,19 @@ class Simulator(object):
         # the different nodes determine whether their is noise or not
         mode = rospy.get_param('~mode')
         if mode == 'ideal':
-            self.mode = SimulatorMode.IDEAL
+            returnMode = SimulatorMode.IDEAL
         elif mode == 'realistic':
-            self.mode = SimulatorMode.REALISTIC
+            returnMode = SimulatorMode.REALISTIC
         else:
             rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
 
         # set the engine environemnt
         render_enabled = rospy.get_param('~render', False)
         rate = rospy.Rate(rospy.get_param('~rate', 30))
-        self.frame_id = rospy.get_param('~frame_id', 'map')
-        self.timeout = rospy.get_param('~timeout', 10)
-        return rate, render_enabled
+        frame_id = rospy.get_param('~frame_id', 'map')
+        timeout = rospy.get_param('~timeout', 10)
+
+        return returnMode, frame_id, timeout, rate, render_enabled
 
 
 """the main function: call the simulator to init the loop and create objects"""
