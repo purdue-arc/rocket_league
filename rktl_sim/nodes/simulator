@@ -74,7 +74,7 @@ class Simulator(object):
 
     def __init__(self):
         # create variables for the functions that might initialize them
-        #TODO: what is the point of the car_cmd?? - only used once...
+        # TODO: what is the point of the car_cmd?? - only used once...
         self.car_cmd = None
 
         rospy.init_node('simulator')
@@ -104,7 +104,7 @@ class Simulator(object):
         # generate car properties
         self.car_properties = self.generate_car_properties()
 
-        #important variables for the car publishers, subscribers, and so on
+        # important variables for the car publishers, subscribers, and so on
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
@@ -436,7 +436,7 @@ class Simulator(object):
 
         if not dict, then check if its a value and return it. if not, throw an errir
         @param path:
-        @return:
+        @return: the specific paramter depending if it was randomized or not
         """
         if not rospy.get_param(path):
             raise self.InvalidRospyParam(path)
@@ -491,7 +491,7 @@ class Simulator(object):
             Sim_reset
             Sim_create_car
             sim_delete_Car
-        @param car_noise:
+        @return the generic car properties that are created for thsi specific run in a dictionary
         """
         # general paramters that are the same for every single car
         car_properties = {'length': rospy.get_param('/cars/length'),
@@ -530,12 +530,15 @@ class Simulator(object):
             if car_name in self.car_pose_pubs:
                 self.car_pose_pubs[car_name].unregister()
                 del self.car_pose_pubs[car_name]
+        #TODO: do I need to completely kill the lists of the cars and so on? - seems redundant... after the above loop
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
         self.reset_lock.release()
+
+        return DeleteCarResponse(True)
 
     def generate_all_cars(self):
         car_configs = rospy.get_param('~cars', [])
@@ -572,10 +575,12 @@ class Simulator(object):
                 self.car_odom_pubs[car_name] = rospy.Publisher(
                     f'/cars/{car_name}/odom', Odometry, queue_size=1)
 
+        return CreateCarResponse(True)
+
     def set_sensor_noise(self):
         """
         adds the sensor noise for the car and for the ball
-        @return: the sensor noises
+        @return: the sensor noises for the ball and for the car
         """
         sensor_noise = rospy.get_param('~sensor_noise', None)
         ball_noise = None
@@ -590,6 +595,8 @@ class Simulator(object):
         check if we want to randomize the ball properties (ball pos and ball vel)
         if we want to randomize, then we will do so in the sim.py
         @param ball_noise: the ball noise that is used to generate the ball object
+        @return: two paramters; the ball odometer publisher and the ball pose publisher
+        depends on the type of simulator mode we are using
         """
         # TODO: need to potentially chagne the init pose here
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
@@ -606,7 +613,7 @@ class Simulator(object):
         elif self.mode == SimulatorMode.IDEAL:
             ball_odom_pub = rospy.Publisher('/ball/odom',
                                             Odometry, queue_size=1)
-            return ball_odom_pub, None
+            return None, ball_odom_pub
 
         return None, None
 
@@ -614,9 +621,15 @@ class Simulator(object):
         """
         initialize the mode of the simulator
         initialize simulator time
-        @return: the rate at which the simulator runs, and whether the render is enabled
+        @return:
+        - the mode of which we will run simulator: ideal or realistic
+        - the frame id of the specify run
+        - the timeout associated with a pause
+        - the rate at which we will run the simulator
+        - whether we want to render durin the run of the simulator
         """
         # the different nodes determine whether their is noise or not
+        returnMode = None
         mode = rospy.get_param('~mode')
         if mode == 'ideal':
             returnMode = SimulatorMode.IDEAL
