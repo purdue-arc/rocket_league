@@ -282,11 +282,12 @@ class Simulator(object):
         # TODO: want to give lest work with generating car properties
         # want to break down into even more functions:
         # have a seperate function for deleting the old cars, generating car properties, and making new ones
-        # for generate_car_propertiies: just combine all of them for generate properties
         # their purpose: calling all of the funcitons to get range and get new parameters from range from each path
         # store that data somewhere int he class
         # clall another function to reset the car htat passes on that info to make sure that its updated
         # create new cars with the newly created properties
+
+        # OTHER NOTES:
         # parametrsr loaded form ros param server: init value read from config: bc collecting data from paths,
         # can update them real time
         # if wanted just range over tiem and increasedd the range as we train -we can do : can publish new values to the parameters
@@ -298,19 +299,6 @@ class Simulator(object):
         # do the computation in the simulator node
         # then pass that computation to the configure dynamics file
 
-        # for each param have 3 subpaths: max, min, value
-        # another strategy: simulation.yaml: waht we can do: instead can define them all being set to value
-        # can start with differnet intial configureation: delete a value, create a new dictionary and them say
-        # collissionmargin:
-        #    min: 0.0
-        #    max: 1.2
-
-        # if do call on this, we get the value back, and do a type check to see its a float, if it returns dictionary, know we are taking a range
-        # if we are not getting either things., or getting another value, know that its wrong
-        # generate car_params: alread yhave autonomy agent dciding over time
-        # can have yaml file as param taht we support, then throw to list and change it in the simulator
-
-        # devide it up: generating new random value from simulator end: pulling them in and internalizing it
         # other: adding functionality to autonomy pachage
         # train_rocket_league.py;
         # waht about rocket_league_interface: they are pulling in paramters there (under rktl_autonomy)
@@ -516,23 +504,26 @@ class Simulator(object):
             sim_delete_Car
         @param car_noise:
         """
+        # general paramters that are the same for every single car
+        self.car_properties = {}
+        self.car_properties['length'] = rospy.get_param('/cars/length')
 
-        car_properties = {}
-        car_properties['length'] = rospy.get_param('/cars/length')
+        self.car_properties['max_speed'] = self.get_rospy_param("/cars/throttle/max_speed")
+        self.car_properties['steering_throw'] = self.get_rospy_param("/cars/throttle/max_steering_throw")
 
-        car_properties['max_speed'] = self.get_rospy_param("/cars/throttle/max_speed")
-        car_properties['steering_throw'] = self.get_rospy_param("/cars/throttle/max_steering_throw")
+        self.car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
+        self.car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
+        self.car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
 
-        car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
-        car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
-        car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
 
+    def generate_cars(self):
+        car_configs = rospy.get_param('~cars', [])
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
-        car_configs = rospy.get_param('~cars', [])
+
         for car_config in car_configs:
             init_pose = None
             if 'init_pose' in car_config:
@@ -545,7 +536,7 @@ class Simulator(object):
                 init_pose = None
 
             self.car_ids[car_name] = self.sim.create_car(
-                'car', init_pose=init_pose, noise=car_noise, car_props=car_properties)
+                'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
 
             car_id = self.car_ids[car_name]
             self.car_effort_subs[car_name] = rospy.Subscriber(
