@@ -22,7 +22,6 @@ from rktl_sim.srv import CreateCar, CreateCarResponse, DeleteCar, DeleteCarRespo
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 
-# TODO: why not use a struct/ something simpler than a class here?
 class SimulatorMode(Enum):
     # NOTE: two types of models
     # ideal: no sensor noise, realistic: simulate sensor noise
@@ -68,6 +67,11 @@ class Simulator(object):
 
     """
 
+    class InvalidRospyParam(Exception):
+
+        """exception when using invalid arguement"""
+        pass
+
     def __init__(self):
         # create variables for the functions that might initialize them
         # TODO: can potentially specify them as return values
@@ -85,11 +89,10 @@ class Simulator(object):
         self.car_noise = None
 
         rospy.init_node('simulator')
-        #init the simulator and the sim time
+        # init the simulator and the sim time
         rate, render_enabled = self.init_sim_environment()
         # Setup bounds for spawning car and ball
         spawn_bounds = self.get_spawn_bounds()
-
 
         urdf_paths = rospy.get_param('~urdf')
         for path in urdf_paths.values():
@@ -106,7 +109,11 @@ class Simulator(object):
 
         # Setting sensor noise
         car_noise, ball_noise = self.set_sensor_noise()
-
+        # TODO: not know if need to split up init func
+        # want to keep sourcing of param in all location- want to see all of hte variables and pass it to gen ball
+        # want to add where source param and pass to generate ball function as paramters vs self. assignment
+        # publishers and subscribers: nice to see all of them there in the init function
+        # hard to avoid breaking it down
         # Creating the ball
         self.generate_ball(ball_noise)
         # generate car properties
@@ -134,35 +141,6 @@ class Simulator(object):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 pass
-
-    def get_rand_num_from_range(self, v1, v2):
-        """
-        generates a random integer in the range of v1 and v2
-        @param v1: first bound
-        @param v2: second bound
-        @return: the random integer
-        """
-        minVal = min(v1, v2)
-        maxval = max(v1, v2)
-        return random.randint(minVal, maxval)
-
-    def get_rand_spawn_bounds(self, fw1, fw2, fl1, fl2):
-        """
-        generates the upper and lower spawn bounds
-
-        @param fw1: first width bound
-        @param fw2: second width bound
-        @param fl1: first length bound
-        @param fl2: second length bound
-        @return: tupple where entry 2= random width between fw1/fw2 and entry 1= random length between fl1/2
-        """
-        lowerFw = min(fw1, fw2);
-        lowerFl = min(fl1, fl2);
-
-        upperFw = max(fw1, fw2)
-        upperFl = max(fl1, fl2)
-
-        return self.get_rand_num_from_range(lowerFw, upperFw), self.get_rand_num_from_range(lowerFl, upperFl)
 
     def check_urdf(self, param):
         """
@@ -301,6 +279,56 @@ class Simulator(object):
         reset the simulator parameters and the sim class itself
         @return: nothing broke response
         """
+        # TODO: want to give lest work with generating car properties
+        # want to break down into even more functions:
+        # have a seperate function for deleting the old cars, generating car properties, and making new ones
+        # for generate_car_propertiies: just combine all of them for generate properties
+        # their purpose: calling all of the funcitons to get range and get new parameters from range from each path
+        # store that data somewhere int he class
+        # clall another function to reset the car htat passes on that info to make sure that its updated
+        # create new cars with the newly created properties
+        # parametrsr loaded form ros param server: init value read from config: bc collecting data from paths,
+        # can update them real time
+        # if wanted just range over tiem and increasedd the range as we train -we can do : can publish new values to the parameters
+        # each time call reset: update with new knowledge and change how do domain randomizaiton
+        # think of ways to ad more paramters and make more adaptable
+
+        # self.configure_dynamics(self.plnae_id)- avoid generating a new data file: outsource all of that to doing computation in ros
+        # instead of rereading the paramters and storing them: can have function that reads param again if change max and min
+        # do the computation in the simulator node
+        # then pass that computation to the configure dynamics file
+
+        # for each param have 3 subpaths: max, min, value
+        # another strategy: simulation.yaml: waht we can do: instead can define them all being set to value
+        # can start with differnet intial configureation: delete a value, create a new dictionary and them say
+        # collissionmargin:
+        #    min: 0.0
+        #    max: 1.2
+
+        # if do call on this, we get the value back, and do a type check to see its a float, if it returns dictionary, know we are taking a range
+        # if we are not getting either things., or getting another value, know that its wrong
+        # generate car_params: alread yhave autonomy agent dciding over time
+        # can have yaml file as param taht we support, then throw to list and change it in the simulator
+
+        # devide it up: generating new random value from simulator end: pulling them in and internalizing it
+        # other: adding functionality to autonomy pachage
+        # train_rocket_league.py;
+        # waht about rocket_league_interface: they are pulling in paramters there (under rktl_autonomy)
+        # want to add functionality to set ranges between runs: after each run: want to increase the range of param by 0.1
+        # as we conifugre that: there is another function :they use rospy.getparam: there is a setparam function: use between runs
+        # for autonomy pacakge: want to do: might not be immediately aware what param available to update bc use sim.configure file
+        # can add apram to simulator.yaml: can include a publish param that we are currently using: set out list
+        # and process them: "sim configurable params' has list of apram names used by the simulator
+        # autonomy can check that parameter and find all of the things it is allwoed to change
+        # that was it iss independent of the simulator that is runnign :in the future can add more params and understand they exist
+        # or if they want to take away params
+        # bc this is one time thing: makes it to be a list in sim.yaml file: whatever devs of sim nodes know to chagne
+
+        # as part of autonomy side: oportunity to explore literature online
+        # many techniques for how do; want to account for soeme of them and think of what features add to support it
+
+        # good skill pull up brand new project and understand it
+
         self.reset_lock.acquire()
 
         # TODO: need to pass key variables to the rest function located in the sim class
@@ -422,37 +450,36 @@ class Simulator(object):
         self.last_time = now
         self.reset_lock.release()
 
-    def generate_max_speed(self):
+    def get_rospy_param(self, path):
         """
-        randomize the car max speed
-        if randomize, generate an int between the max speeds
-        if not, use the first paramter
-        @return: the max speed depending on if it was randomized
-        """
-        # TODO: need to update these paramters in the yaml
+        create a parameter from the path variable
+        check if the variable exist in rospy. if not, throw error
+        check if its a dict, if so, check if have min and max, if so, generate random param
+        if not, throw error
 
-        rand_max_speed = rospy.get_param("/cars/rand_max_speed")
-        if rand_max_speed:
-            max_speed_1 = rospy.get_param('/cars/throttle/max_speed_1')
-            max_speed_2 = rospy.get_param('/cars/throttle/max_speed_2')
-            return self.get_rand_num_from_range(max_speed_1, max_speed_2)
+        if not dict, then check if its a value and return it. if not, throw an errir
+        @param path:
+        @return:
+        """
+        if not rospy.get_param(path):
+            raise self.InvalidRospyParam(path)
         else:
-            return rospy.get_param('/cars/throttle/max_speed_1')
+            type_rospy = type(rospy.get_param(path))
 
-    def generate_steering_throw(self):
-        """
-         randomize the car steering throw
-                if randomize, generate an int between the steering throws
-                if not, use the first paramter
-        @return: the steering throw of the car
-        """
-        rand_steering_throw = rospy.get_param("/cars/rand_steering_throw")
-        if rand_steering_throw:
-            max_steering_throw_1 = rospy.get_param('/cars/throttle/max_steering_throw_1')
-            max_steering_throw_2 = rospy.get_param('/cars/throttle/max_steering_throw_2')
-            return self.get_rand_num_from_range(max_steering_throw_1, max_steering_throw_2)
-        else:
-            return rospy.get_param('/cars/throttle/max_steering_throw_2')
+            if type_rospy == dict:
+                min_param = rospy.get_param(f'${path}/min')
+                max_param = rospy.get_param(f'${path}/max')
+
+                if not max_param:
+                    raise self.InvalidRospyParam(f'${path}/max')
+                if not min_param:
+                    raise self.InvalidRospyParam(f'${path}/min')
+
+                return random.uniform(min_param, max_param)
+
+            elif type_rospy == float or type_rospy == int:
+                return rospy.get_param(path)
+        raise self.InvalidRospyParam(path)
 
     def get_spawn_bounds(self):
         """
@@ -460,48 +487,21 @@ class Simulator(object):
         @return: the spawn bound array
         """
         # Setting up field
-        # TODO: need to add these parameters, but where??
-        randomize_field = rospy.get_param('/field/randomize_field')
-        fw1 = rospy.get_param('/field/width_1')
-        fl1 = rospy.get_param('/field/length_1')
-        wt = rospy.get_param('/field/wall_thickness')
+        fw = self.get_rospy_param("/field/width")
+        fl = self.get_rospy_param("/field/length")
         spawn_height = rospy.get_param('~spawn_height', 0.06)
-        if randomize_field:
-            fw2 = rospy.get_param('/field/width_2')
-            fl2 = rospy.get_param('/field/length_2')
-            fw, fl = self.get_rand_spawn_bounds(fw1, fw2, fl1, fl2)
-        else:
-            fw = fw1
-            fl = fl1
+        wt = rospy.get_param('/field/wall_thickness')
+
         spawn_bounds = [[-(fl / 2) + (2 * wt), (fl / 2) - (2 * wt)],
                         [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
                         [spawn_height, spawn_height]]
         return spawn_bounds
 
-    def get_car_properties(self):
-        """
-        creates a list of car properties and returns it:
-        - generates random max speed and steering throw by calling other functions
-        - used to generate these properties for each car
-        @return:
-        """
-        # TODO: possible bug bc generating locations and cars might overlap
-        car_properties = {}
-        car_properties['length'] = rospy.get_param('/cars/length')
-
-        # TODO: need to update these paramters in the yaml
-        car_properties['max_speed'] = self.generate_max_speed()
-        car_properties['steering_throw'] = self.generate_steering_throw()
-
-        car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
-        car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
-        car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
-        return car_properties
-
     def generate_car_properties(self, car_noise):
         """
         Set the car parameters based on those provided in the rospy directory (the properties of the car itself: length, max_speed, throttle, steering, simulate effort, etc)
-
+        - generates random max speed and steering throw by calling other functions
+        - used to generate these properties for each car
         Create a list for each car depending on its properties:
             Car id
             Car pose publisher
@@ -516,7 +516,17 @@ class Simulator(object):
             sim_delete_Car
         @param car_noise:
         """
-        car_properties = self.get_car_properties()
+
+        car_properties = {}
+        car_properties['length'] = rospy.get_param('/cars/length')
+
+        car_properties['max_speed'] = self.get_rospy_param("/cars/throttle/max_speed")
+        car_properties['steering_throw'] = self.get_rospy_param("/cars/throttle/max_steering_throw")
+
+        car_properties['throttle_tau'] = rospy.get_param('/cars/throttle/tau')
+        car_properties['steering_rate'] = rospy.get_param('/cars/steering/rate')
+        car_properties['simulate_effort'] = (self.mode == SimulatorMode.REALISTIC)
+
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
@@ -531,7 +541,6 @@ class Simulator(object):
             if 'name' not in car_config:
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
-            # TODO: need to add randomization of position to the car configs
             if 'randomize_pose' in car_config:
                 init_pose = None
 
@@ -579,14 +588,6 @@ class Simulator(object):
         # TODO: need to potentially chagne the init pose here
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
         ball_init_speed = rospy.get_param('~ball/init_speed', None)
-        # TODO: need to add these parameters that I am missing
-        randomize_ball_pos = rospy.get_param('/field/randomize_ball_pose')
-        randomize_ball_vel = rospy.get_param('/field/randomize_ball_vel')
-
-        if randomize_ball_pos:
-            ball_init_pose = None
-        if randomize_ball_vel:
-            ball_init_speed = None
 
         self.sim.create_ball('ball', init_pose=ball_init_pose,
                              init_speed=ball_init_speed, noise=ball_noise)
