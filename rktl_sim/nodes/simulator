@@ -75,17 +75,43 @@ class Simulator(object):
     def __init__(self):
         # create variables for the functions that might initialize them
         # TODO: what is the point of the car_cmd?? - only used once...
-        self.car_cmd = None
 
         rospy.init_node('simulator')
         # init the simulator and the sim time
-        self.mode, self.frame_id, self.timeout, rate, render_enabled = self.init_sim_environment()
+
+        # - the mode of which we will run simulator: ideal or realistic
+        # - the frame id of the specify run
+        # - the timeout associated with a pause
+        # - the rate at which we will run the simulator
+        # - whether we want to render durin the run of the simulator
+        # the different nodes determine whether their is noise or not
+        returnMode = None
+        mode = rospy.get_param('~mode')
+        if mode == 'ideal':
+            self.mode = SimulatorMode.IDEAL
+        elif mode == 'realistic':
+            self.mode = SimulatorMode.REALISTIC
+        else:
+            rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
+
+        # set the engine environemnt
+        render_enabled = rospy.get_param('~render', False)
+        rate = rospy.Rate(rospy.get_param('~rate', 30))
+        self.frame_id = rospy.get_param('~frame_id', 'map')
+        self.timeout = rospy.get_param('~timeout', 10)
+
         # Setup bounds for spawning car and ball
         spawn_bounds = self.get_spawn_bounds()
 
+        # urdf file: unversial way to describe kinematics and dynamics of robots
+        # the simulator use urdf to generate models for car, boalll , field bonds
+        # when aluch the node, pass in the param of urdf param - generated dynamically
+        # have all of the models need to load sym
         urdf_paths = rospy.get_param('~urdf')
         for path in urdf_paths.values():
             self.check_urdf(path)
+        # bc created get_rospy_param fun: want to change things
+        # describe a lot of sim's internal paramnters
 
         # Setup simulator properties
         props = {
@@ -311,7 +337,7 @@ class Simulator(object):
 
         self.generate_car_properties(self.car_noise)
         self.delete_all_cars()
-        self.generate_all_cars()
+        self.update_all_cars()
 
         self.sim.reset(spawn_bounds)
         self.car_cmd = (0.0, 0.0)
@@ -380,7 +406,6 @@ class Simulator(object):
                     car_msg.pose.pose.orientation.z = car_quat[2]
                     car_msg.pose.pose.orientation.w = car_quat[3]
                     self.car_pose_pubs[car_name].publish(car_msg)
-            # TODO: why not in an else block: publish data twice no?
             ball_msg = Odometry()
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id
@@ -427,7 +452,7 @@ class Simulator(object):
         self.last_time = now
         self.reset_lock.release()
 
-    def get_rospy_param(self, path):
+    def get_sim_param(self, path):
         """
         create a parameter from the path variable
         check if the variable exist in rospy. if not, throw error
@@ -437,6 +462,7 @@ class Simulator(object):
         if not dict, then check if its a value and return it. if not, throw an errir
         @param path:
         @return: the specific paramter depending if it was randomized or not
+        for clarity: think of a better name for this function: get_sim_param
         """
         if not rospy.get_param(path):
             raise self.InvalidRospyParam(path)
@@ -464,8 +490,8 @@ class Simulator(object):
         @return: the spawn bound array
         """
         # Setting up field
-        fw = self.get_rospy_param("/field/width")
-        fl = self.get_rospy_param("/field/length")
+        fw = self.get_sim_param("/field/width")
+        fl = self.get_sim_param("/field/length")
         spawn_height = rospy.get_param('~spawn_height', 0.06)
         wt = rospy.get_param('/field/wall_thickness')
 
@@ -494,11 +520,13 @@ class Simulator(object):
         @return the generic car properties that are created for thsi specific run in a dictionary
         """
         # general paramters that are the same for every single car
+        # if too constrained in car length between what we detect and what it is - might learn differently
+        # use the get_sim_param in each function case: makes the most sense
         car_properties = {'length': rospy.get_param('/cars/length'),
-                          'max_speed': self.get_rospy_param("/cars/throttle/max_speed"),
-                          'steering_throw': self.get_rospy_param("/cars/throttle/max_steering_throw"),
-                          'throttle_tau': rospy.get_param('/cars/throttle/tau'),
-                          'steering_rate': rospy.get_param('/cars/steering/rate'),
+                          'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
+                          'steering_throw': self.get_sim_param("/cars/throttle/max_steering_throw"),
+                          'throttle_tau': rospy.get_sim_param("/cars/throttle/tau"),
+                          'steering_rate': rospy.get_sim_param("/cars/steering/rate"),
                           'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
 
         return car_properties
@@ -530,7 +558,7 @@ class Simulator(object):
             if car_name in self.car_pose_pubs:
                 self.car_pose_pubs[car_name].unregister()
                 del self.car_pose_pubs[car_name]
-        #TODO: do I need to completely kill the lists of the cars and so on? - seems redundant... after the above loop
+        # reseting vars to be safe
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
@@ -540,7 +568,25 @@ class Simulator(object):
 
         return DeleteCarResponse(True)
 
+    def update_all_cars(self):
+        car_configs = rospy.get_param('~cars', [])
+
+        for car_config in car_configs:
+            init_pose = None
+            if 'init_pose' in car_config:
+                init_pose = car_config['init_pose']
+
+            if 'name' not in car_config:
+                rospy.signal_shutdown('no "name" set for car config in sim')
+            car_name = car_config['name']
+            if 'randomize_pose' in car_config:
+                init_pose = None
+
+            self.car_ids[car_name] = self.sim.create_car(
+                'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
+
     def generate_all_cars(self):
+
         car_configs = rospy.get_param('~cars', [])
 
         for car_config in car_configs:
@@ -616,35 +662,6 @@ class Simulator(object):
             return None, ball_odom_pub
 
         return None, None
-
-    def init_sim_environment(self):
-        """
-        initialize the mode of the simulator
-        initialize simulator time
-        @return:
-        - the mode of which we will run simulator: ideal or realistic
-        - the frame id of the specify run
-        - the timeout associated with a pause
-        - the rate at which we will run the simulator
-        - whether we want to render durin the run of the simulator
-        """
-        # the different nodes determine whether their is noise or not
-        returnMode = None
-        mode = rospy.get_param('~mode')
-        if mode == 'ideal':
-            returnMode = SimulatorMode.IDEAL
-        elif mode == 'realistic':
-            returnMode = SimulatorMode.REALISTIC
-        else:
-            rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
-
-        # set the engine environemnt
-        render_enabled = rospy.get_param('~render', False)
-        rate = rospy.Rate(rospy.get_param('~rate', 30))
-        frame_id = rospy.get_param('~frame_id', 'map')
-        timeout = rospy.get_param('~timeout', 10)
-
-        return returnMode, frame_id, timeout, rate, render_enabled
 
 
 """the main function: call the simulator to init the loop and create objects"""
