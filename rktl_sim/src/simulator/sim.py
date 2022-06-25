@@ -222,7 +222,13 @@ class Sim(object):
                 car_orient = [0.0, 0.0, random.uniform(0, 2 * math.pi)]
                 init_car_pos = None
                 init_car_orient = None
-
+            '''
+            plan: this function can used to reset everything as it initializes everything for this specific car
+            however, it calls the Car initializer ,instead need to access the specific car in self._cars[car_id] and change its properties
+            need to create functions in the Car class to change them
+            probably have to split up init function for this 
+            need to create recursive function that will return a dictionary with parameters
+            '''
             self._cars[car_id] = Car(
                 car_id,
                 car_pos,
@@ -370,54 +376,55 @@ class Sim(object):
     - If the orientation and position were not initialized, then randomize them, and reset the car
     """
 
-    def reset(self,spawn_bounds):
+    def reset(self, spawn_bounds):
         self.scored = False
         self.winner = None
         self.touched_last = None
-        self.spawn_bounds=spawn_bounds
+        self.spawn_bounds = spawn_bounds
         self.reset_ball()
 
         self.reset_cars()
 
-"""
-loops over the cars and generates new init_pos (if it was not specified)
-"""
+    """
+    loops over the cars and generates new init_pos (if it was not specified)
+    """
 
-def reset_cars(self):
-    for car in self._cars.values():
-        car_pos = self._car_data[car.id]["init_pos"]
-        car_orient = self._car_data[car.id]["init_orient"]
+    def reset_cars(self):
+        for car in self._cars.values():
+            car_pos = self._car_data[car.id]["init_pos"]
+            car_orient = self._car_data[car.id]["init_orient"]
 
-        if car_pos is None:
-            car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                       random.uniform(
-                           self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                       random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
+            if car_pos is None:
+                car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                           random.uniform(
+                               self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                           random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
 
-        if car_orient is None:
-            car_orient = [0, 0, random.uniform(0, 2 * math.pi)]
+            if car_orient is None:
+                car_orient = [0, 0, random.uniform(0, 2 * math.pi)]
 
-        car.reset(car_pos, car_orient)
+            car.reset(car_pos, car_orient)
 
-"""
-resets the ball position (if it was not specified)
-"""
-def reset_ball(self):
-    if self._ball_id is not None:
-        ball_pos = self.init_ball_pos
-        if ball_pos is None:
-            ball_pos = [
-                random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
+    """
+    resets the ball position (if it was not specified)
+    """
+
+    def reset_ball(self):
+        if self._ball_id is not None:
+            ball_pos = self.init_ball_pos
+            if ball_pos is None:
+                ball_pos = [
+                    random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                    random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
+                ]
+            p.resetBasePositionAndOrientation(
+                self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
+            )
+
+            ball_vel = [
+                random.uniform(-self._speed_bound, self._speed_bound),
+                random.uniform(-self._speed_bound, self._speed_bound),
+                0.0,
             ]
-        p.resetBasePositionAndOrientation(
-            self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
-        )
-
-        ball_vel = [
-            random.uniform(-self._speed_bound, self._speed_bound),
-            random.uniform(-self._speed_bound, self._speed_bound),
-            0.0,
-        ]
-        p.resetBaseVelocity(self._ball_id, ball_vel, [0, 0, 0])
+            p.resetBaseVelocity(self._ball_id, ball_vel, [0, 0, 0])
