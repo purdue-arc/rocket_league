@@ -10,36 +10,39 @@ import pybullet as p
 import math
 import numpy as np
 
+
 class Car(object):
     def __init__(self, car_id, pos, orient, car_properties):
+        self.joint_ids = None
+        self._v_rear = None
+        self._STEERING_RATE = None
+        self._MAX_CURVATURE = None
+        self._STEERING_THROW = None
+        self._THROTTLE_TAU = None
+        self._MAX_SPEED = None
+        self._LENGTH = None
         self.id = car_id
         self.simulate_effort = car_properties['simulate_effort']
 
         # physical constants
+        self.set_car_properties()
+
+        # urdf configuration
+        self.body_link_id = 1
+
+        self.reset(pos, orient)
+
+    def set_car_properties(self, car_properties):
+        """
+        sets the physical car properties for the car
+        @param car_properties:
+        """
         self._LENGTH = car_properties['length']
         self._MAX_SPEED = car_properties['max_speed']
         self._THROTTLE_TAU = car_properties['throttle_tau']
         self._STEERING_THROW = car_properties['steering_throw']
         self._STEERING_RATE = car_properties['steering_rate']
         self._MAX_CURVATURE = math.tan(self._STEERING_THROW) / self._LENGTH
-
-        # urdf configuration
-        self.body_link_id = 1
-
-        # system state
-        self._v_rear = 0.0
-        self._psi = 0.0
-
-        # model configuration
-        p.resetBasePositionAndOrientation(
-            self.id, [0., 0., pos[2]], p.getQuaternionFromEuler([0., 0., 0.]))
-
-        self.joint_ids = (1, 0, 2) # X, Y, W
-        p.resetJointState(self.id, self.joint_ids[0], targetValue=pos[0])
-        p.resetJointState(self.id, self.joint_ids[1], targetValue=pos[1])
-        p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
-
-        self.cmd = None
 
     def setCmd(self, cmd):
         self.cmd = cmd
@@ -58,7 +61,7 @@ class Car(object):
             psi_ref = self.cmd[1] * self._STEERING_THROW
 
             # update rear wheel velocity using 1st order model
-            self._v_rear = (self._v_rear - v_rear_ref) * math.exp(-dt/self._THROTTLE_TAU) + v_rear_ref
+            self._v_rear = (self._v_rear - v_rear_ref) * math.exp(-dt / self._THROTTLE_TAU) + v_rear_ref
 
             # update steering angle using massless acceleration to a fixed rate
             if abs(psi_ref - self._psi) < self._STEERING_RATE * dt:
@@ -71,9 +74,9 @@ class Car(object):
 
             # using bicycle model, extrapolate future state
             x_dot = self._v_rear * math.cos(theta + math.atan(math.tan(self._psi) / 2.0)) * \
-                math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
+                    math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
             y_dot = self._v_rear * math.sin(theta + math.atan(math.tan(self._psi) / 2.0)) * \
-                math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
+                    math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
             omega = self._v_rear * math.tan(self._psi) / self._LENGTH
         else:
             body_vel = self.cmd[0]
@@ -82,16 +85,16 @@ class Car(object):
 
             body_curv = self.cmd[1]
             if abs(body_curv) > self._MAX_CURVATURE:
-                body_curv = math.copysign(self._MAX_CURVATURE, body_curv) 
-            
+                body_curv = math.copysign(self._MAX_CURVATURE, body_curv)
+
             x_dot = body_vel * math.cos(theta)
             y_dot = body_vel * math.sin(theta)
             omega = body_vel * body_curv
 
         p.setJointMotorControlArray(self.id, self.joint_ids,
-            targetVelocities=(x_dot, y_dot, omega),
-            controlMode=p.VELOCITY_CONTROL,
-            forces=(5000, 5000, 5000))
+                                    targetVelocities=(x_dot, y_dot, omega),
+                                    controlMode=p.VELOCITY_CONTROL,
+                                    forces=(5000, 5000, 5000))
 
     def get_pose(self, noise=None):
         pos = p.getLinkState(self.id, self.body_link_id)[0]
@@ -113,14 +116,28 @@ class Car(object):
         heading = p.getEulerFromQuaternion(orient)[2]
         r_inv = np.array([[math.cos(heading), -math.sin(heading), 0.],
                           [math.sin(heading), math.cos(heading), 0.],
-                         [0., 0., 1.]], dtype=np.float)
+                          [0., 0., 1.]], dtype=np.float)
         linear = r_inv @ linear
         return (linear, angular)
 
     def reset(self, pos, orient):
+        """
+        resets the system state and the model configuration for the car
+        uses the position and the orientation to reset the cars position
+        @param pos: the new position of the car
+        @param orient: the new orientation of the car
+        """
+        # system state
         self._v_rear = 0.0
         self._psi = 0.0
 
+        # model configuration
+        p.resetBasePositionAndOrientation(
+            self.id, [0., 0., pos[2]], p.getQuaternionFromEuler([0., 0., 0.]))
+
+        self.joint_ids = (1, 0, 2)  # X, Y, W
         p.resetJointState(self.id, self.joint_ids[0], targetValue=pos[0])
         p.resetJointState(self.id, self.joint_ids[1], targetValue=pos[1])
         p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
+
+        self.cmd = None
