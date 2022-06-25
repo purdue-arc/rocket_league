@@ -69,9 +69,8 @@ class Simulator(object):
     """
 
     class InvalidRospyParam(Exception):
-
         """exception when using invalid arguement"""
-        pass
+        rospy.logfatal()
 
     def __init__(self):
         # create variables for the functions that might initialize them
@@ -450,6 +449,30 @@ class Simulator(object):
         self.last_time = now
         self.reset_lock.release()
 
+    def get_recursive_sim_param(self, path):
+        if not rospy.get_param(path):
+            raise self.InvalidRospyParam(path)
+        else:
+            type_rospy = type(rospy.get_param(path))
+
+            if type_rospy == dict:
+                min_param = rospy.get_param(f'${path}/min')
+                max_param = rospy.get_param(f'${path}/max')
+
+                if not max_param:
+                    raise self.InvalidRospyParam(f'${path}/max')
+                if not min_param:
+                    raise self.InvalidRospyParam(f'${path}/min')
+                # accounting for moments in yaml file
+                if min_param > max_param:
+                    return random.uniform(max_param, min_param)
+                else:
+                    return random.uniform(min_param, max_param)
+
+            elif type_rospy == float or type_rospy == int:
+                return rospy.get_param(path)
+        raise self.InvalidRospyParam(path)
+
     def get_sim_param(self, path):
         """
         create a parameter from the path variable
@@ -475,11 +498,15 @@ class Simulator(object):
                     raise self.InvalidRospyParam(f'${path}/max')
                 if not min_param:
                     raise self.InvalidRospyParam(f'${path}/min')
-
-                return random.uniform(min_param, max_param)
+                # accounting for moments in yaml file
+                if min_param > max_param:
+                    return random.uniform(max_param, min_param)
+                else:
+                    return random.uniform(min_param, max_param)
 
             elif type_rospy == float or type_rospy == int:
                 return rospy.get_param(path)
+
         raise self.InvalidRospyParam(path)
 
     def get_spawn_bounds(self):
@@ -627,8 +654,8 @@ class Simulator(object):
         depends on the type of simulator mode we are using
         """
         # TODO: need to potentially chagne the init pose here
-        ball_init_pose = rospy.get_param('~ball/init_pose', None)
-        ball_init_speed = rospy.get_param('~ball/init_speed', None)
+        ball_init_pose = rospy.get_sim_param('~ball/init_pose', None)
+        ball_init_speed = rospy.get_sim_param('~ball/init_speed', None)
 
         self.sim.create_ball('ball', init_pose=ball_init_pose,
                              init_speed=ball_init_speed, noise=self.ball_noise)
