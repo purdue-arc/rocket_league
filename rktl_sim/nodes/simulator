@@ -334,13 +334,12 @@ class Simulator(object):
 
         # TODO: need to pass key variables to the rest function located in the sim class
         spawn_bounds = self.get_spawn_bounds()
+        self.set_sensor_noise()
+        self.generate_car_properties()
 
-        self.generate_car_properties(self.car_noise)
-        self.delete_all_cars()
         self.update_all_cars()
 
         self.sim.reset(spawn_bounds)
-        self.car_cmd = (0.0, 0.0)
         self.last_time = None
         self.reset_lock.release()
         return EmptyResponse()
@@ -492,8 +491,8 @@ class Simulator(object):
         # Setting up field
         fw = self.get_sim_param("/field/width")
         fl = self.get_sim_param("/field/length")
-        spawn_height = rospy.get_param('~spawn_height', 0.06)
-        wt = rospy.get_param('/field/wall_thickness')
+        spawn_height = rospy.get_sim_param('~spawn_height', 0.06)
+        wt = rospy.get_sim_param('/field/wall_thickness')
 
         spawn_bounds = [[-(fl / 2) + (2 * wt), (fl / 2) - (2 * wt)],
                         [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
@@ -522,13 +521,13 @@ class Simulator(object):
         # general paramters that are the same for every single car
         # if too constrained in car length between what we detect and what it is - might learn differently
         # use the get_sim_param in each function case: makes the most sense
-        car_properties = {'length': rospy.get_param('/cars/length'),
+        car_properties = {'length': rospy.get_sim_param('/cars/length'),
                           'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
                           'steering_throw': self.get_sim_param("/cars/throttle/max_steering_throw"),
                           'throttle_tau': rospy.get_sim_param("/cars/throttle/tau"),
                           'steering_rate': rospy.get_sim_param("/cars/steering/rate"),
                           'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
-
+        self.car_properties = car_properties
         return car_properties
 
     def delete_all_cars(self):
@@ -628,12 +627,14 @@ class Simulator(object):
         adds the sensor noise for the car and for the ball
         @return: the sensor noises for the ball and for the car
         """
-        sensor_noise = rospy.get_param('~sensor_noise', None)
+        sensor_noise = rospy.get_sim_param('~sensor_noise', None)
         ball_noise = None
         car_noise = None
         if sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
             ball_noise = sensor_noise.get('ball', None)
             car_noise = sensor_noise.get('car', None)
+        self.car_noise = car_noise
+        self.ball_noise = ball_noise
         return car_noise, ball_noise
 
     def generate_ball(self):
