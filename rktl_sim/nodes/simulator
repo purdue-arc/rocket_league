@@ -449,30 +449,6 @@ class Simulator(object):
         self.last_time = now
         self.reset_lock.release()
 
-    def get_recursive_sim_param(self, path):
-        if not rospy.get_param(path):
-            raise self.InvalidRospyParam(path)
-        else:
-            type_rospy = type(rospy.get_param(path))
-
-            if type_rospy == dict:
-                min_param = rospy.get_param(f'${path}/min')
-                max_param = rospy.get_param(f'${path}/max')
-
-                if not max_param:
-                    raise self.InvalidRospyParam(f'${path}/max')
-                if not min_param:
-                    raise self.InvalidRospyParam(f'${path}/min')
-                # accounting for moments in yaml file
-                if min_param > max_param:
-                    return random.uniform(max_param, min_param)
-                else:
-                    return random.uniform(min_param, max_param)
-
-            elif type_rospy == float or type_rospy == int:
-                return rospy.get_param(path)
-        raise self.InvalidRospyParam(path)
-
     def get_sim_param(self, path):
         """
         create a parameter from the path variable
@@ -504,7 +480,7 @@ class Simulator(object):
                 else:
                     return random.uniform(min_param, max_param)
 
-            elif type_rospy == float or type_rospy == int:
+            elif type_rospy == float or type_rospy == int or type_rospy == list:
                 return rospy.get_param(path)
 
         raise self.InvalidRospyParam(path)
