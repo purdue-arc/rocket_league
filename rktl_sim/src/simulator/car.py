@@ -13,6 +13,8 @@ import numpy as np
 
 class Car(object):
     def __init__(self, car_id, pos, orient, car_properties):
+        self._psi = None
+        self.cmd = None
         self.joint_ids = None
         self._v_rear = None
         self._STEERING_RATE = None
@@ -35,7 +37,7 @@ class Car(object):
     def set_car_properties(self, car_properties):
         """
         sets the physical car properties for the car
-        @param car_properties:
+        @param car_properties: the general properties of the car that are set
         """
         self._LENGTH = car_properties['length']
         self._MAX_SPEED = car_properties['max_speed']
@@ -107,7 +109,7 @@ class Car(object):
                 pos = np.random.normal(pos, noise['pos'])
                 orient = np.random.normal(orient, noise['orient'])
 
-        return (pos, p.getQuaternionFromEuler(orient))
+        return pos, p.getQuaternionFromEuler(orient)
 
     def get_velocity(self):
         link_state = p.getLinkState(self.id, self.body_link_id, computeLinkVelocity=1)
@@ -118,7 +120,7 @@ class Car(object):
                           [math.sin(heading), math.cos(heading), 0.],
                           [0., 0., 1.]], dtype=np.float)
         linear = r_inv @ linear
-        return (linear, angular)
+        return linear, angular
 
     def reset(self, pos, orient):
         """
