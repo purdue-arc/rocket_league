@@ -27,7 +27,7 @@ class Car(object):
         self.simulate_effort = car_properties['simulate_effort']
 
         # physical constants
-        self.set_car_properties()
+        self.set_car_properties(car_properties)
 
         # urdf configuration
         self.body_link_id = 1
