@@ -58,7 +58,8 @@ class Simulator(object):
         if IDEAL:
         ball_odom_pub: /ball/odom
 
-    Initialize the ball object finding the parameter from ~ball/init_pose or init_speed (depend on whether using realistic or ideal model)
+    Initialize the ball object finding the parameter from ~ball/init_pose or init_speed
+    (depend on whether using realistic or ideal model)
     Init the ball odometry depending on whether we are using a realistic model or not
 
 
@@ -80,12 +81,11 @@ class Simulator(object):
         # init the simulator and the sim time
 
         # - the mode of which we will run simulator: ideal or realistic
-        # - the frame id of the specify run
+        # - the frame id of the specific run
         # - the timeout associated with a pause
         # - the rate at which we will run the simulator
-        # - whether we want to render durin the run of the simulator
-        # the different nodes determine whether their is noise or not
-        returnMode = None
+        # - whether we want to render during the run of the simulator
+        # the different nodes determine whether there is noise or not
         mode = rospy.get_param('~mode')
         if mode == 'ideal':
             self.mode = SimulatorMode.IDEAL
@@ -94,7 +94,7 @@ class Simulator(object):
         else:
             rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
 
-        # set the engine environemnt
+        # set the engine environment
         render_enabled = rospy.get_param('~render', False)
         rate = rospy.Rate(rospy.get_param('~rate', 30))
         self.frame_id = rospy.get_param('~frame_id', 'map')
@@ -275,6 +275,7 @@ class Simulator(object):
         if req.name in self.car_cmd_subs:
             self.car_cmd_subs[req.name].unregister()
             del self.car_cmd_subs[req.name]
+
         if req.name in self.car_odom_pubs:
             self.car_odom_pubs[req.name].unregister()
             del self.car_odom_pubs[req.name]
@@ -622,7 +623,6 @@ class Simulator(object):
         """
         check if we want to randomize the ball properties (ball pos and ball vel)
         if we want to randomize, then we will do so in the sim.py
-        @param ball_noise: the ball noise that is used to generate the ball object
         @return: two paramters; the ball odometer publisher and the ball pose publisher
         depends on the type of simulator mode we are using
         """
