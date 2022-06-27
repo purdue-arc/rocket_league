@@ -24,6 +24,8 @@ class Car(object):
         self._MAX_SPEED = None
         self._LENGTH = None
         self.id = car_id
+        self.pos = None
+        self.orient = None
         self.simulate_effort = car_properties['simulate_effort']
 
         # physical constants
@@ -129,6 +131,10 @@ class Car(object):
         @param pos: the new position of the car
         @param orient: the new orientation of the car
         """
+        # save the car pos and orient:
+        self.pos = pos
+        self.orient = orient
+
         # system state
         self._v_rear = 0.0
         self._psi = 0.0
@@ -143,3 +149,13 @@ class Car(object):
         p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
 
         self.cmd = None
+
+    def check_overlap(self, pos):
+        """
+        returns whether the two positions of the car will overlap
+        @param pos: the position of the other car
+        @return: bolean if they overlap (true = overlap)
+        """
+        dist = math.sqrt(
+            (pos[0] - self.pos[0]) * (pos[0] - self.pos[0]) + (pos[0] - self.pos[1]) * (pos[1] - self.pos[1]))
+        return dist < self._LENGTH

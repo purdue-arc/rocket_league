@@ -395,16 +395,42 @@ class Sim(object):
             car.set_car_properties(car_properties)
             car_pos = self._car_data[car.id]["init_pos"]
             car_orient = self._car_data[car.id]["init_orient"]
-
+            """
+            brainstorm for garanteed bounds generation
+            ball: need to generate it first - call first to not worry about checking bounds there
+            then for all of the cars: 
+            
+            if pos = none, generate the bounds, and continue generating while not overlap with other cars
+            how define overlap: distance between the two car locations has to be be less than the length of the car
+            continue to randomly generate bounds while the overlap exists
+            """
             if car_pos is None:
-                car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                           random.uniform(
-                               self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                           random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
+                car_pos = self.generate_new_car_pos()
+
+            while self.check_if_pos_overlap(car_pos):
+                car_pos = self.generate_new_car_pos()
 
             if car_orient is None:
                 car_orient = [0, 0, random.uniform(0, 2 * math.pi)]
             car.reset(car_pos, car_orient)
+
+    def check_if_pos_overlap(self, car_pos):
+        for car in self._cars.values():
+            overlap = car.check_overlap(car_pos)
+            # TODO: need to implement the get_distance_to function
+            # also need to make the length attribute of the car not private
+            # or need to access it from rospy
+            if overlap:
+                return True
+
+        return False
+
+    def generate_new_car_pos(self):
+        car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                   random.uniform(
+                       self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                   random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
+        return car_pos
 
     """
     resets the ball position (if it was not specified)
