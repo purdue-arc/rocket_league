@@ -470,21 +470,27 @@ class Simulator(object):
         self.last_time = now
         self.reset_lock.release()
 
-    def get_sim_dict(self, path):
+    def get_sim_param(self, path, throwException=False):
 
-        if not rospy.get_param(path):
-            raise self.InvalidRospyParam(path)
+        rospy_param = rospy.get_param(path)
+        if not rospy_param:
+            if throwException:
+                raise self.InvalidRospyParam(path)
+            return None
         else:
-            type_rospy = type(rospy.get_param(path))
-
+            type_rospy = type(rospy_param)
             if type_rospy == dict:
                 min_param = rospy.get_param(f'${path}/min')
                 max_param = rospy.get_param(f'${path}/max')
 
                 if not max_param:
-                    raise self.InvalidRospyParam(f'${path}/max')
+                    if throwException:
+                        raise self.InvalidRospyParam(f'${path}/max')
+                    return None
                 if not min_param:
-                    raise self.InvalidRospyParam(f'${path}/min')
+                    if throwException:
+                        raise self.InvalidRospyParam(f'${path}/min')
+                    return None
                 # accounting for moments in yaml file
                 if min_param > max_param:
                     return random.uniform(max_param, min_param)
@@ -493,8 +499,10 @@ class Simulator(object):
 
             elif type_rospy == float or type_rospy == int:
                 return rospy.get_param(path)
-
-    def get_sim_param(self, path):
+        if throwException:
+            raise self.InvalidRospyParam(path)
+        return None
+    def get_sim_dict(self, path, throwException=False):
         """
         create a dictionary from the path variable
 
@@ -505,12 +513,15 @@ class Simulator(object):
 
         if not have min and max, for each key of the dictionary, recurse down the tree by calling the same function
 
+        @param throwException: specify whether you want to get null or throw exception
         @param path: the path to the parameter in the yaml file
         @return: either the variable or the complete dictionary, depending on the path taken during recurssion
         """
         rospy_param = rospy.get_param(path)
         if not rospy_param:
-            raise self.InvalidRospyParam(path)
+            if throwException:
+                raise self.InvalidRospyParam(path)
+            return None
         else:
             type_rospy = type(rospy_param)
             if type_rospy == dict:
@@ -519,9 +530,13 @@ class Simulator(object):
                 min_param = rospy.get_param(f'${path}/min')
                 max_param = rospy.get_param(f'${path}/max')
                 if not max_param and min_param:
-                    raise self.InvalidRospyParam(f'${path}/max')
+                    if throwException:
+                        raise self.InvalidRospyParam(f'${path}/max')
+                    return None
                 elif not min_param and max_param:
-                    raise self.InvalidRospyParam(f'${path}/min')
+                    if throwException:
+                        raise self.InvalidRospyParam(f'${path}/min')
+                    return None
                 elif max_param and min_param:
                     if min_param > max_param:
                         return random.uniform(max_param, min_param)
@@ -531,13 +546,14 @@ class Simulator(object):
                 # bc not have max and min, this means that we have more dicts and vals to loop over
                 for key in rospy_param:
                     # recurse down the path, using the key as the continuation
-                    rospy_param[key] = self.get_sim_param(path + f'$/{key}')
+                    rospy_param[key] = self.get_sim_param(path + f'$/{key}', throwException)
                 return rospy_param
 
             elif type_rospy == float or type_rospy == int or type_rospy == list:
                 return rospy.get_param(path)
-
-        raise self.InvalidRospyParam(path)
+        if throwException:
+            raise self.InvalidRospyParam(path)
+        return None
 
     def get_spawn_bounds(self):
         """
@@ -627,9 +643,7 @@ class Simulator(object):
         car_configs = rospy.get_param('~cars', [])
 
         for car_config in car_configs:
-            init_pose = None
-            if 'init_pose' in car_config:
-                init_pose = car_config['init_pose']
+            init_pose = self.get_sim_param('~cars/init_pose')
 
             if 'name' not in car_config:
                 rospy.signal_shutdown('no "name" set for car config in sim')
@@ -659,6 +673,7 @@ class Simulator(object):
                     f'/cars/{car_name}/odom', Odometry, queue_size=1)
 
         return CreateCarResponse(True)
+
 
 """the main function: call the simulator to init the loop and create objects"""
 if __name__ == "__main__":
