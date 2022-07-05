@@ -10,6 +10,8 @@ import pybullet as p
 import math
 import numpy as np
 
+JOINT_IDS = (1, 0, 2)  # X, Y, W
+BASE_QUATERNION = [0., 0., 0.]
 
 class Car(object):
     def __init__(self, car_id, pos, orient, car_properties):
@@ -141,9 +143,9 @@ class Car(object):
 
         # model configuration
         p.resetBasePositionAndOrientation(
-            self.id, [0., 0., pos[2]], p.getQuaternionFromEuler([0., 0., 0.]))
+            self.id, [0., 0., pos[2]], p.getQuaternionFromEuler(BASE_QUATERNION))
 
-        self.joint_ids = (1, 0, 2)  # X, Y, W
+        self.joint_ids = JOINT_IDS  # X, Y, W
         p.resetJointState(self.id, self.joint_ids[0], targetValue=pos[0])
         p.resetJointState(self.id, self.joint_ids[1], targetValue=pos[1])
         p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
