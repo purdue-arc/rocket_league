@@ -26,7 +26,7 @@ class Car(object):
         self._MAX_SPEED = None
         self._LENGTH = None
         self.id = car_id
-        self.pos = None
+        self.init_pos = None
         self.orient = None
         self.simulate_effort = car_properties['simulate_effort']
 
@@ -134,7 +134,7 @@ class Car(object):
         @param orient: the new orientation of the car
         """
         # save the car pos and orient:
-        self.pos = pos
+        self.init_pos = pos
         self.orient = orient
 
         # system state
@@ -159,5 +159,5 @@ class Car(object):
         @return: bolean if they overlap (true = overlap)
         """
         dist = math.sqrt(
-            (pos[0] - self.pos[0]) * (pos[0] - self.pos[0]) + (pos[0] - self.pos[1]) * (pos[1] - self.pos[1]))
+            (pos[0] - self.init_pos[0]) * (pos[0] - self.init_pos[0]) + (pos[0] - self.init_pos[1]) * (pos[1] - self.init_pos[1]))
         return dist < self._LENGTH

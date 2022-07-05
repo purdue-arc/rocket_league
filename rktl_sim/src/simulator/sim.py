@@ -279,9 +279,9 @@ class Sim(object):
                 car.step(p_dt)
             p.stepSimulation()
 
-
     def get_car_pose(self, id, add_noise=False):
-      """Get the current position of the car from the cars list"""
+        """Get the current position of the car from the cars list"""
+
         if id not in self._cars:
             return None
 
@@ -291,7 +291,6 @@ class Sim(object):
         else:
             return self._cars[id].get_pose(noise=None)
 
-
     def get_car_velocity(self, id):
         """get the current car velocity"""
         if id not in self._cars:
@@ -299,14 +298,12 @@ class Sim(object):
 
         return self._cars[id].get_velocity()
 
-
     def set_car_command(self, id, cmd):
         """Returns the command of the car ( maybe some action that the car does)"""
         if id not in self._cars:
             return None
 
         return self._cars[id].setCmd(cmd)
-
 
     def get_ball_pose(self, add_noise=False):
         """
@@ -329,13 +326,11 @@ class Sim(object):
 
         return pos, p.getQuaternionFromEuler([0, 0, 0])
 
-
     def get_ball_velocity(self):
         """get the current ball velocity"""
         if self._ball_id is None:
             return None
         return p.getBaseVelocity(self._ball_id)
-
 
     def reset(self, spawn_bounds, car_properties):
         """
@@ -360,7 +355,6 @@ class Sim(object):
         self.reset_ball()
 
         self.reset_cars(car_properties)
-
 
     def reset_cars(self, car_properties):
         """
@@ -398,7 +392,6 @@ class Sim(object):
                        self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
         return car_pos
-
 
     def reset_ball(self):
         """
