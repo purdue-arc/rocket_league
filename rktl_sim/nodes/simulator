@@ -590,7 +590,8 @@ class Simulator(object):
             if 'name' not in car_config:
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
-
+            if 'randomize_pose' in car_config:
+                init_pose = None
 
             self.sim.delete_car(self.car_ids[car_name])
 
@@ -629,7 +630,8 @@ class Simulator(object):
             if 'name' not in car_config:
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
-
+            if 'randomize_pose' in car_config:
+                init_pose = None
 
             self.car_ids[car_name] = self.sim.create_car(
                 'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
@@ -665,8 +667,6 @@ class Simulator(object):
         if sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
             ball_noise = sensor_noise.get('ball', None)
             car_noise = sensor_noise.get('car', None)
-        self.car_noise = car_noise
-        self.ball_noise = ball_noise
         return car_noise, ball_noise
 
 
