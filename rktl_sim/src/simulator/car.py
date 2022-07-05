@@ -31,14 +31,14 @@ class Car(object):
         self.simulate_effort = car_properties['simulate_effort']
 
         # physical constants
-        self.set_car_properties(car_properties)
+        self.set_properties(car_properties)
 
         # urdf configuration
         self.body_link_id = 1
 
         self.reset(pos, orient)
 
-    def set_car_properties(self, car_properties):
+    def set_properties(self, car_properties):
         """
         sets the physical car properties for the car
         @param car_properties: the general properties of the car that are set
