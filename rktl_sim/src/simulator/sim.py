@@ -362,7 +362,7 @@ class Sim(object):
         """
         for car in self._cars.values():
             # reset the car properties in advance
-            car.set_car_properties(car_properties)
+            car.set_properties(car_properties)
             car_pos = self._car_data[car.id]["init_pos"]
             car_orient = self._car_data[car.id]["init_orient"]
 
