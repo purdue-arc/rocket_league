@@ -356,7 +356,7 @@ class Simulator(object):
         # TODO: need to pass key variables to the rest function located in the sim class
         spawn_bounds = self.get_spawn_bounds()
 
-        self.generate_car_properties()
+        #self.generate_car_properties()
         self.sim.reset(spawn_bounds, self.car_properties)
 
         self.last_time = None
