@@ -22,24 +22,22 @@ class Sim(object):
         """Exception for when a URDF isn't provided"""
         pass
 
-    """
-    param:
-    TODO: are these parameter explanations correct?
-        urdf_paths: stores the urdf paths to the specifc objects
-        spawn_bounds: the bounds in which objects can spawn in the game
-        render_enabled: dictates whether you want to connect a GUI or just train the data (DIRECT) 
-    overview:
-    - Connect the pybullet object based of the gui and direct (for storying objects and their velocity)
-    - Configure: filed type, walls, floor, goal a and b
-    - initialize cars list and other data related to them
-    - Use the loadURDF via p.loadURDF (loads the specific instruction)
-    
-    note:
-    Urdf is used to encode kinetics and location of the object
-    - Use it for setting the field type, walls, floor and the different goals
-    """
-
     def __init__(self, props, urdf_paths, spawn_bounds, render_enabled):
+        """
+        param:
+        - Connect the pybullet object based of the gui and direct (for storying objects and their velocity)
+        - Configure: filed type, walls, floor, goal a and b
+        - initialize cars list and other data related to them
+        - Use the loadURDF via p.loadURDF (loads the specific instruction)
+        
+        note:
+        Urdf is used to encode kinetics and location of the object
+        - Use it for setting the field type, walls, floor and the different goals
+        """
+        self.touchedLast = None
+        self.ball_noise = None
+        self._speed_bound = None
+        self.init_ball_pos = None
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
@@ -79,7 +77,7 @@ class Sim(object):
                 urdf_paths["goal_b"], zero_pos, zero_orient, useFixedBase=1
             )
         else:
-            return self.NoURDFError()
+            raise self.NoURDFError()
 
         self._cars = {}
         self._car_data = {}
@@ -94,17 +92,15 @@ class Sim(object):
         # TODO: why gravity not accurate?
         p.setGravity(0, 0, -10)
 
-    # TODO: what does this function do?
-    """
-    param:
-        body_id: the id of the object to be configured
-        body_type: the specific type of object (ie ball,car,goal,etc)
-    overview:
-    Configure the dynamics of the car
-    sets the type of curvature and how the car behaves
-    """
-
     def configure_dynamics(self, body_id, body_type):
+        """
+        param:
+            body_id: the id of the object to be configured
+            body_type: the specific type of object (ie ball,car,goal,etc)
+
+        Configure the dynamics of the car
+        sets the type of curvature and how the car behaves
+        """
         if 'dynamics' not in self.props or \
                 self.props['dynamics'] is None or \
                 body_type not in self.props['dynamics']:
@@ -114,34 +110,31 @@ class Sim(object):
         for i in range(num_links):
             p.changeDynamics(body_id, i, **self.props['dynamics'][body_type])
 
-    """
-    param: 
-        urdf_name: the id for the specific pybullet object
-        init_pose: (default=None) the initial position of the ball (override randomization)
-        init_speed: (default=None)the max speed of the ball (override known speed parameter)
-        noise: (default=None) the noise and if it should be present in the location of the object
-        init_vel: (default=None) the initial velocity of the ball (override randomization)
-    TODO: what is the difference between speed and velocity here?
-    for init_speed, init_vel, init_pos: check if param is None
-    If so: 
-    keep the existing position 
-    if not, 
-    initialize the object parameter (NOTE: done at random-unique for each one)
-  
-    note: DOES RANDOMIZATION
-    Use pybullet for everything to store the objects with random positions: 
-    (rest it with the new ball position and ball velocity)
-    """
-
     def create_ball(self, urdf_name, init_pose=None, init_speed=None,
                     noise=None, init_vel=None):
+        """
+        param:
+            urdf_name: the id for the specific pybullet object
+            init_pose: (default=None) the initial position of the ball (override randomization)
+            init_speed: (default=None)the max speed of the ball (override known speed parameter)
+            noise: (default=None) the noise and if it should be present in the location of the object
+            init_vel: (default=None) the initial velocity of the ball (override randomization)
+        for init_speed, init_vel, init_pos: check if param is None
+        If so:
+        keep the existing position
+        if not,
+        initialize the object parameter (NOTE: done at random-unique for each one)
+
+        note: DOES RANDOMIZATION
+        Use pybullet for everything to store the objects with random positions:
+        (rest it with the new ball position and ball velocity)
+        """
         if urdf_name in self.urdf_paths:
             zero_orient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
             if init_pose:
                 ball_pos = init_pose["pos"]
                 self.init_ball_pos = ball_pos
             else:
-                # TODO: already randomize the ball position by spawn boundds
                 ball_pos = [
                     random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
                     random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
@@ -171,30 +164,29 @@ class Sim(object):
         else:
             return None
 
-    """
-     param: 
-        urdf_name: the id for the specific pybullet object
-        init_pose: (default=None) the initial position of the ball (override randomization)
-        consists of two parts:
-        - pos: position of the car (x,y)
-        - orient: orientation of the car (angle)
-        noise: (default=None) the noise and if it should be present in the location of the object
-        car_props: (default=None)
-    overview:
-    for init_pose, noise, car_props: check if param is None                       
-    If so:                                                                           
-    keep the existing position                                                       
-    if not,                                                                          
-    initialize the object parameter (NOTE: done at random-unique for each one)  
-    
-    Configures dynamics of the car (call configure_dynamics)
-    
-    store the data:
-        _carData: hols init pos, init orientation and noise
-        _Cars: holds car id, car pos and car orient and car properties
-    """
-
     def create_car(self, urdf_name, init_pose=None, noise=None, car_props=None):
+        """
+         param:
+            urdf_name: the id for the specific pybullet object
+            init_pose: (default=None) the initial position of the ball (override randomization)
+            consists of two parts:
+            - pos: position of the car (x,y)
+            - orient: orientation of the car (angle)
+            noise: (default=None) the noise and if it should be present in the location of the object
+            car_props: (default=None)
+
+        for init_pose, noise, car_props: check if param is None
+        If so:
+        keep the existing position
+        if not,
+        initialize the object parameter (NOTE: done at random-unique for each one)
+
+        Configures dynamics of the car (call configure_dynamics)
+
+        store the data:
+            _carData: hols init pos, init orientation and noise
+            _Cars: holds car id, car pos and car orient and car properties
+        """
         if urdf_name in self.urdf_paths:
             zero_pos = [0.0, 0.0, 0.0]
             zero_orient = [0.0, 0.0, 0.0]
@@ -222,13 +214,6 @@ class Sim(object):
                 car_orient = [0.0, 0.0, random.uniform(0, 2 * math.pi)]
                 init_car_pos = None
                 init_car_orient = None
-            '''
-            plan: this function can used to reset everything as it initializes everything for this specific car
-            however, it calls the Car initializer ,instead need to access the specific car in self._cars[car_id] and change its properties
-            need to create functions in the Car class to change them
-            probably have to split up init function for this 
-            need to create recursive function that will return a dictionary with parameters
-            '''
             self._cars[car_id] = Car(
                 car_id,
                 car_pos,
@@ -246,18 +231,17 @@ class Sim(object):
         else:
             return None
 
-    """
-    param:
-        car_id: the id of the car to be merked
-    overview:
-    Checks if car id exists
-    If so:
-    
-    Delete from the _car_data list (stores current data)
-    Delete from car_list (stores initialization data)
-    """
-
     def delete_car(self, car_id):
+        """
+        param:
+            car_id: the id of the car to be merked
+
+        Checks if car id exists
+        If so:
+
+        Delete from the _car_data list (stores current data)
+        Delete from car_list (stores initialization data)
+        """
         if car_id not in self._cars:
             return False
 
@@ -266,21 +250,15 @@ class Sim(object):
         del self._car_data[car_id]
         return True
 
-    """
-    param:
-        dt: the change in tile (delta-t) provided for this specific step of the sim
-    
-    overview:
-    Advance once time-step in teh sim
-    Check if the ball, either goal, has a contact: 
-    - find if a car touched the ball, and if so, store it    
-    - If ball contacts a goal: declare a winner
-    
-    Step the simulation time
-    """
-
     def step(self, dt):
-        """Advance one time-step in the sim."""
+        """
+        param:
+            dt: the change in tile (delta-t) provided for this specific step of the sim
+        Advance once time-step in teh sim
+        Check if the ball, either goal, has a contact:
+        - find if a car touched the ball, and if so, store it
+        - If ball contacts a goal: declare a winner
+        """
         if self._ball_id is not None:
             ball_contacts = p.getContactPoints(bodyA=self._ball_id)
             for contact in ball_contacts:
@@ -301,9 +279,9 @@ class Sim(object):
                 car.step(p_dt)
             p.stepSimulation()
 
-    """Get the current position of the car from the cars list"""
 
     def get_car_pose(self, id, add_noise=False):
+      """Get the current position of the car from the cars list"""
         if id not in self._cars:
             return None
 
@@ -313,34 +291,32 @@ class Sim(object):
         else:
             return self._cars[id].get_pose(noise=None)
 
-    """get the current car velocity"""
 
     def get_car_velocity(self, id):
+        """get the current car velocity"""
         if id not in self._cars:
             return None
 
         return self._cars[id].get_velocity()
 
-    # TODO: what is the car command and what are avaliable?
-    """Returns the command of the car ( maybe some action that the car does)"""
 
     def set_car_command(self, id, cmd):
+        """Returns the command of the car ( maybe some action that the car does)"""
         if id not in self._cars:
             return None
 
         return self._cars[id].setCmd(cmd)
 
-    """
-    param: add_noise: (default=False) state whether you want noise to get the ball position
-    return: the position of the ball
-    overview:
-    - calls getBasePositionAndOrient from pybullter for the ball_id
-    #TODO: why do we return none, none for adding noise?
-    if add noise, we currently return None, None
-    if not, return the position and the angle for the ball object
-    """
 
     def get_ball_pose(self, add_noise=False):
+        """
+        param: add_noise: (default=False) state whether you want noise to get the ball position
+        return: the position of the ball
+
+        - calls getBasePositionAndOrient from pybuller for the ball_id
+        if add noise, we currently return None, None
+        if not, return the position and the angle for the ball object
+        """
         if self._ball_id is None:
             return None
         pos, _ = p.getBasePositionAndOrientation(self._ball_id)
@@ -353,30 +329,30 @@ class Sim(object):
 
         return pos, p.getQuaternionFromEuler([0, 0, 0])
 
-    """get the current ball velocity"""
 
     def get_ball_velocity(self):
+        """get the current ball velocity"""
         if self._ball_id is None:
             return None
         return p.getBaseVelocity(self._ball_id)
 
-    """
-    Set the winner, scored, touch last variables to none
-    for the ball:
-    - Reset the ball_pos via init_ball_pos
-    - If the init_ball_pos has no default provided, randomize the ball spawn location
-        - using the paramters from above:
-        - Reset the base position and orientation of the ball in pybullet: give the ball id, ball pos, angle for the specific ball
-    
-    - Reset the ball velocity: randomize it by default
-        - reset it in pybullet via resetBaseVelocity
-        
-    For each car: 
-    - try to get the ini_pos and init_orientation if it was provided
-    - If the orientation and position were not initialized, then randomize them, and reset the car
-    """
 
     def reset(self, spawn_bounds, car_properties):
+        """
+        Set the winner, scored, touch last variables to none
+        for the ball:
+        - Reset the ball_pos via init_ball_pos
+        - If the init_ball_pos has no default provided, randomize the ball spawn location
+            - using the paramters from above:
+            - Reset the base position and orientation of the ball in pybullet: give the ball id, ball pos, angle for the specific ball
+
+        - Reset the ball velocity: randomize it by default
+            - reset it in pybullet via resetBaseVelocity
+
+        For each car:
+        - try to get the ini_pos and init_orientation if it was provided
+        - If the orientation and position were not initialized, then randomize them, and reset the car
+        """
         self.scored = False
         self.winner = None
         self.touched_last = None
@@ -385,25 +361,17 @@ class Sim(object):
 
         self.reset_cars(car_properties)
 
-    """
-    loops over the cars and generates new init_pos (if it was not specified)
-    """
 
     def reset_cars(self, car_properties):
+        """
+        loops over the cars and generates new init_pos (if it was not specified)
+        """
         for car in self._cars.values():
             # reset the car properties in advance
             car.set_car_properties(car_properties)
             car_pos = self._car_data[car.id]["init_pos"]
             car_orient = self._car_data[car.id]["init_orient"]
-            """
-            brainstorm for garanteed bounds generation
-            ball: need to generate it first - call first to not worry about checking bounds there
-            then for all of the cars: 
-            
-            if pos = none, generate the bounds, and continue generating while not overlap with other cars
-            how define overlap: distance between the two car locations has to be be less than the length of the car
-            continue to randomly generate bounds while the overlap exists
-            """
+
             if car_pos is None:
                 car_pos = self.generate_new_car_pos()
 
@@ -417,7 +385,6 @@ class Sim(object):
     def check_if_pos_overlap(self, car_pos):
         for car in self._cars.values():
             overlap = car.check_overlap(car_pos)
-            # TODO: need to implement the get_distance_to function
             # also need to make the length attribute of the car not private
             # or need to access it from rospy
             if overlap:
@@ -432,11 +399,11 @@ class Sim(object):
                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
         return car_pos
 
-    """
-    resets the ball position (if it was not specified)
-    """
 
     def reset_ball(self):
+        """
+        resets the ball position (if it was not specified)
+        """
         if self._ball_id is not None:
             ball_pos = self.init_ball_pos
             if ball_pos is None:

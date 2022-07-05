@@ -75,7 +75,6 @@ class Simulator(object):
 
     def __init__(self):
         # create variables for the functions that might initialize them
-        # TODO: what is the point of the car_cmd?? - only used once...
 
         rospy.init_node('simulator')
         # init the simulator and the sim time
@@ -126,7 +125,6 @@ class Simulator(object):
         self.car_noise, self.ball_noise = self.set_sensor_noise()
 
         # Creating the ball
-
         # check if we want to randomize the ball properties (ball pos and ball vel)
         # if we want to randomize, then we will do so in the sim.py
 

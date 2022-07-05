@@ -49,7 +49,7 @@ class ROSInterface(Env):
             launch_file: if training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch'])
             launch_args: if training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10])
             run_id: if training, used to prevent deadlocks. if logging, run_id describes where to save files. Default is randomly generated
-        Overview:
+        
         If eval = false (training agnet):
             - training- try to open launch files
             - generate uuid (our use provided )
@@ -147,7 +147,7 @@ class ROSInterface(Env):
             done (bool): whether the episode has ended, in which case further step() calls will return undefined results
             info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
 
-        overview:
+        
         Runs: _clear_state, _publish_action, _step_time_and_wait_for_state (all abstract methods that are implemented by the child)
         Gets the simulation state via: _get_state
         """
@@ -170,7 +170,7 @@ class ROSInterface(Env):
         a new episode, independent of previous episodes.
         Returns:
             observation (object): the initial observation.
-        Overview:
+        
         Checks if have a new state ready via: _has_state
         If so: gathers information: episode #, net reward, duration of the episode
         Update the message log with these parameters by publishing it
@@ -213,17 +213,17 @@ class ROSInterface(Env):
         self.__start_time = rospy.Time.now()  # logging
         return self._get_state()[0]
 
-    """
-    input: 
-    - number of retries: step time until state is known
-    overview:
-    Increment time and clock, take input of number of tries and do them until figure stuff out
-    Call __wait_once_for_state for the provided number of retries
-    increment the time if retrying wait_once_for_state
-    """
+
 
     def __step_time_and_wait_for_state(self, max_retries=1):
-        """Step time until a state is known."""
+        """
+        input:
+        - number of retries: step time until state is known
+
+        Increment time and clock, take input of number of tries and do them until figure stuff out
+        Call __wait_once_for_state for the provided number of retries
+        increment the time if retrying wait_once_for_state
+        """
         if not self.__EVAL_MODE:
             self.__time += self.__DELTA_T
             self.__clock_pub.publish(self.__time)
@@ -240,9 +240,10 @@ class ROSInterface(Env):
             while not self.__wait_once_for_state():
                 pass  # idle wait
 
-    """overview: Wait and allow other threads to run."""
-    def __wait_once_for_state(self):
 
+
+    def __wait_once_for_state(self):
+        """ Wait and allow other threads to run."""
         with self._cond:
             has_state = self._cond.wait_for(self._has_state, 0.25)
         if rospy.is_shutdown():
@@ -250,49 +251,59 @@ class ROSInterface(Env):
         return has_state
 
     # All the below abstract methods / properties must be implemented by subclasses
-    """overview: The Space object corresponding to valid actions."""
+
+
     @property
     @abstractmethod
     def action_space(self):
+        """ The Space object corresponding to valid actions."""
 
         raise NotImplementedError
 
-    """Overview: The Space object corresponding to valid observations."""
+
+
     @property
     @abstractmethod
     def observation_space(self):
-
+        """ The Space object corresponding to valid observations."""
         raise NotImplementedError
 
-    """Overview: Reset environment for a new episode."""
+
+
     @abstractmethod
     def _reset_env(self):
-
+        """ Reset environment for a new episode."""
         raise NotImplementedError
 
-    """Overview: Reset internally for a new episode."""
+
+
     @abstractmethod
     def _reset_self(self):
-
+        """ Reset internally for a new episode."""
         raise NotImplementedError
 
-    """Overview: Determine if the new state is ready."""
+
+
     @abstractmethod
     def _has_state(self):
+        """ Determine if the new state is ready."""
 
         raise NotImplementedError
 
-    """Overview: Clear state variables / flags in preparation for new ones."""
+
     @abstractmethod
     def _clear_state(self):
+        """ Clear state variables / flags in preparation for new ones."""
         raise NotImplementedError
 
-    """Overview: Get state tuple (observation, reward, done, info)."""
+
     @abstractmethod
     def _get_state(self):
+        """ Get state tuple (observation, reward, done, info)."""
         raise NotImplementedError
 
-    """Overview: Publish an action to the ROS network."""
+
     @abstractmethod
     def _publish_action(self, action):
+        """ Publish an action to the ROS network."""
         raise NotImplementedError

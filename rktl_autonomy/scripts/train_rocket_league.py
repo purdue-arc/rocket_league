@@ -16,7 +16,6 @@ from os.path import expanduser
 import uuid
 
 """
-overview:
 All run env share a run_id
 This is where you specify launch argos: add to the env_kwargs
 Set the model that you will do to use for the training
