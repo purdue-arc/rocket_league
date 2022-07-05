@@ -70,6 +70,7 @@ class Simulator(object):
 
     class InvalidRospyParam(Exception):
         """exception when using invalid arguement"""
+        print(Exception)
         rospy.logfatal()
 
     def __init__(self):
