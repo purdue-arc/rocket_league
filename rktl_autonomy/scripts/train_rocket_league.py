@@ -53,4 +53,4 @@ if __name__ == '__main__':  # this is required due to forking processes
     # save final weights
     print("done training")
     model.save(log_dir + "/final_weights")
-    env.close()  # this must be done to clean up other processes
+    env.close() # this must be done to clean up other processes
