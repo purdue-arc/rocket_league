@@ -9,7 +9,7 @@ License:
 import pybullet as p
 import math
 import numpy as np
-
+#the locations used for accessing car position and orientation
 JOINT_IDS = (1, 0, 2)  # X, Y, W
 BASE_QUATERNION = [0., 0., 0.]
 
@@ -54,6 +54,10 @@ class Car(object):
         self.cmd = cmd
 
     def step(self, dt):
+        """
+        runs a simulation step of the car, moving it in the specific time
+        @param dt: the time that the car step is run for
+        """
         if self.cmd is None:
             return
 
@@ -103,6 +107,11 @@ class Car(object):
                                     forces=(5000, 5000, 5000))
 
     def get_pose(self, noise=None):
+        """
+        randomizes and sets a new position for the car
+        @param noise: the sensor noise and if it is present
+        @return: the position and orientation of the car
+        """
         pos = p.getLinkState(self.id, self.body_link_id)[0]
         heading = p.getJointState(self.id, self.joint_ids[2])[0]
         orient = (0.0, 0.0, heading)
@@ -116,6 +125,9 @@ class Car(object):
         return pos, p.getQuaternionFromEuler(orient)
 
     def get_velocity(self):
+        """
+        @return: the velocity of the car
+        """
         link_state = p.getLinkState(self.id, self.body_link_id, computeLinkVelocity=1)
         orient = link_state[1]
         linear, angular = link_state[6:8]
@@ -128,8 +140,7 @@ class Car(object):
 
     def reset(self, pos, orient):
         """
-        resets the system state and the model configuration for the car
-        uses the position and the orientation to reset the cars position
+        uses the position and the orientation to reset system state and car configuration
         @param pos: the new position of the car
         @param orient: the new orientation of the car
         """
