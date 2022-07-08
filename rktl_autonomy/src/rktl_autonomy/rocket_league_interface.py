@@ -24,7 +24,8 @@ from math import pi, tan
 
 @unique
 class CarActions(IntEnum):
-    """high level: Possible actions for car.
+    """
+    Possible actions for car.
     currently using discrete action space
     """
     STOP = 0
@@ -38,50 +39,22 @@ class CarActions(IntEnum):
 
 
 class RocketLeagueInterface(ROSInterface):
-    """ROS interface for the Rocket League.
-    param:
-    eval: specify whether ytou want to train data or not (look at _ros_interface.py init function)
-    launch_file: used in _ros_interface.py to configure the training for roslaucnh(look at _ros_interface.py init function)
-    launch args: specify the files to be used in launching (look at _ros_interface.py init function)
-    run_id: the id for this specific training run (look at _ros_interface.py init function)
-    Overview:
-        Extends ROS interface: init the super
-        Set some car constants
-        - min/max vel
-        - curvature
-        Override the car constants if you find that the parameters from the action space are < for the min and if they are > for the max of the car’s action space
-        Set the parameters for the observed objects on the field:
-        - goal depth
-        - field dimensions
-        - max velocity (angular and linear)
-
-        set the parameters for the learning part of RL:
-        TODO: all are currently constant: want to add functionality to randomize maybe?
-        - max time
-        - constant reward
-        - ball distance reward
-        - goal distance reward
-        - loss reward
-        - win reward
-        - reverse reward
-        - hitting the wall reward
-
-        Define a reset function for this specific environment: returned from rospy
-        publish:
-        - car0 command
-        - sim_reset
-        subscribe:
-        - car0/odometry
-        - ball/odometry
-        - match status
-    """
 
     def __init__(self, eval=False, launch_file=['rktl_autonomy', 'rocket_league_train.launch'], launch_args=[],
                  run_id=None):
+        """
+        ROS interface for the Rocket League.
+        Set parameters for game elements (car/bar) and field object properties (goal,walls,planes)
+        (look at _ros_interface.py init function for the parameters)
+        @param eval: specify whether ytou want to train data or not
+        @param launch_file: used in _ros_interface.py to configure the training for roslaunch
+        @param launch_args: specify the files to be used in launching
+        @param run_id: the id for this specific training run
+        """
         super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args,
                          run_id=run_id)
 
-        ## Constants
+        # Car Constants
         # Actions
         self._MIN_VELOCITY = -rospy.get_param('/cars/throttle/max_speed')
         self._MAX_VELOCITY = rospy.get_param('/cars/throttle/max_speed')
@@ -143,22 +116,19 @@ class RocketLeagueInterface(ROSInterface):
         if not eval:
             rospy.wait_for_service('sim_reset')
 
-    """
-    high level: The Space object corresponding to valid actions.
-    """
-
     @property
     def action_space(self):
+        """
+        high level: The Space object corresponding to valid actions.
+        """
         return Discrete(CarActions.SIZE)
-
-    """
-    high level: The Space object corresponding to valid observations.
-    returns the lower and upper bound of the field
-    TODO: why upper and lower bounds?    
-    """
 
     @property
     def observation_space(self):
+        """
+        The Space object corresponding to valid observations.
+        @return: the lower and upper bound of the field
+        """
         return Box(
             # x, y, theta, v, omega (car)
             # x, y, vx, vy (ball)
@@ -179,13 +149,8 @@ class RocketLeagueInterface(ROSInterface):
                 self._MAX_OBS_VEL, self._MAX_OBS_VEL],
                 dtype=np.float32))
 
-    # this is the function that is called by the reset to the sim from the rocket_league_interface
     def _reset_env(self):
-        """
-             high level: Reset environment for a new training episode.
-             Reset the environment for the car
-             #TODO: important: call subscriber function
-        """
+        """called by the reset to the sim from the rocket_league_interface"""
         self._reset_srv.call()
 
     def _reset_self(self):
@@ -208,19 +173,8 @@ class RocketLeagueInterface(ROSInterface):
 
     def _get_state(self):
         """
-        Get state tuple (observation, reward, done, info).
-        Overview:
-            Observation:
-                Check if the observation is within the limits: make sure that the car is in bounds
-                If out of blinds: clip the observation space; by the lwo and high, and then continue processing
-            Time:
-                Set the current start time, checn whether the current time, self time is greater tha maximum allocation time:
-            Determine the reward:
-                Start with the constant reward, add , the distance traveled by the ball( ball distance reward
-                Get the change in distance to the goal, multiply by the reward to the distance
-                Calculate the score: if win, add 100, add lose score
-                Wall reward: check if hit the wall, if not add to it, if yet, remove from it
-
+        checks if the ball and car are in the field limits, steps the time, and checks if there are rewards
+        @return: state tuple (observation, reward, done, info)
         """
         assert self._has_state()
 
@@ -273,17 +227,15 @@ class RocketLeagueInterface(ROSInterface):
 
     def _publish_action(self, action):
         """
-        Publish an action to the ROS network (using a message).
-        Message: consists of action and curvature
-
-        For Forward, Forward Right, Forward Left: set msg velocity to max
-        For back, back Right, back Left: set msg velocity to min
+        Publish an action to the ROS network (using a message of action and curvature)
+        @param action: the desired action
+        @return: translated command in curvature and velocity
         """
         assert self.action_space.contains(action)
 
         msg = ControlCommand()
         msg.header.stamp = rospy.Time.now()
-
+        # For Forward, Forward Right, Forward Left: set msg velocity to max
         if (action == CarActions.FWD or
                 action == CarActions.FWD_RIGHT or
                 action == CarActions.FWD_LEFT):
@@ -294,7 +246,7 @@ class RocketLeagueInterface(ROSInterface):
             msg.velocity = self._MIN_VELOCITY
         else:
             msg.velocity = 0.0
-
+        # For back, back Right, back Left: set msg velocity to min
         if (action == CarActions.FWD_LEFT or
                 action == CarActions.REV_LEFT):
             msg.curvature = self._MAX_CURVATURE
@@ -307,13 +259,8 @@ class RocketLeagueInterface(ROSInterface):
         self._command_pub.publish(msg)
 
     def _car_odom_cb(self, odom_msg):
-        """
-        Callback for odometry of car.
-        Get the x,y position and yaw from euler from quaternion calculation,
-        Get the velocity and omega:
-        Ca_odom = (x,y,yaw,v,omega)
-        #TODO: what does the self._cond.notify_all() call do?
-        """
+        """Callback for odometry of car"""
+        # Get the x,y position and yaw from euler from quaternion calculation
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
         yaw, __, __ = euler_from_quaternion((
@@ -323,16 +270,15 @@ class RocketLeagueInterface(ROSInterface):
             odom_msg.pose.pose.orientation.w))
         v = odom_msg.twist.twist.linear.x
         omega = odom_msg.twist.twist.angular.z
-
+        # set the current car position and its future action
         self._car_odom = (x, y, yaw, v, omega)
 
         with self._cond:
             self._cond.notify_all()
 
     def _ball_odom_cb(self, odom_msg):
-        """Callback for odometry of ball.
-            Get the x,y,vx,vy of the ball
-        """
+        """Callback for odometry of ball."""
+
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
         vx = odom_msg.twist.twist.linear.x
@@ -344,10 +290,7 @@ class RocketLeagueInterface(ROSInterface):
             self._cond.notify_all()
 
     def _score_cb(self, score_msg):
-        """Callback for score of game.
-        Self._score = 1: victory team A
-        self._score = -1: victory team B
-        """
+        """Callback for score of game"""
         if score_msg.status == MatchStatus.VICTORY_TEAM_A:
             self._score = 1
         elif score_msg.status == MatchStatus.VICTORY_TEAM_B:
