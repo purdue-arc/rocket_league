@@ -74,17 +74,9 @@ class Simulator(object):
         rospy.logfatal()
 
     def __init__(self):
-        # create variables for the functions that might initialize them
+        """intializes the simulator param such as time, framrate, car properties, sim mode etc"""
 
         rospy.init_node('simulator')
-        # init the simulator and the sim time
-
-        # - the mode of which we will run simulator: ideal or realistic
-        # - the frame id of the specific run
-        # - the timeout associated with a pause
-        # - the rate at which we will run the simulator
-        # - whether we want to render during the run of the simulator
-        # the different nodes determine whether there is noise or not
         mode = rospy.get_param('~mode')
         if mode == 'ideal':
             self.mode = SimulatorMode.IDEAL
@@ -95,22 +87,20 @@ class Simulator(object):
 
         # set the engine environment
         render_enabled = rospy.get_param('~render', False)
+        # the rate at which we will run the simulator
         rate = rospy.Rate(rospy.get_param('~rate', 30))
+        # the frame id of the specific run
         self.frame_id = rospy.get_param('~frame_id', 'map')
+        # the timeout associated with a pause
         self.timeout = rospy.get_param('~timeout', 10)
 
         # Setup bounds for spawning car and ball
         spawn_bounds = self.get_spawn_bounds()
 
-        # urdf file: unversial way to describe kinematics and dynamics of robots
-        # the simulator use urdf to generate models for car, boalll , field bonds
-        # when aluch the node, pass in the param of urdf param - generated dynamically
-        # have all of the models need to load sym
+        # setup urdf file paths: unversial way to describe kinematics and dynamics of robots
         urdf_paths = rospy.get_param('~urdf')
         for path in urdf_paths.values():
             self.check_urdf(path)
-        # bc created get_rospy_param fun: want to change things
-        # describe a lot of sim's internal paramnters
 
         # Setup simulator properties
         props = {
@@ -123,6 +113,7 @@ class Simulator(object):
 
         # Setting sensor noise
         sensor_noise = rospy.get_sim_param('~sensor_noise', None)
+        # the different nodes determine whether there is noise or not
         self.ball_noise = None
         self.car_noise = None
         if sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
@@ -156,9 +147,8 @@ class Simulator(object):
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
+        # generates all of the cars
         self.generate_all_cars()
-
-        # create a list of car properties for each potential car that there could be
 
         # Node data
         self.cmd_lock = Lock()
@@ -183,9 +173,8 @@ class Simulator(object):
 
     def check_urdf(self, param):
         """
-        overview: Checks whether you ahvea valid pybullet url for information
-        if not, wait for the file to build in .5 seconds
         Validates that a URDF exists, then returns path
+        @param param: the path to the URDF
         """
         if param is None:
             rospy.signal_shutdown('no urdf path set for "{}"'.format(param))
@@ -199,52 +188,30 @@ class Simulator(object):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(param))
 
-    # TODO: how do effort_cb and cmd_cb interact?
-
     def effort_cb(self, effort_msg, car_id):
-        """
-        Sets a car's effort (overwrites commands)
-        Overrides the cmd_cb: calls the car command with the throttle and steering
-        TODO: during which state is it called with
-        """
+        """Sets a car's effort (overwrites commands)"""
         self.cmd_lock.acquire()
         self.sim.set_car_command(car_id,
                                  (effort_msg.throttle, effort_msg.steering))
         self.cmd_lock.release()
 
     def cmd_cb(self, cmd_msg, car_id):
-        """
-        Overrides the effirt_cd: calls the car
-        Command with the velocity and the curvature
-        Sets a car's command (overwrites efforts)
-        """
+        """Sets a car's command with the velocity and curvature"""
         self.cmd_lock.acquire()
         self.sim.set_car_command(car_id,
                                  (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
 
     def create_car_cb(self, req):
-        """
-        Add new car to the simulator
-        Checks if resetting to random position:
-        - if not, set it to default
-        - if so, will be reset later in the sim.create_car function
-
-        Get the car id,
-        Subscribe:
-        - effort cb: args: car_id
-        - command cb: args: car_id
-        If realistic mode:
-        - Publish to the pose sync early (with car id)
-        - Publish to the odometry truth (with car id)
-        If ideal mode:
-        - Publish to the odometry (with car id)
-        """
+        """Add new car to the simulator"""
         self.reset_lock.acquire()
         if req.name in self.car_ids:
             return CreateCarResponse(False)
 
         init_pose = None
+        # Checks if resetting to random position:
+        # - if not, set it to default
+        # - if so, will be reset later in the sim.create_car function
         if req.reset_to_random_pose is False:
             init_pose = {
                 "pos": [req.init_pos.x,
@@ -255,7 +222,9 @@ class Simulator(object):
 
         self.car_ids[req.name] = self.sim.create_car(
             'car', init_pose, noise=self.car_noise, props=self.car_properties)
-
+        # Subscribe:
+        # effort cb: args: car_id
+        # command cb: args: car_id
         car_id = self.car_ids[req.name]
         self.car_effort_subs[req.name] = rospy.Subscriber(
             f'/cars/{req.name}/effort', ControlEffort,
@@ -265,12 +234,15 @@ class Simulator(object):
             self.cmd_cb, callback_args=car_id)
 
         if self.mode == SimulatorMode.REALISTIC:
+            # Publish to the pose sync early (with car id)
+            # Publish to the odometry truth (with car id)
             self.car_pose_pubs[req.name] = rospy.Publisher(
                 f'/cars/{req.name}/pose_sync_early',
                 PoseWithCovarianceStamped, queue_size=1)
             self.car_odom_pubs[req.name] = rospy.Publisher(
                 f'/cars/{req.name}/odom_truth', Odometry, queue_size=1)
         elif self.mode == SimulatorMode.IDEAL:
+            # Publish to the odometry (with car id)
             self.car_odom_pubs[req.name] = rospy.Publisher(
                 f'/cars/{req.name}/odom', Odometry, queue_size=1)
 
@@ -278,24 +250,19 @@ class Simulator(object):
         return CreateCarResponse(True)
 
     def delete_car_cb(self, req):
-        """
-        Remove car from the simulator
-        Delete the effort,cmd subs (check if they exist first)
-        delete the odom, pose publishers (check if they exist first)
-        Delete cars body from pybullet by called sim.delete_car
-        """
+        """Remove car from the simulator"""
         self.reset_lock.acquire()
         if req.name not in self.car_ids:
             return DeleteCarResponse(False)
 
-        # Delete all related pubs and subs
+        # Delete the effort,cmd subs (check if they exist first)
         if req.name in self.car_effort_subs:
             self.car_effort_subs[req.name].unregister()
             del self.car_effort_subs[req.name]
         if req.name in self.car_cmd_subs:
             self.car_cmd_subs[req.name].unregister()
             del self.car_cmd_subs[req.name]
-
+        # delete the odom, pose publishers (check if they exist first)
         if req.name in self.car_odom_pubs:
             self.car_odom_pubs[req.name].unregister()
             del self.car_odom_pubs[req.name]
@@ -303,7 +270,7 @@ class Simulator(object):
             self.car_pose_pubs[req.name].unregister()
             del self.car_pose_pubs[req.name]
 
-        # Delete the car's body from pybullet
+        # Delete cars body from pybullet by called sim.delete_car
         res = self.sim.delete_car(self.car_ids[req.name])
         del self.car_ids[req.name]
 
@@ -311,52 +278,17 @@ class Simulator(object):
         return DeleteCarResponse(res)
 
     def reset_cb(self):
-        """
-        Resets the simulator
-        Reset the sim.py for each car
-        Rest the time
-        Reset the car_cmd
-        reset the simulator parameters and the sim class itself
+        """                                                    `
+        Resets the simulator for the next run
         @return: nothing broke response
         """
-        # TODO: want to give lest work with generating car properties
-
-        # OTHER NOTES:
-        # parametrsr loaded form ros param server: init value read from config: bc collecting data from paths,
-        # can update them real time
-        # if wanted just range over tiem and increasedd the range as we train -we can do : can publish new values to the parameters
-        # each time call reset: update with new knowledge and change how do domain randomizaiton
-        # think of ways to ad more paramters and make more adaptable
-
-        # self.configure_dynamics(self.plnae_id)- avoid generating a new data file: outsource all of that to doing computation in ros
-        # instead of rereading the paramters and storing them: can have function that reads param again if change max and min
-        # do the computation in the simulator node
-        # then pass that computation to the configure dynamics file
-
-        # other: adding functionality to autonomy pachage
-        # train_rocket_league.py;
-        # waht about rocket_league_interface: they are pulling in paramters there (under rktl_autonomy)
-        # want to add functionality to set ranges between runs: after each run: want to increase the range of param by 0.1
-        # as we conifugre that: there is another function :they use rospy.getparam: there is a setparam function: use between runs
-        # for autonomy pacakge: want to do: might not be immediately aware what param available to update bc use sim.configure file
-        # can add apram to simulator.yaml: can include a publish param that we are currently using: set out list
-        # and process them: "sim configurable params' has list of apram names used by the simulator
-        # autonomy can check that parameter and find all of the things it is allwoed to change
-        # that was it iss independent of the simulator that is runnign :in the future can add more params and understand they exist
-        # or if they want to take away params
-        # bc this is one time thing: makes it to be a list in sim.yaml file: whatever devs of sim nodes know to chagne
-
-        # as part of autonomy side: oportunity to explore literature online
-        # many techniques for how do; want to account for soeme of them and think of what features add to support it
-
-        # good skill pull up brand new project and understand it
 
         self.reset_lock.acquire()
-
-        # TODO: need to pass key variables to the rest function located in the sim class
+        # generate new simulator bounds
         spawn_bounds = self.get_spawn_bounds()
 
-        #self.generate_car_properties()
+        # self.generate_car_properties()
+        # Reset the sim.py for each car
         self.sim.reset(spawn_bounds, self.car_properties)
 
         self.last_time = None
@@ -365,17 +297,10 @@ class Simulator(object):
 
     def loop_once(self):
         """
-        Pause the time
         Step the simulation once step
-        Update the match status: if either team scored, show the winner, if not, continue the match
-
-        If the simulation mode is realistic:
-        - Write the ball positing and orientation variables (pub)
-        - Write each cars position and orientation variables (pub)
-        For all modes (ideal and realistic):
-        Move the ball forward: get its position, and publish it (via Odometry() func)
-        For each car, move it forward, get its position and publish it (via Odometry() func)
-        Resume the time
+        updates the match status (if someone scores)
+        - moves the ball and car positions to their positions
+        - publishes the new car and ball position
         """
         self.reset_lock.acquire()
         now = rospy.Time.now()
@@ -471,7 +396,14 @@ class Simulator(object):
         self.reset_lock.release()
 
     def get_sim_param(self, path, throwException=False):
-
+        """
+        gets a simulator paramter
+        @param path: the path to the variable
+        @param throwException:
+        true: if variable does not exist, None is return
+        false: if variable does not exist, an error is thrown
+        @return: None
+        """
         rospy_param = rospy.get_param(path)
         if not rospy_param:
             if throwException:
@@ -502,20 +434,15 @@ class Simulator(object):
         if throwException:
             raise self.InvalidRospyParam(path)
         return None
+
     def get_sim_dict(self, path, throwException=False):
         """
         create a dictionary from the path variable
-
-        process:
-        check if the initial path exist in rospy. if not, throw error
-        check if its a dict, if so, check if have min and max, if so, generate random param
-        if not, return a value if its a float, integer or list
-
-        if not have min and max, for each key of the dictionary, recurse down the tree by calling the same function
-
-        @param throwException: specify whether you want to get null or throw exception
-        @param path: the path to the parameter in the yaml file
-        @return: either the variable or the complete dictionary, depending on the path taken during recurssion
+        @param path: the path to the dictianaly in the rospy yaml file
+        @param throwException:
+        true: if variable does not exist, None is return
+        false: if variable does not exist, an error is thrown
+        @return: None
         """
         rospy_param = rospy.get_param(path)
         if not rospy_param:
@@ -573,26 +500,17 @@ class Simulator(object):
 
     def generate_car_properties(self):
         """
-        Set the car parameters based on those provided in the rospy directory (the properties of the car itself: length, max_speed, throttle, steering, simulate effort, etc)
-        - generates random max speed and steering throw by calling other functions
-        - used to generate these properties for each car
-        Create a list for each car depending on its properties:
-            Car id
-            Car pose publisher
-            Car odom publisher
-            Car effort subscribers
-            Car command subscribers
+        Set the car parameters based on those provided in the rospy directory
+        the properties of the car itself: length, max_speed, throttle, steering, simulate effort...
         Publisher:
             match_status
         Service:
             Sim_reset
             Sim_create_car
             sim_delete_Car
-        @return the generic car properties that are created for thsi specific run in a dictionary
+        @return: the generic car properties that are created for thsi specific run in a dictionary
         """
-        # general paramters that are the same for every single car
-        # if too constrained in car length between what we detect and what it is - might learn differently
-        # use the get_sim_param in each function case: makes the most sense
+
         car_properties = {'length': rospy.get_sim_param('/cars/length'),
                           'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
                           'steering_throw': self.get_sim_param("/cars/throttle/max_steering_throw"),
@@ -603,19 +521,24 @@ class Simulator(object):
         return car_properties
 
     def delete_all_cars(self):
+        """
+        loops over all of the cars and deletes each from the list
+        unsubscribes from all publishers and subscribers in the process
+        @return: whether deletion was successful
+        """
         car_configs = rospy.get_param('~cars', [])
         self.reset_lock.acquire()
         for car_config in car_configs:
-
+            # shutdown if the car does not exit
             if 'name' not in car_config:
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
             if 'randomize_pose' in car_config:
                 init_pose = None
-
+            # delete the car from the sim side
             self.sim.delete_car(self.car_ids[car_name])
 
-            # Delete all of hte cars subscribers
+            # Delete all of the cars subscribers
             if car_name in self.car_effort_subs:
                 self.car_effort_subs[car_name].unregister()
                 del self.car_effort_subs[car_name]
@@ -629,7 +552,7 @@ class Simulator(object):
             if car_name in self.car_pose_pubs:
                 self.car_pose_pubs[car_name].unregister()
                 del self.car_pose_pubs[car_name]
-        # reseting vars to be safe
+        # reset all lists to be safe
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
@@ -640,6 +563,7 @@ class Simulator(object):
         return DeleteCarResponse(True)
 
     def generate_all_cars(self):
+        """generate all the cars for the simulator run"""
         car_configs = rospy.get_param('~cars', [])
 
         for car_config in car_configs:
@@ -655,13 +579,14 @@ class Simulator(object):
                 'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
 
             car_id = self.car_ids[car_name]
+            # Subscribers for the car
             self.car_effort_subs[car_name] = rospy.Subscriber(
                 f'/cars/{car_name}/effort', ControlEffort,
                 self.effort_cb, callback_args=car_id)
             self.car_cmd_subs[car_name] = rospy.Subscriber(
                 f'/cars/{car_name}/command', ControlCommand,
                 self.cmd_cb, callback_args=car_id)
-
+            # publishers for the car
             if self.mode == SimulatorMode.REALISTIC:
                 self.car_pose_pubs[car_name] = rospy.Publisher(
                     f'/cars/{car_name}/pose_sync_early',
@@ -671,7 +596,6 @@ class Simulator(object):
             elif self.mode == SimulatorMode.IDEAL:
                 self.car_odom_pubs[car_name] = rospy.Publisher(
                     f'/cars/{car_name}/odom', Odometry, queue_size=1)
-
         return CreateCarResponse(True)
 
 
