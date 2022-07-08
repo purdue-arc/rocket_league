@@ -120,6 +120,8 @@ class ROSInterface(Env):
         """
         Implementation of gym.Env.step. This function will intentionally block
         if the ROS environment is not ready.
+        Run one timestep of the environment's dynamics.
+        When end of episode is reached, you are responsible for calling `reset()` to reset this environment's state.
         @param action: action (object): an action provided by the agent
         @return: observation a tuple of the following:
             (object): agent's observation of the current environment
@@ -128,9 +130,7 @@ class ROSInterface(Env):
             info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
 
         """
-        # Run one timestep of the environment's dynamics. When end of
-        # episode is reached, you are responsible for calling `reset()`
-        # to reset this environment's state.
+
         self._clear_state()
         self._publish_action(action)
         self.__step_time_and_wait_for_state()
@@ -142,26 +142,26 @@ class ROSInterface(Env):
         """
         Resets the environment to an initial state and returns an initial observation.
         Note that this function should not reset the environment's random
-        number generator(s);
-        random variables in the environment's state should
+        number generator(s).
+        Random variables in the environment's state should
         be sampled independently between multiple calls to `reset()`.
         @return: the initial observation.
         """
 
-        # Checks if a new state is ready via: _has_state
+        # Checks if a new state is ready via: _has_state.
         if self._has_state():
-            # gathers information: episode #, net reward, duration of the episode
+            # Gathers the following information: episode #, net reward, duration of the episode.
 
-            # generate log
+            # Generate a log.
             info = {
                 'episode': self.__episode,
                 'net_reward': self.__net_reward,
                 'duration': (rospy.Time.now() - self.__start_time).to_sec()
             }
-            # Update the message log with these parameters by publishing it
+            # Update the message log with these parameters by publishing it.
 
             info.update(self._get_state()[3])
-            # send message
+            # Send message.
             msg = DiagnosticStatus()
             msg.level = DiagnosticStatus.OK
             msg.name = 'ROS-Gym Interface'
@@ -174,7 +174,7 @@ class ROSInterface(Env):
 
         if not self.__EVAL_MODE:
             self._reset_env()
-        # reset the ROS interface (abstract method)
+        # Reset the ROS interface (abstract method).
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
         self.__start_time = rospy.Time.now()  # logging
@@ -182,8 +182,8 @@ class ROSInterface(Env):
 
     def __step_time_and_wait_for_state(self, max_retries=1):
         """
-        Increment time and clock, take input of number of tries and do them until figure stuff out
-        @param max_retries: number of time steps until state is known
+        Increment time and clock, try to publish the next simulation step in the number of tries.
+        @param max_retries: Number of time steps until state is known.
         """
         if not self.__EVAL_MODE:
             self.__time += self.__DELTA_T
@@ -199,7 +199,7 @@ class ROSInterface(Env):
                     self.__clock_pub.publish(self.__time)
                     retries += 1
         else:
-            # call for the provided number of retries
+            # Call for the provided number of retries.
             while not self.__wait_once_for_state():
                 pass  # idle wait
 
