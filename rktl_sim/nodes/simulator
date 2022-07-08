@@ -68,11 +68,6 @@ class Simulator(object):
 
     """
 
-    class InvalidRospyParam(Exception):
-        """exception when using invalid arguement"""
-        print(Exception)
-        rospy.logfatal()
-
     def __init__(self):
         """intializes the simulator param such as time, framrate, car properties, sim mode etc"""
 
@@ -407,7 +402,7 @@ class Simulator(object):
         rospy_param = rospy.get_param(path)
         if not rospy_param:
             if throwException:
-                raise self.InvalidRospyParam(path)
+                rospy.logfatal(f'invalid file path: ${path}')
             return None
         else:
             type_rospy = type(rospy_param)
@@ -417,11 +412,11 @@ class Simulator(object):
 
                 if not max_param:
                     if throwException:
-                        raise self.InvalidRospyParam(f'${path}/max')
+                        rospy.logfatal(f'invalid file path: ${path}/max')
                     return None
                 if not min_param:
                     if throwException:
-                        raise self.InvalidRospyParam(f'${path}/min')
+                        rospy.logfatal(f'invalid file path: ${path}/min')
                     return None
                 # accounting for moments in yaml file
                 if min_param > max_param:
@@ -432,7 +427,7 @@ class Simulator(object):
             elif type_rospy == float or type_rospy == int:
                 return rospy.get_param(path)
         if throwException:
-            raise self.InvalidRospyParam(path)
+            rospy.logfatal(f'invalid file path: ${path}')
         return None
 
     def get_sim_dict(self, path, throwException=False):
@@ -447,7 +442,7 @@ class Simulator(object):
         rospy_param = rospy.get_param(path)
         if not rospy_param:
             if throwException:
-                raise self.InvalidRospyParam(path)
+                rospy.logfatal(f'invalid file path: ${path}')
             return None
         else:
             type_rospy = type(rospy_param)
@@ -458,11 +453,11 @@ class Simulator(object):
                 max_param = rospy.get_param(f'${path}/max')
                 if not max_param and min_param:
                     if throwException:
-                        raise self.InvalidRospyParam(f'${path}/max')
+                        rospy.logfatal(f'invalid file path: ${path}/max')
                     return None
                 elif not min_param and max_param:
                     if throwException:
-                        raise self.InvalidRospyParam(f'${path}/min')
+                        rospy.logfatal(f'invalid file path: ${path}/min')
                     return None
                 elif max_param and min_param:
                     if min_param > max_param:
@@ -479,7 +474,7 @@ class Simulator(object):
             elif type_rospy == float or type_rospy == int or type_rospy == list:
                 return rospy.get_param(path)
         if throwException:
-            raise self.InvalidRospyParam(path)
+            rospy.logfatal(f'invalid file path: ${path}')
         return None
 
     def get_spawn_bounds(self):
