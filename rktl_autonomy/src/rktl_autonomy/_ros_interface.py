@@ -26,7 +26,7 @@ class ROSInterface(Env):
     to extend. This class handles logic regarding timesteps in ROS, and
     allows users to treat any ROS system as a Gym environment once the
     interface is created.
-
+    # IMPORTANT: All the below abstract methods marked with @abstractmethod must be implemented by subclasses
     All classes extending this for a particular environment must do the following:
         - implement all abstract properties:
             - action_space
@@ -148,7 +148,7 @@ class ROSInterface(Env):
         @return: the initial observation.
         """
 
-        # Checks if have a new state ready via: _has_state
+        # Checks if a new state is ready via: _has_state
         if self._has_state():
             # gathers information: episode #, net reward, duration of the episode
 
@@ -169,14 +169,10 @@ class ROSInterface(Env):
             msg.hardware_id = self.__LOG_ID
             msg.values = [KeyValue(key=key, value=str(value)) for key, value in info.items()]
             self.__log_pub.publish(msg)
-            # increment the episode count
             self.__episode += 1
-            # reset the reward accumulated for the past episode
             self.__net_reward = 0
 
-        # reset
         if not self.__EVAL_MODE:
-            # reset the environment with overidden function (abstract method)
             self._reset_env()
         # reset the ROS interface (abstract method)
         self._reset_self()
@@ -201,7 +197,6 @@ class ROSInterface(Env):
                 else:
                     self.__time += self.__DELTA_T
                     self.__clock_pub.publish(self.__time)
-                    # increment the time if retrying wait_once_for_state
                     retries += 1
         else:
             # call for the provided number of retries
@@ -215,8 +210,6 @@ class ROSInterface(Env):
         if rospy.is_shutdown():
             raise rospy.ROSInterruptException()
         return has_state
-
-    # All the below abstract methods / properties must be implemented by subclasses
 
     @property
     @abstractmethod
