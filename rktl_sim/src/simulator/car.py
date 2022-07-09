@@ -9,9 +9,11 @@ License:
 import pybullet as p
 import math
 import numpy as np
-#the locations used for accessing car position and orientation
+
+# The locations used for accessing car position and orientation.
 JOINT_IDS = (1, 0, 2)  # X, Y, W
 BASE_QUATERNION = [0., 0., 0.]
+
 
 class Car(object):
     def __init__(self, car_id, pos, orient, car_properties):
@@ -30,18 +32,18 @@ class Car(object):
         self.orient = None
         self.simulate_effort = car_properties['simulate_effort']
 
-        # physical constants
+        # Physical constants
         self.set_properties(car_properties)
 
-        # urdf configuration
+        # Urdf configuration
         self.body_link_id = 1
 
         self.reset(pos, orient)
 
     def set_properties(self, car_properties):
         """
-        sets the physical car properties for the car
-        @param car_properties: the general properties of the car that are set
+        Sets the physical car properties for the car.
+        @param car_properties: The general properties of the car that are set.
         """
         self._LENGTH = car_properties['length']
         self._MAX_SPEED = car_properties['max_speed']
@@ -55,25 +57,25 @@ class Car(object):
 
     def step(self, dt):
         """
-        runs a simulation step of the car, moving it in the specific time
-        @param dt: the time that the car step is run for
+        Runs a simulation step of the car, moving it within the time step.
+        @param dt: The duration of the car time step.
         """
         if self.cmd is None:
             return
 
-        # get current yaw angle
+        # Get current yaw angle.
         _, orient = self.get_pose()
         theta = p.getEulerFromQuaternion(orient)[2]
 
         if self.simulate_effort:
-            # transfrom control input to reference angles and velocities
+            # Transform control input to reference angles and velocities.
             v_rear_ref = self.cmd[0] * self._MAX_SPEED
             psi_ref = self.cmd[1] * self._STEERING_THROW
 
-            # update rear wheel velocity using 1st order model
+            # Update rear wheel velocity using 1st order model.
             self._v_rear = (self._v_rear - v_rear_ref) * math.exp(-dt / self._THROTTLE_TAU) + v_rear_ref
 
-            # update steering angle using massless acceleration to a fixed rate
+            # Update steering angle using massless acceleration to a fixed rate.
             if abs(psi_ref - self._psi) < self._STEERING_RATE * dt:
                 self._psi = psi_ref
             else:
@@ -82,7 +84,7 @@ class Car(object):
                 else:
                     self._psi -= self._STEERING_RATE * dt
 
-            # using bicycle model, extrapolate future state
+            # Extrapolate future state sing bicycle model.
             x_dot = self._v_rear * math.cos(theta + math.atan(math.tan(self._psi) / 2.0)) * \
                     math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
             y_dot = self._v_rear * math.sin(theta + math.atan(math.tan(self._psi) / 2.0)) * \
@@ -93,13 +95,13 @@ class Car(object):
             if abs(body_vel) > self._MAX_SPEED:
                 body_vel = math.copysign(self._MAX_SPEED, body_vel)
 
-            body_curv = self.cmd[1]
-            if abs(body_curv) > self._MAX_CURVATURE:
-                body_curv = math.copysign(self._MAX_CURVATURE, body_curv)
+            body_curve = self.cmd[1]
+            if abs(body_curve) > self._MAX_CURVATURE:
+                body_curve = math.copysign(self._MAX_CURVATURE, body_curve)
 
             x_dot = body_vel * math.cos(theta)
             y_dot = body_vel * math.sin(theta)
-            omega = body_vel * body_curv
+            omega = body_vel * body_curve
 
         p.setJointMotorControlArray(self.id, self.joint_ids,
                                     targetVelocities=(x_dot, y_dot, omega),
@@ -108,9 +110,9 @@ class Car(object):
 
     def get_pose(self, noise=None):
         """
-        randomizes and sets a new position for the car
-        @param noise: the sensor noise and if it is present
-        @return: the position and orientation of the car
+        Randomizes and sets a new position for the car.
+        @param noise: The sensor noise and if it is present (None=no noise).
+        @return: The position and orientation of the car.
         """
         pos = p.getLinkState(self.id, self.body_link_id)[0]
         heading = p.getJointState(self.id, self.joint_ids[2])[0]
@@ -140,19 +142,19 @@ class Car(object):
 
     def reset(self, pos, orient):
         """
-        uses the position and the orientation to reset system state and car configuration
-        @param pos: the new position of the car
-        @param orient: the new orientation of the car
+        Resets system state and car configuration with the position and the orientation.
+        @param pos: The new position of the car.
+        @param orient: The new orientation of the car.
         """
-        # save the car pos and orient:
+        # Save the car pos and orient.
         self.init_pos = pos
         self.orient = orient
 
-        # system state
+        # System state
         self._v_rear = 0.0
         self._psi = 0.0
 
-        # model configuration
+        # Model configuration
         p.resetBasePositionAndOrientation(
             self.id, [0., 0., pos[2]], p.getQuaternionFromEuler(BASE_QUATERNION))
 
@@ -165,10 +167,11 @@ class Car(object):
 
     def check_overlap(self, pos):
         """
-        returns whether the two positions of the car will overlap
-        @param pos: the position of the other car
-        @return: bolean if they overlap (true = overlap)
+        Returns whether the position will overlap with the current car.
+        @param pos: The position of the other object.
+        @return: Boolean if the positions overlap (true = overlap).
         """
         dist = math.sqrt(
-            (pos[0] - self.init_pos[0]) * (pos[0] - self.init_pos[0]) + (pos[0] - self.init_pos[1]) * (pos[1] - self.init_pos[1]))
+            (pos[0] - self.init_pos[0]) * (pos[0] - self.init_pos[0]) + (pos[0] - self.init_pos[1]) * (
+                    pos[1] - self.init_pos[1]))
         return dist < self._LENGTH
