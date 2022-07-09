@@ -26,7 +26,7 @@ from math import pi, tan
 class CarActions(IntEnum):
     """
     Possible actions for car.
-    currently using discrete action space
+    Currently using discrete action space.
     """
     STOP = 0
     FWD_LEFT = auto()
@@ -44,24 +44,23 @@ class RocketLeagueInterface(ROSInterface):
                  run_id=None):
         """
         ROS interface for the Rocket League.
-        Set parameters for game elements (car/bar) and field object properties (goal,walls,planes)
-        (look at _ros_interface.py init function for the parameters)
-        @param eval: specify whether ytou want to train data or not
-        @param launch_file: used in _ros_interface.py to configure the training for roslaunch
-        @param launch_args: specify the files to be used in launching
-        @param run_id: the id for this specific training run
+        Set parameters for game elements (car/bar) and field object properties (goal,walls,planes).
+        Look at _ros_interface.py init function for the parameters.
+        @param eval: Specify whether you want to train data or not.
+        @param launch_file: Used in _ros_interface.py to configure the training for roslaunch.
+        @param launch_args: Specify the files to be used in launching.
+        @param run_id: The id for this specific training run.
         """
         super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args,
                          run_id=run_id)
 
-        # Car Constants
-        # Actions
+        # Car action constants
         self._MIN_VELOCITY = -rospy.get_param('/cars/throttle/max_speed')
         self._MAX_VELOCITY = rospy.get_param('/cars/throttle/max_speed')
         self._MIN_CURVATURE = -tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
         self._MAX_CURVATURE = tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
 
-        # Action space overrides
+        # Car action space overrides
         if rospy.has_param('~action_space/velocity/min'):
             min_velocity = rospy.get_param('~action_space/velocity/min')
             assert min_velocity > self._MIN_VELOCITY
@@ -112,14 +111,14 @@ class RocketLeagueInterface(ROSInterface):
         rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
         rospy.Subscriber('match_status', MatchStatus, self._score_cb)
 
-        # block until environment is ready
+        # Block simulation until environment is ready.
         if not eval:
             rospy.wait_for_service('sim_reset')
 
     @property
     def action_space(self):
         """
-        high level: The Space object corresponding to valid actions.
+        The Space object corresponding to valid actions.
         """
         return Discrete(CarActions.SIZE)
 
@@ -127,7 +126,7 @@ class RocketLeagueInterface(ROSInterface):
     def observation_space(self):
         """
         The Space object corresponding to valid observations.
-        @return: the lower and upper bound of the field
+        @return: The lower and upper bound of the field.
         """
         return Box(
             # x, y, theta, v, omega (car)
@@ -150,7 +149,7 @@ class RocketLeagueInterface(ROSInterface):
                 dtype=np.float32))
 
     def _reset_env(self):
-        """called by the reset to the sim from the rocket_league_interface"""
+        """Called by the reset to the sim from the rocket_league_interface."""
         self._reset_srv.call()
 
     def _reset_self(self):
@@ -173,17 +172,17 @@ class RocketLeagueInterface(ROSInterface):
 
     def _get_state(self):
         """
-        checks if the ball and car are in the field limits, steps the time, and checks if there are rewards
+        Checks if the ball and car are in the field limits, steps the time, and checks if there are rewards.
         @return: state tuple (observation, reward, done, info)
         """
         assert self._has_state()
 
-        # combine car / ball odoms for observation
+        # Combine the car and ball odoms for observation.
         car = np.asarray(self._car_odom, dtype=np.float32)
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
 
-        # ensure it fits within the observation limits
+        # Ensure it fits within the observation limits.
         if not self.observation_space.contains(observation):
             rospy.logwarn_throttle(5, "Coercing observation into valid bounds")
             np.clip(
@@ -192,12 +191,12 @@ class RocketLeagueInterface(ROSInterface):
                 self.observation_space.high,
                 out=observation)
 
-        # check if time exceeded
+        # Check if time has exceeded.
         if self._start_time is None:
             self._start_time = rospy.Time.now()
         done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME
 
-        # Determine reward
+        # Determine the reward.
         reward = self._CONSTANT_REWARD
 
         ball_dist_sq = np.sum(np.square(ball[0:2] - car[0:2]))
@@ -205,7 +204,7 @@ class RocketLeagueInterface(ROSInterface):
 
         goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_LENGTH / 2, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
-
+        # Check if someone scored.
         if self._score != 0:
             done = True
             if self._score > 0:
@@ -220,22 +219,22 @@ class RocketLeagueInterface(ROSInterface):
                 abs(y) > self._FIELD_WIDTH / 2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
 
-        # info dict
+        # Info Dict
         info = {'goals': self._score}
 
         return (observation, reward, done, info)
 
     def _publish_action(self, action):
         """
-        Publish an action to the ROS network (using a message of action and curvature)
-        @param action: the desired action
-        @return: translated command in curvature and velocity
+        Publish an action to the ROS network (using a message of action and curvature).
+        @param action: The desired action.
+        @return: Translated command in curvature and velocity.
         """
         assert self.action_space.contains(action)
 
         msg = ControlCommand()
         msg.header.stamp = rospy.Time.now()
-        # For Forward, Forward Right, Forward Left: set msg velocity to max
+        # Set msg velocity to max for Forward, Forward-Right, and Forward-Left movement.
         if (action == CarActions.FWD or
                 action == CarActions.FWD_RIGHT or
                 action == CarActions.FWD_LEFT):
@@ -246,7 +245,7 @@ class RocketLeagueInterface(ROSInterface):
             msg.velocity = self._MIN_VELOCITY
         else:
             msg.velocity = 0.0
-        # For back, back Right, back Left: set msg velocity to min
+        # Set msg velocity to min for Back, Back-Right, and Back-Left movement.
         if (action == CarActions.FWD_LEFT or
                 action == CarActions.REV_LEFT):
             msg.curvature = self._MAX_CURVATURE
@@ -259,8 +258,8 @@ class RocketLeagueInterface(ROSInterface):
         self._command_pub.publish(msg)
 
     def _car_odom_cb(self, odom_msg):
-        """Callback for odometry of car"""
-        # Get the x,y position and yaw from euler from quaternion calculation
+        """Callback for odometry of car."""
+        # Get the x,y position and yaw from euler from quaternion calculation.
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
         yaw, __, __ = euler_from_quaternion((
@@ -270,7 +269,7 @@ class RocketLeagueInterface(ROSInterface):
             odom_msg.pose.pose.orientation.w))
         v = odom_msg.twist.twist.linear.x
         omega = odom_msg.twist.twist.angular.z
-        # set the current car position and its future action
+        # Set the current car position and its future action.
         self._car_odom = (x, y, yaw, v, omega)
 
         with self._cond:
@@ -290,7 +289,7 @@ class RocketLeagueInterface(ROSInterface):
             self._cond.notify_all()
 
     def _score_cb(self, score_msg):
-        """Callback for score of game"""
+        """Callback for score of game."""
         if score_msg.status == MatchStatus.VICTORY_TEAM_A:
             self._score = 1
         elif score_msg.status == MatchStatus.VICTORY_TEAM_B:
