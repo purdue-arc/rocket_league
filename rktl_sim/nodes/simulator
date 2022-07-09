@@ -72,7 +72,7 @@ class Simulator(object):
         """intializes the simulator param such as time, framrate, car properties, sim mode etc"""
 
         rospy.init_node('simulator')
-        mode = rospy.get_param('~mode')
+        mode = self.get_sim_param('~mode')
         if mode == 'ideal':
             self.mode = SimulatorMode.IDEAL
         elif mode == 'realistic':
@@ -81,33 +81,33 @@ class Simulator(object):
             rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
 
         # set the engine environment
-        render_enabled = rospy.get_param('~render', False)
+        render_enabled = self.get_sim_param('~render', secondParam=False)
         # the rate at which we will run the simulator
-        rate = rospy.Rate(rospy.get_param('~rate', 30))
+        rate = rospy.Rate(self.get_sim_param('~rate', secondParam=30))
         # the frame id of the specific run
-        self.frame_id = rospy.get_param('~frame_id', 'map')
+        self.frame_id = self.get_sim_param('~frame_id', secondParam='map')
         # the timeout associated with a pause
-        self.timeout = rospy.get_param('~timeout', 10)
+        self.timeout = self.get_sim_param('~timeout', secondParam=10)
 
         # Setup bounds for spawning car and ball
         spawn_bounds = self.get_spawn_bounds()
 
         # setup urdf file paths: unversial way to describe kinematics and dynamics of robots
-        urdf_paths = rospy.get_param('~urdf')
+        urdf_paths = self.get_sim_param('~urdf')
         for path in urdf_paths.values():
             self.check_urdf(path)
 
         # Setup simulator properties
         props = {
-            'engine': rospy.get_param('~engine', None),
-            'dynamics': rospy.get_param('~dynamics', None),
+            'engine': self.get_sim_param('~engine', secondParam=None),
+            'dynamics': self.get_sim_param('~dynamics', secondParam=None),
         }
 
         # Creating physics simulator
         self.sim = simulator.Sim(props, urdf_paths, spawn_bounds, render_enabled)
 
         # Setting sensor noise
-        sensor_noise = rospy.get_sim_param('~sensor_noise', None)
+        sensor_noise = rospy.get_sim_param('~sensor_noise', secondParam=None)
         # the different nodes determine whether there is noise or not
         self.ball_noise = None
         self.car_noise = None
@@ -119,8 +119,8 @@ class Simulator(object):
         # if we want to randomize, then we will do so in the sim.py
 
         self.ball_pose_pub, self.ball_odom_pub = None, None
-        ball_init_pose = rospy.get_sim_param('~ball/init_pose', None)
-        ball_init_speed = rospy.get_sim_param('~ball/init_speed', None)
+        ball_init_pose = rospy.get_sim_param('~ball/init_pose')
+        ball_init_speed = rospy.get_sim_param('~ball/init_speed')
 
         self.sim.create_ball('ball', init_pose=ball_init_pose,
                              init_speed=ball_init_speed, noise=self.ball_noise)
@@ -390,32 +390,37 @@ class Simulator(object):
         self.last_time = now
         self.reset_lock.release()
 
-    def get_sim_param(self, path, throwException=False):
+    def get_sim_param(self, path, returnValue=False, secondParam=None):
         """
-        gets a simulator paramter
+        gets a simulator parameter
+        @param secondParam: if you want to get another value from rospy
         @param path: the path to the variable
-        @param throwException:
+        @param returnValue:
         true: if variable does not exist, None is return
         false: if variable does not exist, an error is thrown
         @return: None
         """
         rospy_param = rospy.get_param(path)
         if not rospy_param:
-            if throwException:
+            if returnValue:
                 rospy.logfatal(f'invalid file path: ${path}')
             return None
         else:
             type_rospy = type(rospy_param)
             if type_rospy == dict:
-                min_param = rospy.get_param(f'${path}/min')
-                max_param = rospy.get_param(f'${path}/max')
+                if secondParam is None:
+                    min_param = rospy.get_param(f'${path}/min')
+                    max_param = rospy.get_param(f'${path}/max')
+                else:
+                    min_param = rospy.get_param(f'${path}/min', secondParam)
+                    max_param = rospy.get_param(f'${path}/max', secondParam)
 
                 if not max_param:
-                    if throwException:
+                    if returnValue:
                         rospy.logfatal(f'invalid file path: ${path}/max')
                     return None
                 if not min_param:
-                    if throwException:
+                    if returnValue:
                         rospy.logfatal(f'invalid file path: ${path}/min')
                     return None
                 # accounting for moments in yaml file
@@ -425,8 +430,11 @@ class Simulator(object):
                     return random.uniform(min_param, max_param)
 
             elif type_rospy == float or type_rospy == int:
-                return rospy.get_param(path)
-        if throwException:
+                if secondParam is None:
+                    return rospy.get_param(path, secondParam)
+                else:
+                    return rospy.get_param(path)
+        if returnValue:
             rospy.logfatal(f'invalid file path: ${path}')
         return None
 
@@ -485,7 +493,7 @@ class Simulator(object):
         # Setting up field
         fw = self.get_sim_param("/field/width")
         fl = self.get_sim_param("/field/length")
-        spawn_height = rospy.get_sim_param('~spawn_height', 0.06)
+        spawn_height = rospy.get_sim_param('~spawn_height', secondParam=0.06)
         wt = rospy.get_sim_param('/field/wall_thickness')
 
         spawn_bounds = [[-(fl / 2) + (2 * wt), (fl / 2) - (2 * wt)],
@@ -521,7 +529,7 @@ class Simulator(object):
         unsubscribes from all publishers and subscribers in the process
         @return: whether deletion was successful
         """
-        car_configs = rospy.get_param('~cars', [])
+        car_configs = self.get_sim_param('~cars', secondParam=[])
         self.reset_lock.acquire()
         for car_config in car_configs:
             # shutdown if the car does not exit
@@ -559,7 +567,7 @@ class Simulator(object):
 
     def generate_all_cars(self):
         """generate all the cars for the simulator run"""
-        car_configs = rospy.get_param('~cars', [])
+        car_configs = self.get_sim_param('~cars',secondParam= [])
 
         for car_config in car_configs:
             init_pose = self.get_sim_param('~cars/init_pose')
