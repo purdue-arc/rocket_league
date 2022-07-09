@@ -11,20 +11,20 @@ from stable_baselines3 import PPO
 from os.path import expanduser
 import rospy
 
-# create interface (and init ROS)
+# Create interface (and init ROS).
 env = RocketLeagueInterface(eval=True)
 
-# load the model
+# Load the model.
 weights = expanduser(rospy.get_param('~weights'))
 model = PPO.load(weights)
 
-# evaluate in real-time
+# Evaluate in real-time.
 obs = env.reset()
 while True:
-    # predict the future action for the sim
+    # Predict the future action for the sim.
     action, __ = model.predict(obs)
     try:
-        # step the sim with the action from the model
+        # Step the sim with the action from the model.
         obs, __, __, __ = env.step(action)
     except rospy.ROSInterruptException:
         exit()
