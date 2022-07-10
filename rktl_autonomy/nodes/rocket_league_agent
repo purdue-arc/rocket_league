@@ -24,7 +24,7 @@ while True:
     # Predict the future action for the sim.
     action, __ = model.predict(obs)
     try:
-        # Step the sim with the action from the model.
+        # step the sim with the action from the model.
         obs, __, __, __ = env.step(action)
     except rospy.ROSInterruptException:
         exit()
