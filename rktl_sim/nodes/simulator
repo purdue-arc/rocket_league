@@ -32,6 +32,13 @@ class Simulator(object):
     """ROS wrapper for the simulator
     Handles the simulator setup: sim mode, sim rate, sensor noise, urdf paths, rendering, etc.
     Cars and ball objects and their functionality are handed off to the sim.py.
+
+    Two types of parameters: configuration-based and instance-based.
+    Configuration-based parameters determine the kinematics and dynamics of the sim.
+        A few examples: car size, sim timestep, friction, etc.
+    Instance-based parameters determine the initial state of a new run.
+        A few examples: car pose, ball pose, etc.
+    On startup, we load both configuration and instance parameters and create an initial setup.
     """
 
     def __init__(self):
