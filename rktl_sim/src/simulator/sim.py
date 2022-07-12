@@ -314,7 +314,7 @@ class Sim(object):
             return None
         return p.getBaseVelocity(self._ball_id)
 
-    def reset(self, spawn_bounds, car_properties):
+    def reset(self, spawn_bounds, car_properties, ball_init_pose, ball_init_speed):
         """
         Resets the ball, score, winner, spawn bounds, cars and ball.
         @param spawn_bounds: The new spawn bounds.
@@ -323,6 +323,8 @@ class Sim(object):
         self.scored = False
         self.winner = None
         self.touched_last = None
+        self.init_ball_pos = ball_init_pose
+        self._speed_bound = ball_init_speed
         self.spawn_bounds = spawn_bounds
         self.reset_ball()
 
