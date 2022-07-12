@@ -111,7 +111,9 @@ class Simulator(object):
         rospy.Service('sim_reset', Empty, self.reset_cb)
         rospy.Service('sim_create_car', CreateCar, self.create_car_cb)
         rospy.Service('sim_delete_car', DeleteCar, self.delete_car_cb)
-        # TODO: add services for deleting all of the cars and creating all of them again
+        rospy.Service('sim_delete_all_cars', Empty, self.create_all_cars_cb)
+        rospy.Service('sim_create_all_cars', Empty, self.delete_all_cars_cb)
+
         while not rospy.is_shutdown():
             self.loop_once()
             try:
@@ -478,6 +480,20 @@ class Simulator(object):
                           'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
         self.car_properties = car_properties
         return car_properties
+
+    def delete_all_cars_cb(self):
+        self.reset_lock.acquire()
+        self.delete_all_cars()
+        self.reset_cb()
+        self.reset_lock.release()
+        return DeleteCarResponse(True)
+
+    def create_all_cars_cb(self):
+        self.reset_lock.acquire()
+        self.create_all_cars_cb()
+        self.reset_cb()
+        self.reset_lock.release()
+        return CreateCarResponse(True)
 
     def delete_all_cars(self):
         """@return: whether deletion was successful"""
