@@ -28,6 +28,7 @@ class SimulatorMode(Enum):
     IDEAL = 1
     REALISTIC = 2
 
+
 class Simulator(object):
     """ROS wrapper for the simulator
     Handles the simulator setup: sim mode, sim rate, sensor noise, urdf paths, rendering, etc.
@@ -43,6 +44,17 @@ class Simulator(object):
 
     def __init__(self):
         """Initialize the simulator environment, field and objects properties, and car and ball objects."""
+        # sim params that are initialized by the reset function
+        self.props = None
+        self.spawn_bounds = None
+        self.sensor_noise = None
+        self.ball_noise = None
+        self.car_noise = None
+        self.ball_init_pose = None
+        self.ball_init_speed = None
+        self.car_properties = None
+        # Setting config parameters (stay constant for the whole simulator run).
+
         rospy.init_node('simulator')
         mode = self.get_sim_param('~mode')
         if mode == 'ideal':
@@ -56,41 +68,20 @@ class Simulator(object):
         rate = rospy.Rate(self.get_sim_param('~rate', secondParam=30))
         self.frame_id = self.get_sim_param('~frame_id', secondParam='map')
         self.timeout = self.get_sim_param('~timeout', secondParam=10)
-
-        spawn_bounds = self.get_spawn_bounds()
-
         # Setup urdf file paths: a universal way to describe kinematics and dynamics of robots.
         urdf_paths = self.get_sim_param('~urdf')
         for path in urdf_paths.values():
             self.check_urdf(path)
+        # Prep the simulator for a new run, setting all simulator parameters, and objects.
+        self.reset_cb(reset_sim=False)
 
-        # Setup simulator properties.
-        props = {
-            'engine': self.get_sim_param('~engine', secondParam=None),
-            'dynamics': self.get_sim_param('~dynamics', secondParam=None),
-        }
-
-        # Creating physics simulator (cars and ball objects are created here).
-        self.sim = simulator.Sim(props, urdf_paths, spawn_bounds, render_enabled)
-
-        # Setting sensor noise.
-        sensor_noise = rospy.get_sim_param('~sensor_noise', secondParam=None)
-        self.ball_noise = None
-        self.car_noise = None
-        if sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
-            self.ball_noise = sensor_noise.get('ball', None)
-            self.car_noise = sensor_noise.get('car', None)
-
-        # Creating the ball:
-        # Randomization is handled by sim.py.
-        self.ball_pose_pub, self.ball_odom_pub = None, None
-        ball_init_pose = rospy.get_sim_param('~ball/init_pose')
-        ball_init_speed = rospy.get_sim_param('~ball/init_speed')
-
-        self.sim.create_ball('ball', init_pose=ball_init_pose,
-                             init_speed=ball_init_speed, noise=self.ball_noise)
+        # create the sim object
+        self.sim = simulator.Sim(self.props, urdf_paths, self.spawn_bounds, render_enabled)
+        self.sim.create_ball('ball', init_pose=self.ball_init_pose,
+                             init_speed=self.ball_init_speed, noise=self.ball_noise)
 
         # Set the ball publishers.
+        self.ball_pose_pub, self.ball_odom_pub = None, None
         if self.mode == SimulatorMode.REALISTIC:
             self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
                                                  PoseWithCovarianceStamped, queue_size=1)
@@ -99,8 +90,6 @@ class Simulator(object):
         elif self.mode == SimulatorMode.IDEAL:
             self.ball_odom_pub = rospy.Publisher('/ball/odom',
                                                  Odometry, queue_size=1)
-
-        self.car_properties = self.generate_car_properties()
 
         self.car_ids = {}
         self.car_pose_pubs = {}
@@ -122,7 +111,7 @@ class Simulator(object):
         rospy.Service('sim_reset', Empty, self.reset_cb)
         rospy.Service('sim_create_car', CreateCar, self.create_car_cb)
         rospy.Service('sim_delete_car', DeleteCar, self.delete_car_cb)
-
+        # TODO: add services for deleting all of the cars and creating all of them again
         while not rospy.is_shutdown():
             self.loop_once()
             try:
@@ -167,6 +156,7 @@ class Simulator(object):
         """Add new car to the simulator."""
         self.reset_lock.acquire()
         if req.name in self.car_ids:
+            self.reset_lock.release()
             return CreateCarResponse(False)
 
         init_pose = None
@@ -203,12 +193,14 @@ class Simulator(object):
             self.car_odom_pubs[req.name] = rospy.Publisher(
                 f'/cars/{req.name}/odom', Odometry, queue_size=1)
 
+        self.reset_cb()
         self.reset_lock.release()
         return CreateCarResponse(True)
 
     def delete_car_cb(self, req):
         self.reset_lock.acquire()
         if req.name not in self.car_ids:
+            self.reset_lock.release()
             return DeleteCarResponse(False)
 
         # Unsubscribe from the subscribers and publishers.
@@ -229,19 +221,44 @@ class Simulator(object):
         res = self.sim.delete_car(self.car_ids[req.name])
         del self.car_ids[req.name]
 
+        self.reset_cb()
         self.reset_lock.release()
 
         return DeleteCarResponse(res)
 
-    def reset_cb(self):
+    def reset_cb(self, reset_sim=True):
         self.reset_lock.acquire()
+        # Setting sim parameters (can be modified by the user)
+        self.spawn_bounds = self.get_spawn_bounds()
 
-        spawn_bounds = self.get_spawn_bounds()
+        # Setup simulator properties.
+        self.props = {
+            'engine': self.get_sim_param('~engine', secondParam=None),
+            'dynamics': self.get_sim_param('~dynamics', secondParam=None),
+        }
+
+        # Creating physics simulator (cars and ball objects are created here).
+
+        # Setting sensor noise.
+        self.sensor_noise = rospy.get_sim_param('~sensor_noise', secondParam=None)
+        self.ball_noise = None
+        self.car_noise = None
+        if self.sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
+            self.ball_noise = self.sensor_noise.get('ball', None)
+            self.car_noise = self.sensor_noise.get('car', None)
+
+        # Creating the ball:
+        # Randomization is handled by sim.py.
+
+        self.ball_init_pose = rospy.get_sim_param('~ball/init_pose')
+        self.ball_init_speed = rospy.get_sim_param('~ball/init_speed')
+        self.car_properties = self.generate_car_properties()
 
         # Uncomment to regenerate configurations for cars.
         # self.generate_car_properties()
-
-        self.sim.reset(spawn_bounds, self.car_properties)
+        # resets the car and ball based off the position
+        if reset_sim:
+            self.sim.reset(self.spawn_bounds, self.car_properties, self.ball_init_pose, self.ball_init_speed)
 
         self.last_time = None
         self.reset_lock.release()
