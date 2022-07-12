@@ -254,10 +254,15 @@ class Simulator(object):
 
         self.ball_init_pose = rospy.get_sim_param('~ball/init_pose')
         self.ball_init_speed = rospy.get_sim_param('~ball/init_speed')
-        self.car_properties = self.generate_car_properties()
+
+        self.car_properties = {'length': rospy.get_sim_param('/cars/length'),
+                               'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
+                               'steering_throw': self.get_sim_param("/cars/throttle/max_steering_throw"),
+                               'throttle_tau': rospy.get_sim_param("/cars/throttle/tau"),
+                               'steering_rate': rospy.get_sim_param("/cars/steering/rate"),
+                               'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
 
         # Uncomment to regenerate configurations for cars.
-        # self.generate_car_properties()
         # resets the car and ball based off the position
         if reset_sim:
             self.sim.reset(self.spawn_bounds, self.car_properties, self.ball_init_pose, self.ball_init_speed)
@@ -469,17 +474,6 @@ class Simulator(object):
                         [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
                         [spawn_height, spawn_height]]
         return spawn_bounds
-
-    def generate_car_properties(self):
-        """Set car properties: Length, Max_speed, Throttle, Steering, Simulate Effort."""
-        car_properties = {'length': rospy.get_sim_param('/cars/length'),
-                          'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
-                          'steering_throw': self.get_sim_param("/cars/throttle/max_steering_throw"),
-                          'throttle_tau': rospy.get_sim_param("/cars/throttle/tau"),
-                          'steering_rate': rospy.get_sim_param("/cars/steering/rate"),
-                          'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
-        self.car_properties = car_properties
-        return car_properties
 
     def delete_all_cars_cb(self):
         self.reset_lock.acquire()
