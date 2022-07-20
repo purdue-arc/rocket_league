@@ -55,12 +55,12 @@ dynamics:
 
 sensor_noise:
   car:
-    pos: [ 0.01, 0.01, 0.00 ]
-    orient: [ 0.0, 0.0, 0.09 ]
+    pos: [0.01, 0.01, 0.00]
+    orient: [0.0, 0.0, 0.09]
     dropout: 0.0
   ball:
-    pos: [ 0.01, 0.01, 0.0 ]
-    orient: [ 0.0, 0.0, 0.0 ]
+    pos: [0.01, 0.01, 0.0]
+    orient: [0.0, 0.0, 0.0]
     dropout: 0.0
 
 cars:
