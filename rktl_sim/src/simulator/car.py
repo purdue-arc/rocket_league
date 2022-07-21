@@ -10,47 +10,40 @@ import pybullet as p
 import math
 import numpy as np
 
-# The locations used for accessing car position and orientation.
+# locations used for accessing car position and orientation
 JOINT_IDS = (1, 0, 2)  # X, Y, W
 BASE_QUATERNION = [0., 0., 0.]
 
 
 class Car(object):
+    """Handles Car actions and instance based parameters."""
+
     def __init__(self, car_id, pos, orient, car_properties):
+        """
+        Generates a car for a sim run.
+        @param car_properties: Configuration car properties.
+        """
         self._psi = None
         self.cmd = None
         self.joint_ids = None
         self._v_rear = None
-        self._STEERING_RATE = None
-        self._MAX_CURVATURE = None
-        self._STEERING_THROW = None
-        self._THROTTLE_TAU = None
-        self._MAX_SPEED = None
-        self._LENGTH = None
         self.id = car_id
         self.init_pos = None
         self.orient = None
         self.simulate_effort = car_properties['simulate_effort']
 
-        # Physical constants
-        self.set_properties(car_properties)
-
-        # Urdf configuration
-        self.body_link_id = 1
-
-        self.reset(pos, orient)
-
-    def set_properties(self, car_properties):
-        """
-        Sets the physical car properties for the car.
-        @param car_properties: The general properties of the car that are set.
-        """
+        # save car confiig properties
         self._LENGTH = car_properties['length']
         self._MAX_SPEED = car_properties['max_speed']
         self._THROTTLE_TAU = car_properties['throttle_tau']
         self._STEERING_THROW = car_properties['steering_throw']
         self._STEERING_RATE = car_properties['steering_rate']
         self._MAX_CURVATURE = math.tan(self._STEERING_THROW) / self._LENGTH
+
+        # urdf configuration
+        self.body_link_id = 1
+
+        self.reset(pos, orient)
 
     def setCmd(self, cmd):
         self.cmd = cmd
@@ -63,19 +56,18 @@ class Car(object):
         if self.cmd is None:
             return
 
-        # Get current yaw angle.
         _, orient = self.get_pose()
         theta = p.getEulerFromQuaternion(orient)[2]
 
         if self.simulate_effort:
-            # Transform control input to reference angles and velocities.
+            # transform control input to reference angles and velocities
             v_rear_ref = self.cmd[0] * self._MAX_SPEED
             psi_ref = self.cmd[1] * self._STEERING_THROW
 
-            # Update rear wheel velocity using 1st order model.
+            # update rear wheel velocity using 1st order model
             self._v_rear = (self._v_rear - v_rear_ref) * math.exp(-dt / self._THROTTLE_TAU) + v_rear_ref
 
-            # Update steering angle using massless acceleration to a fixed rate.
+            # update steering angle using massless acceleration to a fixed rate
             if abs(psi_ref - self._psi) < self._STEERING_RATE * dt:
                 self._psi = psi_ref
             else:
@@ -84,7 +76,7 @@ class Car(object):
                 else:
                     self._psi -= self._STEERING_RATE * dt
 
-            # Extrapolate future state sing bicycle model.
+            # extrapolate future state sing bicycle model
             x_dot = self._v_rear * math.cos(theta + math.atan(math.tan(self._psi) / 2.0)) * \
                     math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
             y_dot = self._v_rear * math.sin(theta + math.atan(math.tan(self._psi) / 2.0)) * \
@@ -127,9 +119,6 @@ class Car(object):
         return pos, p.getQuaternionFromEuler(orient)
 
     def get_velocity(self):
-        """
-        @return: the velocity of the car
-        """
         link_state = p.getLinkState(self.id, self.body_link_id, computeLinkVelocity=1)
         orient = link_state[1]
         linear, angular = link_state[6:8]
@@ -141,22 +130,14 @@ class Car(object):
         return linear, angular
 
     def reset(self, pos, orient):
-        """
-        Resets system state and car configuration with the position and the orientation.
-        @param pos: The new position of the car.
-        @param orient: The new orientation of the car.
-        """
-        # Save the car pos and orient.
+        """Resets the car state with the new pose and orient."""
         self.init_pos = pos
         self.orient = orient
 
-        # System state
         self._v_rear = 0.0
         self._psi = 0.0
 
-        # Model configuration
-        p.resetBasePositionAndOrientation(
-            self.id, [0., 0., pos[2]], p.getQuaternionFromEuler(BASE_QUATERNION))
+        p.resetBasePositionAndOrientation(self.id, [0., 0., pos[2]], p.getQuaternionFromEuler(BASE_QUATERNION))
 
         self.joint_ids = JOINT_IDS  # X, Y, W
         p.resetJointState(self.id, self.joint_ids[0], targetValue=pos[0])
