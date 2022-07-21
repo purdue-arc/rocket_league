@@ -6,7 +6,7 @@ License:
   All rights reserved.
 """
 
-# 3rd party modules.
+# 3rd party modules
 import random
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
@@ -16,23 +16,22 @@ from std_srvs.srv import Empty, EmptyResponse
 from threading import Lock
 from enum import Enum
 
-# Local libraries.
+# local libraries
 import simulator
 from rktl_sim.srv import CreateCar, CreateCarResponse, DeleteCar, DeleteCarResponse
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 
 class SimulatorMode(Enum):
-    # Choose between two types of models:
-    # Ideal (no sensor noise) or realistic (simulate sensor noise).
-    IDEAL = 1
-    REALISTIC = 2
+    IDEAL = 1  # no sensor noise, publish car and ball odom & pose early
+    REALISTIC = 2  # sensor noise for pose & orient of ball and car, publish with a delay
 
 
 class Simulator(object):
-    """ROS wrapper for the simulator
-    Handles the simulator setup: sim mode, sim rate, sensor noise, urdf paths, rendering, etc.
-    Cars and ball objects and their functionality are handed off to the sim.py.
+    """Serves as an interface between params and services to the Sim class.
+    Handles simulator configuration parameters:
+    sim rate(default=30), frame id(default=map), timeout(default=10)
+    sensor noise, urdf paths, car list, car properties
 
     Two types of parameters: configuration-based and instance-based.
     Configuration-based parameters determine the kinematics and dynamics of the sim.
@@ -40,11 +39,13 @@ class Simulator(object):
     Instance-based parameters determine the initial state of a new run.
         A few examples: car pose, ball pose, etc.
     On startup, we load both configuration and instance parameters and create an initial setup.
+
+    Simulator controls Configuration-based parameters.
+    Sim.py handles instance-based parameters.
     """
 
     def __init__(self):
         """Initialize the simulator environment, field and objects properties, and car and ball objects."""
-        # sim params that are initialized by the reset function
         self.props = None
         self.spawn_bounds = None
         self.sensor_noise = None
@@ -53,8 +54,8 @@ class Simulator(object):
         self.ball_init_pose = None
         self.ball_init_speed = None
         self.car_properties = None
-        # Setting config parameters (stay constant for the whole simulator run).
 
+        # setting config parameters (stay constant for the whole simulator run)
         rospy.init_node('simulator')
         mode = self.get_sim_param('~mode')
         if mode == 'ideal':
@@ -68,28 +69,18 @@ class Simulator(object):
         rate = rospy.Rate(self.get_sim_param('~rate', secondParam=30))
         self.frame_id = self.get_sim_param('~frame_id', secondParam='map')
         self.timeout = self.get_sim_param('~timeout', secondParam=10)
-        # Setup urdf file paths: a universal way to describe kinematics and dynamics of robots.
+
+        # setup urdf file paths: a universal way to describe kinematics and dynamics of robots
         urdf_paths = self.get_sim_param('~urdf')
         for path in urdf_paths.values():
             self.check_urdf(path)
-        # Prep the simulator for a new run, setting all simulator parameters, and objects.
+
+        # prep the simulator for a new run, setting all simulator parameters, and objects
         self.reset_cb(reset_sim=False)
 
-        # create the sim object
         self.sim = simulator.Sim(self.props, urdf_paths, self.spawn_bounds, render_enabled)
         self.sim.create_ball('ball', init_pose=self.ball_init_pose,
                              init_speed=self.ball_init_speed, noise=self.ball_noise)
-
-        # Set the ball publishers.
-        self.ball_pose_pub, self.ball_odom_pub = None, None
-        if self.mode == SimulatorMode.REALISTIC:
-            self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
-                                                 PoseWithCovarianceStamped, queue_size=1)
-            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth',
-                                                 Odometry, queue_size=1)
-        elif self.mode == SimulatorMode.IDEAL:
-            self.ball_odom_pub = rospy.Publisher('/ball/odom',
-                                                 Odometry, queue_size=1)
 
         self.car_ids = {}
         self.car_pose_pubs = {}
@@ -106,6 +97,15 @@ class Simulator(object):
         # Publishers
         self.status_pub = rospy.Publisher(
             'match_status', MatchStatus, queue_size=1)
+        self.ball_pose_pub, self.ball_odom_pub = None, None
+        if self.mode == SimulatorMode.REALISTIC:
+            self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
+                                                 PoseWithCovarianceStamped, queue_size=1)
+            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth',
+                                                 Odometry, queue_size=1)
+        elif self.mode == SimulatorMode.IDEAL:
+            self.ball_odom_pub = rospy.Publisher('/ball/odom',
+                                                 Odometry, queue_size=1)
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
@@ -121,49 +121,43 @@ class Simulator(object):
             except rospy.ROSInterruptException:
                 pass
 
-    def check_urdf(self, param):
-        """
-        Validates that a URDF exists, then returns its path.
-        @param param: The path to the URDF.
-        """
+    def check_urdf(self, urdf_path):
+        """Validates that a URDF exists, then returns its file."""
 
-        if param is None:
-            rospy.signal_shutdown('no urdf path set for "{}"'.format(param))
+        if urdf_path is None:
+            rospy.signal_shutdown('no urdf path set for "{}"'.format(urdf_path))
 
         i = 0
-        while not os.path.isfile(param) and i < 5:
-            # Wait for xacro build.
-            rospy.sleep(0.1)
+        while not os.path.isfile(urdf_path) and i < 5:
+            rospy.sleep(0.1)  # wait for xacro build
             i += 1
 
-        if not os.path.isfile(param):
+        if not os.path.isfile(urdf_path):
             rospy.signal_shutdown(
-                'no urdf file exists at path {}'.format(param))
+                'no urdf file exists at path {}'.format(urdf_path))
 
     def effort_cb(self, effort_msg, car_id):
-        """Sets a car's effort (overwrites commands)."""
+        """Sets a car's effort with throttle and steering (overwrites commands)."""
         self.cmd_lock.acquire()
         self.sim.set_car_command(car_id,
                                  (effort_msg.throttle, effort_msg.steering))
         self.cmd_lock.release()
 
     def cmd_cb(self, cmd_msg, car_id):
-        """Sets a car's command with the velocity and curvature."""
+        """Sets a car's command with the velocity and curvature. (overwrites effort)."""
         self.cmd_lock.acquire()
         self.sim.set_car_command(car_id,
                                  (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
 
     def create_car_cb(self, req):
-        """Add new car to the simulator."""
         self.reset_lock.acquire()
         if req.name in self.car_ids:
             self.reset_lock.release()
             return CreateCarResponse(False)
 
         init_pose = None
-        # Checks if resetting to random position.
-        # if so, the sim.create_car will handle the random generation.
+        # sim.py class handles the randomization
         if req.reset_to_random_pose is False:
             init_pose = {
                 "pos": [req.init_pos.x,
@@ -205,7 +199,7 @@ class Simulator(object):
             self.reset_lock.release()
             return DeleteCarResponse(False)
 
-        # Unsubscribe from the subscribers and publishers.
+        # unsubscribe from the subscribers and publishers
         if req.name in self.car_effort_subs:
             self.car_effort_subs[req.name].unregister()
             del self.car_effort_subs[req.name]
@@ -219,7 +213,7 @@ class Simulator(object):
             self.car_pose_pubs[req.name].unregister()
             del self.car_pose_pubs[req.name]
 
-        # Delete cars body from pybullet.
+        # delete cars body from pybullet
         res = self.sim.delete_car(self.car_ids[req.name])
         del self.car_ids[req.name]
 
@@ -230,27 +224,20 @@ class Simulator(object):
 
     def reset_cb(self, reset_sim=True):
         self.reset_lock.acquire()
-        # Setting sim parameters (can be modified by the user)
+        # setting sim parameters (can be modified by the user)
         self.spawn_bounds = self.get_spawn_bounds()
 
-        # Setup simulator properties.
         self.props = {
             'engine': self.get_sim_param('~engine', secondParam=None),
             'dynamics': self.get_sim_param('~dynamics', secondParam=None),
         }
 
-        # Creating physics simulator (cars and ball objects are created here).
-
-        # Setting sensor noise.
         self.sensor_noise = rospy.get_sim_param('~sensor_noise', secondParam=None)
         self.ball_noise = None
         self.car_noise = None
         if self.sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
             self.ball_noise = self.sensor_noise.get('ball', None)
             self.car_noise = self.sensor_noise.get('car', None)
-
-        # Creating the ball:
-        # Randomization is handled by sim.py.
 
         self.ball_init_pose = rospy.get_sim_param('~ball/init_pose')
         self.ball_init_speed = rospy.get_sim_param('~ball/init_speed')
@@ -262,8 +249,6 @@ class Simulator(object):
                                'steering_rate': rospy.get_sim_param("/cars/steering/rate"),
                                'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
 
-        # Uncomment to regenerate configurations for cars.
-        # resets the car and ball based off the position
         if reset_sim:
             self.sim.reset(self.spawn_bounds, self.car_properties, self.ball_init_pose, self.ball_init_speed)
 
@@ -272,9 +257,7 @@ class Simulator(object):
         return EmptyResponse()
 
     def loop_once(self):
-        """
-        Step the simulation once step, updating match status, moving and publishing new car and ball positions.
-        """
+        """Step the simulation once step, updating match status, moving and publishing new car and ball positions."""
         self.reset_lock.acquire()
 
         now = rospy.Time.now()
@@ -282,7 +265,7 @@ class Simulator(object):
             delta_t = (now - self.last_time).to_sec()
             self.sim.step(delta_t)
 
-            # Publish game status.
+            # publish game status
             status = MatchStatus()
             if self.sim.scored:
                 if self.sim.winner == "A":
@@ -293,7 +276,7 @@ class Simulator(object):
                 status.status = MatchStatus.ONGOING
             self.status_pub.publish(status)
 
-            # Publish pose and odometry data.
+            # publish pose and odom data
             if self.mode == SimulatorMode.REALISTIC:
                 ball_msg = PoseWithCovarianceStamped()
                 ball_msg.header.stamp = now
@@ -370,11 +353,11 @@ class Simulator(object):
 
     def get_sim_param(self, path, returnValue=False, secondParam=None):
         """
-        @param secondParam: If you want to get another value from rospy.
+        @param secondParam: Specify if you want to pass in a second parameter to rospy.
         @param path: The path to the variable.
         @param returnValue:
-        True: if variable does not exist, None is return.
-        False: if variable does not exist, an error is thrown.
+        True: None is returned if variable does not exist.
+        False: An error is thrown if variable does not exist.
         @return: None or Exception.
         """
         rospy_param = rospy.get_param(path)
@@ -400,7 +383,7 @@ class Simulator(object):
                     if returnValue:
                         rospy.logfatal(f'invalid file path: ${path}/min')
                     return None
-                # Accounting for bugs in yaml file.
+                # accounting for bugs in yaml file
                 if min_param > max_param:
                     return random.uniform(max_param, min_param)
                 else:
@@ -417,11 +400,11 @@ class Simulator(object):
 
     def get_sim_dict(self, path, throwException=False):
         """
-        Create a dictionary from the path variable.
-        @param path: The path to the dictionary in the rospy yaml file.
+        Returns a dictionary or value from the provided yaml path.
+        @param path: The path to the variable in the yaml file.
         @param throwException:
-        True: if variable does not exist, None is return.
-        False: if variable does not exist, an error is thrown.
+        True: None is returned if variable does not exist.
+        False: An error is thrown if variable does not exist.
         @return: None or Exception.
         """
         rospy_param = rospy.get_param(path)
@@ -448,9 +431,9 @@ class Simulator(object):
                     else:
                         return random.uniform(min_param, max_param)
 
-                # If we don't have max and min, this means that we have more dicts and values to loop over.
+                # loop over all values in the dict
                 for key in rospy_param:
-                    # Recurse down the path, using the key as the continuation.
+                    # recurse down the path, using the key as the continuation
                     rospy_param[key] = self.get_sim_param(path + f'$/{key}', throwException)
                 return rospy_param
 
@@ -461,10 +444,6 @@ class Simulator(object):
         return None
 
     def get_spawn_bounds(self):
-        """
-        Randomly generates the spawn bounds if we specify to generate random ones.
-        @return: The spawn bound array.
-        """
         fw = self.get_sim_param("/field/width")
         fl = self.get_sim_param("/field/length")
         spawn_height = rospy.get_sim_param('~spawn_height', secondParam=0.06)
@@ -490,34 +469,33 @@ class Simulator(object):
         return CreateCarResponse(True)
 
     def delete_all_cars(self):
-        """@return: whether deletion was successful"""
         car_configs = self.get_sim_param('~cars', secondParam=[])
         self.reset_lock.acquire()
         for car_config in car_configs:
-            # Shutdown if the car does not exit.
+            # shutdown if the car does not exit
             if 'name' not in car_config:
                 rospy.signal_shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
             if 'randomize_pose' in car_config:
                 init_pose = None
-            # Delete the car from the sim side.
+            # delete the car from the sim side
             self.sim.delete_car(self.car_ids[car_name])
 
-            # Delete car's subscribers
+            # delete car's subscribers
             if car_name in self.car_effort_subs:
                 self.car_effort_subs[car_name].unregister()
                 del self.car_effort_subs[car_name]
             if car_name in self.car_cmd_subs:
                 self.car_cmd_subs[car_name].unregister()
                 del self.car_cmd_subs[car_name]
-            # Delete cars publishers.
+            # delete cars publishers
             if car_name in self.car_odom_pubs:
                 self.car_odom_pubs[car_name].unregister()
                 del self.car_odom_pubs[car_name]
             if car_name in self.car_pose_pubs:
                 self.car_pose_pubs[car_name].unregister()
                 del self.car_pose_pubs[car_name]
-        # Reset all lists to be safe.
+        # reset all lists to be safe
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
@@ -543,14 +521,14 @@ class Simulator(object):
                 'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
 
             car_id = self.car_ids[car_name]
-            # Create the car's Subscribers.
+            # create the car's Subscribers
             self.car_effort_subs[car_name] = rospy.Subscriber(
                 f'/cars/{car_name}/effort', ControlEffort,
                 self.effort_cb, callback_args=car_id)
             self.car_cmd_subs[car_name] = rospy.Subscriber(
                 f'/cars/{car_name}/command', ControlCommand,
                 self.cmd_cb, callback_args=car_id)
-            # Create the car's Publishers.
+            # create the car's Publishers
             if self.mode == SimulatorMode.REALISTIC:
                 self.car_pose_pubs[car_name] = rospy.Publisher(
                     f'/cars/{car_name}/pose_sync_early',
