@@ -19,10 +19,13 @@ class Car(object):
     """Handles Car actions and instance based parameters."""
 
     def __init__(self, car_id, pos, orient, car_properties):
-        """
-        Generates a car for a sim run.
-        @param car_properties: Configuration car properties.
-        """
+        """Sets instance-based properties for a car and generates instance-based properties for a sim run."""
+        self._MAX_CURVATURE = None
+        self._STEERING_RATE = None
+        self._THROTTLE_TAU = None
+        self._STEERING_THROW = None
+        self._LENGTH = None
+        self._MAX_SPEED = None
         self._psi = None
         self.cmd = None
         self.joint_ids = None
@@ -31,19 +34,21 @@ class Car(object):
         self.init_pos = None
         self.orient = None
         self.simulate_effort = car_properties['simulate_effort']
-
+        self.set_properties(car_properties)
         # save car confiig properties
+
+        # urdf configuration
+        self.body_link_id = 1
+
+        self.reset(pos, orient)
+
+    def set_properties(self, car_properties):
         self._LENGTH = car_properties['length']
         self._MAX_SPEED = car_properties['max_speed']
         self._THROTTLE_TAU = car_properties['throttle_tau']
         self._STEERING_THROW = car_properties['steering_throw']
         self._STEERING_RATE = car_properties['steering_rate']
         self._MAX_CURVATURE = math.tan(self._STEERING_THROW) / self._LENGTH
-
-        # urdf configuration
-        self.body_link_id = 1
-
-        self.reset(pos, orient)
 
     def setCmd(self, cmd):
         self.cmd = cmd
