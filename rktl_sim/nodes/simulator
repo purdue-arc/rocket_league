@@ -76,12 +76,17 @@ class Simulator(object):
             self.check_urdf(path)
 
         # prep the simulator for a new run, setting all simulator parameters, and objects
-        self.reset_cb(reset_sim=False)
 
+        self.spawn_bounds = self.get_spawn_bounds()
+
+        self.props = {
+            'engine': self.get_sim_param('~engine', secondParam=None),
+            'dynamics': self.get_sim_param('~dynamics', secondParam=None),
+        }
         self.sim = simulator.Sim(self.props, urdf_paths, self.spawn_bounds, render_enabled)
         self.sim.create_ball('ball', init_pose=self.ball_init_pose,
                              init_speed=self.ball_init_speed, noise=self.ball_noise)
-
+        self.reset_cb()
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
@@ -222,7 +227,7 @@ class Simulator(object):
 
         return DeleteCarResponse(res)
 
-    def reset_cb(self, reset_sim=True):
+    def reset_cb(self, _):
         self.reset_lock.acquire()
         # setting sim parameters (can be modified by the user)
         self.spawn_bounds = self.get_spawn_bounds()
@@ -231,7 +236,6 @@ class Simulator(object):
             'engine': self.get_sim_param('~engine', secondParam=None),
             'dynamics': self.get_sim_param('~dynamics', secondParam=None),
         }
-
         self.sensor_noise = rospy.get_sim_param('~sensor_noise', secondParam=None)
         self.ball_noise = None
         self.car_noise = None
@@ -249,8 +253,7 @@ class Simulator(object):
                                'steering_rate': rospy.get_sim_param("/cars/steering/rate"),
                                'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
 
-        if reset_sim:
-            self.sim.reset(self.spawn_bounds, self.car_properties, self.ball_init_pose, self.ball_init_speed)
+        self.sim.reset(self.spawn_bounds, self.car_properties, self.ball_init_pose, self.ball_init_speed)
 
         self.last_time = None
         self.reset_lock.release()
