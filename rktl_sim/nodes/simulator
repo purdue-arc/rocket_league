@@ -75,25 +75,28 @@ class Simulator(object):
         for path in urdf_paths.values():
             self.check_urdf(path)
 
-        # prep the simulator for a new run, setting all simulator parameters, and objects
-
-        self.spawn_bounds = self.get_spawn_bounds()
-
         self.props = {
             'engine': self.get_sim_param('~engine', secondParam=None),
             'dynamics': self.get_sim_param('~dynamics', secondParam=None),
         }
-        self.sim = simulator.Sim(self.props, urdf_paths, self.spawn_bounds, render_enabled)
-        self.sim.create_ball('ball', init_pose=self.ball_init_pose,
-                             init_speed=self.ball_init_speed, noise=self.ball_noise)
-        self.reset_cb()
+
+        # prep the simulator for a new run, setting all instance parameters for the sim
+
+        self.spawn_bounds = self.get_spawn_bounds()
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
 
+        self.sim = simulator.Sim(self.props, urdf_paths, self.spawn_bounds, render_enabled)
+
+        self.sim.create_ball('ball', init_pose=self.ball_init_pose,
+                             init_speed=self.ball_init_speed, noise=self.ball_noise)
         self.generate_all_cars()
+
+        self.reset_cb()
+
 
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
@@ -232,10 +235,7 @@ class Simulator(object):
         # setting sim parameters (can be modified by the user)
         self.spawn_bounds = self.get_spawn_bounds()
 
-        self.props = {
-            'engine': self.get_sim_param('~engine', secondParam=None),
-            'dynamics': self.get_sim_param('~dynamics', secondParam=None),
-        }
+
         self.sensor_noise = rospy.get_sim_param('~sensor_noise', secondParam=None)
         self.ball_noise = None
         self.car_noise = None
@@ -357,7 +357,7 @@ class Simulator(object):
     def get_sim_param(self, path, returnValue=False, secondParam=None):
         """
         @param secondParam: Specify if you want to pass in a second parameter to rospy.
-        @param path: The path to the variable.
+        @param path: A direct path to the variable.
         @param returnValue:
         True: None is returned if variable does not exist.
         False: An error is thrown if variable does not exist.
@@ -466,12 +466,13 @@ class Simulator(object):
 
     def create_all_cars_cb(self):
         self.reset_lock.acquire()
-        self.create_all_cars_cb()
+        self.generate_all_cars()
         self.reset_cb()
         self.reset_lock.release()
         return CreateCarResponse(True)
 
     def delete_all_cars(self):
+        """Removes a car's publishers and subscribers and instance-parameters"""
         car_configs = self.get_sim_param('~cars', secondParam=[])
         self.reset_lock.acquire()
         for car_config in car_configs:
@@ -509,6 +510,7 @@ class Simulator(object):
         return DeleteCarResponse(True)
 
     def generate_all_cars(self):
+        """Generates instance-parameters, Subscribers, Publishers for each car."""
         car_configs = self.get_sim_param('~cars', secondParam=[])
 
         for car_config in car_configs:
