@@ -35,10 +35,8 @@ class Car(object):
         self.orient = None
         self.simulate_effort = car_properties['simulate_effort']
         self.set_properties(car_properties)
-        # save car confiig properties
 
-        # urdf configuration
-        self.body_link_id = 1
+        self.body_link_id = 1 # urdf configuration
 
         self.reset(pos, orient)
 
@@ -124,6 +122,8 @@ class Car(object):
         return pos, p.getQuaternionFromEuler(orient)
 
     def get_velocity(self):
+        """Returns the linear and angular velocity of the car."""
+
         link_state = p.getLinkState(self.id, self.body_link_id, computeLinkVelocity=1)
         orient = link_state[1]
         linear, angular = link_state[6:8]
