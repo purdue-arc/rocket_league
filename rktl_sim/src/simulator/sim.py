@@ -309,7 +309,7 @@ class Sim(object):
         self.reset_ball()
 
         self.reset_cars(car_properties)
-
+        # clean up to only reset car
     def reset_cars(self, car_properties):
         """
         Loops over the cars and generates new initial positions (if they were not specified).
