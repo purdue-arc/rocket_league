@@ -71,8 +71,8 @@ class Simulator(object):
         self.timeout = self.get_sim_param('~timeout', secondParam=10)
 
         # setup urdf file paths: a universal way to describe kinematics and dynamics of robots
-        urdf_paths = self.get_sim_param('~urdf')
-        for path in urdf_paths.values():
+        self.urdf_paths = self.get_sim_param('~urdf')
+        for path in self.urdf_paths.values():
             self.check_urdf(path)
 
         self.props = {
@@ -89,11 +89,11 @@ class Simulator(object):
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
 
-        self.sim = simulator.Sim(self.props, urdf_paths, self.spawn_bounds, render_enabled)
+        self.sim = simulator.Sim(self.props, self.urdf_paths, self.spawn_bounds, render_enabled)
 
         self.sim.create_ball('ball', init_pose=self.ball_init_pose,
                              init_speed=self.ball_init_speed, noise=self.ball_noise)
-        self.generate_all_cars()
+        self.update_all_cars()
 
         self.reset_cb()
 
@@ -116,6 +116,7 @@ class Simulator(object):
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
+        rospy.Service('sim_reset_ball', Empty, self.reset_ball_cb())
         rospy.Service('sim_create_car', CreateCar, self.create_car_cb)
         rospy.Service('sim_delete_car', DeleteCar, self.delete_car_cb)
         rospy.Service('sim_delete_all_cars', Empty, self.create_all_cars_cb)
@@ -182,6 +183,7 @@ class Simulator(object):
             }
         ]
         rospy.set_param('/cars/', car_param)
+        self.update_all_cars()
 
         # self.car_ids[req.name] = self.sim.create_car(
         #     'car', init_pose, noise=self.car_noise, props=self.car_properties)
@@ -237,7 +239,6 @@ class Simulator(object):
         # delete car from rospy to prevent regeneration
         rospy.delete_param(f'/cars/{req.name}')
 
-        self.reset_cb()
         self.reset_lock.release()
 
         return DeleteCarResponse(res)
@@ -248,14 +249,11 @@ class Simulator(object):
         self.spawn_bounds = self.get_spawn_bounds()
 
         self.sensor_noise = self.get_sim_param('~sensor_noise', secondParam=None)
-        self.ball_noise = None
         self.car_noise = None
         if self.sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
-            self.ball_noise = self.sensor_noise.get('ball', None)
             self.car_noise = self.sensor_noise.get('car', None)
 
-        self.ball_init_pose = self.get_sim_param('~ball/init_pose')
-        self.ball_init_speed = self.get_sim_param('~ball/init_speed')
+        self.reset_ball_cb()
 
         self.car_properties = {'length': self.get_sim_param('/cars/length'),
                                'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
@@ -263,11 +261,23 @@ class Simulator(object):
                                'throttle_tau': self.get_sim_param("/cars/throttle/tau"),
                                'steering_rate': self.get_sim_param("/cars/steering/rate"),
                                'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
-        self.generate_all_cars()
+
         self.sim.reset(self.spawn_bounds, self.car_properties, self.ball_init_pose, self.ball_init_speed)
 
         self.last_time = None
         self.reset_lock.release()
+        return EmptyResponse()
+
+    def reset_ball_cb(self, _):
+        """Resets the ball sensor noise and pose WITHOUT resetting the whole sim."""
+        self.ball_noise = None
+        if self.sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
+            self.ball_noise = self.sensor_noise.get('ball', None)
+
+        self.ball_init_pose = self.get_sim_param('~ball/init_pose')
+        self.ball_init_speed = self.get_sim_param('~ball/init_speed')
+
+        self.sim.reset_ball()
         return EmptyResponse()
 
     def loop_once(self):
@@ -477,7 +487,7 @@ class Simulator(object):
 
     def create_all_cars_cb(self):
         self.reset_lock.acquire()
-        self.generate_all_cars()
+        self.update_all_cars()
         self.reset_cb()
         self.reset_lock.release()
         return CreateCarResponse(True)
@@ -520,7 +530,7 @@ class Simulator(object):
 
         return DeleteCarResponse(True)
 
-    def generate_all_cars(self):
+    def update_all_cars(self):
         """Generates instance-parameters, Subscribers, Publishers for each car."""
         car_configs = self.get_sim_param('~cars', secondParam=[])
 
