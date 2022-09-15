@@ -17,7 +17,7 @@ then
     exit
 fi
 
-$WS_DIR/src/rocket_league/docker/docker-build.sh
+$WS_DIR/src/rocket_league/docker/docker-build.sh --pull
 
 #XAUTH VOODOO
 rm -rf /home/$USER/.docker.tmp
