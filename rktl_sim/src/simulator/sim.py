@@ -17,7 +17,7 @@ from simulator.car import Car
 class Sim(object):
     """Oversees components of the simulator"""
 
-    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled):
+    def __init__(self, urdf_paths, field_setup, spawn_bounds, render_enabled, time_step):
         if render_enabled:
             self._client = p.connect(p.GUI)
         else:
