@@ -45,7 +45,11 @@ class SimulatorROS(object):
         rate = rospy.Rate(rospy.get_param('~rate', 30))
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 10)
-
+        
+        # Setting up physics
+        # Set time_step to a number less than 0 to not setTimeStep
+        time_step = rospy.get_param('~time_step', -1.0)
+        
         # Setting up field
         fw = rospy.get_param('/field/width')
         fl = rospy.get_param('/field/length')
