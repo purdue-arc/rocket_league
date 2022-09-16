@@ -112,6 +112,8 @@ class Sim(object):
 
         p.setPhysicsEngineParameter(useSplitImpulse=1, restitutionVelocityThreshold=0.0001)
         p.setGravity(0, 0, -10)
+        if time_step > 0.0:
+            p.setTimeStep(time_step)
 
     def create_ball(self, urdf_name, init_pose=None, init_speed=None, noise=None):
         if urdf_name in self.urdf_paths:
