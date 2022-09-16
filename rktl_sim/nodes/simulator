@@ -81,7 +81,7 @@ class SimulatorROS(object):
             self.check_urdf(path)
 
         # Creating physics simulator
-        self.sim = simulator.Sim(urdf_paths, field_setup, spawn_bounds, render_enabled)
+        self.sim = simulator.Sim(urdf_paths, field_setup, spawn_bounds, render_enabled, time_step)
 
         # Creating the ball
         ball_init_pose = rospy.get_param('~ball/init_pose', None)
