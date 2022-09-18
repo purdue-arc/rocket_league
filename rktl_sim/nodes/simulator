@@ -88,18 +88,27 @@ class Simulator(object):
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
+        # TODO: find a better way to not have duplicate code segment
+        self.car_properties = {'length': self.get_sim_param('/cars/length'),
+                               'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
+                               'steering_throw': self.get_sim_param("/cars/steering/max_throw"),
+                               'throttle_tau': self.get_sim_param("/cars/throttle/tau"),
+                               'steering_rate': self.get_sim_param("/cars/steering/rate"),
+                               'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
 
         self.sim = simulator.Sim(self.props, self.urdf_paths, self.spawn_bounds, render_enabled)
 
         self.sim.create_ball('ball', init_pose=self.ball_init_pose,
                              init_speed=self.ball_init_speed, noise=self.ball_noise)
         self.update_all_cars()
-
-        self.reset_cb()
-
+        
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
         self.last_time = None
+
+        self.reset_cb(None) # janky reset call with mandatory none parameter
+
+        
 
         # Publishers
         self.status_pub = rospy.Publisher(
@@ -208,7 +217,7 @@ class Simulator(object):
         #     self.car_odom_pubs[req.name] = rospy.Publisher(
         #         f'/cars/{req.name}/odom', Odometry, queue_size=1)
 
-        self.reset_cb()
+        self.reset_cb(None) # janky reset call with mandatory none parameter
         self.reset_lock.release()
         return CreateCarResponse(True)
 
@@ -253,11 +262,11 @@ class Simulator(object):
         if self.sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
             self.car_noise = self.sensor_noise.get('car', None)
 
-        self.reset_ball_cb()
+        self.reset_ball_cb(None)
 
         self.car_properties = {'length': self.get_sim_param('/cars/length'),
                                'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
-                               'steering_throw': self.get_sim_param("/cars/throttle/max_steering_throw"),
+                               'steering_throw': self.get_sim_param("/cars/steering/max_throw"),
                                'throttle_tau': self.get_sim_param("/cars/throttle/tau"),
                                'steering_rate': self.get_sim_param("/cars/steering/rate"),
                                'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
@@ -276,6 +285,7 @@ class Simulator(object):
 
         self.ball_init_pose = self.get_sim_param('~ball/init_pose')
         self.ball_init_speed = self.get_sim_param('~ball/init_speed')
+        # print(dir(self.sim))
 
         self.sim.reset_ball()
         return EmptyResponse()
@@ -559,6 +569,8 @@ class Simulator(object):
             if car_name not in self.car_ids:
                 # the car does not exist so we will create it
                 # otherwise, we are only reseting the car's parameters which will happen in the sim.reset call
+                print("===============================")
+                print(self.car_properties)
                 self.car_ids[car_name] = self.sim.create_car(
                     'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
                 car_id = self.car_ids[car_name]

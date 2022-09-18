@@ -332,44 +332,44 @@ class Sim(object):
         car.reset(car_pos, car_orient)
 
 
-def check_if_pos_overlap(self, car_pos):
-    """
-    Checks if two cars spawn bounds overlap with each other.
-    @param car_pos: The position of the car.
-    @return: Whether overlap happens (true = need to generate new bounds).
-    """
-    for car in self._cars.values():
-        overlap = car.check_overlap(car_pos)
-        if overlap:
-            return True
+    def check_if_pos_overlap(self, car_pos):
+        """
+        Checks if two cars spawn bounds overlap with each other.
+        @param car_pos: The position of the car.
+        @return: Whether overlap happens (true = need to generate new bounds).
+        """
+        for car in self._cars.values():
+            overlap = car.check_overlap(car_pos)
+            if overlap:
+                return True
 
-    return False
-
-
-def generate_new_car_pos(self):
-    car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-               random.uniform(
-                   self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-               random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
-    return car_pos
+        return False
 
 
-def reset_ball(self):
-    if self._ball_id is not None:
-        ball_pos = self.init_ball_pos
-        if ball_pos is None:
-            ball_pos = [
-                random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
+    def generate_new_car_pos(self):
+        car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                random.uniform(
+                    self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
+        return car_pos
+
+
+    def reset_ball(self):
+        if self._ball_id is not None:
+            ball_pos = self.init_ball_pos
+            if ball_pos is None:
+                ball_pos = [
+                    random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                    random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
+                ]
+            p.resetBasePositionAndOrientation(
+                self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
+            )
+
+            ball_vel = [
+                random.uniform(-self._speed_bound, self._speed_bound),
+                random.uniform(-self._speed_bound, self._speed_bound),
+                0.0,
             ]
-        p.resetBasePositionAndOrientation(
-            self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
-        )
-
-        ball_vel = [
-            random.uniform(-self._speed_bound, self._speed_bound),
-            random.uniform(-self._speed_bound, self._speed_bound),
-            0.0,
-        ]
-        p.resetBaseVelocity(self._ball_id, ball_vel, [0, 0, 0])
+            p.resetBaseVelocity(self._ball_id, ball_vel, [0, 0, 0])
