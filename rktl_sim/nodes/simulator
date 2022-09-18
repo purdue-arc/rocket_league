@@ -125,7 +125,7 @@ class Simulator(object):
 
         # Services
         rospy.Service('sim_reset', Empty, self.reset_cb)
-        rospy.Service('sim_reset_ball', Empty, self.reset_ball_cb())
+        rospy.Service('sim_reset_ball', Empty, self.reset_ball_cb)
         rospy.Service('sim_create_car', CreateCar, self.create_car_cb)
         rospy.Service('sim_delete_car', DeleteCar, self.delete_car_cb)
         rospy.Service('sim_delete_all_cars', Empty, self.create_all_cars_cb)
@@ -282,9 +282,10 @@ class Simulator(object):
         self.ball_noise = None
         if self.sensor_noise is not None and self.mode == SimulatorMode.REALISTIC:
             self.ball_noise = self.sensor_noise.get('ball', None)
-
+        
         self.ball_init_pose = self.get_sim_param('~ball/init_pose')
-        self.ball_init_speed = self.get_sim_param('~ball/init_speed')
+        self.ball_init_speed = self.get_sim_param('/ball/init_speed')
+        
         # print(dir(self.sim))
 
         self.sim.reset_ball()

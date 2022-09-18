@@ -148,6 +148,8 @@ class Sim(object):
                     random.uniform(-self._speed_bound, self._speed_bound),
                     0.0,
                 ]
+            print("\n\n\n\n\n\n\n\n\n\n==========here7================")
+            print(self._speed_bound)
             p.resetBaseVelocity(self._ball_id, ball_vel, zero_orient)
             self.ball_noise = noise
             return self._ball_id
@@ -303,13 +305,13 @@ class Sim(object):
         self.scored = False
         self.winner = None
         self.touched_last = None
-        self.init_ball_pos = ball_init_pose
-        self._speed_bound = ball_init_speed
+        if ball_init_pose is not None: self.init_ball_pos = ball_init_pose 
+        if ball_init_speed is not None: self._speed_bound = ball_init_speed
+
         self.spawn_bounds = spawn_bounds
         self.reset_ball()
         for car in self._cars.values():
-            self.reset_car(self, car, car_properties)
-        self.reset_cars(car_properties)
+            self.reset_car(car, car_properties)
 
     def reset_car(self, car, car_properties):
         """
@@ -355,6 +357,7 @@ class Sim(object):
 
 
     def reset_ball(self):
+            
         if self._ball_id is not None:
             ball_pos = self.init_ball_pos
             if ball_pos is None:
@@ -366,7 +369,8 @@ class Sim(object):
             p.resetBasePositionAndOrientation(
                 self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
             )
-
+            print("===============here8===============")
+            print(self._speed_bound)
             ball_vel = [
                 random.uniform(-self._speed_bound, self._speed_bound),
                 random.uniform(-self._speed_bound, self._speed_bound),
