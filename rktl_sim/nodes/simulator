@@ -390,14 +390,20 @@ class Simulator(object):
                 rospy.logfatal(f'invalid file path: {path}')
             return None
         else:
+            if '~' in path:
+                if secondParam is not None:
+                    print(rospy.get_param(f'{path}',secondParam))
+                    return rospy.get_param(f'{path}',secondParam)
+                else:
+                    print(rospy.get_param(f'{path}'))
+                    return rospy.get_param(f'{path}')
+
             type_rospy = type(rospy_param)
+            
             if type_rospy == dict:
                 if secondParam is None:
-                    try:
-                        min_param = rospy.get_param(f'{path}/min')
-                    except Exception as err:
-                        print("error has happened")
-                    
+
+                    min_param = rospy.get_param(f'{path}/min')
                     max_param = rospy.get_param(f'{path}/max')
                 else:
                     min_param = rospy.get_param(f'{path}/min', secondParam)
