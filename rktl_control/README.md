@@ -1,3 +1,17 @@
+# To-Do
+
+### Feed forwardish
+Giving velocity and steering controls in terms of physical units (i.e. go forward at 1m/s turning 50 degrees left)
+- Measure speed of car at various throttle
+- Measure steering angle for certain steering
+- Create a look up table for effort input -> output
+
+### Impulse Response
+Gives us a frequence response (generating a look up table for inputs to car outputs)
+
+
+
+
 # Rocket League Control
 This package performs several jobs that allow it to move physical cars according
 to commands from either the planning or autonomy code.
@@ -12,6 +26,7 @@ estimated motion of the car by producing control signals.
 
 It also contains several MATLAB scripts that are useful in tuning and validating
 the Python code used for this project.
+
 
 ## Filters
 ### Moving Average
