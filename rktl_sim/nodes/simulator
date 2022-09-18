@@ -543,6 +543,8 @@ class Simulator(object):
     def update_all_cars(self):
         """Generates instance-parameters, Subscribers, Publishers for each car."""
         car_configs = self.get_sim_param('~cars', secondParam=[])
+        print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+        print(car_configs)
 
         for car_config in car_configs:
             init_pose = self.get_sim_param('~cars/init_pose')
@@ -554,7 +556,7 @@ class Simulator(object):
                 init_pose = None
 
             # means the car is already there and we only need to reset it
-            if self.car_ids[car_name] is None:
+            if car_name not in self.car_ids:
                 # the car does not exist so we will create it
                 # otherwise, we are only reseting the car's parameters which will happen in the sim.reset call
                 self.car_ids[car_name] = self.sim.create_car(
