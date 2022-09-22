@@ -131,6 +131,7 @@ class Simulator(object):
         rospy.Service('sim_delete_all_cars', Empty, self.create_all_cars_cb)
         rospy.Service('sim_create_all_cars', Empty, self.delete_all_cars_cb)
 
+
         while not rospy.is_shutdown():
             self.loop_once()
             try:

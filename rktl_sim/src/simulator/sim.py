@@ -313,6 +313,7 @@ class Sim(object):
         for car in self._cars.values():
             self.reset_car(car, car_properties)
 
+
     def reset_car(self, car, car_properties):
         """
         Loops over the cars and generates new initial positions (if they were not specified).
