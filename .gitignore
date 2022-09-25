@@ -148,3 +148,6 @@ rktl_sim/urdf/walls.urdf
 rktl_sim/urdf/goal_a.urdf
 rktl_sim/urdf/goal_b.urdf
 rktl_sim/urdf/walls.urdf
+
+# macOS
+.DS_Store
