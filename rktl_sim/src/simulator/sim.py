@@ -370,8 +370,6 @@ class Sim(object):
             p.resetBasePositionAndOrientation(
                 self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
             )
-            print("===============here8===============")
-            print(self._speed_bound)
             ball_vel = [
                 random.uniform(-self._speed_bound, self._speed_bound),
                 random.uniform(-self._speed_bound, self._speed_bound),
