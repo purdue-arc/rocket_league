@@ -15,11 +15,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from os.path import expanduser
 import uuid
 
-n_envs = 24
-n_saves = 100
-n_steps = 240000000
-
-if __name__ == '__main__':      # this is required due to forking processes
+def train(n_envs = 24, n_saves = 100, n_steps = 240000000) :
     run_id = str(uuid.uuid4())  # ALL running environments must share this
     print(f"RUN ID: {run_id}")
 
@@ -39,7 +35,7 @@ if __name__ == '__main__':      # this is required due to forking processes
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = n_steps # 240M (10M sequential)
+    steps = n_steps
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 
@@ -47,3 +43,6 @@ if __name__ == '__main__':      # this is required due to forking processes
     print("done training")
     model.save(log_dir + "/final_weights")
     env.close() # this must be done to clean up other processes
+    
+if __name__ == '__main__':
+    train()
