@@ -95,17 +95,19 @@ class Simulator(object):
                                'throttle_tau': self.get_sim_param("/cars/throttle/tau"),
                                'steering_rate': self.get_sim_param("/cars/steering/rate"),
                                'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
-
+        
         self.sim = simulator.Sim(self.props, self.urdf_paths, self.spawn_bounds, render_enabled)
-
+        print("done creating sim!")
         self.sim.create_ball('ball', init_pose=self.ball_init_pose,
                              init_speed=self.ball_init_speed, noise=self.ball_noise)
-        self.update_all_cars()
+        print("done creating ball!")                     
         
+        self.update_all_cars()
+        print("done creating cars!")
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
         self.last_time = None
-
+        print("calling reset cb!")
         self.reset_cb(None) # janky reset call with mandatory none parameter
 
         
@@ -295,7 +297,7 @@ class Simulator(object):
     def loop_once(self):
         """Step the simulation once step, updating match status, moving and publishing new car and ball positions."""
         self.reset_lock.acquire()
-
+        
         now = rospy.Time.now()
         if self.last_time is not None and self.last_time != now:
             delta_t = (now - self.last_time).to_sec()
