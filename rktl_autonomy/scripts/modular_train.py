@@ -1,4 +1,9 @@
-from train_rocket_league import *
+from train_rocket_league import train
 
 if __name__ == '__main__' :
-	train_rocket_league.train()
+
+	chnage_params(ydgfydgsyufgf)
+
+	train()
+
+
