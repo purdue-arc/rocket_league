@@ -130,8 +130,8 @@ class Simulator(object):
         rospy.Service('sim_reset_ball', Empty, self.reset_ball_cb)
         rospy.Service('sim_create_car', CreateCar, self.create_car_cb)
         rospy.Service('sim_delete_car', DeleteCar, self.delete_car_cb)
-        rospy.Service('sim_delete_all_cars', Empty, self.create_all_cars_cb)
-        rospy.Service('sim_create_all_cars', Empty, self.delete_all_cars_cb)
+        rospy.Service('sim_create_all_cars', Empty, self.create_all_cars_cb)
+        rospy.Service('sim_delete_all_cars', Empty, self.delete_all_cars_cb)
 
         print("done creating services!")
         while not rospy.is_shutdown():
@@ -374,7 +374,7 @@ class Simulator(object):
                 car_pos, car_quat = self.sim.get_car_pose(
                     self.car_ids[car_name])
                 car_msg.pose.pose.position.x = car_pos[0]
-                car_msg.pose.pose.position.y = car_pos[1]
+                car_msg.pose.pose.po    sition.y = car_pos[1]
                 car_msg.pose.pose.position.z = car_pos[2]
                 car_msg.pose.pose.orientation.x = car_quat[0]
                 car_msg.pose.pose.orientation.y = car_quat[1]
@@ -506,14 +506,14 @@ class Simulator(object):
                         [spawn_height, spawn_height]]
         return spawn_bounds
 
-    def delete_all_cars_cb(self):
+    def delete_all_cars_cb(self,_=None):
         self.reset_lock.acquire()
         self.delete_all_cars()
         self.reset_cb()
         self.reset_lock.release()
         return DeleteCarResponse(True)
-
-    def create_all_cars_cb(self):
+    # no point in having it
+    def create_all_cars_cb(self,_=None):
         self.reset_lock.acquire()
         self.update_all_cars()
         self.reset_cb()
