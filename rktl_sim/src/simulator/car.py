@@ -157,7 +157,9 @@ class Car(object):
         @param pos: The position of the other object.
         @return: Boolean if the positions overlap (true = overlap).
         """
-        dist = math.sqrt(
-            (pos[0] - self.init_pos[0]) * (pos[0] - self.init_pos[0]) + (pos[0] - self.init_pos[1]) * (
-                    pos[1] - self.init_pos[1]))
+        print("x",pos[0],"y",pos[1])
+        print("x1",self.init_pos[0],"y1",self.init_pos[1])
+        val =((pos[0] - self.init_pos[0]) * (pos[0] - self.init_pos[0])) + ((pos[1] - self.init_pos[1]) * (pos[1] - self.init_pos[1]))
+        print(val)
+        dist = math.sqrt(val)
         return dist < self._LENGTH
