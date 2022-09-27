@@ -374,7 +374,7 @@ class Simulator(object):
                 car_pos, car_quat = self.sim.get_car_pose(
                     self.car_ids[car_name])
                 car_msg.pose.pose.position.x = car_pos[0]
-                car_msg.pose.pose.po    sition.y = car_pos[1]
+                car_msg.pose.pose.position.y = car_pos[1]
                 car_msg.pose.pose.position.z = car_pos[2]
                 car_msg.pose.pose.orientation.x = car_quat[0]
                 car_msg.pose.pose.orientation.y = car_quat[1]
