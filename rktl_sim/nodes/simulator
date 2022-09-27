@@ -110,8 +110,6 @@ class Simulator(object):
         print("calling reset cb!")
         self.reset_cb(None) # janky reset call with mandatory none parameter
 
-        
-
         # Publishers
         self.status_pub = rospy.Publisher(
             'match_status', MatchStatus, queue_size=1)
@@ -276,7 +274,6 @@ class Simulator(object):
                                'throttle_tau': self.get_sim_param("/cars/throttle/tau"),
                                'steering_rate': self.get_sim_param("/cars/steering/rate"),
                                'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
-
         self.sim.reset(self.spawn_bounds, self.car_properties, self.ball_init_pose, self.ball_init_speed)
         print("reset the sim!!!")
 
@@ -418,11 +415,11 @@ class Simulator(object):
             if type_rospy == dict:
                 if secondParam is None:
 
-                    min_param = rospy.get_param(f'{path}/min')
-                    max_param = rospy.get_param(f'{path}/max')
+                    min_param = (float)(rospy.get_param(f'{path}/min'))
+                    max_param = (float)(rospy.get_param(f'{path}/max'))
                 else:
-                    min_param = rospy.get_param(f'{path}/min', secondParam)
-                    max_param = rospy.get_param(f'{path}/max', secondParam)
+                    min_param = (float)(rospy.get_param(f'{path}/min', secondParam))
+                    max_param = (float)(rospy.get_param(f'{path}/max', secondParam))
 
                 if not max_param:
                     if returnValue:
@@ -434,9 +431,9 @@ class Simulator(object):
                     return None
                 # accounting for bugs in yaml file
                 if min_param > max_param:
-                    return random.uniform(max_param, min_param)
+                    return (float)(random.uniform(max_param, min_param))
                 else:
-                    return random.uniform(min_param, max_param)
+                    return (float)(random.uniform(min_param, max_param))
 
             elif type_rospy == float or type_rospy == int:
                 if secondParam is not None:
@@ -447,50 +444,7 @@ class Simulator(object):
             rospy.logfatal(f'invalid file path: {path}')
         return None
 
-    def get_sim_dict(self, path, throwException=False):
-        """
-        Returns a dictionary or value from the provided yaml path.
-        @param path: The path to the variable in the yaml file.
-        @param throwException:
-        True: None is returned if variable does not exist.
-        False: An error is thrown if variable does not exist.
-        @return: None or Exception.
-        """
-        rospy_param = rospy.get_param(path)
-        if not rospy_param:
-            if throwException:
-                rospy.logfatal(f'invalid file path: {path}')
-            return None
-        else:
-            type_rospy = type(rospy_param)
-            if type_rospy == dict:
-                min_param = rospy.get_param(f'{path}/min')
-                max_param = rospy.get_param(f'{path}/max')
-                if not max_param and min_param:
-                    if throwException:
-                        rospy.logfatal(f'invalid file path: {path}/max')
-                    return None
-                elif not min_param and max_param:
-                    if throwException:
-                        rospy.logfatal(f'invalid file path: {path}/min')
-                    return None
-                elif max_param and min_param:
-                    if min_param > max_param:
-                        return random.uniform(max_param, min_param)
-                    else:
-                        return random.uniform(min_param, max_param)
 
-                # loop over all values in the dict
-                for key in rospy_param:
-                    # recurse down the path, using the key as the continuation
-                    rospy_param[key] = self.get_sim_param(path + f'/{key}', throwException)
-                return rospy_param
-
-            elif type_rospy == float or type_rospy == int or type_rospy == list:
-                return rospy.get_param(path)
-        if throwException:
-            rospy.logfatal(f'invalid file path: {path}')
-        return None
 
     def get_spawn_bounds(self):
         fw = self.get_sim_param("/field/width")
