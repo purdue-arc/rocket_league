@@ -57,7 +57,19 @@ class Car(object):
         @param dt: The duration of the car time step.
         """
         if self.cmd is None:
-            return
+            print("command is none")
+            self.cmd = (1.0, 1.0)
+            
+
+        """
+        ====================================================
+        ====================================================
+        ====================================================
+        ====================================================
+        TODO: bug descritpion: the self.cmd is none.
+        this means that we cannot use any of the calculations, and therefore cannot update hte car
+        if the command is set, everything works
+        """
 
         _, orient = self.get_pose()
         theta = p.getEulerFromQuaternion(orient)[2]
