@@ -15,38 +15,38 @@ import rospy, roslaunch
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
+
 class SimTimeException(Exception):
     """For when advancing sim time does not go as planned."""
     pass
 
-class ROSInterface(Env):
-    """Extension of the Gym environment class for all specific interfaces
-    to extend. This class handles logic regarding timesteps in ROS, and
-    allows users to treat any ROS system as a Gym environment once the
-    interface is created.
 
+class ROSInterface(Env):
+    """Extension of the Gym environment class for all specific interfaces to extend.
+    This class handles logic regarding timesteps in ROS, and
+    allows users to treat any ROS system as a Gym environment once the interface is created.
     All classes extending this for a particular environment must do the following:
-        - implement all abstract properties:
+        - Implement all abstract properties:
             - action_space
             - observation_space
-        - implement all abstract methods:
+        - Implement all abstract methods:
             - _reset_env()
             - _reset_self()
             - _has_state()
             - _clear_state()
             - _get_state()
             - _publish_action()
-        - notify _cond when _has_state() may have turned true
+        - Notify _cond when _has_state() may have turned true.
     """
 
     def __init__(self, node_name='gym_interface', eval=False, launch_file=None, launch_args=[], run_id=None):
-        """init function
-        Params:
-            node_name: desired name of this node in the ROS network
-            eval: set true if evaluating an agent in an existing ROS env, set false if training an agent
-            launch_file: if training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch'])
-            launch_args: if training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10])
-            run_id: if training, used to prevent deadlocks. if logging, run_id describes where to save files. Default is randomly generated
+        """
+        Initializes the rospy interface.
+        @param node_name: Desired name of this node in the ROS network.
+        @param eval: Set true if evaluating an agent in an existing ROS env, set false if training an agent.
+        @param launch_file: If training, launch file to be used (ex: ['rktl_autonomy', 'rocket_league_train.launch']).
+        @param launch_args: If training, arguments to be passed to roslaunch (ex: ['render:=true', rate:=10]).
+        @param run_id: If training, used to prevent deadlocks. if logging, run_id describes where to save files.
         """
         super().__init__()
         self.__EVAL_MODE = eval
@@ -66,12 +66,11 @@ class ROSInterface(Env):
             port = 11311
             with socket.socket() as sock:
                 try:
-                    # see if default port is available
                     sock.bind(('localhost', port))
                 except socket.error:
-                    # find a random open one
                     sock.bind(('localhost', 0))
                     port = sock.getsockname()[1]
+
             # launch the training ROS network
             ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_id)
@@ -79,8 +78,8 @@ class ROSInterface(Env):
             launch_args = [f'render:={port==11311}', f'plot_log:={port==11311}'] + launch_args + [f'agent_name:={node_name}']
             launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
             launch.start()
-            self.close = lambda : launch.shutdown()
-            # initialize self
+            self.close = lambda: launch.shutdown()
+
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
             rospy.init_node(node_name)
             # let someone else take a turn
@@ -92,7 +91,6 @@ class ROSInterface(Env):
         # private variables
         self._cond = Condition()
 
-        # additional set up for training
         if not self.__EVAL_MODE:
             self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
             self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
@@ -114,48 +112,43 @@ class ROSInterface(Env):
 
     def step(self, action):
         """
-        Implementation of gym.Env.step. This function will intentionally block
-        if the ROS environment is not ready.
-
-        Run one timestep of the environment's dynamics. When end of
-        episode is reached, you are responsible for calling `reset()`
-        to reset this environment's state.
-        Accepts an action and returns a tuple (observation, reward, done, info).
-        Args:
-            action (object): an action provided by the agent
-        Returns:
-            observation (object): agent's observation of the current environment
-            reward (float) : amount of reward returned after previous action
-            done (bool): whether the episode has ended, in which case further step() calls will return undefined results
-            info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)
+        Implementation of gym.Env.step.
+        This function will intentionally block if the ROS environment is not ready.
+        Run one timestep of the environment's dynamics.
+        When end of episode is reached, you are responsible for calling `reset()` to reset this environment's state.
+        @param action: An action provided by the agent.
+        @return observation: A tuple of the following:
+            (object): Agent's observation of the current environment.
+            reward (float) : Amount of reward returned after previous action.
+            done (bool): Whether the episode has ended, in which case further step() calls will return undefined results.
+            info (dict): Contains auxiliary diagnostic information (helpful for debugging, and sometimes learning).
         """
+
         self._clear_state()
         self._publish_action(action)
         self.__step_time_and_wait_for_state()
         state = self._get_state()
-        self.__net_reward += state[1]   # logging
+        self.__net_reward += state[1]  # logging
         return state
 
     def reset(self):
-        """Resets the environment to an initial state and returns an initial observation.
-
-        Note that this function should not reset the environment's random
-        number generator(s); random variables in the environment's state should
-        be sampled independently between multiple calls to `reset()`. In other
-        words, each call of `reset()` should yield an environment suitable for
-        a new episode, independent of previous episodes.
-        Returns:
-            observation (object): the initial observation.
         """
+        Resets the environment to an initial state and returns an initial observation.
+        Note that this function should not reset the environment's random number generator(s).
+        Random variables in the environment's state should be sampled independently between multiple calls to reset().
+        @return: the initial observation.
+        """
+
         if self._has_state():
-            # generate log
+
             info = {
-                'episode'    : self.__episode,
-                'net_reward' : self.__net_reward,
-                'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
+                'episode': self.__episode,
+                'net_reward': self.__net_reward,
+                'duration': (rospy.Time.now() - self.__start_time).to_sec()
             }
+
+            # update the message log with these parameters by publishing it
             info.update(self._get_state()[3])
-            # send message
             msg = DiagnosticStatus()
             msg.level = DiagnosticStatus.OK
             msg.name = 'ROS-Gym Interface'
@@ -163,25 +156,28 @@ class ROSInterface(Env):
             msg.hardware_id = self.__LOG_ID
             msg.values = [KeyValue(key=key, value=str(value)) for key, value in info.items()]
             self.__log_pub.publish(msg)
-            # update variables (update time after reset)
             self.__episode += 1
             self.__net_reward = 0
 
-        # reset
         if not self.__EVAL_MODE:
             self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
-        self.__start_time = rospy.Time.now()    # logging
+        self.__start_time = rospy.Time.now()  # logging
         return self._get_state()[0]
 
     def __step_time_and_wait_for_state(self, max_retries=1):
-        """Step time until a state is known."""
+        """
+        Increment the time and clock.
+        Try to publish the next simulation step in the number of tries.
+        @param max_retries: Number of time steps until state is known.
+        """
         if not self.__EVAL_MODE:
             self.__time += self.__DELTA_T
             self.__clock_pub.publish(self.__time)
             retries = 0
             while not self.__wait_once_for_state():
+
                 if retries >= max_retries:
                     rospy.logerr("Failed to get new state.")
                     raise SimTimeException
@@ -190,56 +186,57 @@ class ROSInterface(Env):
                     self.__clock_pub.publish(self.__time)
                     retries += 1
         else:
+            # call for the provided number of retries
             while not self.__wait_once_for_state():
-                pass    # idle wait
+                pass  # idle wait
 
     def __wait_once_for_state(self):
-        """Wait and allow other threads to run."""
+        """ Wait and allow other threads to run."""
         with self._cond:
             has_state = self._cond.wait_for(self._has_state, 0.25)
         if rospy.is_shutdown():
             raise rospy.ROSInterruptException()
         return has_state
 
-    # All the below abstract methods / properties must be implemented by subclasses
     @property
     @abstractmethod
     def action_space(self):
-        """The Space object corresponding to valid actions."""
+        """ The Space object corresponding to valid actions."""
         raise NotImplementedError
 
     @property
     @abstractmethod
     def observation_space(self):
-        """The Space object corresponding to valid observations."""
+        """ The Space object corresponding to valid observations."""
         raise NotImplementedError
 
     @abstractmethod
     def _reset_env(self):
-        """Reset environment for a new episode."""
+        """ Reset environment for a new episode."""
         raise NotImplementedError
 
     @abstractmethod
     def _reset_self(self):
-        """Reset internally for a new episode."""
+        """ Reset internally for a new episode."""
         raise NotImplementedError
 
     @abstractmethod
     def _has_state(self):
-        """Determine if the new state is ready."""
+        """ Determine if the new state is ready."""
+
         raise NotImplementedError
 
     @abstractmethod
     def _clear_state(self):
-        """Clear state variables / flags in preparation for new ones."""
+        """ Clear state variables / flags in preparation for new ones."""
         raise NotImplementedError
 
     @abstractmethod
     def _get_state(self):
-        """Get state tuple (observation, reward, done, info)."""
+        """ Get state tuple (observation, reward, done, info)."""
         raise NotImplementedError
 
     @abstractmethod
     def _publish_action(self, action):
-        """Publish an action to the ROS network."""
+        """ Publish an action to the ROS network."""
         raise NotImplementedError

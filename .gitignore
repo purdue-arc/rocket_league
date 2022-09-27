@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+rktl_sim/urdf/goal_b.urdf
 # C extensions
 *.so
 
@@ -142,3 +142,12 @@ dmypy.json
 
 # MATLAB
 *.asv
+
+#urdf removal:
+rktl_sim/urdf/walls.urdf
+rktl_sim/urdf/goal_a.urdf
+rktl_sim/urdf/goal_b.urdf
+rktl_sim/urdf/walls.urdf
+
+# macOS
+.DS_Store

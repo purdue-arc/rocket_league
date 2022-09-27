@@ -15,7 +15,9 @@ ball:
 # car dimensions and physical constants
 cars:
   width: 0.0762 # (3 in)
-  length: 0.12 # (8 in)
+  length: 0.12
+    # max: 0.12 # (8 in)
+    # min: 0.6
   steering:
     max_throw: 0.1826 # 15 degrees
     rate: 0.9128 # 30 degrees/s

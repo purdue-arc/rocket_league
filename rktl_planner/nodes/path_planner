@@ -11,7 +11,15 @@ from rktl_msgs.msg import BezierPathList, Path
 from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest
 
+
 def create_simple_path_req(car_odom, ball_odom, goal_pos):
+    """
+    All poses lead to forward motion of the car.
+    @return: A list of future car poses depending on a desired action.
+    pose0: The pose & duration if the car continues moving as is.
+    pose1: The pose & duration if the car attempts to move forward to the ball.
+    pose2: the pose if the car attempts a full stop moving forward.
+    """
     req = CreateBezierPathRequest()
 
     req.velocity = 0.5
@@ -54,7 +62,14 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
 
     return req
 
+
 def create_backup_path_req(car_odom, ball_odom, goal_pos):
+    """
+        All poses lead to backward motion of the car.
+        @return: A list of future car poses depending on a desired action.
+        pose0: The pose & duration if the car continues to move as is.
+        pose1: The pose & duration if the car attempts to move backward to the ball.
+        """
     req = CreateBezierPathRequest()
     req.velocity = -0.5
     req.bezier_segment_duration.data = rospy.Duration(0.5)
@@ -86,25 +101,32 @@ def create_backup_path_req(car_odom, ball_odom, goal_pos):
 
     return req
 
+
 def create_complex_path_req(car_odom, ball_odom, goal_pos):
+    """Returns either a backup or forward req depending on the car's position to the ball."""
     car_orient = car_odom.pose.pose.orientation
     car_yaw = euler_from_quaternion(
         np.array([car_orient.x, car_orient.y, car_orient.z, car_orient.w]))[2]
     car_x = car_odom.pose.pose.position.x
     ball_x = ball_odom.pose.pose.position.x
-    if (car_yaw < math.pi/2 or car_yaw > 3*math.pi/2) and (car_x > ball_x):
+    if (car_yaw < math.pi / 2 or car_yaw > 3 * math.pi / 2) and (car_x > ball_x):
         return create_backup_path_req(car_odom, ball_odom, goal_pos)
     else:
         return create_simple_path_req(car_odom, ball_odom, goal_pos)
 
+
 class PathPlanner(object):
+    """Handles a car's future pose and duration for each valid action."""
+
     def __init__(self):
         rospy.init_node('path_planner')
 
         planner_type = rospy.get_param('~planner_type', 'simple')
         if planner_type == 'simple':
+            # enables only forward motion
             self.path_req = create_simple_path_req
         elif planner_type == 'complex':
+            # enables both forward and backward motion
             self.path_req = create_complex_path_req
         else:
             raise NotImplementedError(f'unrecognized planner type: {rospy.get_param("~planner_type")}')
@@ -119,10 +141,8 @@ class PathPlanner(object):
         self.path_client = rospy.ServiceProxy('create_bezier_path', CreateBezierPath)
 
         # Publishers
-        self.linear_path_pub = rospy.Publisher('linear_path',
-            Path, queue_size=1, latch=True)
-        self.bezier_path_pub = rospy.Publisher('bezier_path',
-            BezierPathList, queue_size=1, latch=True)
+        self.linear_path_pub = rospy.Publisher('linear_path', Path, queue_size=1, latch=True)
+        self.bezier_path_pub = rospy.Publisher('bezier_path', BezierPathList, queue_size=1, latch=True)
 
         self.car_odom = Odometry()
         self.ball_odom = Odometry()
@@ -147,6 +167,7 @@ class PathPlanner(object):
             bezier_path_list.paths = res.bezier_paths
             self.bezier_path_pub.publish(bezier_path_list)
         return EmptyResponse()
+
 
 if __name__ == '__main__':
     PathPlanner()

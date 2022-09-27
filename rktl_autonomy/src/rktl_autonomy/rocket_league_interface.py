@@ -21,9 +21,13 @@ from tf.transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
 from math import pi, tan
 
+
 @unique
 class CarActions(IntEnum):
-    """Possible actions for car."""
+    """
+    Possible actions for car.
+    Currently using discrete action space.
+    """
     STOP = 0
     FWD_LEFT = auto()
     FWD_RIGHT = auto()
@@ -33,19 +37,30 @@ class CarActions(IntEnum):
     REV = auto()
     SIZE = auto()
 
+
 class RocketLeagueInterface(ROSInterface):
-    """ROS interface for the Rocket League."""
-    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'rocket_league_train.launch'], launch_args=[], run_id=None):
-        super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
-        ## Constants
-        # Actions
+    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'rocket_league_train.launch'], launch_args=[],
+                 run_id=None):
+        """
+        ROS interface for the Rocket League.
+        Set parameters for game elements (car/bar) and field object properties (goal,walls,planes).
+        Look at _ros_interface.py init function for the parameters.
+        @param eval: Specify whether you want to train data or not.
+        @param launch_file: Used in _ros_interface.py to configure the training for roslaunch.
+        @param launch_args: Specify the files to be used in launching.
+        @param run_id: The id for this specific training run.
+        """
+        super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args,
+                         run_id=run_id)
+
+        # car action constants
         self._MIN_VELOCITY = -rospy.get_param('/cars/throttle/max_speed')
-        self._MAX_VELOCITY =  rospy.get_param('/cars/throttle/max_speed')
+        self._MAX_VELOCITY = rospy.get_param('/cars/throttle/max_speed')
         self._MIN_CURVATURE = -tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
-        self._MAX_CURVATURE =  tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
+        self._MAX_CURVATURE = tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
 
-        # Action space overrides
+        # car action space overrides
         if rospy.has_param('~action_space/velocity/min'):
             min_velocity = rospy.get_param('~action_space/velocity/min')
             assert min_velocity > self._MIN_VELOCITY
@@ -63,14 +78,14 @@ class RocketLeagueInterface(ROSInterface):
             assert max_curvature < self._MAX_CURVATURE
             self._MAX_CURVATURE = max_curvature
 
-        # Observations
+        # observations
         self._FIELD_WIDTH = rospy.get_param('/field/width')
         self._FIELD_LENGTH = rospy.get_param('/field/length')
         self._GOAL_DEPTH = rospy.get_param('~observation/goal_depth', 0.075)
         self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
-        self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
+        self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2 * pi)
 
-        # Learning
+        # learning
         self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
         self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
         self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
@@ -81,22 +96,22 @@ class RocketLeagueInterface(ROSInterface):
         self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
 
-        # Publishers
+        # publishers
         self._command_pub = rospy.Publisher('cars/car0/command', ControlCommand, queue_size=1)
         self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
 
-        # State variables
+        # state variables
         self._car_odom = None
         self._ball_odom = None
         self._score = None
         self._start_time = None
 
-        # Subscribers
+        # subscribers
         rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
         rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
         rospy.Subscriber('match_status', MatchStatus, self._score_cb)
 
-        # block until environment is ready
+        # block until environment in ready
         if not eval:
             rospy.wait_for_service('sim_reset')
 
@@ -107,24 +122,27 @@ class RocketLeagueInterface(ROSInterface):
 
     @property
     def observation_space(self):
-        """The Space object corresponding to valid observations."""
+        """
+        The Space object corresponding to valid observations.
+        @return: The lower and upper bound of the field.
+        """
         return Box(
             # x, y, theta, v, omega (car)
             # x, y, vx, vy (ball)
             low=np.array([
-                -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
-                -self._FIELD_WIDTH/2, -pi,
+                -(self._FIELD_LENGTH / 2) - self._GOAL_DEPTH,
+                -self._FIELD_WIDTH / 2, -pi,
                 -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
-                -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
-                -self._FIELD_WIDTH/2,
+                -(self._FIELD_LENGTH / 2) - self._GOAL_DEPTH,
+                -self._FIELD_WIDTH / 2,
                 -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
                 dtype=np.float32),
             high=np.array([
-                (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
-                self._FIELD_WIDTH/2, pi,
+                (self._FIELD_LENGTH / 2) + self._GOAL_DEPTH,
+                self._FIELD_WIDTH / 2, pi,
                 self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
-                (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
-                self._FIELD_WIDTH/2,
+                (self._FIELD_LENGTH / 2) + self._GOAL_DEPTH,
+                self._FIELD_WIDTH / 2,
                 self._MAX_OBS_VEL, self._MAX_OBS_VEL],
                 dtype=np.float32))
 
@@ -140,9 +158,9 @@ class RocketLeagueInterface(ROSInterface):
     def _has_state(self):
         """Determine if the new state is ready."""
         return (
-            self._car_odom is not None and
-            self._ball_odom is not None and
-            self._score is not None)
+                self._car_odom is not None and
+                self._ball_odom is not None and
+                self._score is not None)
 
     def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
@@ -151,15 +169,18 @@ class RocketLeagueInterface(ROSInterface):
         self._score = None
 
     def _get_state(self):
-        """Get state tuple (observation, reward, done, info)."""
+        """
+        Checks if the ball and car are in the field limits, steps the time, and checks if there are rewards.
+        @return: state tuple (observation, reward, done, info)
+        """
         assert self._has_state()
 
-        # combine car / ball odoms for observation
+        # combine the car and ball odoms for observation
         car = np.asarray(self._car_odom, dtype=np.float32)
         ball = np.asarray(self._ball_odom, dtype=np.float32)
         observation = np.concatenate((car, ball))
 
-        # ensure it fits within the observation limits
+        # ensure the observation fits within the the limits
         if not self.observation_space.contains(observation):
             rospy.logwarn_throttle(5, "Coercing observation into valid bounds")
             np.clip(
@@ -168,20 +189,20 @@ class RocketLeagueInterface(ROSInterface):
                 self.observation_space.high,
                 out=observation)
 
-        # check if time exceeded
+        # check if time has exceeded
         if self._start_time is None:
             self._start_time = rospy.Time.now()
         done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME
 
-        # Determine reward
+        # determine the reward
         reward = self._CONSTANT_REWARD
 
         ball_dist_sq = np.sum(np.square(ball[0:2] - car[0:2]))
         reward += self._BALL_DISTANCE_REWARD * ball_dist_sq
 
-        goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_LENGTH/2, 0])))
+        goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_LENGTH / 2, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
-
+        # check if someone scored
         if self._score != 0:
             done = True
             if self._score > 0:
@@ -192,38 +213,41 @@ class RocketLeagueInterface(ROSInterface):
         x, y, __, v, __ = self._car_odom
         if v < 0:
             reward += self._REVERSE_REWARD
-        if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
-            abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
+        if (abs(x) > self._FIELD_LENGTH / 2 - self._WALL_THRESHOLD or
+                abs(y) > self._FIELD_WIDTH / 2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
 
-        # info dict
-        info = {'goals' : self._score}
+        info = {'goals': self._score}
 
         return (observation, reward, done, info)
 
     def _publish_action(self, action):
-        """Publish an action to the ROS network."""
+        """
+        Publish an action to the ROS network (using a message of action and curvature).
+        @param action: The desired action.
+        @return: Translated command in curvature and velocity.
+        """
         assert self.action_space.contains(action)
 
         msg = ControlCommand()
         msg.header.stamp = rospy.Time.now()
-
-        if (    action == CarActions.FWD or
+        # set msg velocity to max for Forward, Forward-Right, and Forward-Left movement
+        if (action == CarActions.FWD or
                 action == CarActions.FWD_RIGHT or
                 action == CarActions.FWD_LEFT):
             msg.velocity = self._MAX_VELOCITY
-        elif (  action == CarActions.REV or
-                action == CarActions.REV_RIGHT or
-                action == CarActions.REV_LEFT):
+        elif (action == CarActions.REV or
+              action == CarActions.REV_RIGHT or
+              action == CarActions.REV_LEFT):
             msg.velocity = self._MIN_VELOCITY
         else:
             msg.velocity = 0.0
-
-        if (    action == CarActions.FWD_LEFT or
+        # set msg velocity to min for Back, Back-Right, and Back-Left movement
+        if (action == CarActions.FWD_LEFT or
                 action == CarActions.REV_LEFT):
             msg.curvature = self._MAX_CURVATURE
-        elif (  action == CarActions.FWD_RIGHT or
-                action == CarActions.REV_RIGHT):
+        elif (action == CarActions.FWD_RIGHT or
+              action == CarActions.REV_RIGHT):
             msg.curvature = self._MIN_CURVATURE
         else:
             msg.curvature = 0.0
@@ -249,6 +273,7 @@ class RocketLeagueInterface(ROSInterface):
 
     def _ball_odom_cb(self, odom_msg):
         """Callback for odometry of ball."""
+
         x = odom_msg.pose.pose.position.x
         y = odom_msg.pose.pose.position.y
         vx = odom_msg.twist.twist.linear.x
