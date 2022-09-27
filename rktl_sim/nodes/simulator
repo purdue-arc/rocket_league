@@ -337,8 +337,7 @@ class Simulator(object):
                     car_msg = PoseWithCovarianceStamped()
                     car_msg.header.stamp = now
                     car_msg.header.frame_id = self.frame_id
-                    car_pos, car_quat = self.sim.get_car_pose(
-                        self.car_ids[car_name], add_noise=True)
+                    car_pos, car_quat = self.sim.get_car_pose(self.car_ids[car_name], add_noise=True)
                     car_msg.pose.pose.position.x = car_pos[0]
                     car_msg.pose.pose.position.y = car_pos[1]
                     car_msg.pose.pose.position.z = car_pos[2]
@@ -371,8 +370,7 @@ class Simulator(object):
                 car_msg = Odometry()
                 car_msg.header.stamp = now
                 car_msg.header.frame_id = self.frame_id
-                car_pos, car_quat = self.sim.get_car_pose(
-                    self.car_ids[car_name])
+                car_pos, car_quat = self.sim.get_car_pose(self.car_ids[car_name])
                 car_msg.pose.pose.position.x = car_pos[0]
                 car_msg.pose.pose.position.y = car_pos[1]
                 car_msg.pose.pose.position.z = car_pos[2]
@@ -380,8 +378,7 @@ class Simulator(object):
                 car_msg.pose.pose.orientation.y = car_quat[1]
                 car_msg.pose.pose.orientation.z = car_quat[2]
                 car_msg.pose.pose.orientation.w = car_quat[3]
-                car_linear, car_angular = self.sim.get_car_velocity(
-                    self.car_ids[car_name])
+                car_linear, car_angular = self.sim.get_car_velocity(self.car_ids[car_name])
                 car_msg.twist.twist.linear.x = car_linear[0]
                 car_msg.twist.twist.linear.y = car_linear[1]
                 car_msg.twist.twist.linear.z = car_linear[2]
@@ -577,7 +574,7 @@ class Simulator(object):
             if car_name not in self.car_ids:
                 # the car does not exist so we will create it
                 # otherwise, we are only reseting the car's parameters which will happen in the sim.reset call
-                print("===============================")
+                print("============sub and pubs===================")
                 print(self.car_properties)
                 self.car_ids[car_name] = self.sim.create_car(
                     'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
@@ -599,7 +596,7 @@ class Simulator(object):
                 elif self.mode == SimulatorMode.IDEAL:
                     self.car_odom_pubs[car_name] = rospy.Publisher(
                         f'/cars/{car_name}/odom', Odometry, queue_size=1)
-
+        
         return CreateCarResponse(True)
 
 
