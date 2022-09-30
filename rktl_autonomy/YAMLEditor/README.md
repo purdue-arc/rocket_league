@@ -4,4 +4,4 @@
 
 Intended for use with reward values
 
-Built jar in `build/`
+Built jar in `jars/`
