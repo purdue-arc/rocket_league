@@ -6,7 +6,6 @@ __pycache__/
 # Java
 rktl_autonomy/YAMLEditor/bin
 rktl_autonomy/YAMLEditor/.classpath
-rktl_autonomy/YAMLEditor/.project
 rktl_autonomy/YAMLEditor/.settings
 
 # C extensions
