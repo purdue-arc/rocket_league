@@ -11,6 +11,8 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 /**
  * Unpack into a table, edit, and repack a YAML-styled 2D array
@@ -38,6 +40,14 @@ public class Main {
 		DefaultTableModel tableModel = new DefaultTableModel(data, titles);
 		JTable table = new JTable(tableModel);
 		table.setFillsViewportHeight(true);
+		tableModel.addTableModelListener(new TableModelListener() {
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				if (table.isEditing()) {
+					data[table.getSelectedRow()][table.getSelectedColumn()] = (String) table.getValueAt(table.getSelectedRow(), table.getSelectedColumn());
+				}
+			}
+		});
 		
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(scrollPaneBounds);
@@ -56,9 +66,6 @@ public class Main {
 					System.err.println("Malformed input data");
 					System.exit(1);
 				}
-				/*
-				 * tableModel.getDataVector().toArray(new Vector[tableModel.getDataVector().size()])
-				 */
 				String[][] newData = new String[byID.length][];
 				int prevValuesLength = -1;
 				for (int id = 0; id < byID.length; id++) {
