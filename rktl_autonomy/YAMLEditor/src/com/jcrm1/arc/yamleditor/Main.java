@@ -22,18 +22,15 @@ import javax.swing.table.DefaultTableModel;
  * @version 0.1
  */
 public class Main {
-	private static JFrame frame;
-	private static JTextField inputField;
-	private static JButton updateButton;
-	private static final Rectangle scrollPaneBounds = new Rectangle(2, 44, 496, 454);
+	private static final Rectangle scrollPaneBounds = new Rectangle(2, 44, 496, 426);
 	private static final String[] titles = new String[] {"ID", "WIN", "LOSE"};
 	private static String[][] data = null;
 	public static void main(String[] args) {
-		frame = new JFrame("YAML Editor");
+		JFrame frame = new JFrame("YAML Editor");
+		frame.setResizable(false);
 		frame.setSize(500, 500);
 		
-		inputField = new JTextField("[[5,6],[7,8]]", 50);
-		
+		JTextField inputField = new JTextField("[[5,6],[7,8],[9,10]]", 50);
 		inputField.setBounds(2, 2, 100, 20);
 		
 		data = new String[][] {{"0", "1", "2"}, {"1", "3", "4"}};
@@ -55,7 +52,7 @@ public class Main {
 		JTextField outputField = new JTextField(50);
 		outputField.setBounds(104, 2, 100, 20);
 
-		updateButton = new JButton("Unpack Array");
+		JButton updateButton = new JButton("Unpack Array");
 		updateButton.setBounds(2, 22, 100, 20);
 		updateButton.addActionListener(new ActionListener() {
 			@Override
@@ -91,8 +88,6 @@ public class Main {
 		JButton repackButton = new JButton("Repack Array");
 		repackButton.setBounds(104, 22, 100, 20);
 		repackButton.addActionListener(new ActionListener() {
-
-			@SuppressWarnings("unchecked")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String[][] outputData = new String[data.length][];
@@ -105,7 +100,6 @@ public class Main {
 				}
 				outputField.setText(Arrays.deepToString(outputData).replaceAll("\\s+",""));
 			}
-		
 		});
 		
 		frame.add(inputField);
