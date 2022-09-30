@@ -2,11 +2,7 @@
 __pycache__/
 *.py[cod]
 *.class
-
-# Java
-rktl_autonomy/YAMLEditor/bin
-rktl_autonomy/YAMLEditor/.classpath
-rktl_autonomy/YAMLEditor/.settings
+*$py.class
 
 # C extensions
 *.so

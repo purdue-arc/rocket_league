@@ -20,7 +20,7 @@ import javax.swing.table.DefaultTableModel;
  * 
  * @author Campbell McClendon
  *
- * @version 0.1
+ * @version 1.0
  */
 public class Main {
 	private static final Rectangle scrollPaneBounds = new Rectangle(2, 44, 496, 426);
