@@ -1,4 +1,4 @@
-package com.jcrm1.arc.yamleditor;
+package com.purduearc.yamleditor;
 
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
