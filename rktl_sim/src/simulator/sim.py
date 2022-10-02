@@ -218,9 +218,9 @@ class Sim(object):
 
         # TODO: Provide translation from ARC IDs to Sim IDs
         if add_noise:
-            return cars[0].getPose(noise=self.car_noise)
+            return cars[0].get_pose(noise=self.car_noise)
         else:
-            return cars[0].getPose(noise=None)
+            return cars[0].get_pose(noise=None)
 
     def getCarVelocity(self):
         cars = list(self._cars.values())
@@ -228,7 +228,7 @@ class Sim(object):
             return None
 
         # TODO: Provide translation from ARC IDs to Sim IDs
-        return cars[0].getVelocity()
+        return cars[0].get_velocity()
 
     def getBallPose(self, add_noise=False):
         if self._ballID is None:
