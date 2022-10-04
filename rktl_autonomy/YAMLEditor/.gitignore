@@ -1,0 +1,7 @@
+# Java
+bin/
+.classpath
+.settings
+
+# macOS metadata file
+.DS_Store
