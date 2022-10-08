@@ -31,6 +31,16 @@ class SimulatorROS(object):
     """ROS wrapper for the simulator."""
 
     def __init__(self):
+        """Initialize the simulator environment, field and objects properties, and car and ball objects."""
+        self.props = None
+        self.spawn_bounds = None
+        self.sensor_noise = None
+        self.ball_noise = None
+        self.car_noise = None
+        self.ball_init_pose = None
+        self.ball_init_speed = None
+        self.car_properties = None
+        
         rospy.init_node('simulator')
 
         mode = rospy.get_param('~mode')
@@ -46,31 +56,8 @@ class SimulatorROS(object):
         self.frame_id = rospy.get_param('~frame_id', 'map')
         self.timeout = rospy.get_param('~timeout', 10)
 
-        # Setting up field
-        fw = rospy.get_param('/field/width')
-        fl = rospy.get_param('/field/length')
-        wt = rospy.get_param('/field/wall_thickness')
-        gw = rospy.get_param('/field/goal/width')
-        spawn_height = rospy.get_param('~spawn_height', 0.06)
+        spawn_bounds,field_setup=self.configure_field()
 
-        # Setting up field
-        field_setup = {}
-        field_setup["goalA"] = [(fl/2.) + (wt/2.), 0, spawn_height]
-        field_setup["goalB"] = [(-fl/2.) - (wt/2.), 0, spawn_height]
-        field_setup["rsidewall"] = [0, (fw/2) + (wt/2.), spawn_height]
-        field_setup["lsidewall"] = [0, (-fw/2) - (wt/2.), spawn_height]
-
-        bww = (fw-gw)/2
-        offset = (gw+bww)/2
-        field_setup["flbackwall"] = [(fl/2) + (wt/2.), -offset, spawn_height]
-        field_setup["frbackwall"] = [(fl/2) + (wt/2.), offset, spawn_height]
-        field_setup["blbackwall"] = [(-fl/2) - (wt/2.), -offset, spawn_height]
-        field_setup["brbackwall"] = [(-fl/2) - (wt/2.), offset, spawn_height]
-
-        # Setup bounds for spawning car and ball
-        spawn_bounds = [[-(fl/2) + (2 * wt), (fl/2) - (2 * wt)],
-                        [-(fw/2) + (2 * wt), (fw/2) - (2 * wt)],
-                        [spawn_height, spawn_height]]
 
         urdf_paths = rospy.get_param('~urdf')
         for path in urdf_paths.values():
@@ -142,6 +129,33 @@ class SimulatorROS(object):
                 rate.sleep()
             except rospy.ROSInterruptException:
                 pass
+    def configure_field(self):
+         # Setting up field
+        fw = rospy.get_param('/field/width')
+        fl = rospy.get_param('/field/length')
+        wt = rospy.get_param('/field/wall_thickness')
+        gw = rospy.get_param('/field/goal/width')
+        spawn_height = rospy.get_param('~spawn_height', 0.06)
+
+        # Setting up field
+        field_setup = {}
+        field_setup["goalA"] = [(fl/2.) + (wt/2.), 0, spawn_height]
+        field_setup["goalB"] = [(-fl/2.) - (wt/2.), 0, spawn_height]
+        field_setup["rsidewall"] = [0, (fw/2) + (wt/2.), spawn_height]
+        field_setup["lsidewall"] = [0, (-fw/2) - (wt/2.), spawn_height]
+
+        bww = (fw-gw)/2
+        offset = (gw+bww)/2
+        field_setup["flbackwall"] = [(fl/2) + (wt/2.), -offset, spawn_height]
+        field_setup["frbackwall"] = [(fl/2) + (wt/2.), offset, spawn_height]
+        field_setup["blbackwall"] = [(-fl/2) - (wt/2.), -offset, spawn_height]
+        field_setup["brbackwall"] = [(-fl/2) - (wt/2.), offset, spawn_height]
+
+        # Setup bounds for spawning car and ball
+        spawn_bounds = [[-(fl/2) + (2 * wt), (fl/2) - (2 * wt)],
+                        [-(fw/2) + (2 * wt), (fw/2) - (2 * wt)],
+                        [spawn_height, spawn_height]]
+        return spawn_bounds,field_setup
 
     def check_urdf(self, param):
         """Validates that URDF exists, then returns path."""
