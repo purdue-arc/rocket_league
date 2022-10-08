@@ -104,7 +104,7 @@ class Sim(object):
             self._walls[brBackwallID] = True
 
         self._cars = {}
-        self._ballID = None
+        self._ball_id = None
 
         self.touched_last = None
         self.scored = False
@@ -126,10 +126,10 @@ class Sim(object):
                     random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
                 self.initBallPos = None
-            self._ballID = p.loadURDF(
+            self._ball_id = p.loadURDF(
                 self.urdf_paths[urdf_name], ballPos, zeroOrient)
             p.changeDynamics(
-                bodyUniqueId=self._ballID,
+                bodyUniqueId=self._ball_id,
                 linkIndex=-1,
                 restitution=0.7,
                 linearDamping=0,
@@ -145,9 +145,9 @@ class Sim(object):
                 random.uniform(-self._speed_bound, self._speed_bound),
                 0.0,
             ]
-            p.resetBaseVelocity(self._ballID, ballVel, zeroOrient)
+            p.resetBaseVelocity(self._ball_id, ballVel, zeroOrient)
             self.ball_noise = noise
-            return self._ballID
+            return self._ball_id
         else:
             return None
 
@@ -191,8 +191,8 @@ class Sim(object):
 
     def step(self, car_cmd, dt):
         """Advance one time-step in the sim."""
-        if self._ballID is not None:
-            ballContacts = p.getContactPoints(bodyA=self._ballID)
+        if self._ball_id is not None:
+            ballContacts = p.getContactPoints(bodyA=self._ball_id)
             for contact in ballContacts:
                 if contact[2] in self._cars:
                     self.touchedLast = contact[2]
@@ -231,9 +231,9 @@ class Sim(object):
         return cars[0].get_velocity()
 
     def getBallPose(self, add_noise=False):
-        if self._ballID is None:
+        if self._ball_id is None:
             return None
-        pos, _ = p.getBasePositionAndOrientation(self._ballID)
+        pos, _ = p.getBasePositionAndOrientation(self._ball_id)
 
         if add_noise and self.ball_noise:
             if np.random.uniform() < self.ball_noise['dropout']:
@@ -242,18 +242,18 @@ class Sim(object):
                 pos = np.random.normal(pos, self.ball_noise['pos'])
 
         return pos, p.getQuaternionFromEuler([0, 0, 0])
-
-    def getBallVelocity(self):
-        if self._ballID is None:
+        
+    def get_ball_velocity(self):
+        if self._ball_id is None:
             return None
-        return p.getBaseVelocity(self._ballID)
+        return p.getBaseVelocity(self._ball_id)
 
     def reset(self):
         self.scored = False
         self.winner = None
         self.touched_last = None
 
-        if self._ballID is not None:
+        if self._ball_id is not None:
             ballPos = self.initBallPos
             if ballPos is None:
                 ballPos = [
@@ -262,7 +262,7 @@ class Sim(object):
                     random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
             p.resetBasePositionAndOrientation(
-                self._ballID, ballPos, p.getQuaternionFromEuler([0, 0, 0])
+                self._ball_id, ballPos, p.getQuaternionFromEuler([0, 0, 0])
             )
 
             ballVel = [
@@ -270,7 +270,7 @@ class Sim(object):
                 random.uniform(-self._speed_bound, self._speed_bound),
                 0.0,
             ]
-            p.resetBaseVelocity(self._ballID, ballVel, [0, 0, 0])
+            p.resetBaseVelocity(self._ball_id, ballVel, [0, 0, 0])
 
         for car in self._cars.values():
             carPos = self.initCarPos

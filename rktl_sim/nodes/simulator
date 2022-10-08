@@ -234,7 +234,7 @@ class SimulatorROS(object):
             ball_msg.pose.pose.orientation.y = ball_quat[1]
             ball_msg.pose.pose.orientation.z = ball_quat[2]
             ball_msg.pose.pose.orientation.w = ball_quat[3]
-            ball_linear, ball_angular = self.sim.getBallVelocity()
+            ball_linear, ball_angular = self.sim.get_ball_velocity()
             ball_msg.twist.twist.linear.x = ball_linear[0]
             ball_msg.twist.twist.linear.y = ball_linear[1]
             ball_msg.twist.twist.linear.z = ball_linear[2]
