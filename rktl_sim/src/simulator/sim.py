@@ -229,8 +229,8 @@ class Sim(object):
 
         # TODO: Provide translation from ARC IDs to Sim IDs
         return cars[0].get_velocity()
-
-    def getBallPose(self, add_noise=False):
+    def get_ball_pose(self, add_noise=False):
+        """@param add_noise: State whether you want noise to get the ball position (default=False)."""
         if self._ball_id is None:
             return None
         pos, _ = p.getBasePositionAndOrientation(self._ball_id)

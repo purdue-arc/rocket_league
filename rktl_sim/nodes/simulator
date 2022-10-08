@@ -193,7 +193,7 @@ class SimulatorROS(object):
 
             if self.mode == SimulatorMode.REALISTIC:
                 # Publish ball sync pose
-                ball_pos, ball_quat = self.sim.getBallPose(add_noise=True)
+                ball_pos, ball_quat = self.sim.get_ball_pose(add_noise=True)
                 if ball_pos is not None:
                     ball_msg = PoseWithCovarianceStamped()
                     ball_msg.header.stamp = now
@@ -226,7 +226,7 @@ class SimulatorROS(object):
             ball_msg = Odometry()
             ball_msg.header.stamp = now
             ball_msg.header.frame_id = self.frame_id
-            ball_pos, ball_quat = self.sim.getBallPose()
+            ball_pos, ball_quat = self.sim.get_ball_pose()
             ball_msg.pose.pose.position.x = ball_pos[0]
             ball_msg.pose.pose.position.y = ball_pos[1]
             ball_msg.pose.pose.position.z = ball_pos[2]
