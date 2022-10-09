@@ -24,7 +24,7 @@ class Sim(object):
     class NoURDFError(Exception):
         pass
 
-    def __init__(self, props, urdf_paths, spawn_bounds, render_enabled):
+    def __init__(self, props, urdf_paths, spawn_bounds, field_setup,render_enabled):
         """
         Initializes the playing field, field properties, and field elements.
         @param props: Connect the pybullet object based on the gui and direct.
@@ -52,35 +52,85 @@ class Sim(object):
         zero_pos = [0.0, 0.0, 0.0]
         zero_orient = p.getQuaternionFromEuler([0.0, 0.0, 0.0])
         self._plane_id = None
-        if "plane" in urdf_paths:
-            self._plane_id = p.loadURDF(
-                urdf_paths["plane"], zero_pos, zero_orient, useFixedBase=1
-            )
-            print(self.props)
-            self.configure_dynamics(self._plane_id, "floor")
-        else:
-            raise self.NoURDFError()
-        # set the walls for the simulation
-        if "walls" in urdf_paths:
-            self._walls_id = p.loadURDF(
-                urdf_paths["walls"], zero_pos, zero_orient, useFixedBase=1
-            )
-            self.configure_dynamics(self._walls_id, "walls")
-        else:
-            raise self.NoURDFError()
+
         # set the goals for the simulation
         self._goal_a_id = None
         self._goal_b_id = None
-        if "goal_a" in urdf_paths and "goal_b" in urdf_paths:
-            self._goal_a_id = p.loadURDF(
-                urdf_paths["goal_a"], zero_pos, zero_orient, useFixedBase=1
+        if "plane" in urdf_paths:
+            self._planeID = p.loadURDF(
+                urdf_paths["plane"], [0, 0, 0], zero_orient, useFixedBase=1
+            )
+            p.changeDynamics(bodyUniqueId=self._planeID, linkIndex=-1, restitution=1.0)
+
+        self._goalAID = None
+        self._goalBID = None
+        if "goal" in urdf_paths:
+            self._goalAID = p.loadURDF(
+                urdf_paths["goal"], field_setup["goalA"], zero_orient, useFixedBase=1
             )
 
-            self._goal_b_id = p.loadURDF(
-                urdf_paths["goal_b"], zero_pos, zero_orient, useFixedBase=1
+            self._goalBID = p.loadURDF(
+                urdf_paths["goal"], field_setup["goalB"], zero_orient, useFixedBase=1
             )
-        else:
-            raise self.NoURDFError()
+
+        self._walls = {}
+        if "sidewall" in urdf_paths:
+            lSidewallID = p.loadURDF(
+                urdf_paths["sidewall"],
+                field_setup["lsidewall"],
+                zero_orient,
+                useFixedBase=1,
+            )
+            p.changeDynamics(bodyUniqueId=lSidewallID, linkIndex=-1, restitution=1.0)
+            self._walls[lSidewallID] = True
+
+            rSidewallId = p.loadURDF(
+                urdf_paths["sidewall"],
+                field_setup["rsidewall"],
+                zero_orient,
+                useFixedBase=1,
+            )
+            p.changeDynamics(bodyUniqueId=rSidewallId, linkIndex=-1, restitution=1.0)
+            self._walls[rSidewallId] = True
+
+        if "backwall" in urdf_paths:
+            # TODO: Improve handling of split walls
+            flBackwallID = p.loadURDF(
+                urdf_paths["backwall"],
+                field_setup["flbackwall"],
+                zero_orient,
+                useFixedBase=1,
+            )
+            p.changeDynamics(bodyUniqueId=flBackwallID, linkIndex=-1, restitution=1.0)
+            self._walls[flBackwallID] = True
+
+            frBackwallID = p.loadURDF(
+                urdf_paths["backwall"],
+                field_setup["frbackwall"],
+                zero_orient,
+                useFixedBase=1,
+            )
+            p.changeDynamics(bodyUniqueId=frBackwallID, linkIndex=-1, restitution=1.0)
+            self._walls[frBackwallID] = True
+
+            blBackwallID = p.loadURDF(
+                urdf_paths["backwall"],
+                field_setup["blbackwall"],
+                zero_orient,
+                useFixedBase=1,
+            )
+            p.changeDynamics(bodyUniqueId=blBackwallID, linkIndex=-1, restitution=1.0)
+            self._walls[blBackwallID] = True
+
+            brBackwallID = p.loadURDF(
+                urdf_paths["backwall"],
+                field_setup["brbackwall"],
+                zero_orient,
+                useFixedBase=1,
+            )
+            p.changeDynamics(bodyUniqueId=brBackwallID, linkIndex=-1, restitution=1.0)
+            self._walls[brBackwallID] = True
+
         self._cars = {}
         self._car_data = {}
         self._ball_id = None

@@ -82,7 +82,7 @@ class Simulator(object):
 
         # prep the simulator for a new run, setting all instance parameters for the sim
 
-        self.spawn_bounds = self.get_spawn_bounds()
+        self.spawn_bounds,self.field_setup = self.configure_field()
         self.car_ids = {}
         self.car_pose_pubs = {}
         self.car_odom_pubs = {}
@@ -96,7 +96,7 @@ class Simulator(object):
                                'steering_rate': self.get_sim_param("/cars/steering/rate"),
                                'simulate_effort': (self.mode == SimulatorMode.REALISTIC)}
         
-        self.sim = simulator.Sim(self.props, self.urdf_paths, self.spawn_bounds, render_enabled)
+        self.sim = simulator.Sim(self.props, self.urdf_paths, self.spawn_bounds, self.field_setup, render_enabled)
         print("done creating sim!")
         self.sim.create_ball('ball', init_pose=self.ball_init_pose,
                              init_speed=self.ball_init_speed, noise=self.ball_noise)
@@ -258,7 +258,7 @@ class Simulator(object):
         self.reset_lock.acquire()
         # setting sim parameters (can be modified by the user)
         print("got spawn bounds!")
-        self.spawn_bounds = self.get_spawn_bounds()
+        self.spawn_bounds,self.field_setup = self.configure_field()
 
         self.sensor_noise = self.get_sim_param('~sensor_noise', secondParam=None)
         print("got sensor noise!")
@@ -446,16 +446,31 @@ class Simulator(object):
 
 
 
-    def get_spawn_bounds(self):
-        fw = self.get_sim_param("/field/width")
-        fl = self.get_sim_param("/field/length")
-        spawn_height = self.get_sim_param('~spawn_height', secondParam=0.06)
-        wt = self.get_sim_param('/field/wall_thickness')
+    def configure_field(self):
+        fw = rospy.get_param('/field/width')
+        fl = rospy.get_param('/field/length')
+        wt = rospy.get_param('/field/wall_thickness')
+        gw = rospy.get_param('/field/goal/width')
+        spawn_height = rospy.get_param('~spawn_height', 0.06)
 
         spawn_bounds = [[-(fl / 2) + (2 * wt), (fl / 2) - (2 * wt)],
                         [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
                         [spawn_height, spawn_height]]
-        return spawn_bounds
+        # Setting up field
+        field_setup = {}
+        field_setup["goalA"] = [(fl/2.) + (wt/2.), 0, spawn_height]
+        field_setup["goalB"] = [(-fl/2.) - (wt/2.), 0, spawn_height]
+        field_setup["rsidewall"] = [0, (fw/2) + (wt/2.), spawn_height]
+        field_setup["lsidewall"] = [0, (-fw/2) - (wt/2.), spawn_height]
+
+        bww = (fw-gw)/2
+        offset = (gw+bww)/2
+        field_setup["flbackwall"] = [(fl/2) + (wt/2.), -offset, spawn_height]
+        field_setup["frbackwall"] = [(fl/2) + (wt/2.), offset, spawn_height]
+        field_setup["blbackwall"] = [(-fl/2) - (wt/2.), -offset, spawn_height]
+        field_setup["brbackwall"] = [(-fl/2) - (wt/2.), offset, spawn_height]
+
+        return spawn_bounds,field_setup
 
     def delete_all_cars_cb(self,_=None):
         self.reset_lock.acquire()
