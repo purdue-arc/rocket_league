@@ -277,7 +277,7 @@ class Sim(object):
         del self._car_data[car_id]
         return True
 
-    def step(self, dt):
+    def step(self, car_cmd, dt):
         """
         Moves the sim forward one timestep, checking if a goal is score to end the sim round.
         @param dt: The change in time (delta-t) for this sim step.
@@ -299,7 +299,7 @@ class Sim(object):
         for _ in range(round(dt / p_dt)):
             # step kinematic objects independently, at max possible rate
             for car in self._cars.values():
-                car.step(p_dt)
+                car.step(car_cmd,p_dt)
             p.stepSimulation()
 
     def get_car_pose(self, id, add_noise=False):

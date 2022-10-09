@@ -54,6 +54,7 @@ class Simulator(object):
         self.ball_init_pose = None
         self.ball_init_speed = None
         self.car_properties = None
+        
 
         # setting config parameters (stay constant for the whole simulator run)
         rospy.init_node('simulator')
@@ -64,6 +65,10 @@ class Simulator(object):
             self.mode = SimulatorMode.REALISTIC
         else:
             rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
+        
+        self.cmd_lock = Lock()
+        self.reset_lock = Lock()
+        self.car_cmd = (0.0, 0.0)
 
         render_enabled = self.get_sim_param('~render', secondParam=False)
         rate = rospy.Rate(self.get_sim_param('~rate', secondParam=30))
@@ -153,20 +158,33 @@ class Simulator(object):
         if not os.path.isfile(urdf_path):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(urdf_path))
-
-    def effort_cb(self, effort_msg, car_id):
-        """Sets a car's effort with throttle and steering (overwrites commands)."""
+    def effort_cb(self, effort_msg,v):
+        print("eff_cb:",effort_msg)
+        print("eff_cb:",v)
         self.cmd_lock.acquire()
-        self.sim.set_car_command(car_id,
-                                 (effort_msg.throttle, effort_msg.steering))
+        self.car_cmd = (effort_msg.throttle, effort_msg.steering)
         self.cmd_lock.release()
 
-    def cmd_cb(self, cmd_msg, car_id):
-        """Sets a car's command with the velocity and curvature. (overwrites effort)."""
+    def cmd_cb(self, cmd_msg,v):
+        print("cmd_cb:",cmd_msg)
+        print("cmd_cb:",v)
         self.cmd_lock.acquire()
-        self.sim.set_car_command(car_id,
-                                 (cmd_msg.velocity, cmd_msg.curvature))
+        self.car_cmd = (cmd_msg.velocity, cmd_msg.curvature)
         self.cmd_lock.release()
+
+    # def effort_cb(self, effort_msg, car_id):
+    #     """Sets a car's effort with throttle and steering (overwrites commands)."""
+    #     self.cmd_lock.acquire()
+    #     self.sim.set_car_command(car_id,
+    #                              (effort_msg.throttle, effort_msg.steering))
+    #     self.cmd_lock.release()
+
+    # def cmd_cb(self, cmd_msg, car_id):
+    #     """Sets a car's command with the velocity and curvature. (overwrites effort)."""
+    #     self.cmd_lock.acquire()
+    #     self.sim.set_car_command(car_id,
+    #                              (cmd_msg.velocity, cmd_msg.curvature))
+    #     self.cmd_lock.release()
 
     def create_car_cb(self, req):
         self.reset_lock.acquire()
@@ -302,7 +320,7 @@ class Simulator(object):
         now = rospy.Time.now()
         if self.last_time is not None and self.last_time != now:
             delta_t = (now - self.last_time).to_sec()
-            self.sim.step(delta_t)
+            self.sim.step(self.car_cmd,delta_t)
 
             # publish game status
             status = MatchStatus()
