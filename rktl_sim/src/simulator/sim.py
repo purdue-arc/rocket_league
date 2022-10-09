@@ -276,6 +276,12 @@ class Sim(object):
         del self._cars[car_id]
         del self._car_data[car_id]
         return True
+    """
+    Set the command for the car
+    """    
+    def set_car_command(car_id,msg):
+        cars[car_id].setCmd(msg)
+    
 
     def step(self, car_cmd, dt):
         """
@@ -299,7 +305,7 @@ class Sim(object):
         for _ in range(round(dt / p_dt)):
             # step kinematic objects independently, at max possible rate
             for car in self._cars.values():
-                car.step(car_cmd,p_dt)
+                car.step(p_dt)
             p.stepSimulation()
 
     def get_car_pose(self, id, add_noise=False):

@@ -158,33 +158,33 @@ class Simulator(object):
         if not os.path.isfile(urdf_path):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(urdf_path))
-    def effort_cb(self, effort_msg,v):
-        print("eff_cb:",effort_msg)
-        print("eff_cb:",v)
-        self.cmd_lock.acquire()
-        self.car_cmd = (effort_msg.throttle, effort_msg.steering)
-        self.cmd_lock.release()
-
-    def cmd_cb(self, cmd_msg,v):
-        print("cmd_cb:",cmd_msg)
-        print("cmd_cb:",v)
-        self.cmd_lock.acquire()
-        self.car_cmd = (cmd_msg.velocity, cmd_msg.curvature)
-        self.cmd_lock.release()
-
-    # def effort_cb(self, effort_msg, car_id):
-    #     """Sets a car's effort with throttle and steering (overwrites commands)."""
+    # def effort_cb(self, effort_msg,v):
+    #     print("eff_cb:",effort_msg)
+    #     print("eff_cb:",v)
     #     self.cmd_lock.acquire()
-    #     self.sim.set_car_command(car_id,
-    #                              (effort_msg.throttle, effort_msg.steering))
+    #     self.car_cmd = (effort_msg.throttle, effort_msg.steering)
     #     self.cmd_lock.release()
 
-    # def cmd_cb(self, cmd_msg, car_id):
-    #     """Sets a car's command with the velocity and curvature. (overwrites effort)."""
+    # def cmd_cb(self, cmd_msg,v):
+    #     print("cmd_cb:",cmd_msg)
+    #     print("cmd_cb:",v)
     #     self.cmd_lock.acquire()
-    #     self.sim.set_car_command(car_id,
-    #                              (cmd_msg.velocity, cmd_msg.curvature))
+    #     self.car_cmd = (cmd_msg.velocity, cmd_msg.curvature)
     #     self.cmd_lock.release()
+
+    def effort_cb(self, effort_msg, car_id):
+        """Sets a car's effort with throttle and steering (overwrites commands)."""
+        self.cmd_lock.acquire()
+        self.sim.set_car_command(car_id,
+                                 (effort_msg.throttle, effort_msg.steering))
+        self.cmd_lock.release()
+
+    def cmd_cb(self, cmd_msg, car_id):
+        """Sets a car's command with the velocity and curvature. (overwrites effort)."""
+        self.cmd_lock.acquire()
+        self.sim.set_car_command(car_id,
+                                 (cmd_msg.velocity, cmd_msg.curvature))
+        self.cmd_lock.release()
 
     def create_car_cb(self, req):
         self.reset_lock.acquire()
