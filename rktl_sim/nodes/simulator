@@ -158,19 +158,6 @@ class Simulator(object):
         if not os.path.isfile(urdf_path):
             rospy.signal_shutdown(
                 'no urdf file exists at path {}'.format(urdf_path))
-    # def effort_cb(self, effort_msg,v):
-    #     print("eff_cb:",effort_msg)
-    #     print("eff_cb:",v)
-    #     self.cmd_lock.acquire()
-    #     self.car_cmd = (effort_msg.throttle, effort_msg.steering)
-    #     self.cmd_lock.release()
-
-    # def cmd_cb(self, cmd_msg,v):
-    #     print("cmd_cb:",cmd_msg)
-    #     print("cmd_cb:",v)
-    #     self.cmd_lock.acquire()
-    #     self.car_cmd = (cmd_msg.velocity, cmd_msg.curvature)
-    #     self.cmd_lock.release()
 
     def effort_cb(self, effort_msg, car_id):
         """Sets a car's effort with throttle and steering (overwrites commands)."""
@@ -212,30 +199,6 @@ class Simulator(object):
         ]
         rospy.set_param('/cars/', car_param)
         self.update_all_cars()
-
-        # self.car_ids[req.name] = self.sim.create_car(
-        #     'car', init_pose, noise=self.car_noise, props=self.car_properties)
-        #
-        # # Subscribers
-        # car_id = self.car_ids[req.name]
-        # self.car_effort_subs[req.name] = rospy.Subscriber(
-        #     f'/cars/{req.name}/effort', ControlEffort,
-        #     self.effort_cb, callback_args=car_id)
-        # self.car_cmd_subs[req.name] = rospy.Subscriber(
-        #     f'/cars/{req.name}/command', ControlCommand,
-        #     self.cmd_cb, callback_args=car_id)
-        #
-        # if self.mode == SimulatorMode.REALISTIC:
-        #     # Publishers
-        #     self.car_pose_pubs[req.name] = rospy.Publisher(
-        #         f'/cars/{req.name}/pose_sync_early',
-        #         PoseWithCovarianceStamped, queue_size=1)
-        #     self.car_odom_pubs[req.name] = rospy.Publisher(
-        #         f'/cars/{req.name}/odom_truth', Odometry, queue_size=1)
-        # elif self.mode == SimulatorMode.IDEAL:
-        #     self.car_odom_pubs[req.name] = rospy.Publisher(
-        #         f'/cars/{req.name}/odom', Odometry, queue_size=1)
-
         self.reset_cb(None) # janky reset call with mandatory none parameter
         self.reset_lock.release()
         return CreateCarResponse(True)
