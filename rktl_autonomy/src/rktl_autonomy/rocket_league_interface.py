@@ -72,15 +72,15 @@ class RocketLeagueInterface(ROSInterface):
         self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
 
         # Learning
-        self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
-        self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
-        self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
-        self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
-        self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)[self.instance_id]
-        self._LOSS_REWARD = rospy.get_param('~reward/loss', 0.0)[self.instance_id]
-        self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
-        self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
-        self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
+        self._MAX_TIME = rospy.get_param('~max_episode_time', [30.0])[self.instance_id]
+        self._CONSTANT_REWARD = rospy.get_param('~reward/constant', [0.0])[self.instance_id]
+        self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', [0.0])[self.instance_id]
+        self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', [0.0])[self.instance_id]
+        self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[self.instance_id]
+        self._LOSS_REWARD = rospy.get_param('~reward/loss', [0.0])[self.instance_id]
+        self._REVERSE_REWARD = rospy.get_param('~reward/reverse', [0.0])[self.instance_id]
+        self._WALL_REWARD = rospy.get_param('~reward/walls/value', [0.0])[self.instance_id]
+        self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', [0.0])[self.instance_id]
 
         # Publishers
         self._command_pub = rospy.Publisher('cars/car0/command', ControlCommand, queue_size=1)
