@@ -112,7 +112,7 @@ class Car(object):
             else:
                 pos = np.random.normal(pos, noise['pos'])
                 orient = np.random.normal(orient, noise['orient'])
-        print("position: pos:",pos, "quaternion",p.getQuaternionFromEuler(orient))
+
         return pos, p.getQuaternionFromEuler(orient)
 
     def get_velocity(self):
@@ -126,7 +126,7 @@ class Car(object):
                           [math.sin(heading), math.cos(heading), 0.],
                           [0., 0., 1.]], dtype=np.float)
         linear = r_inv @ linear
-        print("velocity: linear:",linear, "angular",angular)
+       
         return linear, angular
 
     def reset(self, pos, orient):
@@ -138,7 +138,7 @@ class Car(object):
         self._psi = 0.0
 
         p.resetBasePositionAndOrientation(self.id, [0., 0., pos[2]], p.getQuaternionFromEuler(BASE_QUATERNION))
-        print("reseting car to new pose and orient")
+       
         self.joint_ids = JOINT_IDS  # X, Y, W
         p.resetJointState(self.id, self.joint_ids[0], targetValue=pos[0])
         p.resetJointState(self.id, self.joint_ids[1], targetValue=pos[1])
@@ -152,9 +152,7 @@ class Car(object):
         @param pos: The position of the other object.
         @return: Boolean if the positions overlap (true = overlap).
         """
-        print("x",pos[0],"y",pos[1])
-        print("x1",self.init_pos[0],"y1",self.init_pos[1])
+      
         val =((pos[0] - self.init_pos[0]) * (pos[0] - self.init_pos[0])) + ((pos[1] - self.init_pos[1]) * (pos[1] - self.init_pos[1]))
-        print(val)
         dist = math.sqrt(val)
         return dist < self._LENGTH

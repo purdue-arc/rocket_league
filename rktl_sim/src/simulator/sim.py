@@ -198,7 +198,7 @@ class Sim(object):
                     random.uniform(-self._speed_bound, self._speed_bound),
                     0.0,
                 ]
-            print("\n\n\n\n\n\n\n\n\n\n==========here7================")
+
             p.resetBaseVelocity(self._ball_id, ball_vel, zero_orient)
             self.ball_noise = noise
             return self._ball_id
@@ -383,7 +383,6 @@ class Sim(object):
             car_pos = self.generate_new_car_pos()
         
         while self.check_if_pos_overlap(car_pos):
-            print("\n\n\n\n\n\n\n\n\noverlap generation")
             car_pos = self.generate_new_car_pos()
 
         if car_orient is None:
