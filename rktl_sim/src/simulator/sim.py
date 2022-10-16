@@ -24,7 +24,7 @@ class Sim(object):
     class NoURDFError(Exception):
         pass
 
-    def __init__(self, props, urdf_paths, spawn_bounds, field_setup,render_enabled):
+    def __init__(self, props, urdf_paths, spawn_bounds, field_setup, render_enabled):
         """
         Initializes the playing field, field properties, and field elements.
         @param props: Connect the pybullet object based on the gui and direct.
@@ -60,7 +60,8 @@ class Sim(object):
             self._planeID = p.loadURDF(
                 urdf_paths["plane"], [0, 0, 0], zero_orient, useFixedBase=1
             )
-            p.changeDynamics(bodyUniqueId=self._planeID, linkIndex=-1, restitution=1.0)
+            p.changeDynamics(bodyUniqueId=self._planeID,
+                             linkIndex=-1, restitution=1.0)
 
         self._goalAID = None
         self._goalBID = None
@@ -81,7 +82,8 @@ class Sim(object):
                 zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=lSidewallID, linkIndex=-1, restitution=1.0)
+            p.changeDynamics(bodyUniqueId=lSidewallID,
+                             linkIndex=-1, restitution=1.0)
             self._walls[lSidewallID] = True
 
             rSidewallId = p.loadURDF(
@@ -90,7 +92,8 @@ class Sim(object):
                 zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=rSidewallId, linkIndex=-1, restitution=1.0)
+            p.changeDynamics(bodyUniqueId=rSidewallId,
+                             linkIndex=-1, restitution=1.0)
             self._walls[rSidewallId] = True
 
         if "backwall" in urdf_paths:
@@ -101,7 +104,8 @@ class Sim(object):
                 zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=flBackwallID, linkIndex=-1, restitution=1.0)
+            p.changeDynamics(bodyUniqueId=flBackwallID,
+                             linkIndex=-1, restitution=1.0)
             self._walls[flBackwallID] = True
 
             frBackwallID = p.loadURDF(
@@ -110,7 +114,8 @@ class Sim(object):
                 zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=frBackwallID, linkIndex=-1, restitution=1.0)
+            p.changeDynamics(bodyUniqueId=frBackwallID,
+                             linkIndex=-1, restitution=1.0)
             self._walls[frBackwallID] = True
 
             blBackwallID = p.loadURDF(
@@ -119,7 +124,8 @@ class Sim(object):
                 zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=blBackwallID, linkIndex=-1, restitution=1.0)
+            p.changeDynamics(bodyUniqueId=blBackwallID,
+                             linkIndex=-1, restitution=1.0)
             self._walls[blBackwallID] = True
 
             brBackwallID = p.loadURDF(
@@ -128,7 +134,8 @@ class Sim(object):
                 zero_orient,
                 useFixedBase=1,
             )
-            p.changeDynamics(bodyUniqueId=brBackwallID, linkIndex=-1, restitution=1.0)
+            p.changeDynamics(bodyUniqueId=brBackwallID,
+                             linkIndex=-1, restitution=1.0)
             self._walls[brBackwallID] = True
 
         self._cars = {}
@@ -176,9 +183,12 @@ class Sim(object):
                 self.init_ball_pos = ball_pos
             else:
                 ball_pos = [
-                    random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                    random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
+                    random.uniform(
+                        self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                    random.uniform(
+                        self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                    random.uniform(
+                        self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
                 self.init_ball_pos = None
             self._ball_id = p.loadURDF(
@@ -236,9 +246,12 @@ class Sim(object):
                 init_car_orient = car_orient
             else:
                 car_pos = [
-                    random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                    random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
+                    random.uniform(
+                        self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                    random.uniform(
+                        self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                    random.uniform(
+                        self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
                 car_orient = [0.0, 0.0, random.uniform(0, 2 * math.pi)]
                 init_car_pos = None
@@ -276,12 +289,12 @@ class Sim(object):
         del self._cars[car_id]
         del self._car_data[car_id]
         return True
-    """
-    Set the command for the car
-    """    
-    def set_car_command(car_id,msg):
+
+    def set_car_command(car_id, msg):
+        """
+        Set the command for the car
+        """
         cars[car_id].setCmd(msg)
-    
 
     def step(self, car_cmd, dt):
         """
@@ -360,14 +373,15 @@ class Sim(object):
         self.scored = False
         self.winner = None
         self.touched_last = None
-        if ball_init_pose is not None: self.init_ball_pos = ball_init_pose 
-        if ball_init_speed is not None: self._speed_bound = ball_init_speed
+        if ball_init_pose is not None:
+            self.init_ball_pos = ball_init_pose
+        if ball_init_speed is not None:
+            self._speed_bound = ball_init_speed
 
         self.spawn_bounds = spawn_bounds
         self.reset_ball()
         for car in self._cars.values():
             self.reset_car(car, car_properties)
-
 
     def reset_car(self, car, car_properties):
         """
@@ -381,14 +395,13 @@ class Sim(object):
 
         if car_pos is None:
             car_pos = self.generate_new_car_pos()
-        
+
         while self.check_if_pos_overlap(car_pos):
             car_pos = self.generate_new_car_pos()
 
         if car_orient is None:
             car_orient = [0, 0, random.uniform(0, 2 * math.pi)]
         car.reset(car_pos, car_orient)
-
 
     def check_if_pos_overlap(self, car_pos):
         """
@@ -403,24 +416,25 @@ class Sim(object):
 
         return False
 
-
     def generate_new_car_pos(self):
         car_pos = [random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                random.uniform(
-                    self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
+                   random.uniform(
+            self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+            random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1])]
         return car_pos
 
-
     def reset_ball(self):
-            
+
         if self._ball_id is not None:
             ball_pos = self.init_ball_pos
             if ball_pos is None:
                 ball_pos = [
-                    random.uniform(self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
-                    random.uniform(self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
-                    random.uniform(self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
+                    random.uniform(
+                        self.spawn_bounds[0][0], self.spawn_bounds[0][1]),
+                    random.uniform(
+                        self.spawn_bounds[1][0], self.spawn_bounds[1][1]),
+                    random.uniform(
+                        self.spawn_bounds[2][0], self.spawn_bounds[2][1]),
                 ]
             p.resetBasePositionAndOrientation(
                 self._ball_id, ball_pos, p.getQuaternionFromEuler([0, 0, 0])
