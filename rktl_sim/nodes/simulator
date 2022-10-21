@@ -18,7 +18,7 @@ from enum import Enum
 
 # local libraries
 import simulator
-from rktl_sim.srv import CreateCar, CreateCarResponse, DeleteCar, DeleteCarResponse
+from rktl_sim.srv import CreateCarResponse
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 
@@ -128,7 +128,7 @@ class Simulator(object):
                                                  Odometry, queue_size=1)
 
         # Services
-        rospy.Service('sim_reset_car_&_ball', Empty, self.reset_cb)
+        rospy.Service('sim_reset_car_and_ball', Empty, self.reset_cb)
         rospy.Service('sim_reset_ball', Empty, self.reset_ball_cb)
 
         while not rospy.is_shutdown():
@@ -305,7 +305,7 @@ class Simulator(object):
 
         self.last_time = now
         self.reset_lock.release()
-
+        
     def get_sim_param(self, path, returnValue=False, secondParam=None):
         """
         @param secondParam: Specify if you want to pass in a second parameter to rospy.
@@ -352,9 +352,14 @@ class Simulator(object):
                     return None
                 # accounting for bugs in yaml file
                 if min_param > max_param:
-                    return (float)(random.uniform(max_param, min_param))
+                    param_val =(float)(random.uniform(max_param, min_param))
+                    rospy.set_param(f'{path}',param_val)
+                    
+                    return param_val
                 else:
-                    return (float)(random.uniform(min_param, max_param))
+                    param_val =(float)(random.uniform(min_param, max_param))
+                    rospy.set_param(f'{path}',param_val)
+                    return param_val
 
             elif type_rospy == float or type_rospy == int:
                 if secondParam is not None:
@@ -367,11 +372,11 @@ class Simulator(object):
 
     def configure_field(self):
         """Configures the field boundries and goals to be used in the simulator."""
-        fw = rospy.get_param('/field/width')
-        fl = rospy.get_param('/field/length')
-        wt = rospy.get_param('/field/wall_thickness')
-        gw = rospy.get_param('/field/goal/width')
-        spawn_height = rospy.get_param('~spawn_height', 0.06)
+        fw = self.get_sim_param('/field/width')
+        fl = self.get_sim_param('/field/length')
+        wt = self.get_sim_param('/field/wall_thickness')
+        gw = self.get_sim_param('/field/goal/width')
+        spawn_height = self.get_sim_param('~spawn_height', 0.06)
 
         spawn_bounds = [[-(fl / 2) + (2 * wt), (fl / 2) - (2 * wt)],
                         [-(fw / 2) + (2 * wt), (fw / 2) - (2 * wt)],
@@ -431,7 +436,7 @@ class Simulator(object):
                     self.car_odom_pubs[car_name] = rospy.Publisher(
                         f'/cars/{car_name}/odom', Odometry, queue_size=1)
 
-        return CreateCarResponse(True)
+        return True
 
 
 if __name__ == "__main__":
