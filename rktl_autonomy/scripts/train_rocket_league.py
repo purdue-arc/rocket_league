@@ -26,8 +26,11 @@ def train(n_envs=24, n_saves=100, n_steps=240000000, env_counter=None):
     model = PPO("MlpPolicy", env)
 
     # load weights from zip file
-    previous_weights = expanduser(f'~/catkin_ws/data/rocket_league/model')
-    model.set_parameters(previous_weights)
+    try:
+        previous_weights = expanduser(f'~/catkin_ws/data/rocket_league/model')
+        model.set_parameters(previous_weights)
+    except:
+        print('Failed to load from previous weights')
 
     # log training progress as CSV
     log_dir = expanduser(f'~/catkin_ws/data/rocket_league/{run_id}')
