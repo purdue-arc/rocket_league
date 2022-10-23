@@ -15,13 +15,13 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from os.path import expanduser
 import uuid
 
-if __name__ == '__main__':      # this is required due to forking processes
+
+def train(n_envs=24, n_saves=100, n_steps=240000000, env_counter=None):
     run_id = str(uuid.uuid4())  # ALL running environments must share this
     print(f"RUN ID: {run_id}")
-
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
-    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
-            n_envs=24, vec_env_cls=SubprocVecEnv)
+    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id': run_id, 'env_counter': env_counter},
+                       n_envs=n_envs, vec_env_cls=SubprocVecEnv)
 
     model = PPO("MlpPolicy", env)
 
@@ -31,16 +31,19 @@ if __name__ == '__main__':      # this is required due to forking processes
     model.set_logger(logger)
 
     # log model weights
-    freq = 20833 # save 20 times
-    # freq = steps / (n_saves * n_envs)
+    freq = n_steps / (n_saves * n_envs)
     callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
 
     # run training
-    steps = 240000000 # 240M (10M sequential)
+    steps = n_steps
     print(f"training on {steps} steps")
     model.learn(total_timesteps=steps, callback=callback)
 
     # save final weights
     print("done training")
     model.save(log_dir + "/final_weights")
-    env.close() # this must be done to clean up other processes
+    env.close()  # this must be done to clean up other processes
+
+
+if __name__ == '__main__':
+    train()
