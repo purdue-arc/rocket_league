@@ -18,7 +18,6 @@ from enum import Enum
 
 # local libraries
 import simulator
-from rktl_sim.srv import CreateCarResponse
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 
