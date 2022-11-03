@@ -5,6 +5,8 @@ reward:
   # ball_dist_sq: -0.5
   # # reward as a function of squared distance from the ball to the goal
   # goal_dist_sq: -1.0
+  # reward given when car changes velocity direction
+  direction_change: -10
   # reward given when the episode ends with the car scoring the proper goal
   win: 100
   # reward given when the episode ends with the car scoring on the wrong goal
