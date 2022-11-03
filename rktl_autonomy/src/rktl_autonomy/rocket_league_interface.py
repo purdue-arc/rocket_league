@@ -192,10 +192,10 @@ class RocketLeagueInterface(ROSInterface):
                 reward += self._LOSS_REWARD
 
         x, y, __, v, __ = self._car_odom
-        
+
         if self._prev_vel is None:
             self._prev_vel = v
-        if self._prev_vel / abs(self._prev_vel) != v / abs(v):
+        if self.prev_vel != 0 and v != 0 and self._prev_vel / abs(self._prev_vel) != v / abs(v):
             reward += self._DIRECTION_CHANGE_REWARD
         self._prev_vel = v
 
