@@ -197,9 +197,7 @@ class RocketLeagueInterface(ROSInterface):
             self._prev_vel = v
         if self._prev_vel != 0 and v != 0 and self._prev_vel / abs(self._prev_vel) != v / abs(v):
             reward += self._DIRECTION_CHANGE_REWARD
-            print("Adding reward")
         self._prev_vel = v
-        print("Not adding reward")
 
         if v < 0:
             reward += self._REVERSE_REWARD
