@@ -19,5 +19,5 @@ cars:
     max_throw: 0.1826  # center to side, radians
     rate: 0.9128  # rad/s
   throttle:
-    max_speed: 2.3  # m/s
-    tau: 0.2  # time constant, seconds
+    max_speed: 1.0  # m/s
+    tau: 0.1  # time constant, seconds
