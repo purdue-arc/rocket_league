@@ -14,13 +14,14 @@ from stable_baselines3.common.logger import configure
 from stable_baselines3.common.callbacks import CheckpointCallback
 from os.path import expanduser
 import uuid
+import sys
 
 if __name__ == '__main__':      # this is required due to forking processes
     run_id = str(uuid.uuid4())  # ALL running environments must share this
     print(f"RUN ID: {run_id}")
 
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
-    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id},
+    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id':run_id, 'launch_args':sys.argv},
             n_envs=24, vec_env_cls=SubprocVecEnv)
 
     model = PPO("MlpPolicy", env)
