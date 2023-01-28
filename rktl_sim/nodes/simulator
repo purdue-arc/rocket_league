@@ -18,7 +18,6 @@ from enum import Enum
 
 # local libraries
 import simulator
-from rktl_sim.srv import CreateCarResponse
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 
@@ -305,6 +304,15 @@ class Simulator(object):
 
         self.last_time = now
         self.reset_lock.release()
+    # def get_sim_dict(self, path, returnValue=False, secondParam=None):
+    #     rospy_param = rospy.get_param(path, secondParam)
+    #     if not rospy_param:
+    #         if returnValue:
+    #             rospy.logfatal(f'invalid file path: {path}')
+    #         return None
+    #     else:
+    #         for param in rospy_param:
+                
         
     def get_sim_param(self, path, returnValue=False, secondParam=None):
         """
@@ -400,6 +408,7 @@ class Simulator(object):
     def update_all_cars(self):
         """Generates instance-parameters, Subscribers, Publishers for each car."""
         car_configs = self.get_sim_param('~cars', secondParam=[])
+
 
         for car_config in car_configs:
             init_pose = self.get_sim_param('~cars/init_pose')

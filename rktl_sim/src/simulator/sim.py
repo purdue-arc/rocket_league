@@ -7,6 +7,7 @@ License:
 
 # 3rd party modules
 import math
+import re
 import pybullet as p
 import random
 import numpy as np
@@ -301,8 +302,15 @@ class Sim(object):
         Moves the sim forward one timestep, checking if a goal is score to end the sim round.
         @param dt: The change in time (delta-t) for this sim step.
         """
+        # PyBullet steps at 240hz
+        p_dt = 1.0 / 240.0
         if self._ball_id is not None:
             ball_contacts = p.getContactPoints(bodyA=self._ball_id)
+            # TODO: need to decrease ball velocity
+            linear, angular = self.get_ball_velocity()
+            new_linear,new_angular = self.get_decreased_velocity(linear,angular,p_dt)
+            p.resetBaseVelocity(self._ball_id,new_linear,new_angular)
+            
             for contact in ball_contacts:
                 if contact[2] in self._cars:
                     self.touchedLast = contact[2]
@@ -312,15 +320,33 @@ class Sim(object):
                 elif contact[2] == self._goal_b_id:
                     self.scored = True
                     self.winner = "B"
+            
 
-        # PyBullet steps at 240hz
-        p_dt = 1.0 / 240.0
+        
         for _ in range(round(dt / p_dt)):
             # step kinematic objects independently, at max possible rate
             for car in self._cars.values():
                 car.step(p_dt)
             p.stepSimulation()
-
+    def get_decreased_velocity(self,linear,angular,dt):
+        x_vel,y_vel,z_vel=linear[0],linear[1],linear[2]
+        
+        current_speed = math.sqrt(x_vel*x_vel +y_vel*y_vel)
+        # r*cos(theta), r*sin(theta)
+        
+        
+        if current_speed < 0.001: # a very small number
+            return (0,0,z_vel),angular
+        # for each time step, new_vel = old_vel - myu_r*dt
+        angle = math.atan(y_vel/x_vel)
+        current_speed = current_speed - 0.17 * dt
+        
+        new_x_vel = current_speed*math.cos(angle) # v*cos(theta)
+        new_y_vel = current_speed*math.sin(angle) # v*sin(theta)
+        
+        
+        return (new_x_vel,new_y_vel,z_vel),angular
+        
     def get_car_pose(self, id, add_noise=False):
 
         if id not in self._cars:
@@ -362,6 +388,7 @@ class Sim(object):
     def get_ball_velocity(self):
         if self._ball_id is None:
             return None
+
         return p.getBaseVelocity(self._ball_id)
 
     def reset(self, spawn_bounds, car_properties, ball_init_pose, ball_init_speed):
