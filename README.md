@@ -1,5 +1,5 @@
 # Rocket League
-This repo contains all the files necessary for the [Rocket League project](https://wiki.purduearc.com/wiki/rocket-league/overview).
+This repo contains all the files necessary for the [Rocket League project](https://www.purduearc.com/wiki/active-projects/rocket-league/).
 This project aims to recreate the video game of the same name via a team of
 autonomously controlled RC cars competing against human controlled ones.
 
