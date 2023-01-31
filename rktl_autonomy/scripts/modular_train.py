@@ -2,11 +2,8 @@
 
 from train_rocket_league import train
 import yaml
-from rktl_autonomy import EnvCounter
 import sys
 import os
-from pathlib import Path
-from threading import Thread
 from multiprocessing import Process
 
 if __name__ == '__main__':
@@ -22,9 +19,7 @@ if __name__ == '__main__':
     numGroups = len(file["reward"]["win"])
 
     for i in range(numGroups):
-        args = (int(numEnvsAllowed / numGroups), 100, 240000000, EnvCounter())
+        args = (int(numEnvsAllowed / numGroups), 100, 240000000, i)
         p = Process(target=train, args=args)
         p.start()
         print(f'Starting thread {i}/{numGroups}')
-        # thread = Thread(target=train, args=args)
-        # thread.start()
