@@ -6,7 +6,7 @@ License:
   All rights reserved.
 """
 
-from rktl_autonomy import RocketLeagueInterface
+from rktl_autonomy import RocketLeagueInterface, EnvCounter
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.env_util import make_vec_env
@@ -16,7 +16,7 @@ from os.path import expanduser
 import uuid
 
 
-def train(n_envs=24, n_saves=100, n_steps=240000000, env_counter=None):
+def train(n_envs=24, n_saves=100, n_steps=240000000, env_counter=EnvCounter()):
     run_id = str(uuid.uuid4())  # ALL running environments must share this
     print(f"RUN ID: {run_id}")
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
