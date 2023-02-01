@@ -16,11 +16,11 @@ from os.path import expanduser
 import uuid
 
 
-def train(n_envs=24, n_saves=100, n_steps=240000000, env_counter=None):
+def train(n_envs=24, n_saves=100, n_steps=240000000, env_number=0):
     run_id = str(uuid.uuid4())  # ALL running environments must share this
     print(f"RUN ID: {run_id}")
     # to pass launch args, add to env_kwargs: 'launch_args': ['render:=false', 'plot_log:=true']
-    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id': run_id, 'env_counter': env_counter},
+    env = make_vec_env(RocketLeagueInterface, env_kwargs={'run_id': run_id, 'env_number': env_number},
                        n_envs=n_envs, vec_env_cls=SubprocVecEnv)
 
     model = PPO("MlpPolicy", env)
