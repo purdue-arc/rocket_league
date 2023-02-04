@@ -11,13 +11,13 @@
         </node>
 
         <!-- pointgrey RGB camera nodelet -->
-        <node pkg="nodelet" type="nodelet" name="$(arg camera_name)"
+        <!-- <node pkg="nodelet" type="nodelet" name="$(arg camera_name)"
             args="load pointgrey_camera_driver/PointGreyCameraNodelet $(arg manager_name)">
             <rosparam command="load" file="$(find rktl_perception)/config/$(arg camera_name)/pointgrey.yaml" />
             <param name="frame_id" value="$(arg camera_name)" />
             <param name="camera_info_url"
                 value="package://rktl_perception/config/$(arg camera_name)/calibration.yaml" />
-        </node>
+        </node> -->
 
         <!-- De-Bayer / rectify -->
         <include file="$(find image_proc)/launch/image_proc.launch">
