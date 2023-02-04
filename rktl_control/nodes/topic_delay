@@ -2,7 +2,7 @@
 """Delay an arbitrary ROS topic without modifying message
 License:
   BSD 3-Clause License
-  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
