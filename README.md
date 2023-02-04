@@ -5,7 +5,7 @@ autonomously controlled RC cars competing against human controlled ones.
 
 The repo is broken down into several ROS packages, closely matching the system outline:
 
-![System outline](https://wiki.purduearc.com/wiki/rocket-league/assets/images/system-overview.png)
+![System outline](https://www.purduearc.com/wiki/active-projects/rocket-league/images/system-overview.png)
 
 ### rktl_autonomy
 This package contains all code for the "High Level Planner" section. It provides
