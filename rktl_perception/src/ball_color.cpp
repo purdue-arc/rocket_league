@@ -1,3 +1,10 @@
+/*
+ * License:
+ * BSD 3-Clause License
+ * Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+ * All rights reserved.
+ */
+
 /* ros */
 #include <ros/ros.h>
 #include <ros/console.h>

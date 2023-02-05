@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+License:
+  BSD 3-Clause License
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
 
 import math
 from rktl_planner import BezierCurve
