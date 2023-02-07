@@ -48,23 +48,6 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
 )
 
-# Build chromatag_preprocess node
-add_executable(${PROJECT_NAME}_chromatag_preprocess_node
-  src/chromatag_preprocess_node.cpp
-)
-set_target_properties(${PROJECT_NAME}_chromatag_preprocess_node PROPERTIES
-  OUTPUT_NAME chromatag_preprocess
-  PREFIX ""
-)
-add_dependencies(${PROJECT_NAME}_chromatag_preprocess_node
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-)
-target_link_libraries(${PROJECT_NAME}_chromatag_preprocess_node
-  ${catkin_LIBRARIES}
-  ${OpenCV_LIBRARIES}
-)
-
 # Build localizer node
 add_executable(${PROJECT_NAME}_localizer_node
   src/localizer_node.cpp

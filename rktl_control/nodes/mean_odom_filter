@@ -2,7 +2,7 @@
 """Very simple node to estimate odometry from poses over time using a rolling average filter.
 License:
   BSD 3-Clause License
-  Copyright (c) 2020, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
