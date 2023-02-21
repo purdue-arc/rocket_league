@@ -2,7 +2,7 @@
 
 DOCKER_DIR=$(realpath $(dirname $0))
 REPO_NAME="purduearc/rocket-league"
-M1_ARGS=$([ $(uname -p) == 'arm' ] && echo "--platform \"linux/arm64/v8\"")
+M1_ARGS=$([ $(uname -p) == 'arm' ] && echo "--platform linux/arm64/v8")
 
 docker build --build-arg USER=$USER \
              --build-arg PW="robot" \
