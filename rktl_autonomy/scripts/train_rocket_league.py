@@ -2,7 +2,7 @@
 """Training script for the Rocket League project.
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
@@ -25,6 +25,13 @@ if __name__ == '__main__':      # this is required due to forking processes
 
     model = PPO("MlpPolicy", env)
 
+    # load weights from zip file
+    try:
+        previous_weights = expanduser(f'~/catkin_ws/data/rocket_league/model')
+        model.set_parameters(previous_weights)
+    except:
+        print('Failed to load from previous weights')
+    
     # log training progress as CSV
     log_dir = expanduser(f'~/catkin_ws/data/rocket_league/{run_id}')
     logger = configure(log_dir, ["stdout", "csv", "log"])

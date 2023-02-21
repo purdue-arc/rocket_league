@@ -1,3 +1,10 @@
+"""
+License:
+  BSD 3-Clause License
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
 from ._ros_interface import ROSInterface
 from .cartpole_interface import CartpoleInterface
 from .cartpole_direct_interface import CartpoleDirectInterface

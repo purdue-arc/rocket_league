@@ -1,7 +1,7 @@
 """Interface to the Snake game in ARC Tutorials for testing.
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 

@@ -1,7 +1,7 @@
 """Interface to the Rocket League project.
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
@@ -75,6 +75,7 @@ class RocketLeagueInterface(ROSInterface):
         self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
         self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
         self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
+        self._DIRECTION_CHANGE_REWARD = rospy.get_param('~reward/direction_change', 0.0)
         self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)
         self._LOSS_REWARD = rospy.get_param('~reward/loss', 0.0)
         self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
@@ -90,6 +91,7 @@ class RocketLeagueInterface(ROSInterface):
         self._ball_odom = None
         self._score = None
         self._start_time = None
+        self._prev_vel = None
 
         # Subscribers
         rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
@@ -190,6 +192,13 @@ class RocketLeagueInterface(ROSInterface):
                 reward += self._LOSS_REWARD
 
         x, y, __, v, __ = self._car_odom
+
+        if self._prev_vel is None:
+            self._prev_vel = v
+        if self._prev_vel * v < 0:
+            reward += self._DIRECTION_CHANGE_REWARD
+        self._prev_vel = v
+
         if v < 0:
             reward += self._REVERSE_REWARD
         if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
