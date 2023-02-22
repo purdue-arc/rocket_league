@@ -1,97 +1,70 @@
 /*********************************************************************
-Teensyduino sketch used to control six cars at once over six radio links.
+Arduino-Pico sketch used to control a car over a WebSocket.
 License:
   BSD 3-Clause License
   Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 *********************************************************************/
 
+#include <ArduinoHttpClient.h>
+#include <WiFi.h>
 #include <ros.h>
-#include <std_msgs/Bool.h>
 
-#include "CarLink.hpp"
+#define PACKET_SIZE 16
 
-// ros node handle
-ros::NodeHandle nh;
+char ssid[] = "SSID GOES HERE";
+char pass[] = "PASSWORD GOES HERE";
 
-// radio links to each car
-CarLink car0{&nh, 0, 23};
-CarLink car1{&nh, 1, 22};
-CarLink car2{&nh, 2, 21};
-CarLink car3{&nh, 3, 20};
-CarLink car4{&nh, 4, 10};
-CarLink car5{&nh, 5, 9};
+char serverAddress[] = "IP ADDRESS OF WEBSOCKET GOES HERE";  // server address
+int port = WEBSOCKET PORT GOES HERE; // this is meant to cause a compilation error if it's not properly set
 
-// helper functions
-void enable_all() {
-    car0.enable();
-    car1.enable();
-    car2.enable();
-    car3.enable();
-    car4.enable();
-    car5.enable();
-    digitalWrite(LED_BUILTIN, HIGH);
-}
+WiFiClient wifi;
+WebSocketClient client = WebSocketClient(wifi, serverAddress, port);
+int status = WL_IDLE_STATUS;
 
-void disable_all() {
-    car0.disable();
-    car1.disable();
-    car2.disable();
-    car3.disable();
-    car4.disable();
-    car5.disable();
-    digitalWrite(LED_BUILTIN, LOW);
-}
+typedef struct {
+  double throttle;
+  double steering;
+} packet_t;
 
-bool update_all() {
-    return car0.update_params()
-        && car1.update_params()
-        && car2.update_params()
-        && car3.update_params()
-        && car4.update_params()
-        && car5.update_params();
-}
 
-// flag for if params have been properly set
-bool configured = false;
+typedef union {
+  packet_t packet_obj;
+  byte array[16];
+} packet_union_t;
 
-// enabled / disable callback and subscriber
-void enable_callback(const std_msgs::Bool& enable) {
-    if (enable.data && configured) {
-        enable_all();
-    } else {
-       disable_all();
-    }
-}
-
-// subscriber object
-ros::Subscriber<std_msgs::Bool> enable_sub{"enable", enable_callback};
+packet_union_t my_packet = {0.0, 0.0};
 
 void setup() {
-    // LED pin
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LOW);
-    
-    // init node
-    nh.initNode();
-    nh.subscribe(enable_sub);
+  Serial.begin(9600);
+  while (status != WL_CONNECTED) {
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+    status = WiFi.begin(ssid, pass);
+  }
 
-    // wait until connected
-    while (!nh.connected()) {
-        nh.spinOnce();
-    }
-
-    // get params
-    configured = update_all();
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
 }
 
 void loop() {
-    if (!nh.connected()) {
-        configured = false;
-        disable_all();
-    } else if (!configured) {
-        configured = update_all();
-    }
+  client.begin();
 
-    nh.spinOnce();
+  while (client.connected()) {
+    Serial.println("Connected to socket");
+
+    int messageSize = client.parseMessage();
+
+    if (messageSize >= PACKET_SIZE) {
+      Serial.println("Receiving packet");
+      client.read(my_packet.array, PACKET_SIZE);
+      Serial.print("Throttle: ");
+      Serial.println(my_packet.packet_obj.throttle);
+      Serial.print("Steering: ");
+      Serial.println(my_packet.packet_obj.steering);
+    } else if (messageSize != 0) {
+      Serial.println("Bad message size"); // don't know if it receives multiple bytes between repitions
+    }
+  }
 }
