@@ -24,17 +24,18 @@ async def socket_handler(websocket):
 
 async def main():
   try:
-      async with websockets.serve(socket_handler, "127.0.0.1", 8765):
-        await asyncio.Future()
+    async with websockets.serve(socket_handler, None, 8765):
+      await asyncio.Future()
   except asyncio.CancelledError:
-      print("Quitting")
-      os._exit(0)
-      running = False
+    running = False
+    print("Quitting")
+    rospy.signal_shutdown()
+    os._exit(0)
 
-def receive_callback(data):
-    throttle = data.throttle
-    steering = data.steering
-    print(f"Throttle: \{throttle} Steering: \{steering}")
+def receive_callback(thr, str, data):
+  throttle = data.throttle
+  steering = data.steering
+  # print(f"Throttle: \{throttle} Steering: \{steering}")
 
 
 if __name__ == '__main__':
@@ -50,6 +51,6 @@ if __name__ == '__main__':
   try:
     loop.run_until_complete(task)
     print("Spinning")
-    rospy.spin()
   finally:
+    rospy.signal_shutdown()
     loop.close()
