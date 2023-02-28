@@ -1,6 +1,7 @@
 # C
 
 import asyncio
+import os
 import websockets
 
 import rospy
@@ -26,6 +27,8 @@ async def main():
       async with websockets.serve(socket_handler, "127.0.0.1", 8765):
         await asyncio.Future()
   except asyncio.CancelledError:
+      print("Quitting")
+      os._exit(0)
       running = False
 
 def receive_callback(data):
@@ -46,7 +49,7 @@ if __name__ == '__main__':
     loop.add_signal_handler(signal, task.cancel)
   try:
     loop.run_until_complete(task)
+    print("Spinning")
+    rospy.spin()
   finally:
     loop.close()
-  print("Spinning")
-  rospy.spin()
