@@ -10,7 +10,7 @@ License:
 #include <WiFi.h>
 #include <ros.h>
 
-#define PACKET_SIZE 16
+#define PACKET_SIZE 8
 
 char ssid[] = "SSID GOES HERE";
 char pass[] = "PASSWORD GOES HERE";
@@ -23,14 +23,14 @@ WebSocketClient client = WebSocketClient(wifi, serverAddress, port);
 int status = WL_IDLE_STATUS;
 
 typedef struct {
-  double throttle;
-  double steering;
+  float throttle;
+  float steering;
 } packet_t;
 
 
 typedef union {
   packet_t packet_obj;
-  byte array[16];
+  byte array[PACKET_SIZE];
 } packet_union_t;
 
 packet_union_t my_packet = {0.0, 0.0};
