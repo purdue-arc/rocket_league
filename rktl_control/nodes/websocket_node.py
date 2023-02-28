@@ -10,34 +10,43 @@ car_num = 0; # How do we get this?
 
 running = True
 
-class WebSocketNode():
-  def __init__(self):
-    self.throttle = 25565
-    self.steering = 25566
+throttle = 25565
+steering = 25566
 
-  def receive_callback(self, data):
-    self.throttle = data.throttle
-    self.steering = data.steering
+async def socket_handler(websocket):
+  while running:
+    packet = bytearray(throttle.to_bytes(4, byteorder='little'))
+    packet.extend(steering.to_bytes(4, byteorder='little'))
+    print(packet)
+    print(len(packet))
+    await websocket.send(packet)
 
-  def node_listener(self):
-    rospy.init_node('car_websocket', anonymous=True)
-    rospy.Subscriber(f'/cars/car{car_num}/effort', ControlEffort, self.receive_callback)
+async def main():
+  try:
+      async with websockets.serve(socket_handler, "127.0.0.1", 8765):
+        await asyncio.Future()
+  except asyncio.CancelledError:
+      running = False
 
-  async def socket_handler(self, websocket):
-    while running:
-      packet = bytearray(self.throttle.to_bytes(4, byteorder='little'))
-      packet.extend(self.steering.to_bytes(4, byteorder='little'))
-      print(packet)
-      print(len(packet))
-      await websocket.send(packet)
-
-  async def main(self):
-    self.node_listener()
-    async with websockets.serve(self.socket_handler, "192.168.13.133", 8765):
-      await asyncio.Future()
-
+def receive_callback(data):
+    throttle = data.throttle
+    steering = data.steering
+    print(f"Throttle: \{throttle} Steering: \{steering}")
 
 
 if __name__ == '__main__':
-  node = WebSocketNode()
-  asyncio.run(node.main())
+  print("Initing")
+  print("Starting")
+  rospy.init_node('car_websocket', anonymous=True)
+  rospy.Subscriber(f'/cars/car{car_num}/effort', ControlEffort, receive_callback)
+  print("Running")
+  loop = asyncio.get_event_loop()
+  task = asyncio.run(main())
+  for signal in [SIGINT, SIGTERM]:
+    loop.add_signal_handler(signal, task.cancel)
+  try:
+    loop.run_until_complete(task)
+  finally:
+    loop.close()
+  print("Spinning")
+  rospy.spin()
