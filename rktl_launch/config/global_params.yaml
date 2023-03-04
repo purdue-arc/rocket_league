@@ -6,7 +6,7 @@ field:
   length: 4.25
   wall_thickness: 0.25
   goal:
-    width: 1
+    width: 1.0
 
 # car dimensions and physical constants
 ball:
@@ -14,10 +14,11 @@ ball:
 
 # car dimensions and physical constants
 cars:
-  length: 0.12  # front to rear wheel center to center, meters
+  width: 0.0762 # (3 in)
+  length: 0.12 # (8 in)
   steering:
-    max_throw: 0.1826  # center to side, radians
-    rate: 0.9128  # rad/s
+    max_throw: 0.1826 # 15 degrees
+    rate: 0.9128 # 30 degrees/s
   throttle:
-    max_speed: 2.3  # m/s
-    tau: 0.2  # time constant, seconds
+    max_speed: 2.3 # m/s
+    tau: 0.2 # (approx 1 sec to reach max speed)

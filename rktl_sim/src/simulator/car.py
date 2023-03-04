@@ -11,8 +11,8 @@ import math
 import numpy as np
 
 class Car(object):
-    def __init__(self, carID, pos, orient, car_properties):
-        self.id = carID
+    def __init__(self, car_id, pos, orient, car_properties):
+        self.id = car_id
         self.simulate_effort = car_properties['simulate_effort']
 
         # physical constants
@@ -39,15 +39,23 @@ class Car(object):
         p.resetJointState(self.id, self.joint_ids[1], targetValue=pos[1])
         p.resetJointState(self.id, self.joint_ids[2], targetValue=orient[2])
 
-    def step(self, cmd, dt):
+        self.cmd = None
+
+    def setCmd(self, cmd):
+        self.cmd = cmd
+
+    def step(self, dt):
+        if self.cmd is None:
+            return
+
         # get current yaw angle
-        _, orient = self.getPose()
+        _, orient = self.get_pose()
         theta = p.getEulerFromQuaternion(orient)[2]
 
         if self.simulate_effort:
             # transfrom control input to reference angles and velocities
-            v_rear_ref = cmd[0] * self._MAX_SPEED
-            psi_ref = cmd[1] * self._STEERING_THROW
+            v_rear_ref = self.cmd[0] * self._MAX_SPEED
+            psi_ref = self.cmd[1] * self._STEERING_THROW
 
             # update rear wheel velocity using 1st order model
             self._v_rear = (self._v_rear - v_rear_ref) * math.exp(-dt/self._THROTTLE_TAU) + v_rear_ref
@@ -68,11 +76,11 @@ class Car(object):
                 math.sqrt(math.pow(math.tan(self._psi), 2.0) / 4.0 + 1.0)
             omega = self._v_rear * math.tan(self._psi) / self._LENGTH
         else:
-            body_vel = cmd[0]
+            body_vel = self.cmd[0]
             if abs(body_vel) > self._MAX_SPEED:
                 body_vel = math.copysign(self._MAX_SPEED, body_vel)
 
-            body_curv = cmd[1]
+            body_curv = self.cmd[1]
             if abs(body_curv) > self._MAX_CURVATURE:
                 body_curv = math.copysign(self._MAX_CURVATURE, body_curv) 
             
@@ -85,7 +93,7 @@ class Car(object):
             controlMode=p.VELOCITY_CONTROL,
             forces=(5000, 5000, 5000))
 
-    def getPose(self, noise=None):
+    def get_pose(self, noise=None):
         pos = p.getLinkState(self.id, self.body_link_id)[0]
         heading = p.getJointState(self.id, self.joint_ids[2])[0]
         orient = (0.0, 0.0, heading)
@@ -98,7 +106,7 @@ class Car(object):
 
         return (pos, p.getQuaternionFromEuler(orient))
 
-    def getVelocity(self):
+    def get_velocity(self):
         link_state = p.getLinkState(self.id, self.body_link_id, computeLinkVelocity=1)
         orient = link_state[1]
         linear, angular = link_state[6:8]

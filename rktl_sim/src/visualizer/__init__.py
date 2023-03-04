@@ -9,5 +9,6 @@ License:
 """
 
 from visualizer.window import Window
+from visualizer.asset import Image, Rectangle, Lines, Circle
 
-__all__ = ["Window",]
+__all__ = ["Window", "Image", "Rectangle", "Lines", "Circle"]

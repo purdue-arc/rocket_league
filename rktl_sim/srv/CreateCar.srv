@@ -1,0 +1,6 @@
+string name
+geometry_msgs/Vector3 init_pos
+float32 init_yaw
+bool reset_to_random_pose
+---
+bool success

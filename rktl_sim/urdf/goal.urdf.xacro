@@ -1,0 +1,30 @@
+<?xml version="1.0"?> 
+<robot name="goal" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="goal" params="x_dir field_length goal_size">
+         <!-- Base frame of goal -->
+        <link name="base_link">
+            <inertial> 
+                <mass value="0"/>
+                <inertia ixx="0.2" ixy="0" ixz="0" iyy="0.2" iyz="0.0" izz="0.2"/>
+            </inertial> 
+        </link>
+
+        <link name="goal_link">
+            <visual>
+                <geometry>
+                    <box size="0.05 ${goal_size} 0.25"/>
+                </geometry>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="0.05 ${goal_size} 0.25"/>
+                </geometry>
+            </collision>
+        </link>
+        <joint name="goal_joint" type="fixed">
+            <origin xyz="${x_dir*((field_length/2)+0.175)} 0 0" rpy="0 0 0" />
+            <parent link="base_link" />
+            <child link="goal_link" />
+        </joint>
+    </xacro:macro>
+</robot>

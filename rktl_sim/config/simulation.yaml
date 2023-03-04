@@ -1,20 +1,82 @@
+#
+# Simulation settings
+#
+
 rate: 10
 spawn_height: 0.06
 
-car:
-  # init_pose:
-  #   pos: [0.5, 0.0, 0.06]
-  sensor_noise:
+# Directly export to setPhysicsEngineParameters()
+engine:
+  fixedTimeStep: 0.001
+  restitutionVelocityThreshold: 0.0001
+
+# Directly exported to changeDynamics()
+dynamics:
+  ball:
+    mass: 0.2
+    lateralFriction: 0.4
+    restitution: 0.7
+    rollingFriction: 0.0001
+    spinningFriction: 0.001
+    contactDamping: 0.0
+    contactStiffness: 0.0
+    collisionMargin: 0.0
+  car:
+    mass: 0.0
+    lateralFriction: 0.0
+    restitution: 0.0
+    rollingFriction: 0.0
+    spinningFriction: 0.0
+    contactDamping: 0.0
+    contactStiffness: 0.0
+    collisionMargin: 0.0
+  walls:
+    mass: 0.0
+    lateralFriction: 0.0
+    restitution: 0.0
+    rollingFriction: 0.0
+    spinningFriction: 0.0
+    contactDamping: 0.0
+    contactStiffness: 0.0
+    collisionMargin: 0.0
+  floor:
+    mass: 0.0
+    lateralFriction: 0.0
+    restitution: 0.0
+    rollingFriction: 0.0
+    spinningFriction: 0.0
+    contactDamping: 0.0
+    contactStiffness: 0.0
+    collisionMargin: 0.0
+
+#
+# Object instances
+#
+
+sensor_noise:
+  car:
     pos: [0.01, 0.01, 0.00]
     orient: [0.0, 0.0, 0.09]
-    dropout: 0.15
+    dropout: 0.0
+  ball:
+    pos: [0.01, 0.01, 0.0]
+    orient: [0.0, 0.0, 0.0]
+    dropout: 0.0
+
+cars:
+  - name: "car0"
+    # init_pose:
+    #   pos: [0.5, 0.0, 0.06]
+
+  # - name: "car1"
+  #   # init_pose:
+  #   #   pos: [0.5, 0.0, 0.06]
+  #   sensor_noise:
+  #     pos: [0.01, 0.01, 0.00]
+  #     orient: [0.0, 0.0, 0.09]
 
 ball:
   init_speed: 0.0
   # init_pose:
   #   pos: [0.0, 0.5, 0.06]
   #   orient: [0.0, 0.0, 0.0]
-  sensor_noise:
-    pos: [0.01, 0.01, 0.0]
-    orient: [0.0, 0.0, 0.0]
-    dropout: 0.1

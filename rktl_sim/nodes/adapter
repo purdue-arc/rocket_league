@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Node to match sim parameters to bag data.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+import rospy
+import rosbag
+import roslaunch
+
+from tf.transformations import euler_from_quaternion
+
+from rktl_msgs.msg import ControlEffort
+from nav_msgs.msg import Odometry
+from std_srvs.srv import Empty
+from simulator import Sim
+
+rospy.init_node('adapter')
+sim_name = 'sim1'
+
+# Set sim parameters
+rospy.set_param(f'{sim_name}/rate', 10)
+rospy.set_param(f'{sim_name}/spawn_height', 0.06)
+rospy.set_param(f'{sim_name}/mode', 'realistic')
+urdf_paths = rospy.get_param('~urdf')
+rospy.set_param(f'{sim_name}/urdf', urdf_paths)
+
+# Get car and ball parameters
+bag = rosbag.Bag(rospy.get_param('~bag_file'))
+
+init_car_odom = None
+init_ball_odom = None
+car_odoms = []
+ball_odoms = []
+efforts = []
+for topic, msg, t in bag.read_messages():
+  if topic == '/cars/car0/odom':
+    if init_car_odom is None:
+      init_car_odom = msg
+    car_odoms.append(msg)
+  elif topic == '/ball/odom' and init_ball_odom is None:
+    init_ball_odom = msg
+    ball_odoms.append(msg)
+  elif topic == '/cars/car0/effort':
+    efforts.append(msg)
+
+bag.close()
+
+ball_param = {
+  "init_pose": {
+    "pos": [
+      init_ball_odom.pose.pose.position.x,
+      init_ball_odom.pose.pose.position.y,
+      0.06,
+    ]
+  }
+}
+
+# ball_vel = [
+#   init_ball_odom.twist.twist.linear.x,
+#   init_ball_odom.twist.twist.linear.y,
+#   init_ball_odom.twist.twist.linear.z,
+# ]
+
+rospy.set_param(f'{sim_name}/ball', ball_param)
+
+car_quat = [
+  init_car_odom.pose.pose.orientation.x,
+  init_car_odom.pose.pose.orientation.y,
+  init_car_odom.pose.pose.orientation.z,
+  init_car_odom.pose.pose.orientation.w
+]
+
+car_euler = euler_from_quaternion(car_quat)
+
+car_param = [
+  {
+    "name": "car0",
+    "init_pose": {
+      "pos": [
+        init_car_odom.pose.pose.position.x,
+        init_car_odom.pose.pose.position.y,
+        0.06,
+      ],
+      "orient": [
+        0.0, 0.0, car_euler[2]
+      ]
+    }
+  }
+]
+
+rospy.set_param(f'{sim_name}/cars', car_param)
+
+# Launch sim
+sim_pkg = 'rktl_sim'
+executable = 'simulator'
+sim_node = roslaunch.core.Node(sim_pkg, executable, name=sim_name)
+launch = roslaunch.scriptapi.ROSLaunch()
+launch.start()
+launch.launch(sim_node)
+
+# Create command publisher
+effort_pub = rospy.Publisher('/cars/car0/effort',
+  ControlEffort, queue_size=1)
+
+car_odom_pub = rospy.Publisher('/cars/car0/odom',
+  Odometry, queue_size=1)
+
+ball_odom_pub = rospy.Publisher('/ball/odom',
+  Odometry, queue_size=1)
+
+# Refresh visualizer 
+rospy.sleep(1.0)
+refresh_vis_srv = rospy.ServiceProxy('/visualizer_refresh', Empty)
+refresh_vis_srv()
+
+rate = rospy.Rate(10)
+last = None
+curr = init_car_odom.header.stamp
+while not rospy.is_shutdown():
+  if len(efforts) == 0 and len(car_odoms) == 0 and len(ball_odoms):
+    break
+
+  if len(efforts) > 0:
+    while (curr + rospy.Duration(0.3)) > efforts[0].header.stamp:
+      efforts = efforts[1:]
+
+    if (curr + rospy.Duration(0.3)) < efforts[0].header.stamp + rospy.Duration(1/10):
+      effort_pub.publish(efforts[0])
+      efforts = efforts[1:]
+
+  if len(ball_odoms) > 0:
+    while len(ball_odoms) > 0 and curr > ball_odoms[0].header.stamp:
+      ball_odoms = ball_odoms[1:]
+
+    if len(ball_odoms) > 0 and curr < ball_odoms[0].header.stamp + rospy.Duration(1/10):
+      ball_odom_pub.publish(ball_odoms[0])
+      ball_odoms = ball_odoms[1:]
+  
+  if len(car_odoms) > 0:
+    while len(car_odoms) > 0 and curr > car_odoms[0].header.stamp:
+      car_odoms = car_odoms[1:]
+
+    if len(car_odoms) > 0 and curr < car_odoms[0].header.stamp + rospy.Duration(1/10):
+      car_odom_pub.publish(car_odoms[0])
+      car_odoms = car_odoms[1:]
+  
+  last = curr
+  curr += rospy.Duration(1/10)
+  rate.sleep()

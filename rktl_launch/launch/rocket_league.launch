@@ -1,13 +1,21 @@
 <launch>
     <arg name="render"  default="true"/>
 
-    <arg name="agent_type"          default="patrol"/> <!-- Either planner, autonomy, or patrol-->
+    <arg name="sim_mode"            default="realistic"/> <!-- none, realistic, or ideal -->
+    <arg name="perception_delay"    default="0.15"/>
+
+    <arg name="agent_type"          default="planner"/> <!-- none, planner or autonomy -->
     <arg name="autonomy_weights"    default="model"/>
 
     <rosparam command="load" file="$(find rktl_launch)/config/global_params.yaml"/>
 
     <!-- Visualizer -->
     <include if="$(arg render)" file="$(find rktl_sim)/launch/visualizer.launch"/>
+
+    <!-- Simulator -->
+    <include unless="$(eval sim_mode == 'none')" file="$(find rktl_sim)/launch/simulator.launch">
+        <arg name="sim_mode" value="$(arg sim_mode)"/>
+    </include>
 
     <!-- Game Manager -->
     <include file="$(find rktl_game)/launch/game.launch"/>
@@ -16,22 +24,31 @@
     <node pkg="rqt_gui" type="rqt_gui" name="rqt_gui" args="--perspective-file $(find rktl_launch)/rqt/rktl.perspective"/>
 
     <!-- Ball -->
-    <include file="$(find rktl_control)/launch/ball.launch"/>
+    <group if="$(eval sim_mode == 'realistic')">
+        <node ns="ball" pkg="rktl_control" type="topic_delay" name="pose_delay"
+            args="pose_sync_early pose_sync
+            geometry_msgs/PoseWithCovarianceStamped $(arg perception_delay)"/>
+        <include file="$(find rktl_control)/launch/ball_filter.launch"/>
+    </group>
 
     <!-- Cars -->
-    <include file="$(find rktl_control)/launch/car.launch">
-        <arg name="car_name" value="car0"/>
-    </include>
-    <include file="$(find rktl_control)/launch/hardware_interface.launch"/>
+    <!-- TODO: Dynamic configuration of cars on launch-->
+    <include if="$(eval sim_mode == 'none')"
+        file="$(find rktl_control)/launch/hardware_interface.launch"/>
 
-    <include if="$(eval agent_type == 'planner')" file="$(find rktl_planner)/launch/simple_agent.launch">
-        <arg name="agent_name" value="agent0"/>
-        <arg name="car_name" value="car0"/>
+    <include file="$(find rktl_launch)/launch/car.launch">
+        <arg name="car_id" value="0"/>
+        <arg name="agent_type" value="$(arg agent_type)"/>
+        <arg name="autonomy_weights" value="$(arg autonomy_weights)"/>
+        <arg name="sim_mode" value="$(arg sim_mode)"/>
+        <arg name="perception_delay" value="$(arg perception_delay)"/>
     </include>
-    <include if="$(eval agent_type == 'autonomy')" file="$(find rktl_autonomy)/launch/rocket_league/rocket_league_agent.launch">
-        <arg name="weights_name" value="$(arg autonomy_weights)"/>
-    </include>
-    <include if="$(eval agent_type == 'patrol')" file="$(find rktl_planner)/launch/patrol_agent.launch">
-        <arg name="car_name" value="car0"/>
-    </include>
+
+    <!-- <include file="$(find rktl_launch)/launch/car.launch">
+        <arg name="car_id" value="1"/>
+        <arg name="agent_type" value="none"/>
+        <arg name="autonomy_weights" value="$(arg autonomy_weights)"/>
+        <arg name="sim_mode" value="$(arg sim_mode)"/>
+        <arg name="perception_delay" value="$(arg perception_delay)"/>
+    </include> -->
 </launch>

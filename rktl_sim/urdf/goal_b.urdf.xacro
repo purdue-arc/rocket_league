@@ -1,0 +1,10 @@
+<?xml version="1.0"?> 
+<robot name="goal_a" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Xacro Args -->
+    <xacro:arg name="field_length" default="false" />
+    <xacro:arg name="goal_size" default="false" />
+
+    <xacro:include filename="$(find rktl_sim)/urdf/goal.urdf.xacro" />
+    <xacro:goal x_dir="-1" field_length="$(arg field_length)" goal_size="$(arg goal_size)" />
+</robot>
