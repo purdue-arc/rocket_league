@@ -3,6 +3,8 @@
 WS_DIR=$(realpath $(dirname $0)/../../../)
 REPO_NAME="purduearc/rocket-league"
 CONTAINER_NAME="${CONTAINER_NAME:-$USER-arc-rocket-league-dev}"
+MY_DISPLAY=$([ $(uname -s) == 'Darwin' ] && echo "host.docker.internal:0" || echo "$DISPLAY")
+echo "Using display $MY_DISPLAY"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
 # tty-specific options
@@ -14,7 +16,7 @@ fi
 docker run --rm \
     $TTY_OPTS \
     -e USER \
-    -e DISPLAY \
+    -e DISPLAY=$MY_DISPLAY \
     -e NVIDIA_DRIVER_CAPABILITIES=all \
     -v $XAUTHORITY:/home/$USER/.Xauthority:ro \
     -v $WS_DIR:/home/$USER/catkin_ws \

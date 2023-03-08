@@ -2,7 +2,7 @@
 """publish info from a PoseWithCovarianceStamped to the TF tree
 License:
   BSD 3-Clause License
-  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 

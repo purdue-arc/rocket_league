@@ -1,7 +1,7 @@
 """Contains the Car class.
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
@@ -127,7 +127,7 @@ class Car(object):
         heading = p.getEulerFromQuaternion(orient)[2]
         r_inv = np.array([[math.cos(heading), -math.sin(heading), 0.],
                           [math.sin(heading), math.cos(heading), 0.],
-                          [0., 0., 1.]], dtype=np.float)
+                          [0., 0., 1.]], dtype=np.float32)
         linear = r_inv @ linear
 
         return linear, angular

@@ -2,7 +2,7 @@
 """Real-time evaluation of the agent trained on the snake environment.
 License:
   BSD 3-Clause License
-  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
