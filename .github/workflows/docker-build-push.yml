@@ -11,9 +11,6 @@ on:
         default: "latest"
         required: false
         type: string
-    secrets:
-       github_token:
-         required: true
 
 jobs:
   docker:
