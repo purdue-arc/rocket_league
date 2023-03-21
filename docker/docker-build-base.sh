@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DOCKER_DIR=$(realpath $(dirname $0))
-REPO_NAME="purduearc/rocket-league"
+REPO_NAME="ghcr.io/purduearc/rocket-league"
 
 docker buildx build \
     --tag $REPO_NAME \
