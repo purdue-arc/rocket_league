@@ -282,3 +282,5 @@ by spaces, and it will run the script multiple times.
 For each UUID passed in, the script will generate a file in the same folder
 titled `eval_log_<new UUID>.txt`. This is a tab-delimited file, which you can
 open in Matlab or Excel to produce a plot.
+
+<!--- Ignore me -->
