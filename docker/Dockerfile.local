@@ -1,5 +1,5 @@
 ARG TAG=latest
-FROM purduearc/rocket-league:${TAG}
+FROM ghcr.io/purduearc/rocket-league:${TAG}
 
 USER root
 
