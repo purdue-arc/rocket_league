@@ -64,3 +64,5 @@ pass in arbitrary arguments similar to `docker-run.sh`.
 If you have to use an external camera (not including webcams) you need to
 configure permissions. Run `udev-aravis.sh` on your bare-metal computer (not in
 the container) to do this. You only have to do this once.
+
+<!-- Ignore me -->
