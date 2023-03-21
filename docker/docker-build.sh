@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DOCKER_DIR=$(realpath $(dirname $0))
-REPO_NAME="ghcr.io/purduearc/rocket-league"
+REPO_NAME="purduearc/rocket-league"
 M1_ARGS=$([ $(uname -p) == 'arm' ] && echo "--platform linux/arm64/v8")
 
 docker build --build-arg USER=$USER \
