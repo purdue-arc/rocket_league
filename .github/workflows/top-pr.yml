@@ -32,8 +32,6 @@ jobs:
     uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
     with:
       tag: ${{ github.event.number }}
-    secrets:
-      github_token: ${{ secrets.github_token }}
   catkin_tag:
     name: Catkin build and test using PR tagged Docker image
     needs: [changes, docker]
