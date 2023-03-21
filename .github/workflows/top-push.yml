@@ -24,9 +24,6 @@ jobs:
     needs: changes
     if: needs.changes.outputs.docker == 'true'
     uses: purdue-arc/rocket_league/.github/workflows/docker-build-push.yml@main
-    secrets:
-      username: ${{ secrets.DOCKERHUB_USERNAME }}
-      password: ${{ secrets.DOCKERHUB_TOKEN }}
   catkin:
     name: Catkin build and test using latest Docker image
     needs: docker
