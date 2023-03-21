@@ -1,7 +1,7 @@
 #!/bin/bash
 
 WS_DIR=$(realpath $(dirname $0)/../../../)
-REPO_NAME="ghcr.io/purduearc/rocket-league"
+REPO_NAME="purduearc/rocket-league"
 CONTAINER_NAME="${CONTAINER_NAME:-$USER-arc-rocket-league-dev}"
 MY_DISPLAY=$([ $(uname -s) == 'Darwin' ] && echo "host.docker.internal:0" || echo "$DISPLAY")
 echo "Using display $MY_DISPLAY"
