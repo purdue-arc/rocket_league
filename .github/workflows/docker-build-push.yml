@@ -28,7 +28,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.github_token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push (tag)
         if: inputs.tag != 'latest'
         uses: docker/build-push-action@v4
