@@ -13,7 +13,7 @@
 ```{include} ../rktl_autonomy/tests/README.md
 ```
 
-## Modules
+## Modules (`src/rktl_autonomy` directory)
 
 ```{eval-rst}
 .. include:: autoapi/rktl_autonomy/index.rst
