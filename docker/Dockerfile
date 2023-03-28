@@ -25,9 +25,10 @@ RUN apt update && \
     ros-$ROS_DISTRO-camera-calibration \
     ros-$ROS_DISTRO-joy \
     ros-$ROS_DISTRO-rosserial-arduino \
-    ros-$ROS_DISTRO-rosbridge-server && \
+    ros-$ROS_DISTRO-rosbridge-server \
+    ros-$ROS_DISTRO-rosdoc-lite && \
     # pip
-    pip3 install pybullet gym[box2d] stable-baselines3 pfilter optuna && \
+    pip3 install pybullet gym[box2d] stable-baselines3 pfilter optuna sphinx && \
     # clean up
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
@@ -40,6 +41,8 @@ RUN groupadd -o -g $GID $USER && \
     useradd -om -u $UID -g $GID -G sudo -s /bin/zsh $USER && \
     echo "$USER:$PW" | chpasswd
 WORKDIR /home/$USER
+
+# TODO: pip stuff should reallllly be done here, not as root
 
 # install zsh
 USER $USER

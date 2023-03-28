@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# auto-generated Sphinx api docs
+docs/generated
+docs/autoapi
+*/doc/generated
+*/doc/autoapi
+
 # Distribution / packaging
 .Python
 build/
@@ -70,6 +76,9 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/html/
+*/doc/_build/
+*/doc/html/
 
 # PyBuilder
 target/
@@ -145,3 +154,7 @@ dmypy.json
 
 # macOS
 .DS_Store
+
+# docker files
+/docker/.vscode-server
+/docker/.zsh_history
