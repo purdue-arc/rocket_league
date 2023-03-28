@@ -15,9 +15,11 @@ import rospy, roslaunch
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
+
 class SimTimeException(Exception):
     """For when advancing sim time does not go as planned."""
     pass
+
 
 class ROSInterface(Env):
     """Extension of the Gym environment class for all specific interfaces
@@ -76,10 +78,11 @@ class ROSInterface(Env):
             ros_id = roslaunch.rlutil.get_or_generate_uuid(None, False)
             roslaunch.configure_logging(ros_id)
             launch_file = roslaunch.rlutil.resolve_launch_arguments(launch_file)[0]
-            launch_args = [f'render:={port==11311}', f'plot_log:={port==11311}'] + launch_args + [f'agent_name:={node_name}']
+            launch_args = [f'render:={port == 11311}', f'plot_log:={port == 11311}', *launch_args,
+                           f'agent_name:={node_name}']
             launch = roslaunch.parent.ROSLaunchParent(ros_id, [(launch_file, launch_args)], port=port)
             launch.start()
-            self.close = lambda : launch.shutdown()
+            self.close = lambda: launch.shutdown()
             # initialize self
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
             rospy.init_node(node_name)
@@ -133,7 +136,7 @@ class ROSInterface(Env):
         self._publish_action(action)
         self.__step_time_and_wait_for_state()
         state = self._get_state()
-        self.__net_reward += state[1]   # logging
+        self.__net_reward += state[1]  # logging
         return state
 
     def reset(self):
@@ -150,9 +153,9 @@ class ROSInterface(Env):
         if self._has_state():
             # generate log
             info = {
-                'episode'    : self.__episode,
-                'net_reward' : self.__net_reward,
-                'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
+                'episode': self.__episode,
+                'net_reward': self.__net_reward,
+                'duration': (rospy.Time.now() - self.__start_time).to_sec()
             }
             info.update(self._get_state()[3])
             # send message
@@ -172,7 +175,7 @@ class ROSInterface(Env):
             self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
-        self.__start_time = rospy.Time.now()    # logging
+        self.__start_time = rospy.Time.now()  # logging
         return self._get_state()[0]
 
     def __step_time_and_wait_for_state(self, max_retries=1):
@@ -191,7 +194,7 @@ class ROSInterface(Env):
                     retries += 1
         else:
             while not self.__wait_once_for_state():
-                pass    # idle wait
+                pass  # idle wait
 
     def __wait_once_for_state(self):
         """Wait and allow other threads to run."""

@@ -21,6 +21,7 @@ from tf.transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
 from math import pi, tan
 
+
 @unique
 class CarActions(IntEnum):
     """Possible actions for car."""
@@ -33,17 +34,21 @@ class CarActions(IntEnum):
     REV = auto()
     SIZE = auto()
 
+
 class RocketLeagueInterface(ROSInterface):
     """ROS interface for the Rocket League."""
-    def __init__(self, eval=False, launch_file=['rktl_autonomy', 'rocket_league_train.launch'], launch_args=[], run_id=None):
-        super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args, run_id=run_id)
 
-        ## Constants
+    def __init__(self, eval=False, launch_file=('rktl_autonomy', 'rocket_league_train.launch'), launch_args=(),
+                 run_id=None):
+        super().__init__(node_name='rocket_league_agent', eval=eval, launch_file=launch_file, launch_args=launch_args,
+                         run_id=run_id)
+
+        # CONSTANTS
         # Actions
         self._MIN_VELOCITY = -rospy.get_param('/cars/throttle/max_speed')
-        self._MAX_VELOCITY =  rospy.get_param('/cars/throttle/max_speed')
+        self._MAX_VELOCITY = rospy.get_param('/cars/throttle/max_speed')
         self._MIN_CURVATURE = -tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
-        self._MAX_CURVATURE =  tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
+        self._MAX_CURVATURE = tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
 
         # Action space overrides
         if rospy.has_param('~action_space/velocity/min'):
@@ -68,7 +73,7 @@ class RocketLeagueInterface(ROSInterface):
         self._FIELD_LENGTH = rospy.get_param('/field/length')
         self._GOAL_DEPTH = rospy.get_param('~observation/goal_depth', 0.075)
         self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
-        self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
+        self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2 * pi)
 
         # Learning
         self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
@@ -81,6 +86,8 @@ class RocketLeagueInterface(ROSInterface):
         self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
         self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
+        self._SPEED_REWARD = rospy.get_param('~reward/speed/value', 0.0)
+        self._SPEED_THRESHOLD = rospy.get_param('~reward/speed/threshold', 0.0)
 
         # Publishers
         self._command_pub = rospy.Publisher('cars/car0/command', ControlCommand, queue_size=1)
@@ -114,19 +121,19 @@ class RocketLeagueInterface(ROSInterface):
             # x, y, theta, v, omega (car)
             # x, y, vx, vy (ball)
             low=np.array([
-                -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
-                -self._FIELD_WIDTH/2, -pi,
+                -(self._FIELD_LENGTH / 2) - self._GOAL_DEPTH,
+                -self._FIELD_WIDTH / 2, -pi,
                 -self._MAX_OBS_VEL, -self._MAX_OBS_ANG_VEL,
-                -(self._FIELD_LENGTH/2) - self._GOAL_DEPTH,
-                -self._FIELD_WIDTH/2,
+                -(self._FIELD_LENGTH / 2) - self._GOAL_DEPTH,
+                -self._FIELD_WIDTH / 2,
                 -self._MAX_OBS_VEL, -self._MAX_OBS_VEL],
                 dtype=np.float32),
             high=np.array([
-                (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
-                self._FIELD_WIDTH/2, pi,
+                (self._FIELD_LENGTH / 2) + self._GOAL_DEPTH,
+                self._FIELD_WIDTH / 2, pi,
                 self._MAX_OBS_VEL, self._MAX_OBS_ANG_VEL,
-                (self._FIELD_LENGTH/2) + self._GOAL_DEPTH,
-                self._FIELD_WIDTH/2,
+                (self._FIELD_LENGTH / 2) + self._GOAL_DEPTH,
+                self._FIELD_WIDTH / 2,
                 self._MAX_OBS_VEL, self._MAX_OBS_VEL],
                 dtype=np.float32))
 
@@ -142,9 +149,9 @@ class RocketLeagueInterface(ROSInterface):
     def _has_state(self):
         """Determine if the new state is ready."""
         return (
-            self._car_odom is not None and
-            self._ball_odom is not None and
-            self._score is not None)
+                self._car_odom is not None and
+                self._ball_odom is not None and
+                self._score is not None)
 
     def _clear_state(self):
         """Clear state variables / flags in preparation for new ones."""
@@ -170,45 +177,62 @@ class RocketLeagueInterface(ROSInterface):
                 self.observation_space.high,
                 out=observation)
 
-        # check if time exceeded
+        # start the timer
         if self._start_time is None:
             self._start_time = rospy.Time.now()
-        done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME
+        # check if time exceeded or a goal was scored
+        done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME or self._score != 0
 
         # Determine reward
         reward = self._CONSTANT_REWARD
 
+        # penalize the agent for being far from the ball
         ball_dist_sq = np.sum(np.square(ball[0:2] - car[0:2]))
         reward += self._BALL_DISTANCE_REWARD * ball_dist_sq
 
-        goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_LENGTH/2, 0])))
+        # penalize the agent if the ball is far from the goal
+        goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_LENGTH / 2, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
-
-        if self._score != 0:
-            done = True
-            if self._score > 0:
-                reward += self._WIN_REWARD
-            else:
-                reward += self._LOSS_REWARD
 
         x, y, __, v, __ = self._car_odom
 
+        # if the previous velocity is not set, set it to the current velocity
         if self._prev_vel is None:
             self._prev_vel = v
+        # penalize the agent for changing directions
         if self._prev_vel * v < 0:
             reward += self._DIRECTION_CHANGE_REWARD
+        # update the previous velocity
         self._prev_vel = v
 
+        # penalize the agent for driving backwards
         if v < 0:
             reward += self._REVERSE_REWARD
-        if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
-            abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
+
+        # penalize the agent for getting too close to the walls
+        if (abs(x) > self._FIELD_LENGTH / 2 - self._WALL_THRESHOLD or
+                abs(y) > self._FIELD_WIDTH / 2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
 
-        # info dict
-        info = {'goals' : self._score}
+        # penalize the agent for moving too fast
+        if v > self._SPEED_THRESHOLD:
+            reward += self._SPEED_REWARD
 
-        return (observation, reward, done, info)
+        # if the time was exceeded or goal was scored
+        if done:
+            # if the agent scored in the correct goal
+            if self._score > 0:
+                # reward the agent
+                reward += self._WIN_REWARD
+            # if the agent scored in the wrong goal
+            elif self._score < 0:
+                # penalize the agent
+                reward += self._LOSS_REWARD
+
+        # info dict
+        info = {'goals': self._score}
+
+        return observation, reward, done, info
 
     def _publish_action(self, action):
         """Publish an action to the ROS network."""
@@ -217,22 +241,22 @@ class RocketLeagueInterface(ROSInterface):
         msg = ControlCommand()
         msg.header.stamp = rospy.Time.now()
 
-        if (    action == CarActions.FWD or
+        if (action == CarActions.FWD or
                 action == CarActions.FWD_RIGHT or
                 action == CarActions.FWD_LEFT):
             msg.velocity = self._MAX_VELOCITY
-        elif (  action == CarActions.REV or
-                action == CarActions.REV_RIGHT or
-                action == CarActions.REV_LEFT):
+        elif (action == CarActions.REV or
+              action == CarActions.REV_RIGHT or
+              action == CarActions.REV_LEFT):
             msg.velocity = self._MIN_VELOCITY
         else:
             msg.velocity = 0.0
 
-        if (    action == CarActions.FWD_LEFT or
+        if (action == CarActions.FWD_LEFT or
                 action == CarActions.REV_LEFT):
             msg.curvature = self._MAX_CURVATURE
-        elif (  action == CarActions.FWD_RIGHT or
-                action == CarActions.REV_RIGHT):
+        elif (action == CarActions.FWD_RIGHT or
+              action == CarActions.REV_RIGHT):
             msg.curvature = self._MIN_CURVATURE
         else:
             msg.curvature = 0.0
