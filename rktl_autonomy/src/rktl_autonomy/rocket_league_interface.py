@@ -78,14 +78,20 @@ class RocketLeagueInterface(ROSInterface):
         self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
         self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
         self._DIRECTION_CHANGE_REWARD = rospy.get_param('~reward/direction_change', 0.0)
-        if len(rospy.get_param('~reward/win', [100.0])) >= self.env_number:
-            self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[0]
+        if isinstance(rospy.get_param('~reward/win', [100.0]), int):
+            self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])
         else:
-            self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[self.env_number]
-        if len(rospy.get_param('~reward/loss', [100.0])) >= self.env_number:
-            self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[0]
+            if len(rospy.get_param('~reward/win', [100.0])) >= self.env_number:
+                self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[0]
+            else:
+                self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[self.env_number]
+        if isinstance(rospy.get_param('~reward/loss', [100.0]), int):
+            self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])
         else:
-            self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[self.env_number]
+            if len(rospy.get_param('~reward/loss', [100.0])) >= self.env_number:
+                self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[0]
+            else:
+                self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[self.env_number]
         self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
         self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
