@@ -195,9 +195,9 @@ class RocketLeagueInterface(ROSInterface):
         if self._score != 0:
             done = True
             if self._score > 0:
-                reward += self._WIN_REWARD[self.env_number]
+                reward += self._WIN_REWARD
             else:
-                reward += self._LOSS_REWARD[self.env_number]
+                reward += self._LOSS_REWARD
 
         x, y, __, v, __ = self._car_odom
 
