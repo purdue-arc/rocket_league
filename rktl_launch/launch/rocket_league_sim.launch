@@ -26,7 +26,7 @@
     </include>
     
     <!-- Control GUI -->
-    <node pkg="rqt_gui" type="rqt_gui" name="rqt_gui" args="--perspective-file $(find rktl_launch)/rqt/rktl.perspective"/>
+    <node if="$(arg render)" pkg="rqt_gui" type="rqt_gui" name="rqt_gui" args="--perspective-file $(find rktl_launch)/rqt/rktl.perspective"/>
 
 
     <!-- Perception Delays -->
