@@ -92,6 +92,9 @@ class RocketLeagueInterface(ROSInterface):
         self._score = None
         self._start_time = None
         self._prev_vel = None
+        self._reverse_time = None
+        self._switch_rate = None
+        self._wall_rate = None
 
         # Subscribers
         rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
@@ -170,6 +173,70 @@ class RocketLeagueInterface(ROSInterface):
                 self.observation_space.high,
                 out=observation)
 
+        # Start episode timer
+        if state._start_time is None:
+            self._starttime = rospy.Time.now()
+
+        # Check terminal conditions
+            
+            # Out of Time
+        done = (rospy.Time.now() - state._start_time).to_sec() >= state._MAX_TIME
+
+            # Scored a Goal
+        done = state._score != 0
+
+        # Set None Variables
+        if self._switch_rate is None:
+            self._switch_rate = 1
+        if self._prev_vel is None:
+            self._prev_vel = v
+
+        # Trigger Rewards
+
+            # Switching Direction
+     
+        if self._prev_vel * v < 0:
+            reward += self._DIRECTION_CHANGE_REWARD * self._switch_rate
+            self._switch_rate = self._switch_rate ** 1.1
+
+            if v < 0:
+                state._reverse_time = rospy.Time.now()
+            else:
+                state._reverse_time = 0
+        self._prev_vel = v
+
+            # Wall Collision
+        if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
+            abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
+            reward += self._WALL_REWARD * self._wall_rate
+            self._wall_rate = self._wall_rate ** 1.1
+
+        # Reward Selection
+        if done:
+            # End State Rewards
+
+            # Reward for scoring goal
+            if state._score > 0:
+                reward += WIN_REWARD # Scored in opponent goal
+            else if state._score < 0:
+                reward += LOSS_REWARD # Scored in own goal, penalty
+
+            # Reward for taking less time
+            time = (rospy.Time.now() - state._start_time).to_sec()
+            reward += TIME_REWARD * (-40 ** (x/35) + 40)
+
+        else:
+            # During Episode Rewards + Triggers
+
+            # Reward for ball getting closer to the goal
+            goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_LENGTH/2, 0])))
+            reward += GOAL_DISTANCE_REWARD * (1 - (goal_dist_sq/GOAL_MAX_DIST)^0.4)
+
+            # Reward for driving in reverse (penalty)
+            rev_secs = (rospy.Time.now() - state._reverse_time).to_sec()
+            reward += REVERSE_REWARD * rec_secs
+            
+       '''
         # check if time exceeded
         if self._start_time is None:
             self._start_time = rospy.Time.now()
@@ -204,6 +271,7 @@ class RocketLeagueInterface(ROSInterface):
         if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or
             abs(y) > self._FIELD_WIDTH/2 - self._WALL_THRESHOLD):
             reward += self._WALL_REWARD
+        '''
 
         # info dict
         info = {'goals' : self._score}
