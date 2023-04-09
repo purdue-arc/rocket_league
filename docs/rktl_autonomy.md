@@ -1,6 +1,10 @@
 ```{include} ../rktl_autonomy/README.md
 ```
 
+```{toctree}
+:maxdepth 1:
+```
+
 ```{include} ../rktl_autonomy/launch/README.md
 ```
 

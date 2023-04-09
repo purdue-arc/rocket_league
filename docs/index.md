@@ -11,5 +11,6 @@ caption: Contents
 ---
 Home <self>
 rktl_autonomy
+rktl_game
 autoapi/index
 ```
