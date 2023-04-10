@@ -9,8 +9,7 @@ __pycache__/
 # auto-generated Sphinx api docs
 docs/generated
 docs/autoapi
-*/doc/generated
-*/doc/autoapi
+docs/packages/readmes
 
 # Distribution / packaging
 .Python

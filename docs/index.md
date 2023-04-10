@@ -6,11 +6,11 @@ This project is under active development.
 ```
 
 ```{toctree}
----
-caption: Contents
----
+:caption: Contents
+:maxdepth: 2
+:titlesonly:
+
 Home <self>
-rktl_autonomy
-rktl_game
+packages/index
 autoapi/index
 ```

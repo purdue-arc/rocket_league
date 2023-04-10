@@ -1,4 +1,4 @@
-## Training (`scripts` directory)
+# Training Scripts
 These are python scripts used to train the neural network. Each script basically
 does everything to get an agent training. It will generate a UUID (used for
 logging weights / progress), build the environment(s) (which will internally
@@ -11,12 +11,12 @@ several different types of agents.
 
 **You should not manually use any ROS commands when launching for training.**
 
-### `eval_rocket_league.py`
+## `eval_rocket_league.py`
 If you want to evaluate a bunch of models at once, to produce a plot of
 performance over time (perhaps with a different environment or reward set from
 what it was trained on), you can use the this convenience script:
 
-```bash
+```shell
 # in Docker, ~/catkin_ws/src/rocket_league/rktl_autonomy/scripts
 ./eval_rocket_league.py <UUID of run>
 ```
@@ -30,7 +30,7 @@ For each UUID passed in, the script will generate a file in the same folder
 titled `eval_log_<new UUID>.txt`. This is a tab-delimited file, which you can
 open in Matlab or Excel to produce a plot.
 
-### `train_batch.sh`
+## `train_batch.sh`
 This script exists to simplify the process of checking out the proper code,
 launching a Docker container, and running the above training script when many
 different experiments are intended to be run simultaneously. To use, simply
@@ -41,16 +41,16 @@ useful), then run the following command on the machine:
 ./rktl_autonomy/scripts/train_batch.sh <list of git commit hashes>
 ```
 
-### `train_cartpole.py`
+## `train_cartpole.py`
 Training script for the `CartPoleInterface` for testing.
 
-### `train_rocket_league.py`
+## `train_rocket_league.py`
 Training script for the Rocket League project.
 
-### `train_snake.py`
+## `train_snake.py`
 Training script for the Snake game in ARC tutorials.
 
-### `tune_rocket_league.py`
+## `tune_rocket_league.py`
 This script will take the current game settings (rewards, episode length,
 simulation parameters) as is, and only experiment with hyperparameters of the
 PPO model.

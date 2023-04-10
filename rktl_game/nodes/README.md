@@ -1,4 +1,4 @@
-## ROS Nodes (`nodes` directory)
+# ROS Nodes
 
 These are the [ROS Nodes](http://wiki.ros.org/Nodes) provided by this package.
 Most likely, you will use a launch file to run these. You can also run them
@@ -8,7 +8,7 @@ by using `rosrun`:
 rosrun rktl_autonomy <Node name>
 ```
 
-### The `game_manager` node
+## `game_manager`
 
 This node tracks the score of a match played by two teams (orange and blue) and updates the match
 status (playing, paused, finished) based on certain conditions. It subscribes to the Odometry topic
@@ -16,7 +16,7 @@ of the ball to detect goals and publishes the match status and score to the matc
 ScoreKeeper node also provides three services (`reset_game`, `unpause_game`, `pause_game`) that
 enable resetting the game, unpausing it, or pausing it, respectively.
 
-#### Node Initialization
+### Node Initialization
 
 When this node is initialized, it sets several instance variables, including:
 
@@ -29,26 +29,26 @@ When this node is initialized, it sets several instance variables, including:
 - `game_clock`: the time remaining in the game, in seconds (initialized based on the game length parameter)
 - `manager_rate`: the rate at which the main loop runs (initialized based on the manager rate parameter)
 
-#### ROS topics:
+### ROS topics:
 
 The `game_manager` node publishes and subscribes to the following topics:
 
-##### Publishers:
+#### Publishers:
 
 - `match_status`: publishes the current match status and score.
 
-##### Subscribers:
+#### Subscribers:
 
 - `ball/odom`: subscribes to the position of the ball to check if a goal has been scored.
 - `cars/enable`: subscribes to enable or disable the cars.
 
-##### Services:
+#### Services:
 
 - `reset_game`: resets the game and sets the scores to 0.
 - `unpause_game`: unpauses the game and enables the cars.
 - `pause_game`: pauses the game and disables the cars.
 
-##### ROS parameters:
+#### ROS parameters:
 
 - `/field/length`: the length of the playing field.
 - `/game_length`: the length of the game in seconds.
