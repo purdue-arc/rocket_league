@@ -8,14 +8,14 @@ by using `rosrun`:
 rosrun rktl_autonomy <Node name>
 ```
 
-## `cartpole_env`
+## cartpole_env
 TODO
 
-## `plotter`
+## plotter
 TODO
 
-## `rocket_league_agent`
+## rocket_league_agent
 TODO
 
-## `snake_agent`
+## snake_agent
 TODO

@@ -24,7 +24,7 @@ author = "Autonomous Robotics Club of Purdue (Purdue ARC)"
 
 # -- Copy all READMEs to "readmes/" subdir -----------------------------------
 READMES_SUBDIR = "./packages/readmes"
-TARGET_PATHS = ["../rktl_autonomy", "../rktl_control", "../rktl_game", "../rktl_perception", "../rktl_planner", "../rktl_sim"]
+TARGET_PATHS = ["../rktl_autonomy", "../rktl_control", "../rktl_game", "../rktl_launch", "../rktl_msgs", "../rktl_perception", "../rktl_planner", "../rktl_sim"]
 if os.path.exists(READMES_SUBDIR):
     shutil.rmtree(READMES_SUBDIR)
 os.makedirs(READMES_SUBDIR)

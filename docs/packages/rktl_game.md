@@ -3,7 +3,7 @@
 
 ```{toctree}
 :Caption: Package Contents
-:maxdepth 2:
+:maxdepth: 2
 :glob:
 
 readmes/rktl_game/*/README
