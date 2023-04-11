@@ -19,12 +19,12 @@ if [[ -f "$HOME/.gitconfig" ]]; then
 fi
 
 # Create histroy file and vscode-server files if they don't exist
-if [[ ! -f "$DOCKER_DIR/.zsh_history" ]]; then
-    touch "$DOCKER_DIR/.zsh_history"
+if [[ ! -f "$WS_DIR/.zsh_history" ]]; then
+    touch "$WS_DIR/.zsh_history"
 fi
 
-if [[ ! -d "$DOCKER_DIR/.vscode-server" ]]; then
-    mkdir "$DOCKER_DIR/.vscode-server"
+if [[ ! -d "$WS_DIR/.vscode-server" ]]; then
+    mkdir "$WS_DIR/.vscode-server"
 fi
 
 docker run --rm \
@@ -35,8 +35,8 @@ docker run --rm \
     -v $XAUTHORITY:/home/$USER/.Xauthority:ro \
     -v $WS_DIR:/home/$USER/catkin_ws \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v $DOCKER_DIR/.zsh_history:/home/$USER/.zsh_history \
-    -v $DOCKER_DIR/.vscode-server:/home/$USER/.vscode-server \
+    -v $WS_DIR/.zsh_history:/home/$USER/.zsh_history \
+    -v $WS_DIR/.vscode-server:/home/$USER/.vscode-server \
     -v ~/.ssh:/home/$USER/.ssh:ro \
     --name $CONTAINER_NAME \
     $@ \

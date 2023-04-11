@@ -7,18 +7,12 @@ RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y \
     sudo tmux nano vim git wget curl net-tools iputils-ping x11-apps htop \
     mesa-utils python3-dev python3-pip python3-tk software-properties-common \
-    pylint clang-format jq swig zsh libeigen3-dev python3-catkin-tools && \
-    # pip
-    pip3 install --upgrade pip && \
-    pip3 install scipy numpy matplotlib pfilter \
-    pandas jupyterlab autopep8 pyflakes && \
-    # Clean Up to reduce image size
-    rm -rf /var/lib/apt/lists/* /root/.cache/pip/
+    pylint clang-format jq swig zsh libeigen3-dev python3-catkin-tools python-is-python3 && \
+    rm -rf /var/lib/apt/lists/*
 
 # install project software dependencies
 RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y \
-    python3-pygame \
     ros-$ROS_DISTRO-apriltag-ros \
     ros-$ROS_DISTRO-pointgrey-camera-driver \
     ros-$ROS_DISTRO-usb-cam \
@@ -27,10 +21,15 @@ RUN apt update && \
     ros-$ROS_DISTRO-rosserial-arduino \
     ros-$ROS_DISTRO-rosbridge-server \
     ros-$ROS_DISTRO-rosdoc-lite && \
-    # pip
-    pip3 install pybullet gym[box2d] stable-baselines3 pfilter optuna sphinx && \
-    # clean up
-    rm -rf /var/lib/apt/lists/* /root/.cache/pip/
+    rm -rf /var/lib/apt/lists/*
+
+# Install pip packages
+WORKDIR /root
+COPY requirements.in requirements.in
+RUN pip install pip-tools && \
+    pip-compile --output-file=requirements.txt --resolver=backtracking requirements.in && \
+    pip install -r requirements.txt && \
+    rm -rf /root/.cache/pip/ requirements.in requirements.txt
 
 # create user
 ARG USER=arc
@@ -41,8 +40,6 @@ RUN groupadd -o -g $GID $USER && \
     useradd -om -u $UID -g $GID -G sudo -s /bin/zsh $USER && \
     echo "$USER:$PW" | chpasswd
 WORKDIR /home/$USER
-
-# TODO: pip stuff should reallllly be done here, not as root
 
 # install zsh
 USER $USER
