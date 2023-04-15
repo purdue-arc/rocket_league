@@ -17,7 +17,7 @@ rosrun rktl_sim <Node name>
 
 ## simulator
 
-This node written wraps around a physics simulator and allows controlling a car
+This node wraps around a physics simulator and allows controlling a car
 in a simulated environment. The ROS parameter server is used to configure the
 simulator, and publishes sensor data and control commands as ROS messages.
 The simulator is implemented in `simulator.py` in the `src` directory. It can be
@@ -132,25 +132,19 @@ This node does not publish any topics.
     field, in meters.
 - `/field/goal/width` (float): Width of the goals, in meters.
 - `/ball/radius` (float): Radius of the ball, in meters.
-- `window_name` (string, default: 'Rocket League Visualizer'): Name of the window
-- `~frame_id` (string, default: 'map')
-- `~timeout` (int, default: 10)
-- `~rate" (int, default: 20)
-- `~cars/body_width` (float)
-- `~cars/body_length` (float)
-- `~media/field` (string)
-- `~media/car` (string)
-- `~media/ball` (string)
-
-- `~frame_id` (str, default: 'map'): The frame ID for the path and pose messages.
-- `~max_speed` (float, default: 0.1): The maximum speed at which the car should
-  travel along the path.
-- `~lookahead_dist` (float, default: 0.15): The distance ahead of the car to
-  look for the next point on the path.
-- `~lookahead_gain` (float, default: 0.035): The coefficient used to adjust the
-  lookahead distance based on the car's current speed.
-- `~lookahead_pnts` (int, default: -1): The number of points to search along the
-  path for the next valid intersection. If set to -1, the entire path is searched.
-- `~car_name` (str): The name of the car to which this node belongs.
+- `window_name` (string, default: 'Rocket League Visualizer'): Name of the
+    window
+- `~frame_id` (string, default: 'map'): Frame ID to use for published ROS
+    messages.
+- `~timeout` (int, default: 10): Timeout in seconds for certain simulator
+    functions.
+- `~rate` (int, default: 30): Rate at which to run the simulation.
+- `~cars/body_width` (float): Rendered width of the car in the visualizer, in
+    meters.
+- `~cars/body_length` (float): Rendered length of the car in the visualizer,
+    in meters.
+- `~media/field` (string): Path to the image representing the field.
+- `~media/car` (string): Path to the image representing the car.
+- `~media/ball` (string): Path to the image representing the ball.
 
 ---
