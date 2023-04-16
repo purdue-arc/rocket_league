@@ -10,6 +10,6 @@ This project is under active development.
 :maxdepth: 2
 
 Home <self>
-packages/index
+packages
 autoapi/index
 ```

@@ -1,4 +1,4 @@
-```{include} readmes/rktl_sim/README.md
+```{include} ./rktl_sim/README.md
 ```
 
 ```{toctree}
@@ -6,7 +6,8 @@
 :maxdepth: 2
 :glob:
 
-readmes/rktl_sim/*/README
+./rktl_sim/*/README
 Package Module (Simulator) <../autoapi/simulator/index.rst>
 Package Module (Visualizer) <../autoapi/visualizer/index.rst>
+Msg/Srv Documentation </rktl_sim/html/index-msg.html#http://>
 ```

@@ -6,11 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# auto-generated Sphinx api docs
-docs/generated
-docs/autoapi
-docs/packages/readmes
-
 # Distribution / packaging
 .Python
 build/
@@ -76,8 +71,9 @@ instance/
 # Sphinx documentation
 docs/_build/
 docs/html/
-*/doc/_build/
-*/doc/html/
+docs/autoapi
+docs/rosdoc/
+docs/rktl_*/
 
 # PyBuilder
 target/

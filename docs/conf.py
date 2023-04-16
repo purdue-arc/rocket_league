@@ -22,23 +22,6 @@ project = "Purdue ARC—Rocket League IRL"
 copyright = "2023, Autonomous Robotics Club of Purdue (Purdue ARC)"
 author = "Autonomous Robotics Club of Purdue (Purdue ARC)"
 
-# -- Copy all READMEs to "readmes/" subdir -----------------------------------
-READMES_SUBDIR = "./packages/readmes"
-TARGET_PATHS = ["../rktl_autonomy", "../rktl_control", "../rktl_game", "../rktl_launch", "../rktl_msgs", "../rktl_perception", "../rktl_planner", "../rktl_sim"]
-if os.path.exists(READMES_SUBDIR):
-    shutil.rmtree(READMES_SUBDIR)
-os.makedirs(READMES_SUBDIR)
-for path in TARGET_PATHS:
-    for (dirpath, dirnames, filenames) in os.walk(path):
-        for filename in filenames:
-            if filename == 'README.md':
-                target_dir = os.sep.join([READMES_SUBDIR, '_', dirpath])
-                if not os.path.exists(target_dir):
-                    os.makedirs(target_dir)
-                src_file = os.sep.join([dirpath, 'README.md'])
-                target_file = os.sep.join([target_dir, 'README.md'])
-                shutil.copy(src_file, target_file)
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -93,3 +76,4 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_extra_path = ["rosdoc"]
