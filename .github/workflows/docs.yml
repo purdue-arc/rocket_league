@@ -16,7 +16,7 @@ jobs:
         . /opt/ros/noetic/setup.zsh &&
         cd catkin_ws &&
         catkin build --no-status --force-color &&
-        . devel/setup.zsh
+        . devel/setup.zsh &&
         cd src/rocket_league/docs &&
         pip install -r requirements.txt &&
         make html -j4
