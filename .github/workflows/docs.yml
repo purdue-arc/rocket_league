@@ -6,9 +6,6 @@ on:
         default: "latest"
         required: false
         type: string
-  push:
-  pull_request:
-  workflow_dispatch:
 permissions:
     contents: write
 jobs:
