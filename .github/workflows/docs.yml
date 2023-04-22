@@ -16,7 +16,7 @@ jobs:
         . /opt/ros/noetic/setup.zsh &&
         cd catkin_ws/src/rocket_league/docs &&
         pip install -r requirements.txt &&
-        make html
+        make html -j4
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,5 +32,5 @@ jobs:
         with:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: src/rocket_league/docs/_build
+          publish_dir: src/rocket_league/docs/_build/html
           force_orphan: true
