@@ -32,3 +32,7 @@ jobs:
     needs: docker
     if: always()
     uses: purdue-arc/rocket_league/.github/workflows/catkin-build-test.yml@main
+  docs:
+    name: Build and deploy documentation
+    if: always()
+    uses: purdue-arc/rocket_league/.github/workflows/docs.yml@main
