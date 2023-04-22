@@ -6,7 +6,7 @@ associated with the
 the [Purdue University Autonomous Robotics Club](https://www.purduearc.com/).
 
 ## Nodes
-### `ball_detection`
+### ball_detection
 Uses color thresholding to find a vector pointing from the camera in the direction of the ball
 
 Params:
@@ -18,14 +18,14 @@ Params:
 - `maxSat` (int): The upper value of the saturation to threshold on a 0 - 255 scale. Default: `225`
 - `maxVib` (int): The upper value of the vibrance to threshold on a 0 - 255 scale. Default: `255`
 
-### `focus_vis`
+### focus_vis
 Publishes a version of `image_color_rect` that has had Canny Edge Detection applied.
 
-### `localizer`
+### localizer
 Calculates the location of all objects in the cameras' view.
 
 ## Launch files
-### `camera.launch`
+### camera.launch
 This launch file launches all nodes and nodelets associcated with a single
 camera. Most arguments can be safely ignored, with the exception of
 `camera_name`
@@ -50,12 +50,12 @@ Arguments:
   control all nodes that use it, including all cameras). Default: value of
   `load_manager`.
 
-### `focus_assist.launch`
+### focus_assist.launch
 This launch file launches the four nodes that generate a Canny Edge Detection copy of every camera, as to aide in focusing the cameras properly.
 
 To run: `roslaunch rktl_perception focus_assist.launch`
 
-### `cal.launch`
+### cal.launch
 This launch file launches a calibration node for each camera with the standard settions
 
 To run: `roslaunch rktl_perception cal.launch`

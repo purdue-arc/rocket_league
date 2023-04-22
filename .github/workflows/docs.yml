@@ -1,0 +1,36 @@
+name: Docs
+on:
+  workflow_call:
+    inputs:
+      tag:
+        default: "latest"
+        required: false
+        type: string
+permissions:
+    contents: write
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_CMD: >-
+        . /opt/ros/noetic/setup.zsh &&
+        cd catkin_ws/src/rocket_league/docs &&
+        pip install -r requirements.txt &&
+        make html
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: src/rocket_league
+      - name: Build the local Docker image
+        run: ./src/rocket_league/docker/docker-build.sh --build-arg TAG=${{ inputs.tag }}
+      - name: Build docs
+        run: ./src/rocket_league/docker/docker-run.sh
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: src/rocket_league/docs/_build
+          force_orphan: true

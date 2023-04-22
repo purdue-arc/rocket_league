@@ -70,6 +70,10 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/html/
+docs/autoapi
+docs/rosdoc/
+docs/rktl_*/
 
 # PyBuilder
 target/
@@ -145,3 +149,7 @@ dmypy.json
 
 # macOS
 .DS_Store
+
+# docker files
+/docker/.vscode-server
+/docker/.zsh_history
