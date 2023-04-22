@@ -36,4 +36,5 @@ jobs:
           publish_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: src/rocket_league/docs/_build/html
+          cname: rktl.purduearc.com
           force_orphan: true
