@@ -38,6 +38,12 @@ extensions = [
     "myst_parser",
 ]
 
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "smartquotes",
+]
+
 autoapi_dirs = [
     "../rktl_autonomy/src",
     "../rktl_perception/src",

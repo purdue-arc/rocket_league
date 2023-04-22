@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Downsample the raw perception data to produce synchronized poses.
+"""
+Downsample the raw perception data to produce synchronized poses.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -13,10 +15,12 @@ from std_msgs.msg import Float32
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 from collections import deque
-from math import sin,cos, atan2
+from math import sin, cos, atan2
+
 
 class PoseSynchronizer(object):
     """Class to synchronize and buffer all poses."""
+
     def __init__(self):
         rospy.init_node('pose_synchronizer')
 
@@ -27,23 +31,26 @@ class PoseSynchronizer(object):
         self.DELAY = rospy.Duration(rospy.get_param('~delay', 0.15))
         self.PUB_LATENCY = rospy.get_param('~publish_latency', False)
         self.USE_WEIGHTS = {
-            topic : rospy.get_param('~use_weights')[i] for i, topic in enumerate(self.TOPICS)
-        }
+            topic: rospy.get_param('~use_weights')[i] for i,
+            topic in enumerate(self.TOPICS)}
 
         # variables
         self.buffers = {
-            topic : deque(maxlen=rospy.get_param('buffer_size', 15)) for topic in self.TOPICS
-        }
+            topic: deque(maxlen=rospy.get_param('buffer_size', 15))
+            for topic in self.TOPICS}
         self.pubs = {
-            topic : rospy.Publisher(topic+'_sync', PoseWithCovarianceStamped, queue_size=1) for topic in self.TOPICS
-        }
+            topic: rospy.Publisher(
+                topic + '_sync', PoseWithCovarianceStamped, queue_size=1)
+            for topic in self.TOPICS}
         if self.PUB_LATENCY:
             self.latency_pubs = {
-                topic : rospy.Publisher(topic+'_sync_latency', Float32, queue_size=1) for topic in self.TOPICS
-            }
+                topic: rospy.Publisher(
+                    topic + '_sync_latency', Float32, queue_size=1)
+                for topic in self.TOPICS}
         for topic in self.TOPICS:
-            rospy.Subscriber(topic, PoseWithCovarianceStamped,
-                lambda msg, topic=topic: self.recv_pose(topic, msg))
+            rospy.Subscriber(
+                topic, PoseWithCovarianceStamped, lambda msg,
+                topic=topic: self.recv_pose(topic, msg))
 
         # main loop
         rate = rospy.Rate(1/self.PERIOD.to_sec())
@@ -95,11 +102,14 @@ class PoseSynchronizer(object):
             t, x, y, yaw, weight = self.buffers[topic].popleft()
             # check if too old
             if t < now - self.DELAY - self.PERIOD/2:
-                rospy.logdebug("%s: discarding pose from %0.3f sec ago", topic, (now - t).to_sec())
+                rospy.logdebug(
+                    "%s: discarding pose from %0.3f sec ago", topic,
+                    (now - t).to_sec())
             # check if too new
             elif t > now - self.DELAY + self.PERIOD/2:
                 self.buffers[topic].append((t, x, y, yaw, weight))
-                rospy.logdebug("%s: skipping pose from %0.3f sec ago", topic, (now - t).to_sec())
+                rospy.logdebug(
+                    "%s: skipping pose from %0.3f sec ago", topic, (now - t).to_sec())
             # add to averages
             else:
                 avg_x += x * weight
@@ -132,6 +142,7 @@ class PoseSynchronizer(object):
         pose_msg.pose.pose.orientation.z = z
         pose_msg.pose.pose.orientation.w = w
         self.pubs[topic].publish(pose_msg)
+
 
 if __name__ == "__main__":
     PoseSynchronizer()
