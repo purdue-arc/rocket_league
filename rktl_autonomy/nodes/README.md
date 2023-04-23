@@ -19,7 +19,14 @@ rosrun rktl_autonomy <Node name>
 
 ## cartpole_env
 
-This node creates a connection between the CartPole-v0 environment from OpenAI's Gym library and ROS for testing and simulation purposes. It subscribes to the `cartpole/action` topic, which receives a message containing an action (an integer) that is taken by the agent. It also publishes messages to the `cartpole/observation`, `cartpole/reward`, and `cartpole/done` topics, which contain the current observation (a Float32MultiArray), the current reward (a Float32), and a Boolean indicating whether the episode is done or not, respectively.
+This node creates a connection between the CartPole-v0 environment from OpenAI's
+Gym library and ROS for testing and simulation purposes. It subscribes to the
+`cartpole/action` topic, which receives a message containing an action (an
+integer) that is taken by the agent. It also publishes messages to the
+`cartpole/observation`, `cartpole/reward`, and `cartpole/done` topics, which
+contain the current observation (a Float32MultiArray), the current reward (a
+Float32), and a Boolean indicating whether the episode is done or not,
+respectively.
 
 ### Subscribed Topics
 
@@ -57,6 +64,7 @@ saved as a PNG image file.
 - `~log/advanced` (list, default: `['net_reward']`): A list of advanced
     variables to plot. These variables have three lines on the plot: the
     average, the minimum, and the maximum.
+- `~frequency` (float, default: `1/30`): Frequency of the main simulation loop.
 
 ---
 
@@ -71,8 +79,8 @@ This node runs the agent trained for the Rocket League project. It uses the
     velocity.
 - `ball/odom` (nav_msgs/Odometry): Odometry data of the car's position and
     velocity.
-- `match_status` (rktl_msgsMatchStatus): Match status data containing the curent
-    score of the game.
+- `match_status` (rktl_msgsMatchStatus): Match status data containing the
+    current score of the game.
 
 ### Published Topics
 
