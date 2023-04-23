@@ -8,11 +8,11 @@ by using `rosrun`:
 rosrun rktl_perception <Node name>
 ```
 
-:::{contents} ROS Nodes in this package
+```{contents} ROS Nodes in this package
 :depth: 2
 :backlinks: top
 :local: true
-:::
+```
 
 ---
 

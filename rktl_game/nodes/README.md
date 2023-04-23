@@ -8,11 +8,11 @@ by using `rosrun`:
 rosrun rktl_autonomy <Node name>
 ```
 
-:::{contents} ROS Nodes in the package
+```{contents} ROS Nodes in the package
 :depth: 2
 :backlinks: top
 :local: true
-:::
+```
 
 ---
 

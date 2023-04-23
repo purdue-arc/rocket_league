@@ -8,11 +8,11 @@ by using `rosrun`:
 rosrun <Package_name> <Node name>
 ```
 
-:::{contents} ROS Nodes in this package
+```{contents} ROS Nodes in this package
 :depth: 2
 :backlinks: top
 :local: true
-:::
+```
 
 ---
 

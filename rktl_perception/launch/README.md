@@ -7,11 +7,11 @@ using [roslaunch](https://wiki.ros.org/roslaunch):
 roslaunch rktl_perception <launch file>
 ```
 
-:::{contents} Launch Files in this package
+```{contents} Launch Files in this package
 :depth: 2
 :backlinks: top
 :local: true
-:::
+```
 
 ---
 

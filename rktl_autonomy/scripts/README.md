@@ -12,11 +12,11 @@ several different types of agents.
 
 **You should not manually use any ROS commands when launching for training.**
 
-:::{contents} Training scripts in the package
+```{contents} Training scripts in the package
 :depth: 2
 :backlinks: top
 :local: true
-:::
+```
 
 ---
 

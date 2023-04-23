@@ -8,11 +8,11 @@ by using `rosrun`:
 rosrun rktl_control <Node name>
 ```
 
-:::{contents} ROS Nodes in the package
+```{contents} ROS Nodes in the package
 :depth: 2
 :backlinks: top
 :local: true
-:::
+```
 
 ---
 
@@ -151,8 +151,8 @@ Overall, this filter is simple and works well enough for position as long as sli
 
 - `~frame_ids/map` (string, default: `'map'`): Frame ID of the common reference
     frame for all objects. In the context of the project, this is the frame
-    centered on the middle of the field, with the x-axis pointed towards a goal,
-    the y-axis pointing towards a sideline, and the z-axis pointed up. By
+    centered on the middle of the field, with the $x$-axis pointed towards a goal,
+    the $y$-axis pointing towards a sideline, and the $z$-axis pointed up. By
     convention, this should be called `'map'`.
 - `~frame_ids/body` (string, default: `'base_link'`): Frame ID of the object
     being tracked.
@@ -259,8 +259,8 @@ is a good resource on particle filters for more information.
     second.
 - `~frame_ids/map` (string, default: `'map'`): Frame ID of the common reference
     frame for all objects. In the context of the project, this is the frame
-    centered on the middle of the field, with the x-axis pointed towards a goal,
-    the y-axis pointing towards a sideline, and the z-axis pointed up. By
+    centered on the middle of the field, with the $x$-axis pointed towards a goal,
+    the $y$-axis pointing towards a sideline, and the $z$-axis pointed up. By
     convention, this should be called `'map'`.
 - `~frame_ids/body` (string, default: `'base_link'`): Frame ID of the object
     being tracked.
@@ -325,8 +325,8 @@ is the original name of the topic with `_sync` appended to the end.
 
 - `~map_frame` (string, default: `'map'`): Frame ID of the common reference
     frame for all objects. In the context of the project, this is the frame
-    centered on the middle of the field, with the x-axis pointed towards a goal,
-    the y-axis pointing towards a sideline, and the z-axis pointed up. By
+    centered on the middle of the field, with the $x$-axis pointed towards a goal,
+    the $y$-axis pointing towards a sideline, and the $z$-axis pointed up. By
     convention, this should be called `'map'`.
 - `~topics` (array): Array of topic names to synchronize.
 - `~rate` (float, default: `10.0`): Rate at which the synchronized topics are
