@@ -7,13 +7,11 @@ using [roslaunch](https://wiki.ros.org/roslaunch):
 roslaunch rktl_control <launch file>
 ```
 
-**Launch Files:**
-
-- [`ball.launch`](#ball-launch)
-- [`car.launch`](#car-launch)
-- [`hardware_interface.launch`](#hardware-interface-launch)
-- [`keyboard_control.launch`](#keyboard-control-launch)
-- [`xbox_control.launch`](#xbox-control-launch)
+:::{contents} Launch Files in the package
+:depth: 2
+:backlinks: top
+:local: true
+:::
 
 ---
 
@@ -54,11 +52,12 @@ Parameters are provided by `rktl_control/config/particle_odom_filter.yaml` or
 
 - `mean_odom_filter`:
     [`mean_odom_filter`](../nodes/README.md#mean-odom-filter) node from the
-    [`rktl_control`](../README.md) package. Only run if `use_particle_filter` is set to false. Parameters supplied by
-    `rktl_control/config/mean_odom_filter.yaml`.
+    [`rktl_control`](../README.md) package. Only run if `use_particle_filter` is
+    set to false. Parameters supplied by `rktl_control/config/mean_odom_filter.yaml`.
 - `particle_odom_filter`:
-    [`particle_odom_filter`](../nodes/README.md#particle-odom-filter) node from the
-    [`rktl_control`](../README.md) package. Only run if `use_particle_filter` is set to true (the default). Parameters supplied by
+    [`particle_odom_filter`](../nodes/README.md#particle-odom-filter) node from
+    the [`rktl_control`](../README.md) package. Only run if `use_particle_filter`
+    is set to true (the default). Parameters supplied by
     `rktl_control/config/particle_odom_filter.yaml`.
 - `controller`:  [`controller`](../nodes/README.md#controller) node from the
     [`rktl_control`](../README.md) package. Parameters supplied by
@@ -68,7 +67,7 @@ Parameters are provided by `rktl_control/config/particle_odom_filter.yaml` or
 
 ## hardware_interface.launch
 
-This takes a [rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html)
+This takes a [rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html#http://)
 message and sends it to a physical car. The efforts in the message range from
 -1.0 to +1.0 corresponding to full reverse for full forward motor speed, or
 full left or full right steering angle respectively. Technically, you can also

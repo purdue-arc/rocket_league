@@ -8,10 +8,11 @@ by using `rosrun`:
 rosrun rktl_sim <Node name>
 ```
 
-**Nodes:**
-
-- [`simulator`](#simulator)
-- [`visualizer`](#visualizer)
+:::{contents} ROS Nodes in the package
+:depth: 2
+:backlinks: top
+:local: true
+:::
 
 ---
 
@@ -25,37 +26,41 @@ run in `'realistic'` or `'ideal`' mode by changing the `~mode` parameter. If the
 mode is `'ideal'`, the simulator will use perfect sensor readings and ignore
 any control effort messages that it receives. If the mode is `'realistic'`,
 the simulator will add noise to sensor readings and simulate the effects of
-control effort on the car's motion. Many parameters are set in `rktl_launch/config.global_params.yaml` or `rktl_sim/config/simulator.yaml`.
+control effort on the car's motion. Many parameters are set in
+`rktl_launch/config.global_params.yaml` or `rktl_sim/config/simulator.yaml`.
 
 ### Subscribed Topics
 
-- `/cars/car0/effort` (rktl_msgs/ControlEffort): The car's desired movement, in
-    terms of throttle and steering amount. Only subscribed to if the `~mode`
-    parameter is set to `'realistic'`.
-- `/cars/car0/command` (rktl_msgs/ControlCommand): The car's desired movement,
-    in terms of velocity and steering angle. Only subscribed to if the `~mode`
-    parameter is set to `'ideal'`.
+- `/cars/car0/effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html#http://)):
+    The car's desired movement, in terms of throttle and steering amount. Only
+    subscribed to if the `~mode` parameter is set to `'realistic'`.
+- `/cars/car0/command` ([rktl_msgs/ControlCommand](/rktl_msgs/html/msg/ControlCommand.html#http://)):
+    The car's desired movement, in terms of velocity and steering angle. Only
+    subscribed to if the `~mode` parameter is set to `'ideal'`.
 
 ### Published Topics
 
-- `/ball/pose_sync_early` (geometry_msgs/PoseWithCovarianceStamped): Pose of
-    the ball with a timestamp and added noise. Only published if the `~mode`
+- `/ball/pose_sync_early` ([geometry_msgs/PoseWithCovarianceStamped](/geometry_msgs/html/msg/PoseWithCovarianceStamped.html#http://)):
+    Pose of the ball with a timestamp and added noise. Only published if the
+    `~mode` parameter is set to `'realistic'`.
+- `/ball/odom_truth` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    Odometry of the ball with no added noise. Only published if the `~mode`
     parameter is set to `'realistic'`.
-- `/ball/odom_truth` (nav_msgs/Odometry): Odometry of the ball with no added
-    noise. Only published if the `~mode` parameter is set to `'realistic'`.
-- `/ball/odom` (nav_msgs/Odometry): Odometry of the ball with no added noise.
-    Only published if the `~mode` parameter is set to `'ideal'`.
-- `/cars/car0/pose_sync_early` (geometry_msgs/PoseWithCovarianceStamped): Pose
-    of the car with a timestamp and added noise. Only published if the `~mode`
+- `/ball/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    Odometry of the ball with no added noise. Only published if the `~mode`
+    parameter is set to `'ideal'`.
+- `/cars/car0/pose_sync_early` ([geometry_msgs/PoseWithCovarianceStamped](/geometry_msgs/html/msg/PoseWithCovarianceStamped.html#http://)):
+    Pose of the car with a timestamp and added noise. Only published if the
+    `~mode` parameter is set to `'realistic'`.
+- `/cars/car0/odom_truth` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    Odometry of the car with no added noise. Only published if the `~mode`
     parameter is set to `'realistic'`.
-- `/cars/car0/odom_truth` (nav_msgs/Odometry): Odometry of the car with no
-    added noise. Only published if the `~mode` parameter is set to
-    `'realistic'`.
-- `/cars/car0/odom` (nav_msgs/Odometry): Odometry of the car with no added
-    noise. Only published if the `~mode` parameter is set to `'ideal'`.
-- `match_status` (rktl_msgs/MatchStatus): Status of the match, whether the
-    match is ongoing or if a goal has been scored, ending the match (and which
-    goal it was scored on).
+- `/cars/car0/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    Odometry of the car with no added noise. Only published if the `~mode`
+    parameter is set to `'ideal'`.
+- `match_status` ([rktl_msgs/MatchStatus](/rktl_msgs/html/msg/MatchStatus.html#http://)):
+    Status of the match, whether the match is ongoing or if a goal has been
+    scored, ending the match (and which goal it was scored on).
 
 ### Parameters
 
@@ -109,20 +114,16 @@ are set in `rktl_launch/config.global_params.yaml` or
 
 ### Subscribed Topics
 
-- `/ball/odom` (nav_msgs/Odometry): The ball's odometry information containing
-    its position, orientation, and velocities.
-- `/cars/car0/odom` (nav_msgs/Odometry): The car's odometry information
-    containing its position, orientation, and velocities.
-- `/cars/car0/path` (rktl_msgs/Path): Used for visualizing the path the car
-    should follow as a series of waypoints.
-- `/cars/car0/lookahead_pnt` (std_msgs/Float32): Used for visualizing the path
-    the lookahead point for a pure pursuit algorithm.
-- `/agents/agent0/bezier_path` (rktl_msgs/BezierPathList): Used for visualizing
-    the path the car should follow as a bezier curve.
-
-### Published Topics
-
-This node does not publish any topics.
+- `/ball/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    The ball's odometry information containing its position, orientation, and velocities.
+- `/cars/car0/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    The car's odometry information containing its position, orientation, and velocities.
+- `/cars/car0/path` ([rktl_msgs/Path](/rktl_msgs/html/msg/Path.html#http://)):
+    Used for visualizing the path the car should follow as a series of waypoints.
+- `/cars/car0/lookahead_pnt` ([std_msgs/Float32](/std_msgs/html/msg/Float32.html#http://)):
+    Used for visualizing the path the lookahead point for a pure pursuit algorithm.
+- `/agents/agent0/bezier_path` ([rktl_msgs/BezierPathList](/rktl_msgs/html/msg/BezierPathList.html#http://)):
+    Used for visualizing the path the car should follow as a bezier curve.
 
 ### Parameters
 

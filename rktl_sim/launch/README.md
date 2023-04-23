@@ -7,10 +7,11 @@ using [roslaunch](https://wiki.ros.org/roslaunch):
 roslaunch rktl_sim <launch file>
 ```
 
-**Launch Files:**
-
-- [`simulator.launch`](#simulator-launch)
-- [`visualizer.launch`](#visualizer-launch)
+:::{contents} Launch Files in the package
+:depth: 2
+:backlinks: top
+:local: true
+:::
 
 ---
 
@@ -25,7 +26,8 @@ information, please refer to the documentation for the
 ### Launch Arguments
 
 - `pybullet_render` (default: `false`): Whether or not to render the pybullet simulator.
-- `sim_mode` (default: `'realistic'`): Either set to `'realistic'` or `'ideal'`. See [simulator](../nodes/README.md#simulator) for more details.
+- `sim_mode` (default: `'realistic'`): Either set to `'realistic'` or `'ideal'`.
+    See [simulator](../nodes/README.md#simulator) for more details.
 
 
 ### Nodes

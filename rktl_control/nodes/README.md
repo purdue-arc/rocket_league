@@ -8,15 +8,11 @@ by using `rosrun`:
 rosrun rktl_control <Node name>
 ```
 
-**Nodes:**
-
-- [`controller`](#controller)
-- [`keyboard_interface`](#keyboard-interface)
-- [`mean_odom_filter`](#mean-odom-filter)
-- [`particle_odom_filter`](#particle-odom-filter)
-- [`pose_synchronizer`](#pose-synchronizer)
-- [`topic_delay`](#topic-delay)
-- [`xbox_interface`](#xbox-interface)
+:::{contents} ROS Nodes in the package
+:depth: 2
+:backlinks: top
+:local: true
+:::
 
 ---
 
@@ -27,11 +23,11 @@ lead-lag controller.
 
 The controller is responsible for making the car do what you tell it to do.
 Simply, that means you give it a
-[`ControlCommand.msg`](/rktl_msgs/html/msg/ControlCommand.html) and it produces
-a [`ControlEffort.msg`](/rktl_msgs/html/msg/ControlEffort.html) that makes the
-car follow it. At a basic level, it uses the odometry produced by the filter and
-tries to minimize the error between what you want the car to do and what it is
-actually doing.
+[`ControlCommand.msg`](/rktl_msgs/html/msg/ControlCommand.html#http://) and it
+produces a [`ControlEffort.msg`](/rktl_msgs/html/msg/ControlEffort.html#http://)
+that makes the car follow it. At a basic level, it uses the odometry produced by
+the filter and tries to minimize the error between what you want the car to do
+and what it is actually doing.
 
 The incoming message is different from the outgoing message because it is taking
 a desired motion that could be for any mechanism, and it is converting it to
@@ -64,14 +60,14 @@ These are all by Brian Douglas, who has many useful videos on control concepts.
 
 ### Subscribed Topics
 
-- `command` ([rktl_msgs/ControlCommand](/rktl_msgs/html/msg/ControlCommand.html)):
+- `command` ([rktl_msgs/ControlCommand](/rktl_msgs/html/msg/ControlCommand.html#http://)):
     The car's desired movement, in terms of velocity and steering angle.
-- `odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html)): Odometry data
-    of the car's position and velocity.
+- `odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    Odometry data of the car's position and velocity.
 
 ### Published Topics
 
-- `effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html)):
+- `effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html#http://)):
     The car's desired movement, in terms of throttle and steering amount.
 
 ### Parameters
@@ -115,7 +111,7 @@ Allows for controlling the car using a keyboard interface. Uses the terminal
 
 ### Published Topics
 
-- `effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html)):
+- `effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html#http://)):
     The car's desired movement, in terms of throttle and steering amount.
 
 ---
@@ -142,14 +138,14 @@ Overall, this filter is simple and works well enough for position as long as sli
 
 ### Subscribed Topics
 
-- `pose_sync` ([geometry_msgs/PoseWithCovarianceStamped](/geometry_msgs/html/msg/PoseWithCovarianceStamped.html)):
+- `pose_sync` ([geometry_msgs/PoseWithCovarianceStamped](/geometry_msgs/html/msg/PoseWithCovarianceStamped.html#http://)):
     The position, rotation, and timestamp of a given element on the field,
     synchronized across all cameras.
 
 ### Published Topics
 
-- `odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html)): Odometry data
-    of a field element's position and velocity.
+- `odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    Odometry data of a field element's position and velocity.
 
 ### Parameters
 
@@ -217,7 +213,7 @@ $\theta$ is split into two state variables to prevent issues with wrap around
 and summation.
 
 From these, a kinematic bicycle model is used to calculate out everything needed
-for an [odometry message](/nav_msgs/html/msg/Odometry.html). Basically, this
+for an [odometry message](/nav_msgs/html/msg/Odometry.html#http://). Basically, this
 just assumes there is no side-slip by the tires and it uses a lot of
 trigonometry. Details are in the MATLAB script [`scripts/bicycle_model.m`].
 
@@ -236,17 +232,17 @@ is a good resource on particle filters for more information.
 
 ### Subscribed Topics
 
-- `pose_sync` ([geometry_msgs/PoseWithCovarianceStamped](/geometry_msgs/html/msg/PoseWithCovarianceStamped.html)):
+- `pose_sync` ([geometry_msgs/PoseWithCovarianceStamped](/geometry_msgs/html/msg/PoseWithCovarianceStamped.html#http://)):
     The position, rotation, and timestamp of the car, synchronized across all
     cameras.
-- `effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html)):
+- `effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html#http://)):
     The car's desired movement, in terms of throttle and steering amount.
 
 ### Published Topics
 
-- `odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html)): Odometry data
+- `odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)): Odometry data
     of a field element's position and velocity.
-- `odom_particles` ([geometry_msgs](/geometry_msgs/html/msg/PoseArray.html)):
+- `odom_particles` ([geometry_msgs](/geometry_msgs/html/msg/PoseArray.html#http://)):
     Poses of all particles used in the filter. Useful for debugging. Only
     published if `~publish_particles` is true.
 
@@ -355,13 +351,13 @@ Allows for controlling the car using a joystick input, e.g. an Xbox controller.
 
 ### Subscribed Topics
 
-- `joy` ([sensor_msgs/Joy](/sensor_msgs/html/msg/Joy.html)): State all buttons and
-    axes on the Xbox controller.
+- `joy` ([sensor_msgs/Joy](/sensor_msgs/html/msg/Joy.html#http://)): State of
+    all buttons and axes on the Xbox controller.
 
 
 ### Published Topics
 
-- `effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html)):
+- `effort` ([rktl_msgs/ControlEffort](/rktl_msgs/html/msg/ControlEffort.html#http://)):
     The car's desired movement, in terms of throttle and steering amount.
 
 ### Parameters

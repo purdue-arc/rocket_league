@@ -3,9 +3,11 @@
 This folder contains all firmware that is written to microcontollers for the
 project.
 
-**Firmwares:**
-
-- [`hardware_interface`](#hardware-interface)
+:::{contents} Firmwares in the package
+:depth: 2
+:backlinks: top
+:local: true
+:::
 
 ---
 
