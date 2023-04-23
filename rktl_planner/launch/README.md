@@ -7,20 +7,25 @@ using [roslaunch](https://wiki.ros.org/roslaunch):
 roslaunch rktl_planner <launch file>
 ```
 
-**Launch Files:**
-- [`patrol_agent.launch`](#patrol-agent-launch)
-- [`simple_agent.launch`](#simple-agent-launch)
+```{contents} Launch Files in the package
+:depth: 2
+:backlinks: top
+:local: true
+```
 
 ---
 
 ## patrol_agent.launch
+
 This launches a [`patrol_planner`](../nodes/README.md#patrol-planner) node with
 parameters supplied by `rktl_planner/config/patrol_planner.yaml`.
 
 ### Launch Arguments
+
 - `car_name` (default: `car0`): Name of the car to launch the agent for.
 
 ### Nodes
+
 - `cars/{car_name}/patrol_planner`:
     [`patrol_planner`](../nodes/README.md#patrol-planner) node from the
     [`rktl_planner`](../README.md) package. Parameters supplied by
@@ -29,15 +34,18 @@ parameters supplied by `rktl_planner/config/patrol_planner.yaml`.
 ---
 
 ## simple_agent.launch
+
 This launches nodes to generate and follow paths using bezier curve-based
 methods. It loads parameters from `rktl_planner/config/path_follower.yaml` and
 `rktl_planner/config/path_planner.yaml`.
 
 ### Launch Arguments
+
 - `agent_name` (default: `agent0`): Name of the agent to run.
 - `car_name` (default: `car0`): Name of the car to launch the agent for.
 
 ### Nodes
+
 - `agents/{agent_name}/path_follower`:
     [`path_follower`](../nodes/README.md#path-follower) node from the
     [`rktl_planner`](../README.md) package. Parameters supplied by

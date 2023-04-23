@@ -8,11 +8,11 @@ by using `rosrun`:
 rosrun rktl_planner <Node name>
 ```
 
-**Nodes:**
-- [`bezier_path_server`](#bezier-path-server)
-- [`path_follower`](#path-follower)
-- [`path_planner`](#path-planner)
-- [`patrol_planner`](#patrol-planner)
+```{contents} ROS Nodes in the package
+:depth: 2
+:backlinks: top
+:local: true
+```
 
 ---
 
@@ -25,18 +25,11 @@ a series of linear segments that approximate the Bezier path). The Bezier path
 is designed to allow for smooth turns and gradual acceleration and deceleration,
 while the linear path is used for easier computation and execution.
 
-### Subscribed Topics:
-This node does not subscribe to any topics.
-
-### Published Topics:
-This node does not publish any topics.
 
 ### Services:
-- `create_bezier_path` (rktl_planner/CreateBezierPath): a service that
-    creates a Bezier path using the input poses and durations.
 
-### Parameters:
-This node does not have any parameters.
+- `create_bezier_path` ([rktl_planner/CreateBezierPath](/rktl_planner/html/msg/CreateBezierPath.html#http://)):
+    A service that creates a Bezier path using the input poses and durations.
 
 ---
 
@@ -49,15 +42,19 @@ path. It then publishes the control commands to the `/cars/{car_name}/command`
 topic.
 
 ### Subscribed Topics:
-- `/cars/{car_name}/odom` (nav_msgs/Odometry): The car's odometry information
-    containing its position, orientation, and velocities.
-- `linear_path` (rktl_msgs/Path): The desired path that the car should follow.
+
+- `/cars/{car_name}/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    The car's odometry information containing its position, orientation, and velocities.
+- `linear_path` ([rktl_msgs/Path](/rktl_msgs/html/msg/Path.html#http://)):
+    The desired path that the car should follow.
 
 ### Published Topics:
-- `/cars/{car_name}/command` (rktl_msgs/ControlCommand): The control commands to
-    be sent to the car to follow the desired path
+
+- `/cars/{car_name}/command` ([rktl_msgs/ControlCommand](/rktl_msgs/html/msg/ControlCommand.html#http://)):
+    The control commands to be sent to the car to follow the desired path
 
 ### Parameters:
+
 - `~frame_id` (str, default: 'map'): The frame ID for the path and pose messages.
 - `~max_speed` (float, default: 0.1): The maximum speed at which the car should 
     travel along the path.
@@ -81,21 +78,26 @@ takes into account the orientation of the car and decides whether to take a
 direct path or to generate a path in reverse.
 
 ### Subscribed Topics:
-- `/cars/{car_name}/odom` (nav_msgs/Odometry): The car's odometry information
-    containing its position, orientation, and velocities.
+
+- `/cars/{car_name}/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    The car's odometry information containing its position, orientation, and velocities.
 
 ### Published Topics:
-- `linear_path` (rktl_msgs/Path): The desired path that the car should follow,
-    split into linear segments
-- `bezier_path` (rktl_msgs/BezierPath): The desired path that the car should
-    follow, split into bezier segments
+
+- `linear_path` ([rktl_msgs/Path](/rktl_msgs/html/msg/Path.html#http://)):
+    The desired path that the car should follow, split into linear segments
+- `bezier_path` ([rktl_msgs/BezierPath](/rktl_msgs/html/msg/BezierPath.html#http://)):
+    The desired path that the car should follow, split into bezier segments
 
 ### Services:
-- `reset_planner` (std_srvs/Empty): An empty service that is used to trigger
-    the generation/regeneration of the path based on the odemetry of the car
-    and ball. The new path is published on the topics above.
+
+- `reset_planner` ([std_srvs/Empty](/std_srvs/html/msg/Empty.html#http://)):
+    An empty service that is used to trigger the generation/regeneration of the
+    path based on the odemetry of the car and ball. The new path is published on
+    the topics above.
 
 ### Parameters:
+
 - `~frame_id` (str, default: 'map'): The frame ID for the path and pose messages.
 - `~max_speed` (float, default: 0.1): The maximum speed at which the car should 
     travel along the path.
@@ -118,14 +120,14 @@ and defensive modes. A Proportional Derivative (PD) controller is used to
 determine how much to turn.
 
 ### Subscribed Topics:
-- `odom` (nav_msgs/Odometry): The car's odometry information, containing its
-    position, orientation, and velocities.
-- `/ball/odom` (nav_msgs/Odometry): The ball's odometry information, containing
-    its position, orientation, and velocities.
+- `odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    The car's odometry information, containing its position, orientation, and velocities.
+- `/ball/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    The ball's odometry information, containing its position, orientation, and velocities.
 
 ### Published Topics:
-- `command` (rktl_msgs/ControlCommand): The control commands to be sent to the
-    car to perform the patrol algorithm
+- `command` ([rktl_msgs/ControlCommand](/rktl_msgs/html/msg/ControlCommand.html#http://)):
+    The control commands to be sent to the car to perform the patrol algorithm
 
 ### Parameters:
 - `/field/width` (float): Physical constant, width of the field

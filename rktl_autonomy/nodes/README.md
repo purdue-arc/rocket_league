@@ -8,12 +8,11 @@ by using `rosrun`:
 rosrun rktl_autonomy <Node name>
 ```
 
-**Nodes:**
-
-- [`cartpole_env`](#cartpole-env)
-- [`plotter`](#plotter)
-- [`rocket_league_agent`](#rocket-league-agent)
-- [`snake_agent`](#snake-agent)
+```{contents} ROS Nodes in the package
+:depth: 2
+:backlinks: top
+:local: true
+```
 
 ---
 
@@ -30,15 +29,17 @@ respectively.
 
 ### Subscribed Topics
 
-- `cartpole/action` (std_msgs/Int32): The action that should be performed.
+- `cartpole/action` ([std_msgs/Int32](/std_msgs/html/msg/Int32.html#http://)):
+    The action that should be performed.
 
 ### Published Topics
 
-- `cartpole/observation` (std_msgs/Float32MultiArray): Observation of the system
-    at any given point.
-- `cartpole/reward` (std_msgs/Float32): Reward for training.
-- `cartpole/done` (std_msgs/Bool): Boolean representing the whether or not the
-    simulation is complete.
+- `cartpole/observation` ([std_msgs/Float32MultiArray](/std_msgs/html/msg/Float32MultiArray.html#http://)):
+    Observation of the system at any given point.
+- `cartpole/reward` ([std_msgs/Float32](/std_msgs/html/msg/Float32.html#http://)):
+    Reward for training.
+- `cartpole/done` ([std_msgs/Bool](/std_msgs/html/msg/Bool.html#http://)):
+    Boolean representing the whether or not the simulation is complete.
 
 ---
 
@@ -51,7 +52,8 @@ saved as a PNG image file.
 
 ### Subscribed Topics
 
-- `~log` (diagnostic_msgs/DiagnosticStatus): Log for the training algorithm.
+- `~log` ([diagnostic_msgs/DiagnosticStatus](/diagnostic_msgs/html/msg/DiagnosticStatus.html#http://)):
+    Log for the training algorithm.
 
 ### Parameters
 
@@ -75,16 +77,17 @@ This node runs the agent trained for the Rocket League project. It uses the
 
 ### Subscribed Topics
 
-- `cars/car0/odom` (nav_msgs/Odometry): Odometry data of the car's position and
-    velocity.
-- `ball/odom` (nav_msgs/Odometry): Odometry data of the car's position and
-    velocity.
-- `match_status` (rktl_msgsMatchStatus): Match status data containing the
-    current score of the game.
+- `cars/car0/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    Odometry data of the car's position and velocity.
+- `ball/odom` ([nav_msgs/Odometry](/nav_msgs/html/msg/Odometry.html#http://)):
+    Odometry data of the car's position and velocity.
+- `match_status` ([rktl_msgs/MatchStatus](/rktl_msgs/html/msg/MatchStatus.html#http://)):
+    Match status data containing the current score of the game.
 
 ### Published Topics
 
-- `/cars/car0/command` (rktl_msgs/ControlCommand): Control commands for the car.
+- `/cars/car0/command` ([rktl_msgs/ControlCommand](/rktl_msgs/html/msg/ControlCommand.html#http://)):
+    ontrol commands for the car.
 
 ### Parameters
 
@@ -135,24 +138,29 @@ This node runs the agent trained for the snake environment. It uses the
 
 ### Subscribed Topics
 
-- `snake/pose` (geometry_msgs/PoseArray): Pose of the snake parts.
-- `snake/goal` (geometry_msgs/PointStamped):  Location of the apple.
-- `snake/score` (std_msgs/Int32): Current Score.
-- `snake/active` (std_msgs/Bool): Whether or not the snake is active.
+- `snake/pose` ([geometry_msgs/PoseArray](/geometry_msgs/html/msg/PoseArray.html#http://)):
+    Pose of the snake parts.
+- `snake/goal` ([geometry_msgs/PointStamped](/geometry_msgs/html/msg/PointStamped.html#http://)):
+    Location of the apple.
+- `snake/score` ([std_msgs/Int32](/std_msgs/html/msg/Int32.html#http://)):
+    Current Score.
+- `snake/active` ([std_msgs/Bool](/std_msgs/html/msg/Bool.html#http://)):
+    Whether or not the snake is active.
 
 ### Published Topics
 
-- `snake/cmd_vel` (geometry_msgs/Twist): Command for the snake to follow.
+- `snake/cmd_vel` ([geometry_msgs/Twist](/geometry_msgs/html/msg/Twist.html#http://)):
+    Command for the snake to follow.
 
 ### Parameters
 
-- `~num_segments` (int, default: 7): Inital number of segments of the snake.
+- `~num_segments` (int, default: 7): Initial number of segments of the snake.
 - `~field_size` (float, default: 10): Size of the field.
 - `~control/max_angular_velocity` (float, default: 3.0): Max angular velocity.
 - `~control/max_linear_velocity` (float,  default: 3.0): Max velocity.
 - `~reward/death` (float, default: 0.0): Penalty for death.
 - `~reward/goal` (float, default: 50.0): Reward for eating an apple.
-- `~reward/distance` (float, default: 0.0): Reward for distance travelled.
+- `~reward/distance` (float, default: 0.0): Reward for distance traveled.
 - `~reward/constant` (float, default: 0.0): Constant reward.
 - `~max_episode_time` (float, default: 30.0): Maximum time in seconds for an
     episode.

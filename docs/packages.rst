@@ -7,7 +7,7 @@ The repo is broken down into several
 
 .. toctree::
     :caption: Package Contents
-    :maxdepth: 4
+    :maxdepth: 2
     :glob:
 
     rktl_*

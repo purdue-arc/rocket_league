@@ -74,6 +74,7 @@ docs/html/
 docs/autoapi
 docs/rosdoc/
 docs/rktl_*/
+~!docs/rktl_*/index.md
 
 # PyBuilder
 target/

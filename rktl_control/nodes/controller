@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Customizable controller for the car.
+"""
+Customizable controller for the car. It implements either a PID controller or a
+lead-lag controller.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -11,8 +14,10 @@ from nav_msgs.msg import Odometry
 from rktl_msgs.msg import ControlCommand, ControlEffort
 from math import atan, cos, sin
 
+
 class PIDController(object):
     """A very basic PID controller."""
+
     def __init__(self, kp, ki, kd, anti_windup, deadband, delta_t):
         # Constants
         self.KP = kp
@@ -48,8 +53,10 @@ class PIDController(object):
         self.last_error = 0.0
         self.last_output = 0.0
 
+
 class LeadLagController(object):
     """A simple discrete lead-lag controller."""
+
     def __init__(self, k_lead, a_lead, b_lead, a_lag, b_lag):
         # Constants
         self.GAIN_LEAD = k_lead
@@ -57,7 +64,7 @@ class LeadLagController(object):
         self.BETA_LEAD = b_lead
         self.ALPHA_LAG = a_lag
         self.BETA_LAG = b_lag
-        
+
         # State variables
         self.prev_R_lead = 0.0
         self.prev_R_lag = 0.0
@@ -80,8 +87,10 @@ class LeadLagController(object):
         self.prev_R_lead = 0.0
         self.prev_R_lag = 0.0
 
+
 class Controller(object):
     """Controller for car."""
+
     def __init__(self):
         rospy.init_node('controller')
 
@@ -160,8 +169,12 @@ class Controller(object):
         steering_effort = self.psi_ref / self.STEERING_THROW
 
         # enforce actuator saturation limits
-        throttle_effort = max(min(throttle_effort, self.MAX_THROTTLE_EFFORT), self.MIN_THROTTLE_EFFORT)
-        steering_effort = max(min(steering_effort, self.MAX_STEERING_EFFORT), self.MIN_STEERING_EFFORT)
+        throttle_effort = max(
+            min(throttle_effort, self.MAX_THROTTLE_EFFORT),
+            self.MIN_THROTTLE_EFFORT)
+        steering_effort = max(
+            min(steering_effort, self.MAX_STEERING_EFFORT),
+            self.MIN_STEERING_EFFORT)
 
         # publish actuator efforts
         msg = ControlEffort()
@@ -169,6 +182,7 @@ class Controller(object):
         msg.throttle = throttle_effort
         msg.steering = steering_effort
         self.pub.publish(msg)
+
 
 if __name__ == "__main__":
     Controller()

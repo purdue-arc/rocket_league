@@ -36,6 +36,13 @@ extensions = [
     "sphinx.ext.intersphinx",
     "autoapi.extension",
     "myst_parser",
+    "sphinx_favicon",
+]
+
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "smartquotes",
 ]
 
 autoapi_dirs = [
@@ -77,3 +84,22 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_extra_path = ["rosdoc"]
+html_logo = "images/arc_logo.svg"
+
+favicons = [
+    {"href": "favicons/favicon.ico"},
+    {"href": "favicons/favicon-16x16.png"},
+    {"href": "favicons/favicon-32x32.png"},
+    {
+        "rel": "apple-touch-icon",
+        "href": "favicons/apple-touch-icon.png",
+    },
+    {
+        "rel": "android-chrome",
+        "href": "favicons/android-chrome-192x192.png",
+    },
+    {
+        "rel": "android-chrome",
+        "href": "favicons/android-chrome-512-512.png",
+    },
+]

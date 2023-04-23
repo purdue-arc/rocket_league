@@ -7,13 +7,11 @@ using [roslaunch](https://wiki.ros.org/roslaunch):
 roslaunch rktl_autonomy <launch file>
 ```
 
-**Launch Files:**
-
-- [`cartpole_train.launch`](#cartpole-train-launch)
-- [`rocket_league_agent.launch`](#rocket-league-agent-launch)
-- [`rocket_league_train.launch`](#rocket-league-train-launch)
-- [`snake_eval.launch`](#snake-eval-launch)
-- [`snake_train.launch`](#snake-train-launch)
+```{contents} Launch Files in the package
+:depth: 2
+:backlinks: top
+:local: true
+```
 
 ---
 

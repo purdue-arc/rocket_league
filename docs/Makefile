@@ -41,6 +41,7 @@ $(ROSDOC_OUT):
 	@mkdir -p $@
 	rosdoc_lite -o $@ $(shell rospack find $(notdir $@)) > /dev/null 2>&1
 	@# Clean up big unnecessary files 
+	@rm $@/html/index.html
 	@rm $@/html/*.png
 	@rm $@/html/*.js
 
