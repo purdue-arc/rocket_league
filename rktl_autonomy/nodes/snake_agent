@@ -9,13 +9,14 @@ License:
 from rktl_autonomy import SnakeInterface
 from stable_baselines3 import PPO
 from os.path import expanduser
-import rospy
+import rclpy
 
 # create interface (and init ROS)
 env = SnakeInterface(eval=True)
+node = rclpy.create_node('snake_agent')
 
 # load the model
-weights = expanduser(rospy.get_param('~weights'))
+weights = expanduser(node.get_parameter('~weights'))
 model = PPO.load(weights)
 
 # evaluate in real-time
@@ -24,5 +25,5 @@ while True:
     action, __ = model.predict(obs)
     try:
         obs, __, __, __ = env.step(action)
-    except rospy.ROSInterruptException:
+    except rclpy.ROSInterruptException:
         exit()

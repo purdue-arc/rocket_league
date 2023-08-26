@@ -9,10 +9,11 @@ License:
   All rights reserved.
 """
 
-import rospy
+import rclpy
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import ControlCommand, ControlEffort
 from math import atan, cos, sin
+import sys
 
 
 class PIDController(object):
@@ -92,54 +93,54 @@ class Controller(object):
     """Controller for car."""
 
     def __init__(self):
-        rospy.init_node('controller')
+        self.node = rclpy.create_node('controller')
 
         # Constants
-        self.MAX_SPEED = rospy.get_param('/cars/throttle/max_speed')
-        self.STEERING_THROW = rospy.get_param('/cars/steering/max_throw')
-        self.BODY_LENGTH = rospy.get_param('/cars/length')
+        self.MAX_SPEED = self.node.get_parameter('/cars/throttle/max_speed')
+        self.STEERING_THROW = self.node.get_parameter('/cars/steering/max_throw')
+        self.BODY_LENGTH = self.node.get_parameter('/cars/length')
 
-        self.MIN_THROTTLE_EFFORT = rospy.get_param('~limits/throttle/min', -1.0)
-        self.MAX_THROTTLE_EFFORT = rospy.get_param('~limits/throttle/max',  1.0)
-        self.MIN_STEERING_EFFORT = rospy.get_param('~limits/steering/min', -1.0)
-        self.MAX_STEERING_EFFORT = rospy.get_param('~limits/steering/max',  1.0)
+        self.MIN_THROTTLE_EFFORT = self.node.get_parameter_or('~limits/throttle/min', -1.0)
+        self.MAX_THROTTLE_EFFORT = self.node.get_parameter_or('~limits/throttle/max',  1.0)
+        self.MIN_STEERING_EFFORT = self.node.get_parameter_or('~limits/steering/min', -1.0)
+        self.MAX_STEERING_EFFORT = self.node.get_parameter_or('~limits/steering/max',  1.0)
 
-        self.PUBLISH_EARLY = rospy.get_param('~open_loop/publish_early', True)
+        self.PUBLISH_EARLY = self.node.get_parameter_or('~open_loop/publish_early', True)
 
         # Make closed loop velocity controller
-        if rospy.get_param('~controller_type') == 'lead_lag':
+        if self.node.get_parameter('~controller_type') == 'lead_lag':
             self.controller = LeadLagController(
-                rospy.get_param('~lead/gain'),
-                rospy.get_param('~lead/alpha'),
-                rospy.get_param('~lead/beta'),
-                rospy.get_param('~lag/alpha'),
-                rospy.get_param('~lag/beta'))
-        elif rospy.get_param('~controller_type') == 'pid':
+                self.node.get_parameter('~lead/gain'),
+                self.node.get_parameter('~lead/alpha'),
+                self.node.get_parameter('~lead/beta'),
+                self.node.get_parameter('~lag/alpha'),
+                self.node.get_parameter('~lag/beta'))
+        elif self.node.get_parameter('~controller_type') == 'pid':
             self.controller = PIDController(
-                rospy.get_param('~pid/kp'),
-                rospy.get_param('~pid/ki'),
-                rospy.get_param('~pid/kd'),
-                rospy.get_param('~pid/anti_windup'),
-                rospy.get_param('~pid/deadband'),
-                1.0 / rospy.get_param('~rate', 10.0))
-        elif rospy.get_param('~controller_type') == 'none':
+                self.node.get_parameter('~pid/kp'),
+                self.node.get_parameter('~pid/ki'),
+                self.node.get_parameter('~pid/kd'),
+                self.node.get_parameter('~pid/anti_windup'),
+                self.node.get_parameter('~pid/deadband'),
+                1.0 / self.node.get_parameter_or('~rate', 10.0))
+        elif self.node.get_parameter('~controller_type') == 'none':
             self.controller = None
         else:
-            raise NotImplementedError(f"unrecognized controller type: {rospy.get_param('controller_type')}")
+            raise NotImplementedError(f"unrecognized controller type: {self.node.get_parameter('controller_type')}")
 
         # State variables
         self.vr_ref = None
         self.psi_ref = None
 
         # Publishers
-        self.pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
+        self.pub = self.node.create_publisher(ControlEffort, 'effort', queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('command', ControlCommand, self.command_cb)
-        rospy.Subscriber('odom', Odometry, self.odom_cb)
+        self.node.create_subscription(ControlCommand, 'command', self.command_cb)
+        self.node.create_subscription(Odometry, 'odom', self.odom_cb)
 
         # trust that odom_cb runs at proper rate
-        rospy.spin()
+        rclpy.spin(self.node)
 
     def command_cb(self, cmd_msg):
         """Callback for command messages for car."""
@@ -178,7 +179,7 @@ class Controller(object):
 
         # publish actuator efforts
         msg = ControlEffort()
-        msg.header.stamp = rospy.Time.now()
+        msg.header.stamp = self.node.get_clock().now()
         msg.throttle = throttle_effort
         msg.steering = steering_effort
         self.pub.publish(msg)

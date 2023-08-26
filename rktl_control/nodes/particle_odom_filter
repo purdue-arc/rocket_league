@@ -9,7 +9,7 @@ License:
 """
 
 # ROS
-import rospy
+import rclpy
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Pose
 from rktl_msgs.msg import ControlEffort
@@ -26,70 +26,70 @@ class ParticleOdomFilter(object):
     """Class to estimate pose and velocity using Particle filter."""
 
     def __init__(self):
-        rospy.init_node('particle_odom_filter')
+        self.node = rclpy.create_node('particle_odom_filter')
 
         # physical constants (global)
-        self.FIELD_WIDTH = rospy.get_param('/field/width')
-        self.FIELD_HEIGHT = rospy.get_param('/field/length')
-        self.CAR_LENGTH = rospy.get_param('/cars/length')
-        self.MAX_SPEED = rospy.get_param('/cars/throttle/max_speed')
-        self.THROTTLE_TAU = rospy.get_param('/cars/throttle/tau')
-        self.STEERING_THROW = rospy.get_param('/cars/steering/max_throw')
-        self.STEERING_RATE = rospy.get_param('/cars/steering/rate')
+        self.FIELD_WIDTH = self.node.get_parameter('/field/width')
+        self.FIELD_HEIGHT = self.node.get_parameter('/field/length')
+        self.CAR_LENGTH = self.node.get_parameter('/cars/length')
+        self.MAX_SPEED = self.node.get_parameter('/cars/throttle/max_speed')
+        self.THROTTLE_TAU = self.node.get_parameter('/cars/throttle/tau')
+        self.STEERING_THROW = self.node.get_parameter('/cars/steering/max_throw')
+        self.STEERING_RATE = self.node.get_parameter('/cars/steering/rate')
 
         # node configuration
-        self.MAP_FRAME = rospy.get_param('~frame_ids/map', 'map')
-        self.BODY_FRAME = rospy.get_param('~frame_ids/body', 'base_link')
-        self.DELTA_T = rospy.Duration(1.0/rospy.get_param('~rate', 10.0))
-        self.SUPERSAMPLING = rospy.get_param('~supersampling', 1)
-        self.PUB_PARTICLES = rospy.get_param('~publish_particles', False)
+        self.MAP_FRAME = self.node.get_parameter_or('~frame_ids/map', 'map')
+        self.BODY_FRAME = self.node.get_parameter_or('~frame_ids/body', 'base_link')
+        self.DELTA_T = rclpy.duration.Duration(1.0/self.node.get_parameter_or('~rate', 10.0))
+        self.SUPERSAMPLING = self.node.get_parameter_or('~supersampling', 1)
+        self.PUB_PARTICLES = self.node.get_parameter_or('~publish_particles', False)
         self.WATCHDOG_DELTA_T = self.DELTA_T * \
-            rospy.get_param('~allowable_latency', 1.2)
-        self.OPEN_LOOP_LIMIT = rospy.get_param('~open_loop_limit', 10)
+            self.node.get_parameter_or('~allowable_latency', 1.2)
+        self.OPEN_LOOP_LIMIT = self.node.get_parameter_or('~open_loop_limit', 10)
 
         # should the filter compensate for delay by trying to predict the future?
-        self.PREDICT_ENABLE = rospy.get_param('~delay/compensate', False)
-        self.PREDICT_TIME = rospy.Duration(
-            rospy.get_param('~delay/duration', 0.0))
+        self.PREDICT_ENABLE = self.node.get_parameter_or('~delay/compensate', False)
+        self.PREDICT_TIME = rclpy.duration.Duration(
+            self.node.get_parameter_or('~delay/duration', 0.0))
 
         # should the filter weigh particles based on a boundary check?
-        boundary_check = rospy.get_param('~boundary_check', False)
+        boundary_check = self.node.get_parameter_or('~boundary_check', False)
 
         # filter tuning options
-        num_particles = rospy.get_param('~num_particles', 1000)
-        resample_proportion = rospy.get_param('~resample_proportion', 0.1)
+        num_particles = self.node.get_parameter_or('~num_particles', 1000)
+        resample_proportion = self.node.get_parameter_or('~resample_proportion', 0.1)
 
         # standard deviation of incoming measurements used to assign particle weights
-        self.MEAS_LOC_STD_DEV = rospy.get_param(
+        self.MEAS_LOC_STD_DEV = self.node.get_parameter_or(
             '~measurement_error/location', 0.05)
-        self.MEAS_DIR_STD_DEV = rospy.get_param(
+        self.MEAS_DIR_STD_DEV = self.node.get_parameter_or(
             '~measurement_error/orientation', np.deg2rad(5))
 
         # standard deviation when generating random states based off current guess
-        self.GEN_LOC_STD_DEV = rospy.get_param(
+        self.GEN_LOC_STD_DEV = self.node.get_parameter_or(
             '~generator_noise/location', 0.05)
-        self.GEN_DIR_STD_DEV = rospy.get_param(
+        self.GEN_DIR_STD_DEV = self.node.get_parameter_or(
             '~generator_noise/orientation', 0.05)
-        self.GEN_VEL_STD_DEV = rospy.get_param(
+        self.GEN_VEL_STD_DEV = self.node.get_parameter_or(
             '~generator_noise/velocity', 0.05)
-        self.GEN_PSI_STD_DEV = rospy.get_param(
+        self.GEN_PSI_STD_DEV = self.node.get_parameter_or(
             '~generator_noise/steering_angle', np.deg2rad(1))
 
         # should the filter use historic effort data to get a more accurate idea of where the car is?
-        use_efforts = rospy.get_param('~efforts/enable', False)
-        effort_buffer_size = rospy.get_param('~efforts/buffer_size', 0)
+        use_efforts = self.node.get_parameter_or('~efforts/enable', False)
+        effort_buffer_size = self.node.get_parameter_or('~efforts/buffer_size', 0)
 
         # standard deviation to add noise to effort when effort is known and enabled
-        self.THR_EFFORT_STD_DEV = rospy.get_param(
+        self.THR_EFFORT_STD_DEV = self.node.get_parameter_or(
             '~efforts/throttle/noise', 0.05)
-        self.STR_EFFORT_STD_DEV = rospy.get_param(
+        self.STR_EFFORT_STD_DEV = self.node.get_parameter_or(
             '~efforts/steering/noise', 0.05)
 
         # max and min for uniform effort distribution when effort is not known or disabled
-        self.MAX_THROTTLE = rospy.get_param('~efforts/throttle/max',  1.0)
-        self.MIN_THROTTLE = rospy.get_param('~efforts/throttle/min', -1.0)
-        self.MAX_STEERING = rospy.get_param('~efforts/steering/max',  1.0)
-        self.MIN_STEERING = rospy.get_param('~efforts/steering/min', -1.0)
+        self.MAX_THROTTLE = self.node.get_parameter_or('~efforts/throttle/max',  1.0)
+        self.MIN_THROTTLE = self.node.get_parameter_or('~efforts/throttle/min', -1.0)
+        self.MAX_STEERING = self.node.get_parameter_or('~efforts/steering/max',  1.0)
+        self.MIN_STEERING = self.node.get_parameter_or('~efforts/steering/min', -1.0)
 
         # variables
         self.effort_buffer = deque(maxlen=effort_buffer_size)
@@ -111,16 +111,15 @@ class ParticleOdomFilter(object):
         self.filter.mean_state = None
 
         # pubs / subs
-        self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
-        rospy.Subscriber('pose_sync', PoseWithCovarianceStamped, self.pose_cb)
+        self.odom_pub = self.node.create_publisher(Odometry, 'odom', queue_size=1)
+        self.node.create_subscription(PoseWithCovarianceStamped, 'pose_sync', self.pose_cb)
         if use_efforts:
-            rospy.Subscriber('effort', ControlEffort, self.effort_cb)
+            self.node.create_subscriptionbscriber(ControlEffort, 'effort', self.effort_cb)
         if self.PUB_PARTICLES:
-            self.cloud_pub = rospy.Publisher(
-                'odom_particles', PoseArray, queue_size=1)
+            self.cloud_pub = self.node.create_publisher(PoseArray, 'odom_particles', queue_size=1)
 
         # main loop
-        rospy.spin()
+        rclpy.spin(self.node)
 
     def effort_cb(self, effort_msg):
         """Callback for new efforts."""
@@ -134,12 +133,10 @@ class ParticleOdomFilter(object):
                 return
 
             assert self.current_time is not None
-            rospy.loginfo(
-                "Dropped pose message detected, extrapolating with no measurement")
+            self.node.get_logger().info("Dropped pose message detected, extrapolating with no measurement")
 
             # set a new watchdog
-            self.watchdog = rospy.Timer(
-                self.WATCHDOG_DELTA_T, self.watchdog_cb, True)
+            self.watchdog = self.node.create_timer(self.WATCHDOG_DELTA_T, self.watchdog_cb, True)
 
             # get the exact time since the watchdog was set
             set_time = timer_event.current_expected - self.WATCHDOG_DELTA_T
@@ -152,7 +149,7 @@ class ParticleOdomFilter(object):
                 self.publish_odom()
                 self.open_loop_count += 1
             else:
-                rospy.logerr("Halting filter due to too many lost poses")
+                self.node.get_logger().info("Halting filter due to too many lost poses")
                 self.filter_reset()
 
     def pose_cb(self, pose_msg):
@@ -174,8 +171,7 @@ class ParticleOdomFilter(object):
             # reset the watchdog
             if self.watchdog is not None:
                 self.watchdog.shutdown()
-            self.watchdog = rospy.Timer(
-                self.WATCHDOG_DELTA_T, self.watchdog_cb, True)
+            self.watchdog = self.node.create_timer(self.WATCHDOG_DELTA_T, self.watchdog_cb)
 
             # initialize the current time (as one update ago) if needed
             if self.current_time is None:
@@ -188,8 +184,9 @@ class ParticleOdomFilter(object):
                 self.publish_odom()
                 self.open_loop_count = 0
             else:
-                rospy.logwarn(
-                    "Incoming measurement out of sync. Possible watchdog runaway. Resetting filter. Consider turning down supersampling")
+                self.node.get_logger().warn(
+                    "Incoming measurement out of sync. Possible watchdog runaway. Resetting filter. Consider turning "
+                    "down supersampling")
                 self.filter_reset()
 
     def publish_odom(self):
@@ -215,7 +212,7 @@ class ParticleOdomFilter(object):
 
         # validate output
         if np.isnan(state).any():
-            rospy.logwarn(
+            self.node.get_logger().warn(
                 "Performing automatic filter reset due to NaN output")
             self.filter_reset()
             state = np.sum(

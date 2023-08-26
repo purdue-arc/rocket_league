@@ -7,17 +7,20 @@ License:
 """
 
 # ROS
-import rospy
+import rclpy
 from std_msgs.msg import Int32, Float32, Float32MultiArray, Bool
 from std_srvs.srv import Empty, EmptyResponse
+import sys
 
 import gym
 from threading import Lock
 
 class CartPole(object):
     def __init__(self):
-        rospy.init_node('cart_pole_node')
-        self.RENDER = rospy.get_param('~render', False)
+        rclpy.init(args=sys.argv)
+        node = rclpy.create_node('cart_pole_node')
+
+        self.RENDER = node.get_parameter_or('~render', False)
 
         self.env = gym.make('CartPole-v0')
         self.observation = self.env.reset() 
@@ -27,19 +30,20 @@ class CartPole(object):
         self.lock = Lock()
 
         # Publishers
-        self.obs_pub = rospy.Publisher('cartpole/observation', Float32MultiArray, queue_size=1) 
-        self.reward_pub = rospy.Publisher('cartpole/reward', Float32, queue_size=1)
-        self.done_pub = rospy.Publisher('cartpole/done', Bool, queue_size=1)
+        self.obs_pub = node.create_publisher(Float32MultiArray, 'cartpole/observation', queue_size=1)
+        self.reward_pub = node.create_publisher(Float32, 'cartpole/reward', Float32, queue_size=1)
+        self.done_pub = node.create_publisher(Bool, 'cartpole/done', queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('cartpole/action', Int32, self.cartpole_action)
+        node.create_subscription(Int32, 'cartpole/action', self.cartpole_action)
 
         # Services
-        rospy.Service('cartpole/reset', Empty, self.cartpole_reset)
+        node.create_service(Empty, 'cartpole/reset', self.cartpole_reset)
 
         # Timers
-        rospy.Timer(rospy.Duration(rospy.get_param('~frequency', 1/30)), self.cartpole_step)
-        rospy.spin()
+        frequency = node.get_parameter_or('~frequency', 1/30)
+        node.create_timer(frequency, self.cartpole_step)
+        rclpy.spin(node)
 
     def cartpole_step(self,event=None):
         """Step time once."""
@@ -66,6 +70,7 @@ class CartPole(object):
             self.done=0
             self.action=None
         return EmptyResponse()
+
 
 if __name__ == "__main__":
     CartPole()
