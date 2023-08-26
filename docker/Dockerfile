@@ -28,7 +28,7 @@ RUN apt update && \
     ros-$ROS_DISTRO-rosbridge-server \
     ros-$ROS_DISTRO-rosdoc-lite && \
     # pip
-    pip3 install pybullet gym[box2d] stable-baselines3 pfilter optuna && \
+    pip3 install pybullet gym[box2d] stable-baselines3 pfilter optuna websockets && \
     # clean up
     rm -rf /var/lib/apt/lists/* /root/.cache/pip/
 
