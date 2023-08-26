@@ -11,7 +11,7 @@ import random
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 import os
-import rospy
+import rclpy
 from std_srvs.srv import Empty, EmptyResponse
 from threading import Lock
 from enum import Enum
@@ -55,21 +55,25 @@ class Simulator(object):
         self.car_properties = None
 
         # setting config parameters (stay constant for the whole simulator run)
-        rospy.init_node('simulator')
+        rclpy.init(args=sys.argv)
+        node = rclpy.create_node('simulator')
+
+        #rclpy.init_node('simulator')
+
         mode = self.get_sim_param('~mode')
         if mode == 'ideal':
             self.mode = SimulatorMode.IDEAL
         elif mode == 'realistic':
             self.mode = SimulatorMode.REALISTIC
         else:
-            rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
+            rclpy.shutdown('unknown sim mode set "{}"'.format(mode))
 
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
         self.car_cmd = (0.0, 0.0)
 
         render_enabled = self.get_sim_param('~render', secondParam=False)
-        rate = rospy.Rate(self.get_sim_param('~rate', secondParam=30))
+        rate = node.create_rate(self.get_sim_param('~rate', secondParam=30))
         self.frame_id = self.get_sim_param('~frame_id', secondParam='map')
         self.timeout = self.get_sim_param('~timeout', secondParam=10)
 
@@ -114,43 +118,42 @@ class Simulator(object):
         self.reset_cb(None)  # janky reset call with mandatory none parameter
 
         # Publishers
-        self.status_pub = rospy.Publisher(
-            'match_status', MatchStatus, queue_size=1)
+        self.status_pub = node.create_publisher(
+            MatchStatus, 'match_status', queue_size=1)
         self.ball_pose_pub, self.ball_odom_pub = None, None
         if self.mode == SimulatorMode.REALISTIC:
-            self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early',
-                                                 PoseWithCovarianceStamped, queue_size=1)
-            self.ball_odom_pub = rospy.Publisher('/ball/odom_truth',
-                                                 Odometry, queue_size=1)
+            self.ball_pose_pub = rclpy.node.create_publisher(PoseWithCovarianceStamped,
+                                                 '/ball/pose_sync_early', queue_size=1)
+            self.ball_odom_pub = rclpy.node.create_publisher(Odometry,
+                                                '/ball/odom_truth', queue_size=1)
         elif self.mode == SimulatorMode.IDEAL:
-            self.ball_odom_pub = rospy.Publisher('/ball/odom',
-                                                 Odometry, queue_size=1)
+            self.ball_odom_pub = rclpy.node.create_publisher(Odometry,
+                                                '/ball/odom', queue_size=1)
 
         # Services
-        rospy.Service('sim_reset_car_and_ball', Empty, self.reset_cb)
-        rospy.Service('sim_reset_ball', Empty, self.reset_ball_cb)
+        srv = rclpy.node.create_service('sim_reset_car_and_ball', Empty, self.reset_cb)
+        srv2 = rclpy.node.create_service('sim_reset_ball', Empty, self.reset_ball_cb)
 
-        while not rospy.is_shutdown():
+        while not rclpy.ok():
             self.loop_once()
             try:
                 rate.sleep()
-            except rospy.ROSInterruptException:
-                pass
+
 
     def check_urdf(self, urdf_path):
         """Validates that a URDF exists, then returns its file."""
 
         if urdf_path is None:
-            rospy.signal_shutdown(
+            rclpy.shutdown(
                 'no urdf path set for "{}"'.format(urdf_path))
 
         i = 0
         while not os.path.isfile(urdf_path) and i < 5:
-            rospy.sleep(0.1)  # wait for xacro build
+            rclpy.sleep(0.1)  # wait for xacro build
             i += 1
 
         if not os.path.isfile(urdf_path):
-            rospy.signal_shutdown(
+            rclpy.shutdown(
                 'no urdf file exists at path {}'.format(urdf_path))
 
     def effort_cb(self, effort_msg, car_id):
@@ -213,7 +216,7 @@ class Simulator(object):
         """Step the simulation once step, updating match status, moving and publishing new car and ball positions."""
         self.reset_lock.acquire()
 
-        now = rospy.Time.now()
+        now = self.node.get_clock().now()
         if self.last_time is not None and self.last_time != now:
             delta_t = (now - self.last_time).to_sec()
             self.sim.step(self.car_cmd, delta_t)
@@ -305,77 +308,77 @@ class Simulator(object):
         self.last_time = now
         self.reset_lock.release()
     # def get_sim_dict(self, path, returnValue=False, secondParam=None):
-    #     rospy_param = rospy.get_param(path, secondParam)
-    #     if not rospy_param:
+    #     rclpy_param = rclpy.get_param(path, secondParam)
+    #     if not rclpy_param:
     #         if returnValue:
-    #             rospy.logfatal(f'invalid file path: {path}')
+    #             rclpy.logfatal(f'invalid file path: {path}')
     #         return None
     #     else:
-    #         for param in rospy_param:
+    #         for param in rclpy_param:
                 
         
     def get_sim_param(self, path, returnValue=False, secondParam=None):
         """
-        @param secondParam: Specify if you want to pass in a second parameter to rospy.
+        @param secondParam: Specify if you want to pass in a second parameter to rclpy.
         @param path: A direct path to the variable.
         @param returnValue:
         True: None is returned if variable does not exist.
         False: An error is thrown if variable does not exist.
         @return: None or Exception.
         """
-        rospy_param = rospy.get_param(path, secondParam)
-        if not rospy_param:
+        rclpy_param = self.node.get_parameter_or(path, secondParam)
+        if not rclpy_param:
             if returnValue:
-                rospy.logfatal(f'invalid file path: {path}')
+                self.node.get_logger().fatal(f'invalid file path: {path}')
             return None
         else:
             if '~' in path:
                 if secondParam is not None:
 
-                    return rospy.get_param(f'{path}', secondParam)
+                    return self.node.declare_parameter_or(f'{path}', secondParam)
                 else:
 
-                    return rospy.get_param(f'{path}')
+                    return self.node.declare_parameter(f'{path}')
 
-            type_rospy = type(rospy_param)
+            type_rclpy = type(rclpy_param)
 
-            if type_rospy == dict:
+            if type_rclpy == dict:
                 if secondParam is None:
 
-                    min_param = (float)(rospy.get_param(f'{path}/min'))
-                    max_param = (float)(rospy.get_param(f'{path}/max'))
+                    min_param = (float)(self.node.get_parameter(f'{path}/min'))
+                    max_param = (float)(self.node.get_parameter(f'{path}/max'))
                 else:
-                    min_param = (float)(rospy.get_param(
+                    min_param = (float)(self.node.get_parameter_or(
                         f'{path}/min', secondParam))
-                    max_param = (float)(rospy.get_param(
+                    max_param = (float)(self.node.get_parameter_or(
                         f'{path}/max', secondParam))
 
                 if not max_param:
                     if returnValue:
-                        rospy.logfatal(f'invalid file path: {path}/max')
+                        self.node.get_logger().fatal(f'invalid file path: {path}/max')
                     return None
                 if not min_param:
                     if returnValue:
-                        rospy.logfatal(f'invalid file path: {path}/min')
+                        self.node.get_logger().fatal(f'invalid file path: {path}/min')
                     return None
                 # accounting for bugs in yaml file
                 if min_param > max_param:
                     param_val =(float)(random.uniform(max_param, min_param))
-                    rospy.set_param(f'{path}',param_val)
+                    self.node.declare_parameter(f'{path}',param_val)
                     
                     return param_val
                 else:
                     param_val =(float)(random.uniform(min_param, max_param))
-                    rospy.set_param(f'{path}',param_val)
+                    self.node.declare_parameter(f'{path}',param_val)
                     return param_val
 
-            elif type_rospy == float or type_rospy == int:
+            elif type_rclpy == float or type_rclpy == int:
                 if secondParam is not None:
-                    return rospy.get_param(path, secondParam)
+                    return self.node.declare_parameter(path, secondParam)
                 else:
-                    return rospy.get_param(path)
+                    return self.node.declare_parameter(path)
         if returnValue:
-            rospy.logfatal(f'invalid file path: {path}')
+            self.node.get_logger().fatal(f'invalid file path: {path}')
         return None
 
     def configure_field(self):
@@ -414,7 +417,7 @@ class Simulator(object):
             init_pose = self.get_sim_param('~cars/init_pose')
 
             if 'name' not in car_config:
-                rospy.signal_shutdown('no "name" set for car config in sim')
+                rclpy.shutdown('no "name" set for car config in sim')
             car_name = car_config['name']
             if 'randomize_pose' in car_config:
                 init_pose = None
@@ -428,21 +431,21 @@ class Simulator(object):
                     'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
                 car_id = self.car_ids[car_name]
                 # create the car's Subscribers
-                self.car_effort_subs[car_name] = rospy.Subscriber(
+                self.car_effort_subs[car_name] = rclpy.Subscriber(
                     f'/cars/{car_name}/effort', ControlEffort,
                     self.effort_cb, callback_args=car_id)
-                self.car_cmd_subs[car_name] = rospy.Subscriber(
+                self.car_cmd_subs[car_name] = rclpy.Subscriber(
                     f'/cars/{car_name}/command', ControlCommand,
                     self.cmd_cb, callback_args=car_id)
                 # create the car's Publishers
                 if self.mode == SimulatorMode.REALISTIC:
-                    self.car_pose_pubs[car_name] = rospy.Publisher(
+                    self.car_pose_pubs[car_name] = rclpy.Publisher(
                         f'/cars/{car_name}/pose_sync_early',
                         PoseWithCovarianceStamped, queue_size=1)
-                    self.car_odom_pubs[car_name] = rospy.Publisher(
+                    self.car_odom_pubs[car_name] = rclpy.Publisher(
                         f'/cars/{car_name}/odom_truth', Odometry, queue_size=1)
                 elif self.mode == SimulatorMode.IDEAL:
-                    self.car_odom_pubs[car_name] = rospy.Publisher(
+                    self.car_odom_pubs[car_name] = rclpy.Publisher(
                         f'/cars/{car_name}/odom', Odometry, queue_size=1)
 
         return True
