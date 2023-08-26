@@ -15,4 +15,6 @@ RUN usermod -l $USER -u $UID -aG video,dialout -md /home/$USER $BASE_USER && \
     echo "$USER:$PW" | chpasswd
 
 USER $USER
+ENV PATH="${PATH}:/home/$USER/.local/bin"
+
 WORKDIR /home/$USER

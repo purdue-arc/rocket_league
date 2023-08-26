@@ -1,4 +1,9 @@
-"""Interface to the Rocket League project.
+"""
+This the main environment intended for use. It interfaces the agent with the
+mess of other nodes that exist in this repository. Look at higher level
+documentation to learn more about the inputs and outputs from this node and how
+they are consumed or created by others.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)

@@ -1,4 +1,13 @@
 """
+This package manipulates a ROS network so that it provides an enviornment to
+train an AI. In short, it uses the sim time mechanism used to replay bag files
+to mess with how time progresses, so that an arbitrary ROS network can be used
+as an environment, specifically, an OpenAI Gym environment.
+
+This can be used for both training and evaluation purposes. When training, it
+manipulates time so that the network gets what it needs. It evaluation, it
+runs the network as fast as real time is progressing.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Use joystick data to control car in sim.
+"""
+Use joystick data to control car in sim.
+
 License:
   BSD 3-Clause License
   Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
@@ -11,19 +13,25 @@ from rktl_msgs.msg import ControlEffort
 from std_srvs.srv import Empty
 from sensor_msgs.msg import Joy
 
+
 class XboxInterface():
     def __init__(self):
         rospy.init_node('xbox_interface')
 
-        self.base_throttle = rospy.get_param('~base_throttle') # throttle when not boosting
-        self.boost_throttle = rospy.get_param('~boost_throttle') # throttle when boosting
-        self.cooldown_ratio = rospy.get_param('~cooldown_ratio') # how long should one second of boost take to recharge?
-        self.max_boost = rospy.get_param('~max_boost') * self.cooldown_ratio # max time boost can be active
-        self.boost_tank = self.max_boost # this is how much boost is left
-        self.is_boosting = False # is the car currently boosting?
+        self.base_throttle = rospy.get_param(
+            '~base_throttle')  # throttle when not boosting
+        self.boost_throttle = rospy.get_param(
+            '~boost_throttle')  # throttle when boosting
+        # how long should one second of boost take to recharge?
+        self.cooldown_ratio = rospy.get_param('~cooldown_ratio')
+        # max time boost can be active
+        self.max_boost = rospy.get_param('~max_boost') * self.cooldown_ratio
+        self.boost_tank = self.max_boost  # this is how much boost is left
+        self.is_boosting = False  # is the car currently boosting?
 
         # Publishers
-        self.effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
+        self.effort_pub = rospy.Publisher(
+            'effort', ControlEffort, queue_size=1)
 
         # Subscribers
         rospy.Subscriber('joy', Joy, self.callback)
@@ -56,6 +64,7 @@ class XboxInterface():
             self.is_boosting = False
             msg.throttle *= self.base_throttle
         self.effort_pub.publish(msg)
+
 
 if __name__ == "__main__":
     XboxInterface()

@@ -4,7 +4,7 @@
 
     <group ns="agents/$(arg agent_name)">
         <!-- Path Follower -->
-        <node pkg="rktl_planner" type="path_follower" name="path_" output="screen">
+        <node pkg="rktl_planner" type="path_follower" name="path_follower" output="screen">
             <rosparam command="load" file="$(find rktl_planner)/config/path_follower.yaml"/>
             <param name="car_name" value="$(arg car_name)"/>
         </node>

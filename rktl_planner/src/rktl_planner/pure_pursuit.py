@@ -51,7 +51,8 @@ def calculate_lat_error(intersect_pos, bot_pos, bot_orient, lookahead_dist):
     return x * sign
 
 
-def calculate_turn_rad(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
+def calculate_turn_rad(
+        intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw):
     """Determines turning radius to reach intersection point."""
 
     _, _, bot_yaw = euler_from_quaternion(bot_orient)
