@@ -8,7 +8,7 @@ License:
   All rights reserved.
 """
 
-import rospy
+import rclpy
 import roslib.message
 from collections import deque
 from time import sleep
@@ -31,15 +31,15 @@ class Delay(object):
         assert msg_class is not None
 
         # create node
-        rospy.init_node('delay', anonymous=True)
-        pub = rospy.Publisher(output_name, msg_class, queue_size=1)
-        rospy.Subscriber(input_name, msg_class, self.msg_cb)
+        self.node = rclpy.create_node('delay', anonymous=True)
+        pub = self.node.create_publisher(msg_class, output_name, queue_size=1)
+        sub = self.node.create_subscription(msg_class, input_name, self.msg_cb)
         self.buffer = deque()
 
-        while not rospy.is_shutdown():
+        while not rclpy.is_shutdown():
             if len(self.buffer) > 0:
                 time, msg = self.buffer.popleft()
-                wait = delay - (rospy.Time.now() - time).to_sec()
+                wait = delay - (self.node.get_clock().now() - time).to_sec()
                 if wait > 0:
                     sleep(wait)
                 pub.publish(msg)
@@ -48,7 +48,7 @@ class Delay(object):
 
     def msg_cb(self, msg):
         """Callback for enqueuing new message"""
-        self.buffer.append((rospy.Time.now(), msg))
+        self.buffer.append((self.node.get_clock().now(), msg))
 
 
 if __name__ == "__main__":

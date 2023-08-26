@@ -8,7 +8,7 @@ License:
   All rights reserved.
 """
 
-import rospy
+import rclpy
 from rktl_msgs.msg import ControlEffort
 from std_srvs.srv import Empty
 from sensor_msgs.msg import Joy
@@ -16,32 +16,31 @@ from sensor_msgs.msg import Joy
 
 class XboxInterface():
     def __init__(self):
-        rospy.init_node('xbox_interface')
+        self.node = rclpy.create_node('xbox_interface')
 
-        self.base_throttle = rospy.get_param(
+        self.base_throttle = self.node.get_parameter(
             '~base_throttle')  # throttle when not boosting
-        self.boost_throttle = rospy.get_param(
+        self.boost_throttle = self.node.get_parameter(
             '~boost_throttle')  # throttle when boosting
         # how long should one second of boost take to recharge?
-        self.cooldown_ratio = rospy.get_param('~cooldown_ratio')
+        self.cooldown_ratio = self.node.get_parameter('~cooldown_ratio')
         # max time boost can be active
-        self.max_boost = rospy.get_param('~max_boost') * self.cooldown_ratio
+        self.max_boost = self.node.get_parameter('~max_boost') * self.cooldown_ratio
         self.boost_tank = self.max_boost  # this is how much boost is left
         self.is_boosting = False  # is the car currently boosting?
 
         # Publishers
-        self.effort_pub = rospy.Publisher(
-            'effort', ControlEffort, queue_size=1)
+        self.effort_pub = self.node.create_publisher(ControlEffort, 'effort', queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('joy', Joy, self.callback)
+        self.node.create_subscription(Joy, 'joy', self.callback)
 
         # Services
-        self.reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
+        self.reset_srv = self.node.create_client(Empty, '/sim_reset')
 
         # Manages the cooldown
-        rate = rospy.Rate(1)
-        while not rospy.is_shutdown():
+        rate = self.node.create_rate(1)
+        while not rclpy.is_shutdown():
             if not self.is_boosting:
                 if self.boost_tank < self.max_boost:
                     self.boost_tank += 1
@@ -52,7 +51,7 @@ class XboxInterface():
 
     def callback(self, joy: Joy):
         msg = ControlEffort()
-        msg.header.stamp = rospy.Time.now()
+        msg.header.stamp = self.node.get_clock().now()
         if (joy.buttons[6] == 1):
             self.reset_srv.call()
         msg.throttle = ((joy.axes[2] - joy.axes[5]) / 2)
