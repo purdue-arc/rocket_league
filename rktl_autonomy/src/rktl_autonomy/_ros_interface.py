@@ -14,7 +14,7 @@ import time, uuid, socket, os
 
 from gym import Env
 
-import rospy, roslaunch
+import rclpy, roslaunch
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
@@ -85,23 +85,23 @@ class ROSInterface(Env):
             self.close = lambda : launch.shutdown()
             # initialize self
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
-            rospy.init_node(node_name)
+            self.node = rclpy.create_node(node_name)
             # let someone else take a turn
             os.remove(f'/tmp/{run_id}_launch')
         else:
             # use an existing ROS network
-            rospy.init_node(node_name)
+            self.node = rclpy.create_node(node_name)
 
         # private variables
         self._cond = Condition()
 
         # additional set up for training
         if not self.__EVAL_MODE:
-            self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
-            self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
+            self.__DELTA_T = rclpy.duration.Duration.from_sec(1.0 / self.node.get_parameter_or('~rate', 30.0))
+            self.__clock_pub = self.node.create_publisher(Clock, '/clock', queue_size=1, latch=True)
 
             # initialize sim time
-            self.__time = rospy.Time.from_sec(time.time())
+            self.__time = rclpy.get_clock().now().from_sec(time.time())
             self.__clock_pub.publish(self.__time)
 
         # additional set up for logging
@@ -110,10 +110,10 @@ class ROSInterface(Env):
         if self.__EVAL_MODE:
             port = 11311
         self.__LOG_ID = f'{run_id}:{port}'
-        self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
+        self.__log_pub = self.node.create_publisher(DiagnosticStatus, '~log', queue_size=1)
         self.__episode = 0
         self.__net_reward = 0
-        self.__start_time = rospy.Time.now()
+        self.__start_time = rclpy.get_clock().now()
 
     def step(self, action):
         """
@@ -155,7 +155,7 @@ class ROSInterface(Env):
             info = {
                 'episode'    : self.__episode,
                 'net_reward' : self.__net_reward,
-                'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
+                'duration'   : (self.node.get_clock().now() - self.__start_time).to_sec()
             }
             info.update(self._get_state()[3])
             # send message
@@ -175,7 +175,7 @@ class ROSInterface(Env):
             self._reset_env()
         self._reset_self()
         self.__step_time_and_wait_for_state(5)
-        self.__start_time = rospy.Time.now()    # logging
+        self.__start_time = self.node.get_clock().now()    # logging
         return self._get_state()[0]
 
     def __step_time_and_wait_for_state(self, max_retries=1):
@@ -186,7 +186,7 @@ class ROSInterface(Env):
             retries = 0
             while not self.__wait_once_for_state():
                 if retries >= max_retries:
-                    rospy.logerr("Failed to get new state.")
+                    self.node.get_logger().error("Failed to get new state.")
                     raise SimTimeException
                 else:
                     self.__time += self.__DELTA_T
@@ -200,8 +200,8 @@ class ROSInterface(Env):
         """Wait and allow other threads to run."""
         with self._cond:
             has_state = self._cond.wait_for(self._has_state, 0.25)
-        if rospy.is_shutdown():
-            raise rospy.ROSInterruptException()
+        if rclpy.is_shutdown():
+            raise rclpy.ROSInterruptException()
         return has_state
 
     # All the below abstract methods / properties must be implemented by subclasses

@@ -15,7 +15,7 @@ from rktl_autonomy import ROSInterface
 from gym.spaces import Box, Discrete
 
 # ROS
-import rospy
+import rclpy
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import ControlCommand, MatchStatus
 from std_srvs.srv import Empty
@@ -46,64 +46,65 @@ class RocketLeagueInterface(ROSInterface):
                          run_id=run_id)
         # Constants
         self.env_number = env_number
+        self.node = rclpy.create_node('rocket_league_interface')
         # Actions
-        self._MIN_VELOCITY = -rospy.get_param('/cars/throttle/max_speed')
-        self._MAX_VELOCITY =  rospy.get_param('/cars/throttle/max_speed')
-        self._MIN_CURVATURE = -tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
-        self._MAX_CURVATURE =  tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
+        self._MIN_VELOCITY = -self.node.get_parameter('/cars/throttle/max_speed')
+        self._MAX_VELOCITY =  self.node.get_parameter('/cars/throttle/max_speed')
+        self._MIN_CURVATURE = -tan(self.node.get_parameter('/cars/steering/max_throw')) / self.node.get_parameter('cars/length')
+        self._MAX_CURVATURE =  tan(self.node.get_parameter('/cars/steering/max_throw')) / self.node.get_parameter('cars/length')
 
         # Action space overrides
-        if rospy.has_param('~action_space/velocity/min'):
-            min_velocity = rospy.get_param('~action_space/velocity/min')
+        if self.node.has_parameters('~action_space/velocity/min'):
+            min_velocity = self.node.get_parameter('~action_space/velocity/min')
             assert min_velocity > self._MIN_VELOCITY
             self._MIN_VELOCITY = min_velocity
-        if rospy.has_param('~action_space/velocity/max'):
-            max_velocity = rospy.get_param('~action_space/velocity/max')
+        if self.node.has_parameters('~action_space/velocity/max'):
+            max_velocity = self.node.get_parameter('~action_space/velocity/max')
             assert max_velocity < self._MAX_VELOCITY
             self._MAX_VELOCITY = max_velocity
-        if rospy.has_param('~action_space/curvature/min'):
-            min_curvature = rospy.get_param('~action_space/curvature/min')
+        if self.node.has_parameters('~action_space/curvature/min'):
+            min_curvature = self.node.get_parameter('~action_space/curvature/min')
             assert min_curvature > self._MIN_CURVATURE
             self._MIN_CURVATURE = min_curvature
-        if rospy.has_param('~action_space/curvature/max'):
-            max_curvature = rospy.get_param('~action_space/curvature/max')
+        if self.node.has_parameters('~action_space/curvature/max'):
+            max_curvature = self.node.get_parameter('~action_space/curvature/max')
             assert max_curvature < self._MAX_CURVATURE
             self._MAX_CURVATURE = max_curvature
 
         # Observations
-        self._FIELD_WIDTH = rospy.get_param('/field/width')
-        self._FIELD_LENGTH = rospy.get_param('/field/length')
-        self._GOAL_DEPTH = rospy.get_param('~observation/goal_depth', 0.075)
-        self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
-        self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
+        self._FIELD_WIDTH = self.node.get_parameter('/field/width')
+        self._FIELD_LENGTH = self.node.get_parameter('/field/length')
+        self._GOAL_DEPTH = self.node.get_parameter_or('~observation/goal_depth', 0.075)
+        self._MAX_OBS_VEL = self.node.get_parameter_or('~observation/velocity/max_abs', 3.0)
+        self._MAX_OBS_ANG_VEL = self.node.get_parameter_or('~observation/angular_velocity/max_abs', 2*pi)
 
         # Learning
-        self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
-        self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
-        self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
-        self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
-        self._DIRECTION_CHANGE_REWARD = rospy.get_param('~reward/direction_change', 0.0)
-        if isinstance(rospy.get_param('~reward/win', [100.0]), int):
-            self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])
+        self._MAX_TIME = self.node.get_parameter_or('~max_episode_time', 30.0)
+        self._CONSTANT_REWARD = self.node.get_parameter_or('~reward/constant', 0.0)
+        self._BALL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/ball_dist_sq', 0.0)
+        self._GOAL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/goal_dist_sq', 0.0)
+        self._DIRECTION_CHANGE_REWARD = self.node.get_parameter_or('~reward/direction_change', 0.0)
+        if isinstance(self.node.get_parameter_or('~reward/win', [100.0]), int):
+            self._WIN_REWARD = self.node.get_parameter_or('~reward/win', [100.0])
         else:
-            if len(rospy.get_param('~reward/win', [100.0])) >= self.env_number:
-                self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[0]
+            if len(self.node.get_parameter_or('~reward/win', [100.0])) >= self.env_number:
+                self._WIN_REWARD = self.node.get_parameter_or('~reward/win', [100.0])[0]
             else:
-                self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[self.env_number]
-        if isinstance(rospy.get_param('~reward/loss', [100.0]), int):
-            self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])
+                self._WIN_REWARD = self.node.get_parameter_or('~reward/win', [100.0])[self.env_number]
+        if isinstance(self.node.get_parameter('~reward/loss', [100.0]), int):
+            self._LOSS_REWARD = self.node.get_parameter('~reward/loss', [100.0])
         else:
-            if len(rospy.get_param('~reward/loss', [100.0])) >= self.env_number:
-                self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[0]
+            if len(self.node.get_parameter_or('~reward/loss', [100.0])) >= self.env_number:
+                self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', [100.0])[0]
             else:
-                self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[self.env_number]
-        self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
-        self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
-        self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
+                self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', [100.0])[self.env_number]
+        self._REVERSE_REWARD = self.node.get_parameter_or('~reward/reverse', 0.0)
+        self._WALL_REWARD = self.node.get_parameter_or('~reward/walls/value', 0.0)
+        self._WALL_THRESHOLD = self.node.get_parameter_or('~reward/walls/threshold', 0.0)
 
         # Publishers
-        self._command_pub = rospy.Publisher('cars/car0/command', ControlCommand, queue_size=1)
-        self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
+        self._command_pub = self.node.create_publisher(ControlCommand, 'cars/car0/command', queue_size=1)
+        self._reset_srv = self.node.create_client(Empty, 'sim_reset')
 
         # State variables
         self._car_odom = None
@@ -113,9 +114,9 @@ class RocketLeagueInterface(ROSInterface):
         self._prev_vel = None
 
         # Subscribers
-        rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
-        rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
-        rospy.Subscriber('match_status', MatchStatus, self._score_cb)
+        self.node.create_subscription(Odometry, 'cars/car0/odom', self._car_odom_cb)
+        self.node.create_subscription(Odometry, 'ball/odom', self._ball_odom_cb)
+        self.node.create_subscription(MatchStatus, 'match_status', self._score_cb)
 
         # block until environment is ready
         if not eval:
@@ -182,7 +183,7 @@ class RocketLeagueInterface(ROSInterface):
 
         # ensure it fits within the observation limits
         if not self.observation_space.contains(observation):
-            rospy.logwarn_throttle(5, "Coercing observation into valid bounds")
+            self.node.get_logger().warn("Coercing observation into valid bounds")
             np.clip(
                 observation,
                 self.observation_space.low,
@@ -191,8 +192,8 @@ class RocketLeagueInterface(ROSInterface):
 
         # check if time exceeded
         if self._start_time is None:
-            self._start_time = rospy.Time.now()
-        done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME
+            self._start_time = rclpy.get_clock().now()
+        done = (rclpy.get_clock().now() - self._start_time).to_sec() >= self._MAX_TIME
 
         # Determine reward
         reward = self._CONSTANT_REWARD
@@ -234,7 +235,7 @@ class RocketLeagueInterface(ROSInterface):
         assert self.action_space.contains(action)
 
         msg = ControlCommand()
-        msg.header.stamp = rospy.Time.now()
+        msg.header.stamp = self.node.get_clock().now()
 
         if (    action == CarActions.FWD or
                 action == CarActions.FWD_RIGHT or
