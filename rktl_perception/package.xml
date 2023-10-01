@@ -10,7 +10,7 @@
   <author email="dgerblic@purdue.edu">Daniel Gerblick</author>
   <author email="aernande@purdue.edu">AJ Ernandes</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>colcon</buildtool_depend>
   <depend>roscpp</depend>
   <depend>pointgrey_camera_driver</depend>
   <depend>image_proc</depend>
