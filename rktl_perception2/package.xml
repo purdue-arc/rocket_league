@@ -11,7 +11,7 @@
 
   <depend>rclcpp</depend>
 <!-- added dependencies from previous-->
- <depend>roscpp</depend>
+  <depend>roscpp</depend>
   <depend>pointgrey_camera_driver</depend>
   <depend>image_proc</depend>
   <depend>apriltag_ros</depend>
@@ -20,6 +20,11 @@
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
   <depend>nodelet</depend>
+  <depend>OpenCV</depend>
+  <depend>Eigen3</depened>
+  <depend>geometry_msgs</depend>
+  <depend>image_geometry</depend>
+
   <exec_depend>camera_calibration</exec_depend>
   <exec_depend>rviz</exec_depend>
 
