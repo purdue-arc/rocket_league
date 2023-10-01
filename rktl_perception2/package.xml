@@ -20,10 +20,12 @@
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
   <depend>nodelet</depend>
+<!-- added dependencies missing from previous--> 
   <depend>OpenCV</depend>
   <depend>Eigen3</depened>
   <depend>geometry_msgs</depend>
-  <depend>image_geometry</depend>
+  <depend>image_geometry</depened>
+
 
   <exec_depend>camera_calibration</exec_depend>
   <exec_depend>rviz</exec_depend>
