@@ -14,7 +14,7 @@ import time, uuid, socket, os
 
 from gym import Env
 
-import rospy, roslaunch
+import rclpy, roslaunch
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 

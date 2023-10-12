@@ -16,6 +16,8 @@ from gym.spaces import Box, Discrete
 
 # ROS
 import rospy
+import rclpy
+from rclpy import Node
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import ControlCommand, MatchStatus
 from std_srvs.srv import Empty
@@ -53,8 +55,10 @@ class RocketLeagueInterface(ROSInterface):
         self._MAX_CURVATURE =  tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
 
         # Action space overrides
-        if rospy.has_param('~action_space/velocity/min'):
-            min_velocity = rospy.get_param('~action_space/velocity/min')
+        # if rospy.has_param('~action_space/velocity/min'):
+        if self.node.has_parameter('~action_space/velocity/min'):
+            # min_velocity = rospy.get_param('~action_space/velocity/min')
+            min_velocity = self.node.get_parameter('~action_space/velocity/min')
             assert min_velocity > self._MIN_VELOCITY
             self._MIN_VELOCITY = min_velocity
         if rospy.has_param('~action_space/velocity/max'):
@@ -101,9 +105,12 @@ class RocketLeagueInterface(ROSInterface):
         self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
 
+        self.node = Node('rocket_league_interface')
         # Publishers
-        self._command_pub = rospy.Publisher('cars/car0/command', ControlCommand, queue_size=1)
-        self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
+        # self._command_pub = rospy.Publisher('cars/car0/command', ControlCommand, queue_size=1)
+        self.node.create_publisher(ControlCommand, 'cars/car0/command', 1)
+        # self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
+        self._reset_srv = self.node.create_client(Empty, 'sim_reset')
 
         # State variables
         self._car_odom = None
@@ -113,13 +120,19 @@ class RocketLeagueInterface(ROSInterface):
         self._prev_vel = None
 
         # Subscribers
-        rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
-        rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
-        rospy.Subscriber('match_status', MatchStatus, self._score_cb)
+        # rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
+        self.node.create_subscription(Odometry, 'cars/car0/odom', self._car_odom_cb)
+        # rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
+        self.node.create_subscription(Odometry, 'ball/odom', self._ball_odom_cb)
+        # rospy.Subscriber('match_status', MatchStatus, self._score_cb)
+        self.node.create_subscription(MatchStatus, 'match_status', self._score_cb)
 
         # block until environment is ready
+        # if not eval:
+        #     rospy.wait_for_service('sim_reset')
         if not eval:
-            rospy.wait_for_service('sim_reset')
+            while not self._reset_srv.wait_for_service(timeout_sec=1.0):
+                self.node.get_logger().info('service not available, waiting again...')
 
     @property
     def action_space(self):
@@ -182,7 +195,8 @@ class RocketLeagueInterface(ROSInterface):
 
         # ensure it fits within the observation limits
         if not self.observation_space.contains(observation):
-            rospy.logwarn_throttle(5, "Coercing observation into valid bounds")
+            # rospy.logwarn_throttle(5, "Coercing observation into valid bounds")
+            self.node.get_logger().warn("Coercing observations into valid bounds")
             np.clip(
                 observation,
                 self.observation_space.low,
@@ -191,7 +205,8 @@ class RocketLeagueInterface(ROSInterface):
 
         # check if time exceeded
         if self._start_time is None:
-            self._start_time = rospy.Time.now()
+            # self._start_time = rospy.Time.now()
+            self._start_time = self.node.get_clock().now()
         done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME
 
         # Determine reward
