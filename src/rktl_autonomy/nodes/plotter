@@ -6,7 +6,9 @@ License:
   All rights reserved.
 """
 
-import rospy
+# import rospy
+import rclpy
+from rclpy.node import Node
 from diagnostic_msgs.msg import DiagnosticStatus
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
@@ -15,29 +17,32 @@ matplotlib.use('PS')
 import matplotlib.pyplot as plt
 from numpy import append
 from os.path import expanduser, normpath
-
-class Plotter(object):
+class Plotter(rclpy.Node):
     """Plot progress during training."""
     def __init__(self):
-        rospy.init_node('model_progress_plotter')
+        #rospy.init_node('model_progress_plotter')
+        super()._init_('model_progress_plotter')
 
         # Constants
-        self.LOG_DIR = normpath(expanduser(rospy.get_param('~log/base_dir')))
-        self.PLOT_FREQ = rospy.get_param('~log/plot_freq', 25)
-        self.BASIC_VARS = rospy.get_param('~log/basic', ["duration"])
-        self.ADVANCED_VARS = rospy.get_param('~log/advanced', ["net_reward"])
+        self.LOG_DIR = normpath(expanduser(rclpy.get_param('~log/base_dir')))
+        #self.PLOT_FREQ = rospy.get_param('~log/plot_freq', 25)
+        self.PLOT_FREQ = self.get_parameter('~log/plot_freq', 25)
+        #self.BASIC_VARS = rospy.get_param('~log/basic', ["duration"])
+        self.BASIC_VARS = self.get_parameter('~log/basic', ["duration"])
+        #self.ADVANCED_VARS = rospy.get_param('~log/advanced', ["net_reward"])
+        self.ADVANCED_VARS = self.get_parameter('~log/advanced', ["net_reward"])
 
         self.KEYS = ["episode"] + self.BASIC_VARS + self.ADVANCED_VARS
         
         # Subscribers
-        rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
+        #rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
+        self.create_subscription(DiagnosticStatus, '~log', self.progress_cb)
 
         self.history = None
         self.LOG_NAME = None
         self.next_plot_episode = self.PLOT_FREQ
         self.init_plot()
-
-        rospy.spin()
+        rclpy.spin()
 
     def init_plot(self):
         """Initialize the plot and all axes."""
@@ -96,7 +101,7 @@ class Plotter(object):
             self.LOG_NAME = '/' + progress_msg.hardware_id.replace(':', '/plot_') + '.png'
 
         data = {}
-
+        
         for item in progress_msg.values:
             if item.key in self.KEYS:
                 data[item.key] = float(item.value)
@@ -112,7 +117,8 @@ class Plotter(object):
                 self.next_plot_episode += self.PLOT_FREQ
                 self.history = None
         else:
-            rospy.logerr("Bad progress message.")
+            #rospy.logerr("Bad progress message.")
+            self.get_logger().warn("Bad progress message.")
 
     def plot(self):
         """Add new data to plot, show, and save"""
@@ -165,7 +171,8 @@ class Plotter(object):
         plt.draw()
 
         # update file
-        rospy.loginfo(f"Saving training progress to {self.LOG_DIR}{self.LOG_NAME}")
+        #rospy.loginfo(f"Saving training progress to {self.LOG_DIR}{self.LOG_NAME}")
+        self.get_logger().info("Saving training progress to {self.LOG_DIR}{self.LOG_NAME}")
         plt.savefig(self.LOG_DIR + self.LOG_NAME)
 
 if __name__ == "__main__":
