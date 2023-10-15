@@ -29,7 +29,7 @@ def generate_launch_description():
                     '/use_sim_time': 'true'
                 },
                 {
-                    'frequency': '$(eval 1/rate)'
+                    'frequency': 1/launch.substitutions.LaunchConfiguration('rate') #'$(eval 1/rate)'
                 },
                 {
                     'render': launch.substitutions.LaunchConfiguration('render')

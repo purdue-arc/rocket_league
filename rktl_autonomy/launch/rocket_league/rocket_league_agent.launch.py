@@ -27,20 +27,19 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {
-                    'weights': '$(eval weights_dir + weights_name)'
+                    'weights': launch.substitutions.LaunchConfiguration('weights_dir')+launch.substitutions.LaunchConfiguration('weights_name')#'$(eval weights_dir + weights_name)'
                 },
-                get_package_share_directory(
-                    'rktl_autonomy') + '/config/rocket_league.yaml'
+                get_package_share_directory('rktl_autonomy') + '/config/rocket_league.yaml'
             ]
         ),
         launch_ros.actions.Node(
+            condition=launch.conditions.LaunchConfigurationNotEquals('plot_log', 'false'),
             package='rktl_autonomy',
             executable='plotter',
             name='plotter',
             output='screen',
             parameters=[
-                get_package_share_directory(
-                    'rktl_autonomy') + '/config/rocket_league.yaml'
+                get_package_share_directory('rktl_autonomy') + '/config/rocket_league.yaml'
             ]
         )
     ])

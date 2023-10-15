@@ -33,6 +33,7 @@ def generate_launch_description():
             default_value='none'
         ),
         launch_ros.actions.Node(
+            condition=launch.conditions.LaunchConfigurationEquals('plot_log', 'true'),
             package='rktl_autonomy',
             executable='plotter',
             name='plotter',
@@ -41,14 +42,12 @@ def generate_launch_description():
                 {
                     '/use_sim_time': 'true'
                 },
-                get_package_share_directory(
-                    'rktl_autonomy') + '/config/rocket_league.yaml'
+                get_package_share_directory('rktl_autonomy') + '/config/rocket_league.yaml'
             ]
         ),
         launch.actions.IncludeLaunchDescription(
             launch.launch_description_sources.PythonLaunchDescriptionSource(
-                os.path.join(get_package_share_directory(
-                    'rktl_launch'), 'launch/rocket_league_sim.launch.py')
+                os.path.join(get_package_share_directory('rktl_launch'), 'launch/rocket_league_sim.launch.py')
             ),
             launch_arguments={
                 'render': launch.substitutions.LaunchConfiguration('render'),
