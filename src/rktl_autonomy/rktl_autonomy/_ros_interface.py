@@ -85,20 +85,25 @@ class ROSInterface(Env):
             self.close = lambda : launch.shutdown()
             # initialize self
             os.environ['ROS_MASTER_URI'] = f'http://localhost:{port}'
-            rospy.init_node(node_name)
+            # rospy.init_node(node_name)
+            self.node = rclpy.Node(node_name)
             # let someone else take a turn
             os.remove(f'/tmp/{run_id}_launch')
         else:
             # use an existing ROS network
-            rospy.init_node(node_name)
+            # rospy.init_node(node_name)
+            self.node = rclpy.Node(node_name)
 
         # private variables
         self._cond = Condition()
 
         # additional set up for training
         if not self.__EVAL_MODE:
-            self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
-            self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
+            # self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
+            # self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
+
+            self.__DELTA_T = rospy.Duration.from_sec(1.0 / self.node.get_parameter('~rate', 30.0))
+            self.__clock_pub = self.node.create_publisher(Clock, '/clock', queue_size=1, latch=True)
 
             # initialize sim time
             self.__time = rospy.Time.from_sec(time.time())
