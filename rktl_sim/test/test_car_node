@@ -7,14 +7,21 @@ License:
 """
 
 import unittest
-import rospy
+import rclpy
+import sys
+
+#import rospy
 import simulator
+
 
 class TestCar(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        rospy.init_node('test_car_node')
-
+        #rospy.init_node('test_car_node')
+        rclpy.init(args=sys.argv)
+        node = rclpy.create_node('test_car_node')
+        node.get_logger().info('Created node')
+        
         urdf_paths = {}
         urdf_paths["car"] = rospy.get_param('~urdf/car')
         urdf_paths["plane"] = rospy.get_param('~urdf/plane')

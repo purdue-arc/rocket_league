@@ -13,22 +13,29 @@ TODO:
 import math
 from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
-import rospy
+import rclpy
+import sys
+
+#import rospy
 from tf.transformations import euler_from_quaternion
 from threading import Lock
 import numpy as np
+
 
 # Local library
 import visualizer
 from rktl_msgs.msg import Path, BezierPathList
 from rktl_planner import BezierPath
 
+
 class VisualizerROS(object):
     """ROS wrapper for the visualizer."""
 
     def __init__(self):
-        rospy.init_node("visualizer")
-
+        #rospy.init_node("visualizer")
+        rclpy.init(args=sys.argv)
+        node = rclpy.create_node("visualizer")
+        
         # Collecting global parameters
         field_width = rospy.get_param('/field/width')
         field_length = rospy.get_param('/field/length')
