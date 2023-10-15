@@ -9,13 +9,17 @@ License:
 from rktl_autonomy import RocketLeagueInterface
 from stable_baselines3 import PPO
 from os.path import expanduser
-import rospy
+# import rospy
+import rclpy
+
+
 
 # create interface (and init ROS)
 env = RocketLeagueInterface(eval=True)
 
 # load the model
-weights = expanduser(rospy.get_param('~weights'))
+# weights = expanduser(rospy.get_param('~weights'))
+weights = expanduser(env.node.get_parameter('~weights'))
 model = PPO.load(weights)
 
 # evaluate in real-time
@@ -24,5 +28,6 @@ while True:
     action, __ = model.predict(obs)
     try:
         obs, __, __, __ = env.step(action)
-    except rospy.ROSInterruptException:
+    # except rospy.ROSInterruptException:
+    except rclpy.ROSInterruptException:
         exit()

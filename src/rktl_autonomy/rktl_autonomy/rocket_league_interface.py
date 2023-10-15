@@ -15,7 +15,7 @@ from rktl_autonomy import ROSInterface
 from gym.spaces import Box, Discrete
 
 # ROS
-import rospy
+# import rospy
 import rclpy
 from rclpy import Node
 from nav_msgs.msg import Odometry
