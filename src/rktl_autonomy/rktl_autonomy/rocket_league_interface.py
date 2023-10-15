@@ -241,7 +241,9 @@ class RocketLeagueInterface(ROSInterface):
         if self._start_time is None:
             # self._start_time = rospy.Time.now()
             self._start_time = self.node.get_clock().now()
-        done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME
+        # done = (rospy.Time.now() - self._start_time).to_sec() >= self._MAX_TIME
+        done = (self.node.get_clock().now() - self._start_time).to_sec() >= self._MAX_TIME
+
 
         # Determine reward
         reward = self._CONSTANT_REWARD
