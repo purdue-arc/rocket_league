@@ -14,7 +14,7 @@ def generate_launch_description():
         ),
         launch.actions.DeclareLaunchArgument(
             name='sim_mode',
-            default_value='realistic'
+            default_value='realistic' # Either realistic or ideal (check docs)
         ),
         launch.actions.DeclareLaunchArgument(
             name='perception_delay',
@@ -22,36 +22,61 @@ def generate_launch_description():
         ),
         launch.actions.DeclareLaunchArgument(
             name='agent_type',
-            default_value='patrol'
+            default_value='patrol' # Either planner, autonomy, or patrol
         ),
         launch.actions.DeclareLaunchArgument(
             name='autonomy_weights',
             default_value='model'
         ),
-        launch_ros.actions.Node(
-            package='rktl_control',
-            executable='topic_delay',
-            name='pose_delay',
-            condition=launch.conditions.IfCondition(
-                "$(eval sim_mode == 'realistic')")
+        launch_ros.actions.SetRemap(
+            src="/cars/car0/odom",
+            dst="/cars/car0/odom_truth",
+            namespace="truth",
+            condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
+        ),
+        launch_ros.actions.SetRemap(
+            src="/ball/odom",
+            dst="/ball/odom_truth",
+            namespace="truth",
+            condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
+        ),
+        launch_ros.actions.SetParameter(
+            name="window_name",
+            value="Ground Truth",
+            namespace="visualizer",
+            condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
         ),
         launch_ros.actions.Node(
+            namespace='ball',
             package='rktl_control',
             executable='topic_delay',
             name='pose_delay',
-            condition=launch.conditions.IfCondition(
-                "$(eval sim_mode == 'realistic')")
+            condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic'),
+            arguments="pose_sync_early pose_sync geometry_msgs/PoseWithCovarianceStamped " + str(launch.substitutions.LaunchConfiguration('perception_delay'))
+        ),
+        launch_ros.actions.Node(
+            namespace='cars/car0',
+            package='rktl_control',
+            executable='topic_delay',
+            name='pose_delay',
+            condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic'),
+            arguments="pose_sync_early pose_sync geometry_msgs/PoseWithCovarianceStamped " + str(launch.substitutions.LaunchConfiguration('perception_delay'))
         ),
         launch_ros.actions.Node(
             package='rqt_gui',
             executable='rqt_gui',
-            name='rqt_gui'
+            name='rqt_gui',
+            condition=launch.conditions.LaunchConfigurationEquals('render', 'true'),
+            arguments='--perspective-file ' + os.path.join(get_package_share_directory(
+                    'rktl_launch'), 'rqt','rktl.perspective')
         ),
         launch.actions.IncludeLaunchDescription(
             launch.launch_description_sources.PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_sim'), 'launch/visualizer.launch.py')
-            )
+            ),
+            namespace='truth',
+            condition=launch.conditions.LaunchConfigurationEquals('render', 'true')
         ),
         launch.actions.IncludeLaunchDescription(
             launch.launch_description_sources.PythonLaunchDescriptionSource(
