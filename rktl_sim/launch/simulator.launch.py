@@ -14,7 +14,7 @@ def generate_launch_description():
         ),
         launch.actions.DeclareLaunchArgument(
             name='sim_mode',
-            default_value='realistic'
+            default_value='realistic' # Either realistic or ideal (check docs)
         ),
         launch_ros.actions.Node(
             package='rktl_sim',
