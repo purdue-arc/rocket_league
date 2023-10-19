@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Tests for rewards in rocket_league_interface.py. This node will own the
+interface object and evaluate it's output.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+# import unittest, rostest, rospy
+import unittest, rostest, rcply
+from nav_msgs.msg import Odometry
+from rktl_msgs.msg import MatchStatus
+from std_srvs.srv import Empty, EmptyResponse
+from rosgraph_msgs.msg import Clock
+import numpy as np
+from rktl_autonomy import RocketLeagueInterface
+import uuid
+
+def easy_odom(x, y, v):
+    """Helper to construct Odom msgs."""
+    odom_msg = Odometry()
+    odom_msg.pose.pose.orientation.w = 1
+    odom_msg.pose.pose.position.x = x
+    odom_msg.pose.pose.position.y = y
+    odom_msg.twist.twist.linear.x = v
+    return odom_msg
+
+class TestStep(unittest.TestCase):
+    def test_all(self):
+        # initialize node and interface to code under test
+        rospy.init_node('rocket_league_agent')
+        self.car_pub = rospy.Publisher('cars/car0/odom', Odometry, queue_size=1) 
+        self.ball_pub = rospy.Publisher('ball/odom', Odometry, queue_size=1)
+        self.match_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
+        rospy.Subscriber('/clock', Clock, self.clock_cb)
+        rospy.Service('sim_reset', Empty, self.reset)
+
+        # member variables used for test
+        self.send_car = None
+        self.send_ball = None
+        self.send_match = None
+        self.last_time = None
+        self.want_reset = False
+
+        # initialize code under test
+        # would hang if above service was not initialized first
+        env = RocketLeagueInterface(launch_args=['render:=false'], run_id = str(uuid.uuid4()))
+
+        # wait until first clock callback called
+        while(self.last_time is None):
+            pass
+
+        # Test reset
+        self.send_car = easy_odom(2, 1, 2.5)
+        self.send_ball = easy_odom(-2, -1, -2.5)
+        self.send_match = MatchStatus(status=MatchStatus.ONGOING)
+        self.want_reset = True
+        max_time = self.last_time + rospy.Duration.from_sec(0.6)
+
+        obs = env.reset()
+
+        self.assertTrue(np.allclose(obs, [2, 1, 0, 2.5, 0, -2, -1, -2.5, 0]), msg='observation vector is incorrect')
+        self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
+
+        # step 1
+        self.send_car = easy_odom(0, 0, 1)
+        self.send_ball = easy_odom(0, 0, 0)
+        self.send_match = MatchStatus(status=MatchStatus.ONGOING)
+        self.want_reset = False
+        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+
+        obs, reward, done, __ = env.step(env.action_space.sample())
+
+        self.assertTrue(np.allclose(obs, [0, 0, 0, 1, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, -2.125, places=4, msg='reward is incorrect')
+        self.assertFalse(done, msg='done is incorrect')
+        self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
+
+        # step 2
+        self.send_car = easy_odom(0, 0, -1)
+        self.send_ball = easy_odom(1, 0, 0)
+        self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_A)
+        self.want_reset = False
+        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+
+        obs, reward, done, __ = env.step(env.action_space.sample())
+
+        self.assertTrue(np.allclose(obs, [0, 0, 0, -1, 0, 1, 0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, 998.775, places=4, msg='reward is incorrect')
+        self.assertTrue(done, msg='done is incorrect')
+        self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
+
+        # step 3
+        self.send_car = easy_odom(2.3, 0, 0)
+        self.send_ball = easy_odom(0, 0, 0)
+        self.send_match = MatchStatus(status=MatchStatus.ONGOING)
+        self.want_reset = False
+        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+
+        obs, reward, done, __ = env.step(env.action_space.sample())
+
+        self.assertTrue(np.allclose(obs, [2.3, 0, 0, 0, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, -7.654, places=4, msg='reward is incorrect')
+        self.assertFalse(done, msg='done is incorrect')
+        self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
+
+        # step 4
+        self.send_car = easy_odom(0, -1.65, 1)
+        self.send_ball = easy_odom(0, 0, 0)
+        self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_A)
+        self.want_reset = False
+        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+
+        obs, reward, done, __ = env.step(env.action_space.sample())
+
+        self.assertTrue(np.allclose(obs, [0, -1.65, 0, 1, 0, 0, 0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, 992.60275, places=4, msg='reward is incorrect')
+        self.assertTrue(done, msg='done is incorrect')
+        self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
+
+        # step 5
+        self.send_car = easy_odom(1, 0.5, 0)
+        self.send_ball = easy_odom(-2.3, 1.0, 0)
+        self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_B)
+        self.want_reset = False
+        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+
+        obs, reward, done, __ = env.step(env.action_space.sample())
+
+        self.assertTrue(np.allclose(obs, [1, 0.5, 0, 0, 0, -2.3, 1.0, 0, 0]), msg='observation vector is incorrect')
+        self.assertAlmostEqual(reward, -512.134, places=4, msg='reward is incorrect')
+        self.assertTrue(done, msg='done is incorrect')
+        self.assertLessEqual(self.last_time, max_time, msg='step took too many retry cycles')
+
+    def clock_cb(self, clock_msg):
+        """Callback for clock signal."""
+        self.last_time = clock_msg.clock
+        if self.send_car is not None:
+            self.car_pub.publish(self.send_car)
+        if self.send_ball is not None:
+            self.ball_pub.publish(self.send_ball)
+        if self.send_match is not None:
+            self.match_pub.publish(self.send_match)
+
+    def reset(self, __):
+        """Do nothing."""
+        self.assertTrue(self.want_reset, msg='env reset called when unexpected')
+        return EmptyResponse()
+
+if __name__ == '__main__':
+    rostest.rosrun('rktl_autonomy', 'test_rktl_rewards', TestStep)
