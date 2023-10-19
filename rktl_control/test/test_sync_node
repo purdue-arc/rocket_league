@@ -49,9 +49,9 @@ class TestSync(unittest.TestCase):
         car1_pub = rospy.Publisher('cars/car1/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
         ball_pub = rospy.Publisher('ball/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
 
-        rospy.Subscriber('cars/car0/pose_sync', PoseWithCovarianceStamped, self.car0_cb)
-        rospy.Subscriber('cars/car1/pose_sync', PoseWithCovarianceStamped, self.car1_cb)
-        rospy.Subscriber('ball/pose_sync', PoseWithCovarianceStamped, self.ball_cb)
+        node.create_subscription(PoseWithCovarianceStamped, 'cars/car0/pose_sync', self.car0_cb)
+        node.create_subscription(PoseWithCovarianceStamped, 'cars/car1/pose_sync', self.car1_cb)
+        node.create_subscription(PoseWithCovarianceStamped, 'ball/pose_sync', self.ball_cb)
 
         # member variables used for test
         self.last_car0 = None

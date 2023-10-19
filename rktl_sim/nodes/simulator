@@ -465,12 +465,18 @@ class Simulator(object):
                     'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
                 car_id = self.car_ids[car_name]
                 # create the car's Subscribers
-                self.car_effort_subs[car_name] = rospy.Subscriber(
-                    f'/cars/{car_name}/effort', ControlEffort,
+                # self.car_effort_subs[car_name] = rospy.Subscriber(
+                #     f'/cars/{car_name}/effort', ControlEffort,
+                #     self.effort_cb, callback_args=car_id)
+                self.car_effort_subs[car_name] = node.create_subscription(
+                    ControlEffort, f'/cars/{car_name}/effort',
                     self.effort_cb, callback_args=car_id)
-                self.car_cmd_subs[car_name] = rospy.Subscriber(
-                    f'/cars/{car_name}/command', ControlCommand,
-                    self.cmd_cb, callback_args=car_id)
+                # self.car_cmd_subs[car_name] = rospy.Subscriber(
+                #     f'/cars/{car_name}/command', ControlCommand,
+                #     self.cmd_cb, callback_args=car_id)
+                self.car_cmd_subs[car_name] = node.create_subscription(
+                     ControlEffort, f'/cars/{car_name}/effort',
+                    self.effort_cb, callback_args=car_id)
                 # create the car's Publishers
                 if self.mode == SimulatorMode.REALISTIC:
                     self.car_pose_pubs[car_name] = rospy.Publisher(

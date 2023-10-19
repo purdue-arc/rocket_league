@@ -21,7 +21,7 @@ class Projector(object):
     def __init__(self):
         rospy.init_node('projector')
         self.depth_pub = rospy.Publisher('depth_rect', Image, queue_size=1)
-        rospy.Subscriber('camera_info', CameraInfo, self.camera_info_cb)
+        node.create_subscription(CameraInfo, 'camera_info', self.camera_info_cb)
 
         # constants
         self.GROUND_HEIGHT = rospy.get_param('~ground_height', 0.0)

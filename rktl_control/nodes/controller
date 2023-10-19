@@ -135,8 +135,8 @@ class Controller(object):
         self.pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('command', ControlCommand, self.command_cb)
-        rospy.Subscriber('odom', Odometry, self.odom_cb)
+        node.create_subscription(ControlCommand, 'command', self.command_cb)
+        node.create_subscription(Odometry, 'odom', self.odom_cb)
 
         # trust that odom_cb runs at proper rate
         rospy.spin()

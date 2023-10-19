@@ -30,7 +30,7 @@ class Plotter(object):
         self.KEYS = ["episode"] + self.BASIC_VARS + self.ADVANCED_VARS
         
         # Subscribers
-        rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
+        node.create_subscription(DiagnosticStatus, '~log', self.progress_cb)
 
         self.history = None
         self.LOG_NAME = None

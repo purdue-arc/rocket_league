@@ -52,7 +52,7 @@ class PathFollower(object):
 
         # Subscribers
         rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
-        rospy.Subscriber('linear_path', Path, self.path_cb)
+        node.create_subscription(Path, 'linear_path', self.path_cb)
 
         rospy.spin()
 

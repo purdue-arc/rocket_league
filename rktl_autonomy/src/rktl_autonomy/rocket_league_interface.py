@@ -113,9 +113,9 @@ class RocketLeagueInterface(ROSInterface):
         self._prev_vel = None
 
         # Subscribers
-        rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
-        rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
-        rospy.Subscriber('match_status', MatchStatus, self._score_cb)
+        node.create_subscription(Odometry, 'cars/car0/odom', self._car_odom_cb)
+        node.create_subscription(Odometry, 'ball/odom', self._ball_odom_cb)
+        node.create_subscription(MatchStatus, 'match_status', self._score_cb)
 
         # block until environment is ready
         if not eval:

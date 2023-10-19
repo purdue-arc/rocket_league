@@ -48,9 +48,9 @@ class CartpoleInterface(ROSInterface):
         self._done = None
 
         # Subscribers
-        rospy.Subscriber('cartpole/observation', Float32MultiArray, self._obs_cb)
-        rospy.Subscriber('cartpole/done', Bool, self._done_cb)
-        rospy.Subscriber('cartpole/reward', Float32, self._reward_cb)
+        node.create_subscription(Float32MultiArray, 'cartpole/observation', self._obs_cb)
+        node.create_subscription(Bool, 'cartpole/done', self._done_cb)
+        node.create_subscription(Float32, 'cartpole/reward', self._reward_cb)
 
     @property
     def action_space(self):
