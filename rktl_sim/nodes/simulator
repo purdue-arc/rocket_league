@@ -155,6 +155,7 @@ class Simulator(object):
 
         if urdf_path is None:
             #rospy.signal_shutdown('no urdf path set for "{}"'.format(urdf_path))
+            self.destroy_node('no urdf path set for "{}"'.format(urdf_path))
             try:
                 raise Exception('no urdf path set for "{}"'.format(urdf_path))
             except Exception as e:
@@ -168,7 +169,7 @@ class Simulator(object):
 
         if not os.path.isfile(urdf_path):
             #rospy.signal_shutdown('no urdf file exists at path {}'.format(urdf_path))
-            rclpy.shutdown('no urdf file exists at path {}'.format(urdf_path))
+            self.destroy_node('no urdf file exists at path {}'.format(urdf_path))
 
     def effort_cb(self, effort_msg, car_id):
         """Sets a car's effort with throttle and steering (overwrites commands)."""
@@ -351,7 +352,6 @@ class Simulator(object):
         else:
             if '~' in path:
                 if secondParam is not None:
-
                     #return rospy.get_param(f'{path}', secondParam)
                     return self.node.declare_parameter(f'{path}', secondParam)
                 else:
@@ -380,30 +380,38 @@ class Simulator(object):
              
                 if not max_param:
                     if returnValue:
-                        rospy.logfatal(f'invalid file path: {path}/max')
+                        #rospy.logfatal(f'invalid file path: {path}/max')
+                        self.node.get_logger().fatal(f'invalid file path: {path}/max')
                     return None
                 if not min_param:
                     if returnValue:
-                        rospy.logfatal(f'invalid file path: {path}/min')
+                        #rospy.logfatal(f'invalid file path: {path}/min')
+                        self.node.get_logger().fatal(f'invalid file path: {path}/min')
                     return None
                 # accounting for bugs in yaml file
                 if min_param > max_param:
                     param_val =(float)(random.uniform(max_param, min_param))
-                    rospy.set_param(f'{path}',param_val)
+                    #rospy.set_param(f'{path}',param_val)
+                    self.node.declare_parameter(f'{path}',param_val)
                     
                     return param_val
                 else:
                     param_val =(float)(random.uniform(min_param, max_param))
-                    rospy.set_param(f'{path}',param_val)
+                    #rospy.set_param(f'{path}',param_val)
+                    self.node.declare_parameter(f'{path}',param_val)
+                    
                     return param_val
 
             elif type_rospy == float or type_rospy == int:
                 if secondParam is not None:
-                    return rospy.get_param(path, secondParam)
+                    #return rospy.get_param(path, secondParam)
+                    return self.node.declare_parameter(path, secondParam)
                 else:
-                    return rospy.get_param(path)
+                    #return rospy.get_param(path)
+                    return self.node.declare_parameter(path)
         if returnValue:
-            rospy.logfatal(f'invalid file path: {path}')
+            #rospy.logfatal(f'invalid file path: {path}')
+            self.node.get_logger().fatal(f'invalid file path: {path}')
         return None
 
     def configure_field(self):
@@ -442,7 +450,8 @@ class Simulator(object):
             init_pose = self.get_sim_param('~cars/init_pose')
 
             if 'name' not in car_config:
-                rospy.signal_shutdown('no "name" set for car config in sim')
+                #rospy.signal_shutdown('no "name" set for car config in sim')
+                self.destroy_node('no "name" set for car config in sim')
             car_name = car_config['name']
             if 'randomize_pose' in car_config:
                 init_pose = None
