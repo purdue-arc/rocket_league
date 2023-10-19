@@ -475,19 +475,28 @@ class Simulator(object):
                 #     f'/cars/{car_name}/command', ControlCommand,
                 #     self.cmd_cb, callback_args=car_id)
                 self.car_cmd_subs[car_name] = node.create_subscription(
-                     ControlEffort, f'/cars/{car_name}/effort',
-                    self.effort_cb, callback_args=car_id)
+                    ControlCommand, f'/cars/{car_name}/command',
+                    self.cmd_cb, callback_args=car_id)
+                
                 # create the car's Publishers
                 if self.mode == SimulatorMode.REALISTIC:
-                    self.car_pose_pubs[car_name] = rospy.Publisher(
-                        f'/cars/{car_name}/pose_sync_early',
-                        PoseWithCovarianceStamped, queue_size=1)
-                    self.car_odom_pubs[car_name] = rospy.Publisher(
-                        f'/cars/{car_name}/odom_truth', Odometry, queue_size=1)
+                    # self.car_pose_pubs[car_name] = rospy.Publisher(
+                    #     f'/cars/{car_name}/pose_sync_early',
+                    #     PoseWithCovarianceStamped, queue_size=1)
+                    self.car_pose_pubs[car_name] = node.create_publisher(
+                        PoseWithCovarianceStamped, f'/cars/{car_name}/pose_sync_early',
+                        1)
+                    
+                    # self.car_odom_pubs[car_name] = rospy.Publisher(
+                    #     f'/cars/{car_name}/odom_truth', Odometry, queue_size=1)
+                    self.car_pose_pubs[car_name] = node.create_publisher(
+                        Odometry, f'/cars/{car_name}/odom_truth', 1)
+                
                 elif self.mode == SimulatorMode.IDEAL:
-                    self.car_odom_pubs[car_name] = rospy.Publisher(
-                        f'/cars/{car_name}/odom', Odometry, queue_size=1)
-
+                    # self.car_odom_pubs[car_name] = rospy.Publisher(
+                    #     f'/cars/{car_name}/odom', Odometry, queue_size=1)
+                    self.car_odom_pubs[car_name] = node.create_publisher(
+                        Odometry, f'/cars/{car_name}/odom', 1)
         return True
 
 
