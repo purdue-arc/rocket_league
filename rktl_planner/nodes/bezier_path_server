@@ -97,6 +97,7 @@ def bezier_path_server(req: CreateBezierPathRequest):
     return res
 
 if __name__ == '__main__':
-    node = rclpy.init('bezier_path_server')
+    rclpy.init()
+    node = rclpy.create_node('bezier_path_server')
     service = node.create_service(CreateBezierPath, 'create_bezier_path', bezier_path_server)
     rclpy.spin()
