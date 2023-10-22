@@ -11,7 +11,7 @@ License:
 """
 
 # package
-from rktl_autonomy import ROSInterface
+from rktl_autonomy._ros_interface import ROSInterface
 from gym.spaces import Box, Discrete
 
 # ROS

@@ -195,7 +195,8 @@ class ROSInterface(Env):
             retries = 0
             while not self.__wait_once_for_state():
                 if retries >= max_retries:
-                    rospy.logerr("Failed to get new state.")
+                    # rospy.logerr("Failed to get new state.")
+                    self.node.get_logger().warn('Failed to get new state.')
                     raise SimTimeException
                 else:
                     self.__time += self.__DELTA_T
@@ -212,7 +213,7 @@ class ROSInterface(Env):
         # if rospy.is_shutdown():
         if not rclpy.ok():
             # raise rospy.ROSInterruptException()
-            raise rclpy.ROSInterruptException()
+            raise Exception()
         return has_state
 
     # All the below abstract methods / properties must be implemented by subclasses

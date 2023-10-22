@@ -19,6 +19,10 @@ def generate_launch_description():
             description='Name of the agent.'
         ),
         DeclareLaunchArgument(
+            'log_file',
+            default_value='rocket_league_agent/log',
+            description='Filepath for logger output'),
+        DeclareLaunchArgument(
             'render',
             default_value='false',
             description='Set to true to enable rendering.'
@@ -69,7 +73,7 @@ def generate_launch_description():
             executable='plotter',
             name='plotter',
             output='screen',
-            remappings=[('~log', LaunchConfiguration('agent_name') + '/log')],
+            remappings=[('~log', LaunchConfiguration('log_file'))],
             namespace=LaunchConfiguration('agent_name')
         )
     ])
