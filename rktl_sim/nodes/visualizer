@@ -17,15 +17,15 @@ import rclpy
 import sys
 
 #import rospy
-from tf.transformations import euler_from_quaternion
-from threading import Lock
-import numpy as np
+# from ../external.transformations import euler_from_quaternion
+# from threading import Lock
+# import numpy as np
 
 
 # Local library
-import visualizer
-from rktl_msgs.msg import Path, BezierPathList
-from rktl_planner import BezierPath
+# from rktl_sim.nodes import visualizer
+#from rktl_msgs.msg import Path, BezierPathList
+#from rktl_planner.src.rktl_planner import BezierPath
 
 
 class VisualizerROS(object):
@@ -34,6 +34,7 @@ class VisualizerROS(object):
     def __init__(self):
         #rospy.init_node("visualizer")
         rclpy.init(args=sys.argv)
+        global node
         node = rclpy.create_node("visualizer")
         
         # Collecting global parameters

@@ -9,10 +9,9 @@ License:
 import unittest
 import rclpy
 import sys
-
+import time
 #import rospy
-import simulator
-
+from rktl_sim.nodes import simulator
 
 class TestCar(unittest.TestCase):
     @classmethod
@@ -23,8 +22,10 @@ class TestCar(unittest.TestCase):
         node.get_logger().info('Created node')
         
         urdf_paths = {}
-        urdf_paths["car"] = rospy.get_param('~urdf/car')
-        urdf_paths["plane"] = rospy.get_param('~urdf/plane')
+        # urdf_paths["car"] = rospy.get_param('~urdf/car')
+        # urdf_paths["plane"] = rospy.get_param('~urdf/plane')
+        urdf_paths["car"] = node.node.declare_parameter('~urdf/car').value
+        urdf_paths["plane"] = node.declare_parameter('~urdf/plane').value
 
         # Creating physics simulator
         cls.sim = simulator.Sim(

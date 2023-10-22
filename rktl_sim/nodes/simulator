@@ -7,7 +7,7 @@ License:
 """
 
 # 3rd party modules
-from rclpy import node
+import rclpy #import node
 import random
 import sys
 from geometry_msgs.msg import PoseWithCovarianceStamped
@@ -23,7 +23,7 @@ from enum import Enum
 
 
 # local libraries
-import simulator
+from rktl_sim.nodes import simulator
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 
@@ -63,6 +63,7 @@ class Simulator(object):
         # setting config parameters (stay constant for the whole simulator run)
         # rospy.init_node('simulator')
         rclpy.init(args=sys.argv)
+        global node
         node = rclpy.create_node("simulator")
         
         mode = self.get_sim_param('~mode')
