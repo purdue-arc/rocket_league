@@ -8,9 +8,9 @@ License:
 """
 
 import math
-from rktl_planner import BezierCurve
+from rktl_planner.src.rktl_planner import BezierCurve
 from rktl_msgs.msg import BezierPath as BezierPathMsg
-from rospy import Duration
+from rclpy import Duration
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import Duration as DurationMsg
 
