@@ -64,10 +64,10 @@ class SnakeInterface(ROSInterface):
         self._start_time = None
 
         # Subscribers
-        rospy.Subscriber('snake/pose', PoseArray, self._pose_cb)
-        rospy.Subscriber('snake/goal', PointStamped, self._goal_cb)
-        rospy.Subscriber('snake/score', Int32, self._score_cb)
-        rospy.Subscriber('snake/active', Bool, self._alive_cb)
+        node.create_subscription(PoseArray, 'snake/pose', self._pose_cb)
+        node.create_subscription(PointStamped, 'snake/goal', self._goal_cb)
+        node.create_subscription(Int32, 'snake/score', self._score_cb)
+        node.create_subscription(Bool, 'snake/active', self._alive_cb)
 
     @property
     def action_space(self):

@@ -32,7 +32,7 @@ class CartPole(object):
         self.done_pub = rospy.Publisher('cartpole/done', Bool, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('cartpole/action', Int32, self.cartpole_action)
+        node.create_subscription(Int32, 'cartpole/action', self.cartpole_action)
 
         # Services
         rospy.Service('cartpole/reset', Empty, self.cartpole_reset)

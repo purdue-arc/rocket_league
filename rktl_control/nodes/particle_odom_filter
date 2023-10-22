@@ -112,9 +112,9 @@ class ParticleOdomFilter(object):
 
         # pubs / subs
         self.odom_pub = rospy.Publisher('odom', Odometry, queue_size=1)
-        rospy.Subscriber('pose_sync', PoseWithCovarianceStamped, self.pose_cb)
+        node.create_subscription(PoseWithCovarianceStamped, 'pose_sync', self.pose_cb)
         if use_efforts:
-            rospy.Subscriber('effort', ControlEffort, self.effort_cb)
+            node.create_subscription(ControlEffort, 'effort', self.effort_cb)
         if self.PUB_PARTICLES:
             self.cloud_pub = rospy.Publisher(
                 'odom_particles', PoseArray, queue_size=1)

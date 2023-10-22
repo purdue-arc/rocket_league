@@ -63,8 +63,8 @@ class PatrolPlanner(object):
         self.cmd_pub = rospy.Publisher('command', ControlCommand, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('odom', Odometry, self.car_odom_cb)
-        rospy.Subscriber('/ball/odom', Odometry, self.ball_odom_cb)
+        node.create_subscription(Odometry, 'odom', self.car_odom_cb)
+        node.create_subscription(Odometry, '/ball/odom', self.ball_odom_cb)
 
         rospy.spin()
 

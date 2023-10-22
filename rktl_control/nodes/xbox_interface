@@ -34,7 +34,7 @@ class XboxInterface():
             'effort', ControlEffort, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber('joy', Joy, self.callback)
+        node.create_subscription(Joy, 'joy', self.callback)
 
         # Services
         self.reset_srv = rospy.ServiceProxy('/sim_reset', Empty)

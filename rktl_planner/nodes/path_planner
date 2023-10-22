@@ -112,7 +112,7 @@ class PathPlanner(object):
         # Subscribers
         car_name = rospy.get_param('~car_name')
         rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.car_odom_cb)
-        rospy.Subscriber('/ball/odom', Odometry, self.ball_odom_cb)
+        node.create_subscription(Odometry, '/ball/odom', self.ball_odom_cb)
 
         # Services
         self.reset_server = rospy.Service('reset_planner', Empty, self.reset)
