@@ -5,15 +5,16 @@
  *   All rights reserved.
  */
 
-#include <rktl_perception/ball_detection.h>
+#include "rclcpp/rclcpp.hpp"
+#include "rktl_perception/ball_detection.h"
 
 int main(int argc, char* argv[]) {
-    ros::init(argc, argv, "ball_detection");
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<rclcpp::Node>("ball_detection");
 
-    ros::NodeHandle nh;
-    ros::NodeHandle pnh("~");
-    rktl_perception::BallDetection ballDetection(nh, pnh);
+    auto ballDetection = std::make_shared<rktl_perception::BallDetection>(node);
 
-    ros::spin();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
     return 0;
 }

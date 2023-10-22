@@ -5,28 +5,30 @@
  *   All rights reserved.
  */
 
-#include <rktl_perception/ball_detection.h>
+#include "rktl_perception/ball_detection.h"
+#include "rclcpp/rclcpp.hpp"
 
 namespace rktl_perception {
 
 int getMaxAreaContourId(std::vector<std::vector<cv::Point>> contours);
 
-BallDetection::BallDetection(const ros::NodeHandle& nh, const ros::NodeHandle& pnh)
-    : _nh(nh), _pnh(pnh), _it(nh) {
-    _vecPub = _nh.advertise<geometry_msgs::Vector3Stamped>("ball_vec", 10);
+
+BallDetection::BallDetection(const std::shared_ptr<rclcpp::Node>& node) : _node(node), _it(node) {
+    _vecPub = _node->create_publisher<geometry_msgs::msg::Vector3Stamped>("ball_vec", 10);
     _imgPub = _it.advertise("threshold_img", 1);
-    _cameraSub = _it.subscribeCamera("image_rect_color", 10, &BallDetection::ballCallback, this);
+    _cameraSub = _it.subscribe_camera("image_rect_color", 10, std::bind(&BallDetection::ballCallback, this, std::placeholders::_1, std::placeholders::_2));
+
     // future plan for this node is to make all of these adjustable with dynamic_reconfigure
-    _publishThresh = _pnh.param<bool>("publishThresh", false);
-    _minHue = _pnh.param<int>("min_hue", 050);
-    _maxHue = _pnh.param<int>("max_hue", 100);
-    _minSat = _pnh.param<int>("min_sat", 075);
-    _maxSat = _pnh.param<int>("max_sat", 180);
-    _minVib = _pnh.param<int>("min_vib", 040);
-    _maxVib = _pnh.param<int>("max_vib", 100);
-    _minSize = _pnh.param<int>("min_size", 50);
-    _erodeAmnt = _pnh.param<int>("erode", 4);
-    _dilateAmnt = _pnh.param<int>("dilate", 5);
+    _publishThresh = _node->declare_parameter<bool>("publishThresh", false);
+    _minHue = _node->declare_parameter<int>("min_hue", 50);
+    _maxHue = _node->declare_parameter<int>("max_hue", 100);
+    _minSat = _node->declare_parameter<int>("min_sat", 75);
+    _maxSat = _node->declare_parameter<int>("max_sat", 180);
+    _minVib = _node->declare_parameter<int>("min_vib", 40);
+    _maxVib = _node->declare_parameter<int>("max_vib", 100);
+    _minSize = _node->declare_parameter<int>("min_size", 50);
+    _erodeAmnt = _node->declare_parameter<int>("erode", 4);
+    _dilateAmnt = _node->declare_parameter<int>("dilate", 5);
 }
 
 void BallDetection::ballCallback(const sensor_msgs::ImageConstPtr& msg,
@@ -88,7 +90,8 @@ void BallDetection::ballCallback(const sensor_msgs::ImageConstPtr& msg,
             _vecPub.publish(vec);
 
             /* debug the size of the countour */
-            ROS_INFO("Size of the largest ball: %.0f\n", largestContourArea);
+            //ROS_INFO("Size of the largest ball: %.0f\n", largestContourArea);
+            RCLCPP_INFO(node->get_logger(), "Size of the largest ball: %.0f\n", largestContourArea);
 
             /* publishes the threshold image */
             if (_publishThresh) {
@@ -103,7 +106,9 @@ void BallDetection::ballCallback(const sensor_msgs::ImageConstPtr& msg,
             }
         }
     } catch (cv_bridge::Exception& e) {
-        ROS_ERROR("There was some error, likely with image conversion");
+        
+        //ROS_ERROR("There was some error, likely with image conversion");
+        RCLCPP_ERROR(node->get_logger(), "There was some error, likely with image conversion");
     }
 }
 

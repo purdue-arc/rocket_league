@@ -6,8 +6,8 @@
  */
 
 /* ros */
-#include <ros/ros.h>
-#include <ros/console.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
 
 /* image */
 #include <image_transport/image_transport.h>
@@ -89,13 +89,18 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
         cv::imshow(window_detection_name, frame_threshold);
         cv::waitKey(30);
     } catch (cv_bridge::Exception& e) {
-        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+        //ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+        RCLCPP_ERROR(node->get_logger(), "Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
     }
 }
 
 int main(int argc, char* argv[]) {
-    ros::init(argc, argv, "image_listener");
-    ros::NodeHandle nh;
+    //ros::init(argc, argv, "image_listener");
+    //ros::NodeHandle nh;
+    rclcpp::init(argc, argv);
+    auto node = rclcpp:Node::make_shared("image_listener");
+
+
     cv::namedWindow(window_detection_name);
 
     // Trackbars to set thresholds for HSV values
@@ -117,7 +122,7 @@ int main(int argc, char* argv[]) {
     image_transport::ImageTransport it(nh);
     image_transport::Subscriber sub = it.subscribe("image_rect_color", 10, imageCallback);
 
-    ros::spin();
+    rclcpp::spin();
     cv::destroyWindow(window_detection_name);
 
     return 0;
