@@ -29,12 +29,23 @@ def easy_odom(x, y, v):
 class TestStep(unittest.TestCase):
     def test_all(self):
         # initialize node and interface to code under test
-        rospy.init_node('rocket_league_agent')
-        self.car_pub = rospy.Publisher('cars/car0/odom', Odometry, queue_size=1) 
-        self.ball_pub = rospy.Publisher('ball/odom', Odometry, queue_size=1)
-        self.match_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
-        rospy.Subscriber('/clock', Clock, self.clock_cb)
-        rospy.Service('sim_reset', Empty, self.reset)
+        #rospy.init_node('rocket_league_agent')
+        rclpy.init_node('rocket_league_agent')
+
+        #self.car_pub = rospy.Publisher('cars/car0/odom', Odometry, queue_size=1) 
+        self.car_pub = self.node.create_publisher('cars/car0/odom', Odometry, queue_size=1)
+
+        #self.ball_pub = rospy.Publisher('ball/odom', Odometry, queue_size=1)
+        self.ball_pub =self.node.create_publisher('ball/odom', Odometry, queue_size=1)
+
+        #self.match_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
+        self.match_pub = self.node.create_publisher('match_status', MatchStatus, queue_size=1)
+
+        #rospy.Subscriber('/clock', Clock, self.clock_cb)
+        self.node.create_subscriber('/clock', Clock, self.clock_cb)
+        
+        #rospy.Service('sim_reset', Empty, self.reset)
+        rclpy.Service('sim_reset', Empty, self.reset)
 
         # member variables used for test
         self.send_car = None
@@ -56,7 +67,8 @@ class TestStep(unittest.TestCase):
         self.send_ball = easy_odom(-2, -1, -2.5)
         self.send_match = MatchStatus(status=MatchStatus.ONGOING)
         self.want_reset = True
-        max_time = self.last_time + rospy.Duration.from_sec(0.6)
+        #max_time = self.last_time + rospy.Duration.from_sec(0.6)
+        max_time = self.last_time + rclpy.Duration.from_sec(0.6)
 
         obs = env.reset()
 
@@ -68,7 +80,8 @@ class TestStep(unittest.TestCase):
         self.send_ball = easy_odom(0, 0, 0)
         self.send_match = MatchStatus(status=MatchStatus.ONGOING)
         self.want_reset = False
-        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        #max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        max_time = self.last_time + rclpy.Duration.from_sec(0.2)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
@@ -82,7 +95,8 @@ class TestStep(unittest.TestCase):
         self.send_ball = easy_odom(1, 0, 0)
         self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_A)
         self.want_reset = False
-        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        #max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        max_time = self.last_time + rclpy.Duration.from_sec(0.2)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
@@ -96,7 +110,8 @@ class TestStep(unittest.TestCase):
         self.send_ball = easy_odom(0, 0, 0)
         self.send_match = MatchStatus(status=MatchStatus.ONGOING)
         self.want_reset = False
-        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        #max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        max_time = self.last_time + rclpy.Duration.from_sec(0.2)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
@@ -110,7 +125,8 @@ class TestStep(unittest.TestCase):
         self.send_ball = easy_odom(0, 0, 0)
         self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_A)
         self.want_reset = False
-        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        #max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        max_time = self.last_time + rclpy.Duration.from_sec(0.2)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
@@ -124,7 +140,8 @@ class TestStep(unittest.TestCase):
         self.send_ball = easy_odom(-2.3, 1.0, 0)
         self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_B)
         self.want_reset = False
-        max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        #max_time = self.last_time + rospy.Duration.from_sec(0.2)
+        max_time = self.last_time + rclpy.Duration.from_sec(0.2)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
