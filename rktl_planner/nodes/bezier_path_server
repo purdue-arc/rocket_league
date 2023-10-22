@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-import rospy
+#import rospy
+import rclpy
 import math
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest, CreateBezierPathResponse
@@ -30,7 +31,8 @@ def line(p: Point, v: Vector3, t: float):
 
 
 def create_segment(start_pose: Pose, end_pose: Pose, velocity: float, 
-    duration: rospy.Duration, segment_duration: rospy.Duration):
+    # duration: rospy.Duration, segment_duration: rospy.Duration):
+    duration: rclpy.duration.Duration, segment_duration: rclpy.duration.Duration):
     control_points = [start_pose.position, end_pose.position]
     start_vel, start_head = vel(start_pose, velocity)
     end_vel, end_head = vel(end_pose, velocity)
@@ -38,8 +40,7 @@ def create_segment(start_pose: Pose, end_pose: Pose, velocity: float,
     t_val = duration.to_sec() / 3
 
     control_points.insert(1, line(control_points[0], start_vel, t_val))
-    control_points.insert(len(control_points) - 1,
-                          line(control_points[-1], end_vel, -t_val))
+    control_points.insert(len(control_points) - 1, line(control_points[-1], end_vel, -t_val))
     path = BezierPath(control_points, duration.to_sec())
     num_segments = math.ceil(duration.to_sec() / segment_duration.to_sec())
     segment_length = duration.to_sec() / num_segments
@@ -96,7 +97,9 @@ def bezier_path_server(req: CreateBezierPathRequest):
     return res
 
 if __name__ == '__main__':
-    rospy.init_node('bezier_path_server')
-    service = rospy.Service('create_bezier_path',
-        CreateBezierPath, bezier_path_server)
-    rospy.spin()
+    #rospy.init_node('bezier_path_server')
+    rclpy.init_node('bezier_path_server')
+    #service = rospy.Service('create_bezier_path', CreateBezierPath, bezier_path_server)
+    service = rclpy.Service('create_bezier_path', CreateBezierPath, bezier_path_server)
+    #rospy.spin()
+    rclpy.spin()
