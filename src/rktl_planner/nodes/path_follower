@@ -54,7 +54,7 @@ class PathFollower(object):
 
         # Publishers
         car_name = node.declare_parameter('~car_name')
-        car_name = self.get_param('~car_name')
+        car_name = self.declare_parameter('~car_name')
         self.bot_velocity_cmd = node.create_publisher(f'/cars/{car_name}/command',
             ControlCommand, queue_size=1)
 
