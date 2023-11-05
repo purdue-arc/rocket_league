@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 
 int8 PAUSED=0           # before the match is started
 int8 ONGOING=1          # match is currently going on
