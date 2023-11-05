@@ -9,6 +9,7 @@ License:
 
 # import unittest, rostest, rospy
 import unittest, rostest, rclpy
+from rclpy.duration import Duration
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import MatchStatus
 from std_srvs.srv import Empty, EmptyResponse
