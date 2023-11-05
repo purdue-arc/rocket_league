@@ -7,7 +7,8 @@ License:
 """
 
 # 3rd party modules
-import rospy
+#import rospy
+import rclpy
 import numpy as np
 import math
 import time
@@ -23,7 +24,8 @@ class PathFollower(object):
     """A node to ensure the car follows a given trajectory."""
 
     def __init__(self):
-        rospy.init_node('path_follower')
+        #rospy.init_node('path_follower')
+        self.init_node('path_follower')
 
         self.path_start_time = None
         self.path = None
@@ -31,30 +33,37 @@ class PathFollower(object):
         self.start_time = None
         self.max_speed = None
 
-        self.frame_id = rospy.get_param('~frame_id', 'map')
+        #self.frame_id = rospy.get_param('~frame_id', 'map')
+        self.frame_id = node.declare_parameter('~frame_id', 'map')
 
         # Max speed to travel path
-        self.max_speed = rospy.get_param('~max_speed', 0.1)
+        #self.max_speed = node.get_param('~max_speed', 0.1)
+        self.max_speed = node.declare_parameter('~max_speed', 0.1)
 
         # Radius to search for intersections
-        self.lookahead_dist = rospy.get_param('~lookahead_dist', 0.15)
+        #self.lookahead_dist = node.getParam('~lookahead_dist', 0.15)
+        self.lookahead_dist = node.declare_parameter('~lookahead_dist', 0.15)
 
         # Coeffient to adjust lookahead distance by speed
-        self.lookahead_gain = rospy.get_param('~lookahead_gain', 0.035)
+        #self.lookahead_gain = node.getParam('~lookahead_gain', 0.035)
+        self.lookahead_gain = node.declare_parameter('~lookahead_gain', 0.035)
 
         # Number of waypoints to search per pass (-1 is full path)
-        self.lookahead_pnts = rospy.get_param('~lookahead_pnts', -1)
+        #self.lookahead_pnts = node.getParam('~lookahead_pnts', -1)
+        self.lookahead_pnts = node.declare_parameter('~lookahead_pnts', -1)
 
         # Publishers
-        car_name = rospy.get_param('~car_name')
-        self.bot_velocity_cmd = rospy.Publisher(f'/cars/{car_name}/command',
+        car_name = node.declare_parameter('~car_name')
+        car_name = self.get_param('~car_name')
+        self.bot_velocity_cmd = node.create_publisher(f'/cars/{car_name}/command',
             ControlCommand, queue_size=1)
 
         # Subscribers
-        rospy.Subscriber(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
-        rospy.Subscriber('linear_path', Path, self.path_cb)
+        node.create_subscription(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
+        node.create_subscription('linear_path', Path, self.path_cb)
 
-        rospy.spin()
+        #rospy.spin()
+        rclpy.spin()
 
     def path_cb(self, path_msg: Path):
         """Creates path using waypoints in Path message."""
