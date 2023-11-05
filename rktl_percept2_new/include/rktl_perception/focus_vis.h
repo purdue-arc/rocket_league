@@ -9,7 +9,7 @@
 #define __RKTL_PERCEPTION_FOCUS_VIS_H__
 
 /* ros */
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 /* image */
 #include <image_transport/image_transport.h>
@@ -30,19 +30,22 @@
 #include <vector>
 #include <math.h>
 
+/* memory */
+# include<memory>
+
 namespace rktl_perception {
 
 class FocusVis {
 public:
-    FocusVis(const ros::NodeHandle& nh);
+    FocusVis(const std::shared_ptr<rclcpp::Node> nh);
     ~FocusVis() = default;
 
 private:
     void focusCallback(const sensor_msgs::ImageConstPtr& msg,
                        const sensor_msgs::CameraInfoConstPtr& info);
 
-    ros::NodeHandle _nh;
-    ros::NodeHandle _pnh;
+    std::shared_ptr<rclcpp::Node> _nh;
+    std::shared_ptr<rclcpp::Node> _pnh;
     image_transport::ImageTransport _it;
     image_transport::CameraSubscriber _cameraSub;
     image_transport::Publisher _imgPub;

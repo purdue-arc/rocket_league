@@ -7,9 +7,11 @@
 
 #include <rktl_perception/focus_vis.h>
 
+rclcpp::init(argc, argv);
+
 namespace rktl_perception {
 
-FocusVis::FocusVis(const ros::NodeHandle& nh) : _nh(nh), _it(_nh) {
+FocusVis::FocusVis(const std::shared_ptr<rclcpp::Node> nh) : _nh(nh), _it(_nh) {
     _imgPub = _it.advertise("edge_dectection", 1);
     _cameraSub = _it.subscribeCamera("image_rect_color", 10, &FocusVis::focusCallback, this);
 }

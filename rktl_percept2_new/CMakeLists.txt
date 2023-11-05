@@ -36,7 +36,7 @@ include_directories(
   ${OpenCV_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
   )
-  
+
 # Build localizer node
 add_executable(${PROJECT_NAME}_localizer_node
   src/localizer_node.cpp
@@ -93,6 +93,7 @@ add_dependencies(${PROJECT_NAME}_ball_color_node
   target_link_libraries(${PROJECT_NAME}_ball_color_node
   ${OpenCV_LIBRARIES}
   )
+
 ament_target_dependencies(${PROJECT_NAME}_ball_color_node
   rclcpp
   std_msgs
@@ -141,5 +142,6 @@ ament_export_dependencies(rclcpp
   apriltag_ros
   OpenCV
   )
+  
 ament_export_include_directories(include)
 ament_package() 
