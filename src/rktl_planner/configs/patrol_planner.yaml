@@ -1,0 +1,25 @@
+# tuned params for no prediction at 0.15 delay
+wall_avoidance:
+  reverse_time: 0.125
+  distance_margin: 0.375
+  heading_margin: 1.57
+
+patrol_wall_dist: 0.75
+
+curvature_gain:
+  kp: 2.0
+  kd: 0.05
+  falloff: 0.25
+
+scoring:
+  car_lookahead_dist: 0.75
+  goal_depth_target: 0.05
+
+# X coordinate to switch to defense
+defensive_line: -0.5
+
+# Y coordinate to switch to reverse
+reverse_line: 0.0
+
+speed: 1.75
+attempt_timeout: 4.0
