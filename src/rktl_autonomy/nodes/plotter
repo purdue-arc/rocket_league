@@ -21,16 +21,16 @@ class Plotter(rclpy.Node):
     """Plot progress during training."""
     def __init__(self):
         #rospy.init_node('model_progress_plotter')
-        super()._init_('model_progress_plotter')
+        super().__init__('model_progress_plotter')
 
         # Constants
-        self.LOG_DIR = normpath(expanduser(rclpy.get_param('~log/base_dir')))
+        self.LOG_DIR = normpath(expanduser(self.get_parameter('~log/base_dir')))
         #self.PLOT_FREQ = rospy.get_param('~log/plot_freq', 25)
-        self.PLOT_FREQ = self.get_parameter('~log/plot_freq', 25)
+        self.PLOT_FREQ = self.get_parameter_or('~log/plot_freq', 25)
         #self.BASIC_VARS = rospy.get_param('~log/basic', ["duration"])
-        self.BASIC_VARS = self.get_parameter('~log/basic', ["duration"])
+        self.BASIC_VARS = self.get_parameter_or('~log/basic', ["duration"])
         #self.ADVANCED_VARS = rospy.get_param('~log/advanced', ["net_reward"])
-        self.ADVANCED_VARS = self.get_parameter('~log/advanced', ["net_reward"])
+        self.ADVANCED_VARS = self.get_parameter_or('~log/advanced', ["net_reward"])
 
         self.KEYS = ["episode"] + self.BASIC_VARS + self.ADVANCED_VARS
         
@@ -42,7 +42,7 @@ class Plotter(rclpy.Node):
         self.LOG_NAME = None
         self.next_plot_episode = self.PLOT_FREQ
         self.init_plot()
-        rclpy.spin()
+        rclpy.spin(self)
 
     def init_plot(self):
         """Initialize the plot and all axes."""
