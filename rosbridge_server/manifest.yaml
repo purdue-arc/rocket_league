@@ -1,0 +1,29 @@
+actions: []
+authors: Jonathan Mace <jonathan.c.mace@gmail.com>
+brief: ''
+bugtracker: https://github.com/RobotWebTools/rosbridge_suite/issues
+depends:
+- python-twisted-core
+- python3-twisted
+- python3-tornado
+- rosapi
+- python-backports.ssl-match-hostname
+- python-autobahn
+- rosauth
+- python-setuptools
+- rospy
+- rostest
+- python3-setuptools
+- python-tornado
+- python3-autobahn
+- catkin
+- rosbridge_msgs
+- rosbridge_library
+description: A WebSocket interface to rosbridge.
+license: BSD
+maintainers: Russell Toris <rctoris@wpi.edu>, Jihoon Lee <jihoonlee.in@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/RobotWebTools/rosbridge_suite
+srvs: []
+url: http://ros.org/wiki/rosbridge_server

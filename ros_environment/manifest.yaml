@@ -1,0 +1,15 @@
+actions: []
+authors: ''
+brief: ''
+bugtracker: https://github.com/ros/ros_environment/issues
+depends:
+- catkin
+description: The package provides the environment variables `ROS_VERSION`, `ROS_DISTRO`,
+  `ROS_PACKAGE_PATH`, and `ROS_ETC_DIR`.
+license: Apache License 2.0
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_environment
+srvs: []
+url: ''

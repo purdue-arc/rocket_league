@@ -1,0 +1,20 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- rostest
+- rostopic
+- rosgraph
+- catkin
+description: "rosnode is a command-line tool for displaying debug information\n  \
+  \  about ROS <a href=\"http://wiki.ros.org/Nodes\">Nodes</a>,\n    including publications,\
+  \ subscriptions and connections. It also\n    contains an experimental library for\
+  \ retrieving node\n    information. This library is intended for internal use only."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rosnode

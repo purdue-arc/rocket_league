@@ -1,0 +1,24 @@
+actions: []
+authors: Patrick Mihelich, Kurt Konolige, Jeremy Leibs
+brief: ''
+bugtracker: ''
+depends:
+- cv_bridge
+- catkin
+- dynamic_reconfigure
+- sensor_msgs
+- stereo_msgs
+- nodelet
+- image_proc
+- rostest
+- message_filters
+- image_geometry
+- image_transport
+description: Stereo and single image rectification and disparity processing.
+license: BSD
+maintainers: Vincent Rabaud <vincent.rabaud@gmail.com>, Autonomoustuff team <software@autonomoustuff.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/stereo_image_proc

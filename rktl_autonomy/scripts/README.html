@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Scripts &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="rktl_autonomy" href="../../autoapi/rktl_autonomy/index.html" />
+    <link rel="prev" title="Nodes" href="../nodes/README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../rktl_autonomy.html">rktl_autonomy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../YAMLEditor/README.html">YAMLEditor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../launch/README.html">Launch Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nodes/README.html">Nodes</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Training Scripts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#eval-rocket-league-py">eval_rocket_league.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#train-batch-sh">train_batch.sh</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#train-cartpole-py">train_cartpole.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#train-rocket-league-py">train_rocket_league.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#train-snake-py">train_snake.py</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tune-rocket-league-py">tune_rocket_league.py</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rktl_autonomy/index.html">Package Module</a></li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_autonomy/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../rktl_autonomy.html">rktl_autonomy</a></li>
+      <li class="breadcrumb-item active">Training Scripts</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rktl_autonomy/scripts/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="training-scripts">
+<h1>Training Scripts<a class="headerlink" href="#training-scripts" title="Permalink to this heading"></a></h1>
+<p>These are python scripts used to train the neural network. Each script basically
+does everything to get an agent training. It will generate a UUID (used for
+logging weights / progress), build the environment(s) (which will internally
+handle everything with ROS), set it up to periodically log, then kick it off in
+a training loop that will run for a very long time.</p>
+<p>If you want to modify the type of agent or hyperparameters, this is the place to
+do it. There is no reason there can’t be several different scripts to train
+several different types of agents.</p>
+<p><strong>You should not manually use any ROS commands when launching for training.</strong></p>
+<nav class="contents local" id="training-scripts-in-the-package">
+<p class="topic-title">Training scripts in the package</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#eval-rocket-league-py" id="id1">eval_rocket_league.py</a></p></li>
+<li><p><a class="reference internal" href="#train-batch-sh" id="id2">train_batch.sh</a></p></li>
+<li><p><a class="reference internal" href="#train-cartpole-py" id="id3">train_cartpole.py</a></p></li>
+<li><p><a class="reference internal" href="#train-rocket-league-py" id="id4">train_rocket_league.py</a></p></li>
+<li><p><a class="reference internal" href="#train-snake-py" id="id5">train_snake.py</a></p></li>
+<li><p><a class="reference internal" href="#tune-rocket-league-py" id="id6">tune_rocket_league.py</a></p></li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="eval-rocket-league-py">
+<h2><a class="toc-backref" href="#training-scripts-in-the-package" role="doc-backlink">eval_rocket_league.py</a><a class="headerlink" href="#eval-rocket-league-py" title="Permalink to this heading"></a></h2>
+<p>If you want to evaluate a bunch of models at once, to produce a plot of
+performance over time (perhaps with a different environment or reward set from
+what it was trained on), you can use the this convenience script:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># in Docker, ~/catkin_ws/src/rocket_league/rktl_autonomy/scripts</span>
+./eval_rocket_league.py<span class="w"> </span>&lt;UUID<span class="w"> </span>of<span class="w"> </span>run&gt;
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">UUID</span> <span class="pre">of</span> <span class="pre">run</span></code> should be the name of a folder in the
+<code class="docutils literal notranslate"><span class="pre">~/catkin_ws/data/rocket_league</span></code> directory containing all the weights you
+with to evaluate. You can pass in multiple UUIDs separated by spaces, and it
+will run the script multiple times.</p>
+<p>For each UUID passed in, the script will generate a file in the same folder
+titled <code class="docutils literal notranslate"><span class="pre">eval_log_&lt;new</span> <span class="pre">UUID&gt;.txt</span></code>. This is a tab-delimited file, which you can
+open in Matlab or Excel to produce a plot.</p>
+</section>
+<hr class="docutils" />
+<section id="train-batch-sh">
+<h2><a class="toc-backref" href="#training-scripts-in-the-package" role="doc-backlink">train_batch.sh</a><a class="headerlink" href="#train-batch-sh" title="Permalink to this heading"></a></h2>
+<p>This script exists to simplify the process of checking out the proper code,
+launching a Docker container, and running the above training script when many
+different experiments are intended to be run simultaneously. To use, simply
+note the commit numbers of the configurations you want to run (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">log</span></code> may be
+useful), then run the following command on the machine:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./rktl_autonomy/scripts/train_batch.sh<span class="w"> </span>&lt;list<span class="w"> </span>of<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>hashes&gt;
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="train-cartpole-py">
+<h2><a class="toc-backref" href="#training-scripts-in-the-package" role="doc-backlink">train_cartpole.py</a><a class="headerlink" href="#train-cartpole-py" title="Permalink to this heading"></a></h2>
+<p>Training script for the <code class="docutils literal notranslate"><span class="pre">CartPoleInterface</span></code> for testing.</p>
+</section>
+<hr class="docutils" />
+<section id="train-rocket-league-py">
+<h2><a class="toc-backref" href="#training-scripts-in-the-package" role="doc-backlink">train_rocket_league.py</a><a class="headerlink" href="#train-rocket-league-py" title="Permalink to this heading"></a></h2>
+<hr class="docutils" />
+<p>Training script for the Rocket League project.</p>
+</section>
+<hr class="docutils" />
+<section id="train-snake-py">
+<h2><a class="toc-backref" href="#training-scripts-in-the-package" role="doc-backlink">train_snake.py</a><a class="headerlink" href="#train-snake-py" title="Permalink to this heading"></a></h2>
+<p>Training script for the Snake game in ARC tutorials.</p>
+</section>
+<hr class="docutils" />
+<section id="tune-rocket-league-py">
+<h2><a class="toc-backref" href="#training-scripts-in-the-package" role="doc-backlink">tune_rocket_league.py</a><a class="headerlink" href="#tune-rocket-league-py" title="Permalink to this heading"></a></h2>
+<p>This script will take the current game settings (rewards, episode length,
+simulation parameters) as is, and only experiment with hyperparameters of the
+PPO model.</p>
+<p>These hyperparameters will be fed into the PPO initialization function as
+<code class="docutils literal notranslate"><span class="pre">model_params</span></code> at the start of each tuning attempt. The choice of
+hyperparameters is determined by Optuna based on the ranges given in the
+<code class="docutils literal notranslate"><span class="pre">optimize_ppo2()</span></code> function`. All of the chosen hyperparameter ranges can be
+modified directly in the function’s code.</p>
+<p>Within the script, there are also 4 tuning variables that can be modified to
+change the rate at which the tuning and training-batches occur.</p>
+<p>The tuning script will output progress in the command window it was executed in.
+Every 5 tuning attempts, it will print out the best hyperparameters that it
+has found so far. These can later be copied and used in the
+<code class="docutils literal notranslate"><span class="pre">train_rocket_league.py</span></code> script.</p>
+<hr class="docutils" />
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../nodes/README.html" class="btn btn-neutral float-left" title="Nodes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../autoapi/rktl_autonomy/index.html" class="btn btn-neutral float-right" title="rktl_autonomy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

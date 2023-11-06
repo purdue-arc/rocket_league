@@ -1,0 +1,20 @@
+actions: []
+authors: Dan Lazewatsky <dan@lazewatsky.com>
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_top/issues
+depends:
+- python-psutil
+- rqt_gui_py
+- python3-psutil
+- rospy
+- catkin
+- python_qt_binding
+- rqt_gui
+description: RQT plugin for monitoring ROS processes.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_top
+srvs: []
+url: http://wiki.ros.org/rqt_top

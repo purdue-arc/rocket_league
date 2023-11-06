@@ -1,0 +1,17 @@
+actions: []
+authors: ''
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- python3-setuptools
+- python-setuptools
+- genmsg
+description: Javascript ROS message and service generators.
+license: Apache 2.0
+maintainers: Chris Smith <csmith@rethinkrobotics.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

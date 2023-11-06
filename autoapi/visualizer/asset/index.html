@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>visualizer.asset &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="visualizer.window" href="../window/index.html" />
+    <link rel="prev" title="visualizer" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../../rktl_sim.html">rktl_sim</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../../rktl_sim/launch/README.html">Launch Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../rktl_sim/nodes/README.html">ROS Nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../simulator/index.html">Package Module (Simulator)</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Package Module (Visualizer)</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_sim/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../../rktl_sim.html">rktl_sim</a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualizer</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualizer.asset</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/visualizer/asset/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-visualizer.asset">
+<span id="visualizer-asset"></span><h1><a class="reference internal" href="#module-visualizer.asset" title="visualizer.asset"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualizer.asset</span></code></a><a class="headerlink" href="#module-visualizer.asset" title="Permalink to this heading"></a></h1>
+<p>Contains the Asset class.
+License:</p>
+<blockquote>
+<div><p>BSD 3-Clause License
+Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+All rights reserved.</p>
+</div></blockquote>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#visualizer.asset.Asset" title="visualizer.asset.Asset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Asset</span></code></a></p></td>
+<td><p>Helper class that provides a standard way to create an ABC using</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#visualizer.asset.Image" title="visualizer.asset.Image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Image</span></code></a></p></td>
+<td><p>Helper class that provides a standard way to create an ABC using</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#visualizer.asset.Rectangle" title="visualizer.asset.Rectangle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Rectangle</span></code></a></p></td>
+<td><p>Helper class that provides a standard way to create an ABC using</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#visualizer.asset.Lines" title="visualizer.asset.Lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Lines</span></code></a></p></td>
+<td><p>Helper class that provides a standard way to create an ABC using</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#visualizer.asset.Circle" title="visualizer.asset.Circle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Circle</span></code></a></p></td>
+<td><p>Helper class that provides a standard way to create an ABC using</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="visualizer.asset.Asset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">visualizer.asset.</span></span><span class="sig-name descname"><span class="pre">Asset</span></span><a class="headerlink" href="#visualizer.asset.Asset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></a></p>
+<p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Asset.setPos">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setPos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Asset.setPos" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Asset.blit">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">blit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Asset.blit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="visualizer.asset.Image">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">visualizer.asset.</span></span><span class="sig-name descname"><span class="pre">Image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Image" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#visualizer.asset.Asset" title="visualizer.asset.Asset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Asset</span></code></a></p>
+<p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Image.setPos">
+<span class="sig-name descname"><span class="pre">setPos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Image.setPos" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Image.setAngle">
+<span class="sig-name descname"><span class="pre">setAngle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Image.setAngle" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Image.blit">
+<span class="sig-name descname"><span class="pre">blit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screen</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Image.blit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="visualizer.asset.Rectangle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">visualizer.asset.</span></span><span class="sig-name descname"><span class="pre">Rectangle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Rectangle" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#visualizer.asset.Asset" title="visualizer.asset.Asset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Asset</span></code></a></p>
+<p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Rectangle.setPos">
+<span class="sig-name descname"><span class="pre">setPos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Rectangle.setPos" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Rectangle.blit">
+<span class="sig-name descname"><span class="pre">blit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screen</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Rectangle.blit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="visualizer.asset.Lines">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">visualizer.asset.</span></span><span class="sig-name descname"><span class="pre">Lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Lines" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#visualizer.asset.Asset" title="visualizer.asset.Asset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Asset</span></code></a></p>
+<p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Lines.resetPoints">
+<span class="sig-name descname"><span class="pre">resetPoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Lines.resetPoints" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Lines.setPos">
+<span class="sig-name descname"><span class="pre">setPos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Lines.setPos" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Lines.blit">
+<span class="sig-name descname"><span class="pre">blit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screen</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Lines.blit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="visualizer.asset.Circle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">visualizer.asset.</span></span><span class="sig-name descname"><span class="pre">Circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">color</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Circle" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#visualizer.asset.Asset" title="visualizer.asset.Asset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Asset</span></code></a></p>
+<p>Helper class that provides a standard way to create an ABC using
+inheritance.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Circle.setPos">
+<span class="sig-name descname"><span class="pre">setPos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Circle.setPos" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Circle.setRadius">
+<span class="sig-name descname"><span class="pre">setRadius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">radius</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Circle.setRadius" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="visualizer.asset.Circle.blit">
+<span class="sig-name descname"><span class="pre">blit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">screen</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#visualizer.asset.Circle.blit" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="visualizer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../window/index.html" class="btn btn-neutral float-right" title="visualizer.window" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

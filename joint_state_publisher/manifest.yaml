@@ -1,0 +1,18 @@
+actions: []
+authors: David V. Lu!! <davidvlu@gmail.com>, Jackie Kay <jacquelinekay1@gmail.com>
+brief: ''
+bugtracker: https://github.com/ros/joint_state_publisher/issues
+depends:
+- sensor_msgs
+- rostest
+- rospy
+- catkin
+description: This package contains a tool for setting and publishing joint state values
+  for a given URDF.
+license: BSD
+maintainers: Chris Lalancette <clalancette@osrfoundation.org>, Shane Loretz <sloretz@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/joint_state_publisher
+srvs: []
+url: http://www.ros.org/wiki/joint_state_publisher

@@ -1,0 +1,27 @@
+actions: []
+authors: Ioan Sucan <isucan@gmail.com>, Jackie Kay <jacquelinekay1@gmail.com>
+brief: ''
+bugtracker: https://github.com/ros/urdf/issues
+depends:
+- roscpp
+- tinyxml2
+- rosconsole_bridge
+- rostest
+- liburdfdom-headers-dev
+- catkin
+- pluginlib
+- liburdfdom-dev
+- tinyxml
+- cmake_modules
+- urdf_parser_plugin
+description: "This package contains a C++ parser for the Unified Robot Description\n\
+  \    Format (URDF), which is an XML format for representing a robot model.\n   \
+  \ The code API of the parser has been through our review process and will remain\n\
+  \    backwards compatible in future releases."
+license: BSD
+maintainers: Chris Lalancette <clalancette@osrfoundation.org>, Shane Loretz <sloretz@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/urdf
+srvs: []
+url: http://ros.org/wiki/urdf

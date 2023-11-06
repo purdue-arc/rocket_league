@@ -1,0 +1,21 @@
+actions: []
+authors: Wim Meeussen
+brief: ''
+bugtracker: ''
+depends:
+- liborocos-kdl-dev
+- ros_environment
+- catkin
+- tf2_ros
+- eigen
+- tf2
+- rostest
+- cmake_modules
+description: KDL binding for tf2
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/tf2

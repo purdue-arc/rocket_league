@@ -1,0 +1,22 @@
+actions: []
+authors: Kei Okada
+brief: ''
+bugtracker: ''
+depends:
+- nodelet
+- catkin
+- dynamic_reconfigure
+- cv_bridge
+- camera_info_manager
+- sensor_msgs
+- image_transport
+- roscpp
+description: "<p>\n      Contains a node publish an image stream from single image\
+  \ file\n      or avi motion file.\n    </p>"
+license: BSD
+maintainers: Vincent Rabaud <vincent.rabaud@gmail.com>, Autonomoustuff team <software@autonomoustuff.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/image_publisher

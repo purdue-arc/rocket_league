@@ -1,0 +1,26 @@
+actions: []
+authors: Jonathan Bohren, Dave Coleman
+brief: ''
+bugtracker: https://github.com/ros-simulation/gazebo_ros_pkgs/issues
+depends:
+- urdf
+- catkin
+- gazebo_ros
+- gazebo_dev
+- joint_limits_interface
+- transmission_interface
+- std_msgs
+- angles
+- pluginlib
+- controller_manager
+- roscpp
+- control_toolbox
+- hardware_interface
+description: gazebo_ros_control
+license: BSD
+maintainers: Jose Luis Rivero <jrivero@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-simulation/gazebo_ros_pkgs
+srvs: []
+url: http://ros.org/wiki/gazebo_ros_control

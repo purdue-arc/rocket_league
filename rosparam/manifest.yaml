@@ -1,0 +1,22 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros_comm/issues
+depends:
+- catkin
+- rosgraph
+- python3-yaml
+- python-yaml
+description: "rosparam contains the rosparam command-line tool for getting and\n \
+  \   setting ROS Parameters on the <a href=\"http://wiki.ros.org/Parameter%20Server\"\
+  >Parameter\n    Server</a> using YAML-encoded files. It also contains an\n    experimental\
+  \ library for using YAML with the Parameter\n    Server. This library is intended\
+  \ for internal use only.\n\n    rosparam can be invoked within a <a href=\"http://wiki.ros.org/roslaunch\"\
+  >roslaunch</a> file."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_comm
+srvs: []
+url: http://wiki.ros.org/rosparam

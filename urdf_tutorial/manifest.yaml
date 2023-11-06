@@ -1,0 +1,20 @@
+actions: []
+authors: David V. Lu!! <davidvlu@gmail.com>
+brief: ''
+bugtracker: ''
+depends:
+- roslaunch
+- catkin
+- joint_state_publisher
+- joint_state_publisher_gui
+- rviz
+- robot_state_publisher
+- xacro
+description: This package contains a number of URDF tutorials.
+license: BSD
+maintainers: David V. Lu!! <davidvlu@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/urdf_tutorial

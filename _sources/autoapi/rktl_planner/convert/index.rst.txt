@@ -1,0 +1,57 @@
+:py:mod:`rktl_planner.convert`
+==============================
+
+.. py:module:: rktl_planner.convert
+
+.. autoapi-nested-parse::
+
+   Contains ROS message conversions.
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   rktl_planner.convert.odom_to_array
+   rktl_planner.convert.pose_covar_to_array
+   rktl_planner.convert.twist_covar_to_array
+   rktl_planner.convert.pose_to_array
+   rktl_planner.convert.twist_to_array
+
+
+
+.. py:function:: odom_to_array(msg)
+
+   Convert odom msg to numpy arrays.
+
+
+.. py:function:: pose_covar_to_array(msg)
+
+   Convert pose with covariance msg to numpy arrays.
+
+
+.. py:function:: twist_covar_to_array(msg)
+
+   Convert twist with covariance msg to numpy arrays.
+
+
+.. py:function:: pose_to_array(msg)
+
+   Convert pose msg to numpy arrays.
+
+
+.. py:function:: twist_to_array(msg)
+
+   Convert twist msg to numpy arrays.
+
+

@@ -1,0 +1,21 @@
+actions: []
+authors: Chad Rockey
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- message_runtime
+- statistics_msgs
+- message_generation
+- std_msgs
+description: Messages related to the Point Grey camera driver.
+license: BSD
+maintainers: Mike Purvis <mpurvis@clearpathrobotics.com>
+msgs:
+- SequenceExposureStatistics
+- ExposureSequence
+- ImageExposureStatistics
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/pointgrey_camera_driver

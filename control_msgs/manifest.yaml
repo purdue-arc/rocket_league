@@ -1,0 +1,70 @@
+actions:
+- PointHead
+- SingleJointPosition
+- JointTrajectory
+- FollowJointTrajectory
+- GripperCommand
+authors: Stuart Glaser <sglaser@willowgarage.com>
+brief: ''
+bugtracker: ''
+depends:
+- trajectory_msgs
+- message_generation
+- actionlib_msgs
+- catkin
+- geometry_msgs
+- message_runtime
+- std_msgs
+description: "control_msgs contains base messages and actions useful for\n    controlling\
+  \ robots.  It provides representations for controller\n    setpoints and joint and\
+  \ cartesian trajectories."
+license: BSD
+maintainers: Bence Magyar <bence.magyar.robotics@gmail.com>
+msgs:
+- FollowJointTrajectoryAction
+- SingleJointPositionFeedback
+- SingleJointPositionGoal
+- GripperCommandAction
+- SingleJointPositionAction
+- JointTrajectoryAction
+- FollowJointTrajectoryActionFeedback
+- JointTrajectoryActionResult
+- SingleJointPositionActionFeedback
+- PointHeadFeedback
+- FollowJointTrajectoryActionGoal
+- JointTrajectoryActionGoal
+- PointHeadActionResult
+- PointHeadGoal
+- FollowJointTrajectoryGoal
+- GripperCommandResult
+- PointHeadActionGoal
+- GripperCommandActionGoal
+- GripperCommandFeedback
+- JointTolerance
+- FollowJointTrajectoryResult
+- JointTrajectoryActionFeedback
+- PointHeadResult
+- FollowJointTrajectoryFeedback
+- PidState
+- PointHeadAction
+- JointTrajectoryFeedback
+- PointHeadActionFeedback
+- GripperCommandActionFeedback
+- JointTrajectoryControllerState
+- JointControllerState
+- GripperCommandGoal
+- SingleJointPositionActionResult
+- JointJog
+- JointTrajectoryResult
+- SingleJointPositionResult
+- FollowJointTrajectoryActionResult
+- GripperCommandActionResult
+- JointTrajectoryGoal
+- SingleJointPositionActionGoal
+- GripperCommand
+package_type: package
+repo_url: ''
+srvs:
+- QueryTrajectoryState
+- QueryCalibrationState
+url: http://ros.org/wiki/control_msgs

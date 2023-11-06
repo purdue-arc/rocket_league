@@ -1,0 +1,31 @@
+actions: []
+authors: Tully Foote, Radu Bogdan Rusu
+brief: ''
+bugtracker: https://github.com/ros/nodelet_core/issues
+depends:
+- pluginlib
+- bondcpp
+- message_generation
+- cmake_modules
+- uuid
+- message_runtime
+- roscpp
+- boost
+- rosconsole
+- catkin
+- rospy
+- std_msgs
+description: "The nodelet package is designed to provide a way to run multiple\n \
+  \   algorithms in the same process with zero copy transport between\n    algorithms.\n\
+  \n    This package provides both the nodelet base class needed for\n    implementing\
+  \ a nodelet, as well as the NodeletLoader class used\n    for instantiating nodelets."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/nodelet_core
+srvs:
+- NodeletList
+- NodeletLoad
+- NodeletUnload
+url: http://ros.org/wiki/nodelet

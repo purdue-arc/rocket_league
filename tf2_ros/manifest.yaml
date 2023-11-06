@@ -1,0 +1,28 @@
+actions: []
+authors: Eitan Marder-Eppstein, Wim Meeussen
+brief: ''
+bugtracker: ''
+depends:
+- geometry_msgs
+- std_msgs
+- xmlrpcpp
+- tf2_py
+- rostest
+- roscpp
+- actionlib_msgs
+- catkin
+- message_filters
+- rospy
+- actionlib
+- rosgraph
+- tf2_msgs
+- tf2
+description: This package contains the ROS bindings for the tf2 library, for both
+  Python and C++.
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/tf2_ros

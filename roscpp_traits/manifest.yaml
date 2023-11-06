@@ -1,0 +1,19 @@
+actions: []
+authors: Josh Faust, Dirk Thomas
+brief: ''
+bugtracker: ''
+depends:
+- rostime
+- catkin
+- cpp_common
+description: "roscpp_traits contains the message traits code as described in\n   \
+  \ <a href=\"http://www.ros.org/wiki/roscpp/Overview/MessagesTraits\">MessagesTraits</a>.\n\
+  \n    This package is a component of <a href=\"http://www.ros.org/wiki/roscpp\"\
+  >roscpp</a>."
+license: BSD
+maintainers: Martin Pecka <peckama2@fel.cvut.cz>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/roscpp_traits

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Microcontroller Firmware &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Launch Files" href="../launch/README.html" />
+    <link rel="prev" title="rktl_control" href="../../rktl_control.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../rktl_control.html">rktl_control</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Microcontroller Firmware</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hardware-interface">hardware_interface</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../launch/README.html">Launch Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nodes/README.html">ROS Nodes</a></li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_control/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../rktl_control.html">rktl_control</a></li>
+      <li class="breadcrumb-item active">Microcontroller Firmware</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rktl_control/firmware/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="microcontroller-firmware">
+<h1>Microcontroller Firmware<a class="headerlink" href="#microcontroller-firmware" title="Permalink to this heading"></a></h1>
+<p>This folder contains all firmware that is written to microcontollers for the
+project.</p>
+<nav class="contents local" id="firmwares-in-the-package">
+<p class="topic-title">Firmwares in the package</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#hardware-interface" id="id1">hardware_interface</a></p>
+<ul>
+<li><p><a class="reference internal" href="#building-and-uploading" id="id2">Building and Uploading</a></p></li>
+<li><p><a class="reference internal" href="#binding-the-radios" id="id3">Binding the Radios</a></p></li>
+<li><p><a class="reference internal" href="#setting-the-radio-failsafe" id="id4">Setting the Radio Failsafe</a></p></li>
+<li><p><a class="reference internal" href="#programming-the-escs" id="id5">Programming the ESCs</a></p></li>
+<li><p><a class="reference internal" href="#further-information" id="id6">Further Information</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="hardware-interface">
+<h2><a class="toc-backref" href="#firmwares-in-the-package" role="doc-backlink">hardware_interface</a><a class="headerlink" href="#hardware-interface" title="Permalink to this heading"></a></h2>
+<p>This is the firmware that is written to a
+<a class="reference external" href="https://www.pjrc.com/store/teensy32.html">Teensy 3.2</a>. The Teensy is connected
+to a computer via USB, and code running on the computer allows it to pull
+control effort messages from the ROS network. The Teensy is also connected to
+<a class="reference external" href="https://www.frsky-rc.com/xjt/">FrSky XJT</a> radio transmitter, which allows it
+to send these controls to the car.</p>
+<p>To launch the node, simply give the Teensy power and use the
+<a class="reference internal" href="../launch/README.html#hardware-interface-launch"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">hardware_interface</span></code></span></a> launch
+file:</p>
+<p>Note that in order for this node to work, it need to be run on a Linux computer
+with that the <a class="reference internal" href="#../../docker/README.md"><span class="xref myst">docker container</span></a> needs to be run with
+the <code class="docutils literal notranslate"><span class="pre">--privileged</span></code> option.</p>
+<p>To use a different serial port (check <code class="docutils literal notranslate"><span class="pre">ls</span> <span class="pre">/dev</span></code> to see what it is named), modify
+the config file.</p>
+<p>You can enable the cars with:</p>
+<p>Then manually feed it controls with:</p>
+<section id="building-and-uploading">
+<h3><a class="toc-backref" href="#firmwares-in-the-package" role="doc-backlink">Building and Uploading</a><a class="headerlink" href="#building-and-uploading" title="Permalink to this heading"></a></h3>
+<p>Unfortunately, there are several steps required to build and upload code.</p>
+<p>First you need to configure your IDE. This is best done <em>outside</em> of the Docker
+container. First, install the Arduino IDE, then Teensyduino. Make sure to install
+the PulsePosition library when installing Teensyduino.</p>
+<p>Next, build the ROS libraries. <em>Inside the Docker container</em>, run:</p>
+<p>Copy the generated <code class="docutils literal notranslate"><span class="pre">ros_lib</span></code> folder to <code class="docutils literal notranslate"><span class="pre">&lt;Arduino</span> <span class="pre">Location&gt;/libraries/</span></code></p>
+<p>Lastly, launch the Arduino IDE, load the <code class="docutils literal notranslate"><span class="pre">hardware_interface.ino</span></code> project inside the
+<code class="docutils literal notranslate"><span class="pre">scripts</span></code> folder, set the target board to the Teensy 3.2, and click upload.</p>
+</section>
+<section id="binding-the-radios">
+<h3><a class="toc-backref" href="#firmwares-in-the-package" role="doc-backlink">Binding the Radios</a><a class="headerlink" href="#binding-the-radios" title="Permalink to this heading"></a></h3>
+<p>Binding the radios to the cars is a somewhat tedious process. There is a very
+precise set of instructions to follow, and you may need to do it several times
+in a row, until everything goes exactly right.</p>
+<ol class="arabic simple">
+<li><p>Power everything off (radio + car)</p></li>
+<li><p>Ensure the dip switches on the radio are set to 1-on, 2-off</p></li>
+<li><p>Hold down the white button on the radio and power it. It will beep and blink</p></li>
+<li><p>Hold down the button on the car’s receiver, and power it. It will also blink</p></li>
+<li><p>You can release both buttons</p></li>
+<li><p>Power off the car</p></li>
+<li><p>Power off the radio</p></li>
+<li><p>Power on the radio</p></li>
+<li><p>Power on the car
+If it worked, the car’s receiver will have a solid red light. If it didn’t work,
+you’ll need to try again.</p></li>
+</ol>
+</section>
+<section id="setting-the-radio-failsafe">
+<h3><a class="toc-backref" href="#firmwares-in-the-package" role="doc-backlink">Setting the Radio Failsafe</a><a class="headerlink" href="#setting-the-radio-failsafe" title="Permalink to this heading"></a></h3>
+<p>If the radio signal is lost, the car will automatically go in to a failsafe
+mode. This mode needs to be programmed so that the default action is to do
+nothing (as opposed to go absolutely bonkers and run into walls, which has a
+good chance of happening if the failsafe is not explicitly set). The procedure
+is simple. Run the hardware interface and manually publish an effort message
+with the field’s zeroed (do this on a frequency like 10 Hz). Power on the car
+and within a second or two <em>after</em> power it, click the button on the receiver.
+All done.</p>
+</section>
+<section id="programming-the-escs">
+<h3><a class="toc-backref" href="#firmwares-in-the-package" role="doc-backlink">Programming the ESCs</a><a class="headerlink" href="#programming-the-escs" title="Permalink to this heading"></a></h3>
+<p>The ESCs (Electronic Speed Controllers) in the cars are very advanced. They’re
+over-powered for what we’re doing, and are some of the best on the market. They
+are highly configurable through a simple user interface.</p>
+<p>Download and install
+<a class="reference external" href="https://home.castlecreations.com/download-castle-link/">Castle Link</a>
+on a Windows computer. Use the
+<a class="reference external" href="https://www.castlecreations.com/en/pc-software-and-cables-4/castle-link-v3-usb-programming-kit-011-0119-00">USB adapter</a>
+that we purchased with the ESCs to connect it to your computer. The battery does
+not need to be connected to the car, and you will unplug the ESC from the
+receiver to connect it to your computer. In Castle Link, connect to the car.
+Then go to File-&gt;Load Settings, and load <code class="docutils literal notranslate"><span class="pre">esc_settings.dat</span></code> in the <code class="docutils literal notranslate"><span class="pre">config</span></code>
+folder. Click Update in the bottom right to send them to the car.</p>
+<p>After programming them, the endpoints need to be set. This tells it what
+control input maps to what speed. The procedure is a little complex, but not too
+bad.</p>
+<ol class="arabic simple">
+<li><p>Power off the car and hardware interface</p></li>
+<li><p>Set the throttle throw to 500 on the hardware interface config</p></li>
+<li><p>Launch and enable the hardware interface</p></li>
+<li><p>Manually publish an effort message with 1.0 throttle effort (at 10 Hz)</p></li>
+<li><p>Power on the car <strong>With the wheels off the ground</strong>, it should make a lot of beeping noises</p></li>
+<li><p>Manually publish an effort message with -1.0 throttle effort (at 10 Hz)</p></li>
+<li><p>Manually publish an effort message with 0.0 throttle effort (at 10 Hz)</p></li>
+<li><p>Power off the car and hardware interface</p></li>
+<li><p>Revert the throttle throw to what it was previously at</p></li>
+</ol>
+<p>After step 7, the car should have made some noises, then stopped beeping. If you
+run the car normally and it makes a lot of noises and doesn’t move, or if it
+goes <em>way</em> too fast, then you likely need to do this procedure again.</p>
+</section>
+<section id="further-information">
+<h3><a class="toc-backref" href="#firmwares-in-the-package" role="doc-backlink">Further Information</a><a class="headerlink" href="#further-information" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Teensyduino</span></code>, software that lets you program the Teensy using the Arduino IDE, is described here: <a class="reference external" href="https://www.pjrc.com/teensy/teensyduino.html">https://www.pjrc.com/teensy/teensyduino.html</a></p>
+<p>The specific library used to connect to the modules is described here: <a class="reference external" href="https://www.pjrc.com/teensy/td_libs_PulsePosition.html">https://www.pjrc.com/teensy/td_libs_PulsePosition.html</a></p>
+<p>Additional <code class="docutils literal notranslate"><span class="pre">rosserial_arduino</span></code> tutorials can be found here: <a class="reference external" href="http://wiki.ros.org/rosserial_arduino/Tutorials">http://wiki.ros.org/rosserial_arduino/Tutorials</a></p>
+<p>Radio transmitter manual: <a class="reference external" href="https://www.frsky-rc.com/wp-content/uploads/2017/07/Manual/XJT.pdf">https://www.frsky-rc.com/wp-content/uploads/2017/07/Manual/XJT.pdf</a></p>
+<p>Radio receiver manual: <a class="reference external" href="https://cdn.shopify.com/s/files/1/0609/8324/7079/files/R84_Receiver_User_manual.pdf?v=1639375461">https://cdn.shopify.com/s/files/1/0609/8324/7079/files/R84_Receiver_User_manual.pdf?v=1639375461</a></p>
+<p>ESC manual: <a class="reference external" href="https://www.castlecreations.com/en/1-18th-scale/sidewinder-micro-2-esc-010-0150-00">https://www.castlecreations.com/en/1-18th-scale/sidewinder-micro-2-esc-010-0150-00</a></p>
+<hr class="docutils" />
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../rktl_control.html" class="btn btn-neutral float-left" title="rktl_control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../launch/README.html" class="btn btn-neutral float-right" title="Launch Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

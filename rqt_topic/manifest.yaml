@@ -1,0 +1,22 @@
+actions: []
+authors: Dirk Thomas, Dorian Scholz
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_topic/issues
+depends:
+- python-rospkg
+- rqt_gui_py
+- python3-rospkg
+- rostopic
+- std_msgs
+- rqt_gui
+- catkin
+- python_qt_binding
+description: rqt_topic provides a GUI plugin for displaying debug information about
+  ROS topics including publishers, subscribers, publishing rate, and ROS Messages.
+license: BSD
+maintainers: Dorian Scholz <scholz@sim.tu-darmstadt.de>, Scott K Logan <scott@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_topic
+srvs: []
+url: http://wiki.ros.org/rqt_topic

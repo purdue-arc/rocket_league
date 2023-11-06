@@ -1,0 +1,19 @@
+actions: []
+authors: Stuart Glaser <sglaser@willowgarage.com>
+brief: ''
+bugtracker: https://github.com/ros-controls/realtime_tools/issues
+depends:
+- actionlib
+- catkin
+- rostest
+- rosunit
+- roscpp
+description: "Contains a set of tools that can be used from a hard\n    realtime thread,\
+  \ without breaking the realtime behavior."
+license: BSD
+maintainers: Bence Magyar <bence.magyar.robotics@gmail.com>, Gennaro Raiola <gennaro.raiola@iit.it>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-controls/realtime_tools/
+srvs: []
+url: http://ros.org/wiki/realtime_tools

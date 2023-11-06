@@ -1,0 +1,26 @@
+actions: []
+authors: Ken Conley
+brief: ''
+bugtracker: https://github.com/ros/ros_tutorials/issues
+depends:
+- rospy
+- roscpp_tutorials
+- message_generation
+- message_runtime
+- catkin
+- rostest
+- std_msgs
+description: "This package attempts to show the features of ROS python API step-by-step,\n\
+  \    including using messages, servers, parameters, etc. These tutorials are compatible\
+  \ with the nodes in roscpp_tutorial."
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs:
+- HeaderString
+- Floats
+package_type: package
+repo_url: https://github.com/ros/ros_tutorials
+srvs:
+- AddTwoInts
+- BadTwoInts
+url: http://www.ros.org/wiki/rospy_tutorials

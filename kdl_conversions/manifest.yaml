@@ -1,0 +1,17 @@
+actions: []
+authors: Adam Leeper
+brief: ''
+bugtracker: ''
+depends:
+- liborocos-kdl-dev
+- geometry_msgs
+- catkin
+- liborocos-kdl
+description: Conversion functions between KDL and geometry_msgs types.
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/kdl_conversions

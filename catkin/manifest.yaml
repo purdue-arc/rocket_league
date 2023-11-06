@@ -1,0 +1,27 @@
+actions: []
+authors: Troy Straszheim, Morten Kjaergaard, Brian Gerkey, Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros/catkin/issues
+depends:
+- google-mock
+- python3-setuptools
+- python-argparse
+- python-setuptools
+- python3-mock
+- python3-catkin-pkg
+- cmake
+- python-mock
+- python-empy
+- python3-empy
+- python-nose
+- python-catkin-pkg
+- python3-nose
+- gtest
+description: Low-level build system macros and infrastructure for ROS.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Tully Foote <tfoote@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/catkin
+srvs: []
+url: http://wiki.ros.org/catkin

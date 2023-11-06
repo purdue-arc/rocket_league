@@ -1,0 +1,23 @@
+actions: []
+authors: Michael Ferguson, Adam Stambler
+brief: ''
+bugtracker: ''
+depends:
+- message_generation
+- rospy
+- rosserial_msgs
+- catkin
+- rosserial_python
+- arduino-core
+- message_runtime
+- rosserial_client
+description: rosserial for Arduino/AVR platforms.
+license: BSD
+maintainers: Paul Bouchier <paul.bouchier@gmail.com>, Mike Purvis <mpurvis@clearpathrobotics.com>
+msgs:
+- Adc
+package_type: package
+repo_url: ''
+srvs:
+- Test
+url: http://ros.org/wiki/rosserial_arduino

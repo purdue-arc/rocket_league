@@ -1,0 +1,16 @@
+actions: []
+authors: Josh Faust
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- roscpp
+- visualization_msgs
+description: The visulalization_marker_tutorials package
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/visualization_marker_tutorials

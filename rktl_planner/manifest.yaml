@@ -1,0 +1,27 @@
+actions: []
+authors: Harrison McCarty <mccarth@purdue.edu>, Arianna McNamara <mcnama20@purdue.edu>,
+  Vincent Vu <vvvu@purdue.edu>, Adrian Teigen <ateigen@purdue.edu>, Daniel Gerblick
+  <dgerblic@purdue.edu>
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- std_msgs
+- nav_msgs
+- rospy
+- std_srvs
+- python-numpy
+- rktl_msgs
+- tf
+- geometry_msgs
+- message_generation
+- message_runtime
+description: Handles localized actions to plan and follow trajectories.
+license: BSD 3 Clause
+maintainers: Autonomous Robotics Club of Purdue <autonomy@purdue.edu>
+msgs: []
+package_type: package
+repo_url: ''
+srvs:
+- CreateBezierPath
+url: https://www.purduearc.com

@@ -1,0 +1,29 @@
+actions: []
+authors: Ken Conley, Tully Foote, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron
+  <jacob@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros_comm/issues
+depends:
+- std_msgs
+- diagnostic_msgs
+- catkin
+- genmsg
+- python-rospkg
+- genpy
+- roslib
+- python3-rospkg
+- rostest
+- std_srvs
+- rosbag
+description: "rosmsg contains two command-line tools: <tt>rosmsg</tt> and\n    <tt>rossrv</tt>.\
+  \ <tt>rosmsg</tt> is a command-line tool for\n    displaying information about <a\
+  \ href=\"http://wiki.ros.org/msg\">ROS Message\n    types</a>. <tt>rossrv</tt> is\
+  \ a command-line tool for displaying\n    information about <a href=\"http://wiki.ros.org/srv\"\
+  >ROS\n    Service types</a>."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_comm
+srvs: []
+url: http://wiki.ros.org/rosmsg

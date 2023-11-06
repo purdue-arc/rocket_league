@@ -1,0 +1,24 @@
+actions: []
+authors: Aaron Blasdel
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_runtime_monitor/issues
+depends:
+- python-rospkg
+- rqt_gui_py
+- rqt_gui
+- rospy
+- diagnostic_msgs
+- python-setuptools
+- python3-rospkg
+- catkin
+- python3-setuptools
+- python_qt_binding
+- qt_gui
+description: rqt_runtime_monitor provides a GUI plugin viewing DiagnosticsArray messages.
+license: BSD
+maintainers: Aaron Blasdel <ablasdel@gmail.com>, Arne Hitzmann <arne.hitzmann@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_runtime_monitor
+srvs: []
+url: http://wiki.ros.org/rqt_runtime_monitor

@@ -1,0 +1,36 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros_comm/issues
+depends:
+- catkin
+- genpy
+- rosgraph_msgs
+- python-numpy
+- python3-numpy
+- python-rospkg
+- python3-rospkg
+- std_msgs
+- python-yaml
+- roscpp
+- roslib
+- rosgraph
+- python3-yaml
+description: "rospy is a pure Python client library for ROS. The rospy client\n  \
+  \  API enables Python programmers to quickly interface with ROS <a href=\"http://ros.org/wiki/Topics\"\
+  >Topics</a>, <a href=\"http://ros.org/wiki/Services\">Services</a>, and <a href=\"\
+  http://ros.org/wiki/Parameter Server\">Parameters</a>. The\n    design of rospy\
+  \ favors implementation speed (i.e. developer\n    time) over runtime performance\
+  \ so that algorithms can be quickly\n    prototyped and tested within ROS. It is\
+  \ also ideal for\n    non-critical-path code, such as configuration and initialization\n\
+  \    code. Many of the ROS tools are written in rospy to take\n    advantage of\
+  \ the type introspection capabilities.\n\n    Many of the ROS tools, such\n    as\
+  \ <a href=\"http://ros.org/wiki/rostopic\">rostopic</a>\n    and <a href=\"http://ros.org/wiki/rosservice\"\
+  >rosservice</a>, are\n    built on top of rospy."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_comm
+srvs: []
+url: http://wiki.ros.org/rospy

@@ -1,0 +1,48 @@
+actions: []
+authors: Tully Foote <tfoote@osrfoundation.org>
+brief: ''
+bugtracker: ''
+depends:
+- message_generation
+- catkin
+- message_runtime
+- std_msgs
+description: "geometry_msgs provides messages for common geometric primitives\n  \
+  \  such as points, vectors, and poses. These primitives are designed\n    to provide\
+  \ a common data type and facilitate interoperability\n    throughout the system."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>
+msgs:
+- TwistWithCovarianceStamped
+- PoseArray
+- Quaternion
+- PointStamped
+- AccelWithCovariance
+- AccelWithCovarianceStamped
+- PolygonStamped
+- TwistStamped
+- WrenchStamped
+- Vector3
+- Pose
+- TwistWithCovariance
+- PoseWithCovarianceStamped
+- Wrench
+- Transform
+- TransformStamped
+- AccelStamped
+- QuaternionStamped
+- PoseStamped
+- Accel
+- PoseWithCovariance
+- Point32
+- Vector3Stamped
+- InertiaStamped
+- Point
+- Twist
+- Polygon
+- Pose2D
+- Inertia
+package_type: package
+repo_url: ''
+srvs: []
+url: http://wiki.ros.org/geometry_msgs

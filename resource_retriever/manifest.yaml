@@ -1,0 +1,26 @@
+actions: []
+authors: Josh Faust <jfaust@willowgarage.com>, Ioan Sucan <isucan@gmail.com>
+brief: ''
+bugtracker: https://github.com/ros/resource_retriever/issues
+depends:
+- libcurl
+- roslib
+- python3-rospkg
+- rosconsole
+- boost
+- catkin
+- python-rospkg
+- libcurl-dev
+description: "This package retrieves data from url-format files such as http://,\n\
+  \   ftp://, package:// file://, etc., and loads the data into memory.\n   The package://\
+  \ url for ros packages is translated into a local\n   file:// url.  The resourse\
+  \ retriever was initially designed to load\n   mesh files into memory, but it can\
+  \ be used for any type of\n   data. The resource retriever is based on the the libcurl\
+  \ library."
+license: BSD
+maintainers: Chris Lalancette <clalancette@osrfoundation.org>, Shane Loretz <sloretz@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/resource_retriever
+srvs: []
+url: http://ros.org/wiki/resource_retriever

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>simulator &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="simulator.car" href="car/index.html" />
+    <link rel="prev" title="ROS Nodes" href="../../rktl_sim/nodes/README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../rktl_sim.html">rktl_sim</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../rktl_sim/launch/README.html">Launch Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../rktl_sim/nodes/README.html">ROS Nodes</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Package Module (Simulator)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../visualizer/index.html">Package Module (Visualizer)</a></li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_sim/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../rktl_sim.html">rktl_sim</a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulator</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/autoapi/simulator/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-simulator">
+<span id="simulator"></span><h1><a class="reference internal" href="#module-simulator" title="simulator"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulator</span></code></a><a class="headerlink" href="#module-simulator" title="Permalink to this heading"></a></h1>
+<p>3D simulation of ARC’s rocket league environment.</p>
+<dl class="simple">
+<dt>License:</dt><dd><p>BSD 3-Clause License
+Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+All rights reserved.</p>
+</dd>
+</dl>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="car/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulator.car</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="sim/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulator.sim</span></code></a></li>
+</ul>
+</div>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#simulator.Sim" title="simulator.Sim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sim</span></code></a></p></td>
+<td><p>Oversees instance-based parameters and objects of the simulator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#simulator.Car" title="simulator.Car"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Car</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="simulator.Sim">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">simulator.</span></span><span class="sig-name descname"><span class="pre">Sim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">props</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">urdf_paths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spawn_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_setup</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_enabled</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Oversees instance-based parameters and objects of the simulator.
+Cars, ball objects, goal position, etc.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.configure_dynamics">
+<span class="sig-name descname"><span class="pre">configure_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.configure_dynamics" title="Permalink to this definition"></a></dt>
+<dd><p>Set the car’s curvature and general car behavior.
+&#64;param body_id: The id of the object to be configured.
+&#64;param body_type: The specific type of object (ie ball,car,goal,etc).
+&#64;return: Error if not initialized.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.create_ball">
+<span class="sig-name descname"><span class="pre">create_ball</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">urdf_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_pose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_speed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.create_ball" title="Permalink to this definition"></a></dt>
+<dd><p>&#64;param urdf_name: The id for the specific pybullet object.
+&#64;param init_pose: The initial position of the ball (override randomization).
+&#64;param init_speed: The max speed of the ball (override known speed parameter).
+&#64;param noise: The noise and if it should be present in the location of the object.
+&#64;param init_vel: The initial velocity of the ball (override randomization).
+&#64;return: The ball id if the creation was successful.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.create_car">
+<span class="sig-name descname"><span class="pre">create_car</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">urdf_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_pose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">car_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.create_car" title="Permalink to this definition"></a></dt>
+<dd><p>Creates instance based car properties(pose,vel,orient) and configures car dynamics.
+&#64;param urdf_name: The id for the specific pybullet object.
+&#64;param init_pose: The initial position of the ball (override randomization).
+&#64;param noise: The noise and if it should be present in the location of the object.
+&#64;param car_props: Configuration based car properties.
+&#64;return: The car id if the creation was successful.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.delete_car">
+<span class="sig-name descname"><span class="pre">delete_car</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.delete_car" title="Permalink to this definition"></a></dt>
+<dd><p>Removes a car from being tracked in the _cars and _car_data lists.
+&#64;param car_id: The id of the car in the simulator class.
+&#64;return: Whether the deletion was successful.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.set_car_command">
+<span class="sig-name descname"><span class="pre">set_car_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.set_car_command" title="Permalink to this definition"></a></dt>
+<dd><p>Set the command for the car</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_cmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.step" title="Permalink to this definition"></a></dt>
+<dd><p>Moves the sim forward one timestep, checking if a goal is score to end the sim round.
+&#64;param dt: The change in time (delta-t) for this sim step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.get_decreased_velocity">
+<span class="sig-name descname"><span class="pre">get_decreased_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linear</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angular</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.get_decreased_velocity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.get_car_pose">
+<span class="sig-name descname"><span class="pre">get_car_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.get_car_pose" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.get_car_velocity">
+<span class="sig-name descname"><span class="pre">get_car_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.get_car_velocity" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a tuple of linear and angular velocity for the car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">set_car_command</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.get_ball_pose">
+<span class="sig-name descname"><span class="pre">get_ball_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.get_ball_pose" title="Permalink to this definition"></a></dt>
+<dd><p>&#64;param add_noise: State whether you want noise to get the ball position (default=False).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.get_ball_velocity">
+<span class="sig-name descname"><span class="pre">get_ball_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.get_ball_velocity" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spawn_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">car_properties</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ball_init_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ball_init_speed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Resets the ball, score, winner, spawn bounds, cars and ball.
+&#64;param spawn_bounds: The new spawn bounds.
+&#64;param car_properties: The new car properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.reset_car">
+<span class="sig-name descname"><span class="pre">reset_car</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">car_properties</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.reset_car" title="Permalink to this definition"></a></dt>
+<dd><p>Loops over the cars and generates new initial positions (if they were not specified).
+&#64;param car_properties: The new car config properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.check_if_pos_overlap">
+<span class="sig-name descname"><span class="pre">check_if_pos_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.check_if_pos_overlap" title="Permalink to this definition"></a></dt>
+<dd><p>Checks if two cars spawn bounds overlap with each other.
+&#64;param car_pos: The position of the car.
+&#64;return: Whether overlap happens (true = need to generate new bounds).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.generate_new_car_pos">
+<span class="sig-name descname"><span class="pre">generate_new_car_pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.generate_new_car_pos" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Sim.reset_ball">
+<span class="sig-name descname"><span class="pre">reset_ball</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Sim.reset_ball" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="simulator.Car">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">simulator.</span></span><span class="sig-name descname"><span class="pre">Car</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">car_properties</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Car" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Car.set_properties">
+<span class="sig-name descname"><span class="pre">set_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_properties</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Car.set_properties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Car.setCmd">
+<span class="sig-name descname"><span class="pre">setCmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Car.setCmd" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Car.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Car.step" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Car.get_pose">
+<span class="sig-name descname"><span class="pre">get_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Car.get_pose" title="Permalink to this definition"></a></dt>
+<dd><p>Randomizes and sets a new position for the car.
+&#64;param noise: The sensor noise and if it is present (None=no noise).
+&#64;return: The position and orientation of the car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Car.get_velocity">
+<span class="sig-name descname"><span class="pre">get_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Car.get_velocity" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the linear and angular velocity of the car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Car.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orient</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Car.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Resets the car state with the new pose and orient.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.Car.check_overlap">
+<span class="sig-name descname"><span class="pre">check_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.Car.check_overlap" title="Permalink to this definition"></a></dt>
+<dd><p>Returns whether the position will overlap with the current car.
+&#64;param pos: The position of the other object.
+&#64;return: Boolean if the positions overlap (true = overlap).</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../rktl_sim/nodes/README.html" class="btn btn-neutral float-left" title="ROS Nodes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="car/index.html" class="btn btn-neutral float-right" title="simulator.car" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

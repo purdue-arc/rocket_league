@@ -1,0 +1,20 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros/issues
+depends:
+- python-rospkg
+- roslib
+- python3-setuptools
+- python3-rospkg
+- python-setuptools
+- catkin
+description: Unit-testing package for ROS. This is a lower-level library for rostest
+  and handles unit tests, whereas rostest handles integration tests.
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros
+srvs: []
+url: http://wiki.ros.org/rosunit

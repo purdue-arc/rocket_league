@@ -1,0 +1,18 @@
+actions: []
+authors: Michael Ferguson
+brief: ''
+bugtracker: ''
+depends:
+- diagnostic_msgs
+- rospy
+- python3-serial
+- rosserial_msgs
+- catkin
+description: A Python-based implementation of the rosserial protocol.
+license: BSD
+maintainers: Paul Bouchier <paul.bouchier@gmail.com>, Mike Purvis <mpurvis@clearpathrobotics.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rosserial_python

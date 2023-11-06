@@ -1,0 +1,27 @@
+actions: []
+authors: Vijay Pradeep
+brief: ''
+bugtracker: ''
+depends:
+- laser_geometry
+- message_generation
+- tf
+- sensor_msgs
+- rostest
+- pluginlib
+- catkin
+- filters
+- message_runtime
+- roscpp
+- message_filters
+description: Provides nodes to assemble point clouds from either LaserScan or PointCloud
+  messages
+license: BSD
+maintainers: Jonathan Binney <jon.binney@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs:
+- AssembleScans2
+- AssembleScans
+url: http://ros.org/wiki/laser_assembler

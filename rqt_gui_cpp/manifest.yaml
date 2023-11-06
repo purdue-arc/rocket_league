@@ -1,0 +1,19 @@
+actions: []
+authors: Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt/issues
+depends:
+- qt_gui
+- qt_gui_cpp
+- qtbase5-dev
+- roscpp
+- catkin
+- nodelet
+description: rqt_gui_cpp enables GUI plugins to use the C++ client library for ROS.
+license: BSD
+maintainers: Michael Jeronimo <michael.jeronimo@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt
+srvs: []
+url: http://ros.org/wiki/rqt_gui_cpp

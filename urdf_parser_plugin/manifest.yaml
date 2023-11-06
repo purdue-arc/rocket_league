@@ -1,0 +1,15 @@
+actions: []
+authors: Ioan Sucan <isucan@gmail.com>, Jackie Kay <jacquelinekay1@gmail.com>
+brief: ''
+bugtracker: https://github.com/ros/urdf/issues
+depends:
+- liburdfdom-headers-dev
+- catkin
+description: This package contains a C++ base class for URDF parsers.
+license: BSD
+maintainers: Chris Lalancette <clalancette@osrfoundation.org>, Shane Loretz <sloretz@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/urdf
+srvs: []
+url: http://ros.org/wiki/urdf

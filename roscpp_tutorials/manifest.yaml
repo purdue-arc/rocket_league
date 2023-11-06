@@ -1,0 +1,25 @@
+actions: []
+authors: Morgan Quigley
+brief: ''
+bugtracker: https://github.com/ros/ros_tutorials/issues
+depends:
+- rosconsole
+- message_runtime
+- libboost-thread-dev
+- roscpp_serialization
+- roscpp
+- libboost-date-time-dev
+- message_generation
+- catkin
+- rostime
+- std_msgs
+description: "This package attempts to show the features of ROS step-by-step,\n  \
+  \  including using messages, servers, parameters, etc."
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_tutorials
+srvs:
+- TwoInts
+url: http://www.ros.org/wiki/roscpp_tutorials

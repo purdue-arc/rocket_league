@@ -1,0 +1,30 @@
+actions: []
+authors: Patrick Mihelich
+brief: ''
+bugtracker: ''
+depends:
+- rostest
+- cmake_modules
+- stereo_msgs
+- eigen_conversions
+- tf2
+- boost
+- image_geometry
+- sensor_msgs
+- tf2_ros
+- image_transport
+- cv_bridge
+- catkin
+- nodelet
+- message_filters
+description: "Contains nodelets for processing depth images such as those\n     produced\
+  \ by OpenNI camera. Functions include creating disparity\n     images and point\
+  \ clouds, as well as registering (reprojecting)\n     a depth image into another\
+  \ camera frame."
+license: BSD
+maintainers: Vincent Rabaud <vincent.rabaud@gmail.com>, Autonomoustuff team <software@autonomoustuff.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/depth_image_proc

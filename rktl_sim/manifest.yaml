@@ -1,0 +1,23 @@
+actions: []
+authors: Harrison McCarty <mccarth@purdue.edu>, Dhiro Sarkar <sarkar40@purdue.edu>,
+  Jake Tockerman <jtockerm@purdue.edu>
+brief: ''
+bugtracker: ''
+depends:
+- rktl_msgs
+- rosunit
+- rospy
+- PyBullet
+- pygame
+- geometry_msgs
+- catkin
+- std_srvs
+- nav_msgs
+description: Simulator and Visualizer for ARC Rocket League project
+license: BSD 3 Clause
+maintainers: Autonomous Robotics Club of Purdue <autonomy@purdue.edu>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: https://www.purduearc.com

@@ -1,0 +1,20 @@
+actions: []
+authors: Josh Faust, Dirk Thomas
+brief: ''
+bugtracker: ''
+depends:
+- rostime
+- cpp_common
+- roscpp_traits
+- catkin
+description: "roscpp_serialization contains the code for serialization as described\
+  \ in\n    <a href=\"http://www.ros.org/wiki/roscpp/Overview/MessagesSerializationAndAdaptingTypes\"\
+  >MessagesSerializationAndAdaptingTypes</a>.\n\n    This package is a component of\
+  \ <a href=\"http://www.ros.org/wiki/roscpp\">roscpp</a>."
+license: BSD
+maintainers: Martin Pecka <peckama2@fel.cvut.cz>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/roscpp_serialization

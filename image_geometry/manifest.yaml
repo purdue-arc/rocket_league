@@ -1,0 +1,19 @@
+actions: []
+authors: Patrick Mihelich
+brief: ''
+bugtracker: ''
+depends:
+- libopencv-dev
+- sensor_msgs
+- catkin
+description: "`image_geometry` contains C++ and Python libraries for interpreting\
+  \ images\n    geometrically. It interfaces the calibration parameters in sensor_msgs/CameraInfo\n\
+  \    messages with OpenCV functions such as image rectification, much as cv_bridge\n\
+  \    interfaces ROS sensor_msgs/Image with OpenCV data types."
+license: BSD
+maintainers: Vincent Rabaud <vincent.rabaud@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/image_geometry

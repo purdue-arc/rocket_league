@@ -1,0 +1,23 @@
+actions: []
+authors: Stuart Glaser
+brief: ''
+bugtracker: https://github.com/ros/bond_core/issues
+depends:
+- libboost-dev
+- catkin
+- libboost-thread-dev
+- uuid
+- libboost-date-time-dev
+- bond
+- smclib
+- cmake_modules
+- roscpp
+description: "C++ implementation of bond, a mechanism for checking when\n    another\
+  \ process has terminated."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/bond_core
+srvs: []
+url: http://www.ros.org/wiki/bondcpp

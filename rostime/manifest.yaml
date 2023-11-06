@@ -1,0 +1,18 @@
+actions: []
+authors: Josh Faust, Dirk Thomas
+brief: ''
+bugtracker: ''
+depends:
+- libboost-date-time-dev
+- libboost-system-dev
+- cpp_common
+- catkin
+- libboost-thread-dev
+description: Time and Duration implementations for C++ libraries, including roscpp.
+license: BSD
+maintainers: Martin Pecka <peckama2@fel.cvut.cz>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rostime

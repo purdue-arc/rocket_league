@@ -1,0 +1,19 @@
+actions: []
+authors: Dave Hershberger
+brief: ''
+bugtracker: ''
+depends:
+- libqt5-core
+- libqt5-widgets
+- qtbase5-dev
+- catkin
+- libqt5-gui
+- rviz
+description: Tutorials showing how to write plugins for RViz.
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rviz_plugin_tutorials

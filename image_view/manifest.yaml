@@ -1,0 +1,28 @@
+actions: []
+authors: Patrick Mihelich
+brief: ''
+bugtracker: ''
+depends:
+- rostest
+- image_transport
+- stereo_msgs
+- cv_bridge
+- sensor_msgs
+- roscpp
+- std_srvs
+- rosconsole
+- nodelet
+- catkin
+- message_generation
+- camera_calibration_parsers
+- message_filters
+- dynamic_reconfigure
+description: "A simple viewer for ROS image topics. Includes a specialized viewer\n\
+  \  for stereo + disparity images."
+license: BSD
+maintainers: Vincent Rabaud <vincent.rabaud@gmail.com>, Autonomoustuff team <software@autonomoustuff.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/image_view

@@ -1,0 +1,28 @@
+actions: []
+authors: John Hsu, Nate Koenig, Dave Coleman
+brief: ''
+bugtracker: https://github.com/ros-simulation/gazebo_ros_pkgs/issues
+depends:
+- roscpp
+- roslib
+- tinyxml
+- tf
+- dynamic_reconfigure
+- geometry_msgs
+- catkin
+- gazebo_msgs
+- std_srvs
+- python-argparse
+- rosgraph_msgs
+- cmake_modules
+- gazebo_dev
+- std_msgs
+description: "Provides ROS plugins that offer message and service publishers for interfacing\
+  \ with <a href=\"http://gazebosim.org\">Gazebo</a> through ROS.\n    Formally simulator_gazebo/gazebo"
+license: Apache 2.0
+maintainers: Jose Luis Rivero <jrivero@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-simulation/gazebo_ros_pkgs
+srvs: []
+url: http://gazebosim.org/tutorials?cat=connect_ros

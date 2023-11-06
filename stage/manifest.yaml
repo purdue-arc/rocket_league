@@ -1,0 +1,25 @@
+actions: []
+authors: Richard Vaughan <vaughan@sfu.ca>, Brian Gerkey <gerkey@willowgarage.com>,
+  Reed Hedges <hedges@mobilerobots.com>, Andrew Howard <andrew.b.howard@jpl.nasa.gov>,
+  Toby Collett <tcollett@plan9.net.nz>, Pooya Karimian <pooyak@sfu.ca>, Jeremy Asher
+  <jra11@sfu.ca>, Alex Couture-Beil <asc17@sfu.ca>, Geoff Biggs <git@killbots.net>,
+  Rich Mattes <jpgr87@github.com>, Abbas Sadat <abbas.sadat@gmail.com>
+brief: ''
+bugtracker: https://github.com/rtv/Stage/issues
+depends:
+- gtk2
+- cmake
+- catkin
+- pkg-config
+- opengl
+- libjpeg
+- libfltk-dev
+- libtool
+description: Mobile robot simulator http://rtv.github.com/Stage
+license: GPL
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/rtv/Stage/
+srvs: []
+url: http://rtv.github.com/Stage

@@ -1,0 +1,24 @@
+actions: []
+authors: Jack O'Quin
+brief: ''
+bugtracker: https://github.com/ros-perception/image_common/issues
+depends:
+- boost
+- sensor_msgs
+- gtest
+- camera_calibration_parsers
+- image_transport
+- roslib
+- catkin
+- rostest
+- roscpp
+description: "This package provides a C++ interface for camera calibration\n     information.\
+  \  It provides CameraInfo, and handles SetCameraInfo\n     service requests, saving\
+  \ and restoring the camera calibration\n     data."
+license: BSD
+maintainers: Jack O'Quin <jack.oquin@gmail.com>, Vincent Rabaud <vincent.rabaud@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-perception/image_common
+srvs: []
+url: http://ros.org/wiki/camera_info_manager

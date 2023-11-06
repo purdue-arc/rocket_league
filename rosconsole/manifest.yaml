@@ -1,0 +1,23 @@
+actions: []
+authors: Josh Faust
+brief: ''
+bugtracker: ''
+depends:
+- cpp_common
+- apr
+- catkin
+- rosunit
+- libboost-system-dev
+- log4cxx
+- rosbuild
+- rostime
+- libboost-thread-dev
+- libboost-regex-dev
+description: ROS console output library.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/rosconsole

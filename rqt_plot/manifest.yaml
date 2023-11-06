@@ -1,0 +1,31 @@
+actions: []
+authors: Dorian Scholz, Dirk Thomas <dthomas@osrfoundation.org>
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_plot/issues
+depends:
+- python-rospkg
+- qwt_dependency
+- std_msgs
+- python-matplotlib
+- catkin
+- python-numpy
+- python3-rospkg
+- python_qt_binding
+- qt_gui_py_common
+- rostopic
+- rqt_py_common
+- python3-numpy
+- rqt_gui
+- rqt_gui_py
+- rosgraph
+- python3-matplotlib
+description: rqt_plot provides a GUI plugin visualizing numeric values in a 2D plot
+  using different plotting backends.
+license: BSD
+maintainers: Mabel Zhang <mabel@openrobotics.org>, Scott K Logan <logans@cottsay.net>,
+  Dorian Scholz <scholz@sim.tu-darmstadt.de>, Austin Hendrix <namniart@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_plot
+srvs: []
+url: http://wiki.ros.org/rqt_plot

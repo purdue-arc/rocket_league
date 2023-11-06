@@ -1,0 +1,28 @@
+actions: []
+authors: Jonathan Bohren
+brief: ''
+bugtracker: ''
+depends:
+- actionlib_msgs
+- smach
+- smach_msgs
+- std_msgs
+- rostest
+- rospy
+- catkin
+- rostopic
+- std_srvs
+- actionlib
+description: "The smach_ros package contains extensions for the SMACH library to\n\
+  \    integrate it tightly with ROS.  For example, SMACH-ROS can call\n    ROS services,\
+  \ listen to ROS topics, and integrate\n    with <a href=\"http://www.ros.org/wiki/actionlib\"\
+  >actionlib</a>\n    both as a client, and a provider of action servers.  SMACH is\
+  \ a\n    new library that takes advantage of very old concepts in order to\n   \
+  \ quickly create robust robot behavior with maintainable and modular\n    code."
+license: BSD
+maintainers: Isaac I. Y. Saito <gm130s@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

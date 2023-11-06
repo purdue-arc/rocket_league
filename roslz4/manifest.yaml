@@ -1,0 +1,19 @@
+actions: []
+authors: Ben Charrow <bcharrow@seas.upenn.edu>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- cpp_common
+- lz4
+- rosunit
+- catkin
+description: "A Python and C++ implementation of the LZ4 streaming format.  Large\
+  \ data\n    streams are split into blocks which are compressed using the very fast\
+  \ LZ4\n    compression algorithm."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

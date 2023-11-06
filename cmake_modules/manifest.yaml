@@ -1,0 +1,15 @@
+actions: []
+authors: William Woodall <william@osrfoundation.org>
+brief: ''
+bugtracker: https://github.com/ros/cmake_modules/issues
+depends:
+- catkin
+description: A common repository for CMake Modules which are not distributed with
+  CMake but are commonly used by ROS packages.
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/cmake_modules
+srvs: []
+url: ''

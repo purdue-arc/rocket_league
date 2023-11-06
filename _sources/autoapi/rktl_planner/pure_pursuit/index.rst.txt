@@ -1,0 +1,59 @@
+:py:mod:`rktl_planner.pure_pursuit`
+===================================
+
+.. py:module:: rktl_planner.pure_pursuit
+
+.. autoapi-nested-parse::
+
+   Contains pure pursuit helper functions.
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   rktl_planner.pure_pursuit.find_intersection
+   rktl_planner.pure_pursuit.calculate_lat_error
+   rktl_planner.pure_pursuit.calculate_turn_rad
+   rktl_planner.pure_pursuit.calculate_angle
+   rktl_planner.pure_pursuit.get_angular_speed
+
+
+
+.. py:function:: find_intersection(path_seg, bot_path, lookahead_dist)
+
+   Uses quadratic formula to find intersections between
+   the lookahead radius and the path.
+
+
+.. py:function:: calculate_lat_error(intersect_pos, bot_pos, bot_orient, lookahead_dist)
+
+   Determines lateral error from intersection point.
+
+
+.. py:function:: calculate_turn_rad(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw)
+
+   Determines turning radius to reach intersection point.
+
+
+.. py:function:: calculate_angle(intersect_pos, bot_pos, bot_orient, lookahead_dist, bkw)
+
+   Determines angle from heading to the intersection point.
+   Angle is from -pi to pi, with 0 at car's heading.
+
+
+.. py:function:: get_angular_speed(linear_vel, turn_rad)
+
+   Relates path to the angular velocity.
+
+

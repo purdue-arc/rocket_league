@@ -1,0 +1,16 @@
+actions: []
+authors: Josh Faust, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- rosgraph_msgs
+- catkin
+- roscpp
+description: System-wide logging mechanism for messages sent to the /rosout topic.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rosout

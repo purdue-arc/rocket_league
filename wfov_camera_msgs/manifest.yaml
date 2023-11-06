@@ -1,0 +1,20 @@
+actions: []
+authors: Chad Rockey
+brief: ''
+bugtracker: ''
+depends:
+- message_generation
+- catkin
+- sensor_msgs
+- message_runtime
+description: Messages related to the Point Grey camera driver.
+license: BSD
+maintainers: Mike Purvis <mpurvis@clearpathrobotics.com>
+msgs:
+- WFOVCompressedImage
+- WFOVTrigger
+- WFOVImage
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/pointgrey_camera_driver

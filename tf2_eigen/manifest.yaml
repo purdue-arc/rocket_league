@@ -1,0 +1,18 @@
+actions: []
+authors: Koji Terada
+brief: ''
+bugtracker: ''
+depends:
+- eigen
+- cmake_modules
+- tf2
+- catkin
+- geometry_msgs
+description: tf2_eigen
+license: BSD
+maintainers: Koji Terada <terakoji@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

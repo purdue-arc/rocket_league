@@ -1,0 +1,25 @@
+actions: []
+authors: David V. Lu!! <davidvlu@gmail.com>, Paul Bovbel <paul@bovbel.com>
+brief: ''
+bugtracker: ''
+depends:
+- gazebo_ros
+- position_controllers
+- controller_manager
+- robot_state_publisher
+- rqt_robot_steering
+- rviz
+- diff_drive_controller
+- urdf_tutorial
+- xacro
+- joint_state_controller
+- catkin
+- gazebo_ros_control
+description: The urdf_sim_tutorial package
+license: BSD
+maintainers: David V. Lu!! <davidvlu@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

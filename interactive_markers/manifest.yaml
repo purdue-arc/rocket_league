@@ -1,0 +1,22 @@
+actions: []
+authors: David Gossow
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- roscpp
+- rospy
+- rostest
+- rosconsole
+- visualization_msgs
+- std_msgs
+- tf2_geometry_msgs
+- tf2_ros
+description: 3D interactive marker communication library for RViz and similar tools.
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/interactive_markers

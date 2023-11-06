@@ -1,0 +1,18 @@
+actions: []
+authors: David Gossow
+brief: ''
+bugtracker: ''
+depends:
+- interactive_markers
+- roscpp
+- visualization_msgs
+- tf
+- catkin
+description: The interactive_marker_tutorials package
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/interactive_marker_tutorials

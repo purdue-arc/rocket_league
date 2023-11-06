@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rktl_autonomy._ros_interface &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="rktl_autonomy.cartpole_direct_interface" href="../cartpole_direct_interface/index.html" />
+    <link rel="prev" title="rktl_autonomy" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../../rktl_autonomy.html">rktl_autonomy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../../rktl_autonomy/YAMLEditor/README.html">YAMLEditor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../rktl_autonomy/launch/README.html">Launch Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../rktl_autonomy/nodes/README.html">Nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../rktl_autonomy/scripts/README.html">Training Scripts</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Package Module</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_autonomy/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../../rktl_autonomy.html">rktl_autonomy</a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rktl_autonomy</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rktl_autonomy._ros_interface</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/rktl_autonomy/_ros_interface/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-rktl_autonomy._ros_interface">
+<span id="rktl-autonomy-ros-interface"></span><h1><a class="reference internal" href="#module-rktl_autonomy._ros_interface" title="rktl_autonomy._ros_interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rktl_autonomy._ros_interface</span></code></a><a class="headerlink" href="#module-rktl_autonomy._ros_interface" title="Permalink to this heading"></a></h1>
+<p>This handles the base behavior of manipulating time and interfacing with ROS.
+It gets subclassed to customize it to a specific ROS network’s environment.</p>
+<dl class="simple">
+<dt>License:</dt><dd><p>BSD 3-Clause License
+Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+All rights reserved.</p>
+</dd>
+</dl>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#rktl_autonomy._ros_interface.ROSInterface" title="rktl_autonomy._ros_interface.ROSInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ROSInterface</span></code></a></p></td>
+<td><p>Extension of the Gym environment class for all specific interfaces</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py exception">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.SimTimeException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rktl_autonomy._ros_interface.</span></span><span class="sig-name descname"><span class="pre">SimTimeException</span></span><a class="headerlink" href="#rktl_autonomy._ros_interface.SimTimeException" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>For when advancing sim time does not go as planned.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">rktl_autonomy._ros_interface.</span></span><span class="sig-name descname"><span class="pre">ROSInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gym_interface'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">launch_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">launch_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">gym.Env</span></code></p>
+<p>Extension of the Gym environment class for all specific interfaces
+to extend. This class handles logic regarding timesteps in ROS, and
+allows users to treat any ROS system as a Gym environment once the
+interface is created.</p>
+<dl class="simple">
+<dt>All classes extending this for a particular environment must do the following:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>implement all abstract properties:</dt><dd><ul>
+<li><p>action_space</p></li>
+<li><p>observation_space</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>implement all abstract methods:</dt><dd><ul>
+<li><p>_reset_env()</p></li>
+<li><p>_reset_self()</p></li>
+<li><p>_has_state()</p></li>
+<li><p>_clear_state()</p></li>
+<li><p>_get_state()</p></li>
+<li><p>_publish_action()</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>notify _cond when _has_state() may have turned true</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface.action_space">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">action_space</span></span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface.action_space" title="Permalink to this definition"></a></dt>
+<dd><p>The Space object corresponding to valid actions.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface.observation_space">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">observation_space</span></span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface.observation_space" title="Permalink to this definition"></a></dt>
+<dd><p>The Space object corresponding to valid observations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface.step" title="Permalink to this definition"></a></dt>
+<dd><p>Implementation of gym.Env.step. This function will intentionally block
+if the ROS environment is not ready.</p>
+<p>Run one timestep of the environment’s dynamics. When end of
+episode is reached, you are responsible for calling <cite>reset()</cite>
+to reset this environment’s state.
+Accepts an action and returns a tuple (observation, reward, done, info).
+Args:</p>
+<blockquote>
+<div><p>action (object): an action provided by the agent</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>observation (object): agent’s observation of the current environment
+reward (float) : amount of reward returned after previous action
+done (bool): whether the episode has ended, in which case further step() calls will return undefined results
+info (dict): contains auxiliary diagnostic information (helpful for debugging, and sometimes learning)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Resets the environment to an initial state and returns an initial observation.</p>
+<p>Note that this function should not reset the environment’s random
+number generator(s); random variables in the environment’s state should
+be sampled independently between multiple calls to <cite>reset()</cite>. In other
+words, each call of <cite>reset()</cite> should yield an environment suitable for
+a new episode, independent of previous episodes.
+Returns:</p>
+<blockquote>
+<div><p>observation (object): the initial observation.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface.__step_time_and_wait_for_state">
+<span class="sig-name descname"><span class="pre">__step_time_and_wait_for_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface.__step_time_and_wait_for_state" title="Permalink to this definition"></a></dt>
+<dd><p>Step time until a state is known.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface.__wait_once_for_state">
+<span class="sig-name descname"><span class="pre">__wait_once_for_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface.__wait_once_for_state" title="Permalink to this definition"></a></dt>
+<dd><p>Wait and allow other threads to run.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface._reset_env">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_reset_env</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface._reset_env" title="Permalink to this definition"></a></dt>
+<dd><p>Reset environment for a new episode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface._reset_self">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_reset_self</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface._reset_self" title="Permalink to this definition"></a></dt>
+<dd><p>Reset internally for a new episode.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface._has_state">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_has_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface._has_state" title="Permalink to this definition"></a></dt>
+<dd><p>Determine if the new state is ready.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface._clear_state">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_clear_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface._clear_state" title="Permalink to this definition"></a></dt>
+<dd><p>Clear state variables / flags in preparation for new ones.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface._get_state">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface._get_state" title="Permalink to this definition"></a></dt>
+<dd><p>Get state tuple (observation, reward, done, info).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="rktl_autonomy._ros_interface.ROSInterface._publish_action">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_publish_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#rktl_autonomy._ros_interface.ROSInterface._publish_action" title="Permalink to this definition"></a></dt>
+<dd><p>Publish an action to the ROS network.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="rktl_autonomy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../cartpole_direct_interface/index.html" class="btn btn-neutral float-right" title="rktl_autonomy.cartpole_direct_interface" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+actions: []
+authors: Dirk Thomas <dthomas@osrfoundation.org>, Aaron Blasdel <ablasdel@gmail.com>,
+  Austin Hendrix <namniart@gmail.com>, Tim Field
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_bag/issues
+depends:
+- rosgraph_msgs
+- roslib
+- rospy
+- python3-rospkg
+- rosbag
+- rosnode
+- python_qt_binding
+- catkin
+- rqt_gui
+- python-rospkg
+- rqt_gui_py
+description: rqt_bag provides a GUI plugin for displaying and replaying ROS bag files.
+license: BSD
+maintainers: Mabel Zhang <mabel@openrobotics.org>, Michael Jeronimo <michael.jeronimo@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_bag
+srvs: []
+url: http://wiki.ros.org/rqt_bag

@@ -1,0 +1,20 @@
+actions: []
+authors: Radu Bogdan Rusu, Tully Foote
+brief: ''
+bugtracker: https://github.com/ros/nodelet_core/issues
+depends:
+- nodelet
+- catkin
+- pluginlib
+- message_filters
+- roscpp
+- boost
+- dynamic_reconfigure
+description: This package contains common nodelet tools such as a mux, demux and throttle.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/nodelet_core
+srvs: []
+url: http://ros.org/wiki/nodelet_topic_tools

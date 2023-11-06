@@ -1,0 +1,20 @@
+actions: []
+authors: Russell Toris <rctoris@wpi.edu>
+brief: ''
+bugtracker: https://github.com/GT-RAIL/rosauth/issues
+depends:
+- libssl-dev
+- roscpp
+- message_runtime
+- message_generation
+- rostest
+- catkin
+description: Server Side tools for Authorization and Authentication of ROS Clients
+license: BSD
+maintainers: Rein Appeldoorn <rein@eurotec.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/GT-RAIL/rosauth
+srvs:
+- Authentication
+url: http://ros.org/wiki/rosauth

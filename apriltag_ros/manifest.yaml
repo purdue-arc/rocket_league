@@ -1,0 +1,39 @@
+actions: []
+authors: Danylo Malyuta
+brief: ''
+bugtracker: https://github.com/AprilRobotics/apriltag_ros/issues
+depends:
+- image_geometry
+- cv_bridge
+- tf
+- std_msgs
+- eigen
+- libopencv-dev
+- nodelet
+- catkin
+- cmake_modules
+- sensor_msgs
+- pluginlib
+- roscpp
+- message_runtime
+- image_transport
+- apriltag
+- message_generation
+- geometry_msgs
+description: "A ROS wrapper of the AprilTag 3 visual fiducial detection\n    algorithm.\
+  \ Provides full access to the core AprilTag 3 algorithm's\n    customizations and\
+  \ makes the tag detection image and detected tags' poses\n    available over ROS\
+  \ topics (including tf). The core AprilTag 3 algorithm is\n    extended to allow\
+  \ the detection of tag bundles and a bundle calibration\n    script is provided\
+  \ (bundle detection is more accurate than single tag\n    detection). Continuous\
+  \ (camera image stream) and single image detector nodes\n    are available."
+license: BSD
+maintainers: Danylo Malyuta <danylo.malyuta@gmail.com>, Wolfgang Merkt <w.merkt+oss@gmail.com>
+msgs:
+- AprilTagDetection
+- AprilTagDetectionArray
+package_type: package
+repo_url: https://github.com/AprilRobotics/apriltag_ros
+srvs:
+- AnalyzeSingleImage
+url: http://www.ros.org/wiki/apriltag_ros

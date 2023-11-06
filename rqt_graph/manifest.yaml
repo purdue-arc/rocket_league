@@ -1,0 +1,31 @@
+actions: []
+authors: Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_graph/issues
+depends:
+- roslib
+- rosservice
+- rqt_gui
+- python3-rospkg
+- rospy
+- rosgraph
+- rosgraph_msgs
+- qt_dotgraph
+- rosnode
+- rostopic
+- python_qt_binding
+- python-rospkg
+- rqt_gui_py
+- catkin
+description: "rqt_graph provides a GUI plugin for visualizing the ROS\n      computation\
+  \ graph.<br/>\n      Its components are made generic so that other packages\n  \
+  \    where you want to achieve graph representation can depend upon this pkg\n \
+  \     (use <a href=\"http://www.ros.org/wiki/rqt_dep\">rqt_dep</a> to find out\n\
+  \      the pkgs that depend. rqt_dep itself depends on rqt_graph too)."
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>, Aaron Blasdel <ablasdel@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_graph
+srvs: []
+url: http://wiki.ros.org/rqt_graph

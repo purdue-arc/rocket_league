@@ -1,0 +1,21 @@
+actions: []
+authors: Dorian Scholz, Kunal Tyagi
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_shell/issues
+depends:
+- qt_gui_py_common
+- rqt_gui
+- python-rospkg
+- qt_gui
+- python_qt_binding
+- catkin
+- python3-rospkg
+- rqt_gui_py
+description: rqt_shell is a Python GUI plugin providing an interactive shell.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_shell
+srvs: []
+url: http://wiki.ros.org/rqt_shell

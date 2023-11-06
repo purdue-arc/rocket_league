@@ -1,0 +1,20 @@
+actions: []
+authors: Stuart Glaser, Adam Leeper
+brief: ''
+bugtracker: ''
+depends:
+- liborocos-kdl-dev
+- eigen
+- std_msgs
+- catkin
+- liborocos-kdl
+- geometry_msgs
+description: "Conversion functions between:\n      - Eigen and KDL\n      - Eigen\
+  \ and geometry_msgs."
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/eigen_conversions

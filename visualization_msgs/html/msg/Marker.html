@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>visualization_msgs/Marker Documentation</title>
+<link type="text/css" rel="stylesheet" href="../msg-styles.css" />
+</head>
+<body>
+
+<div id="container">
+
+<h1 class="msg-title"><a href="../index-msg.html">visualization_msgs</a>/Marker Message</h1>
+
+<div class="msg">
+
+<h2>File: <span class="filename">visualization_msgs/Marker.msg</filename></h2>
+
+<h2>Raw Message Definition</h2>
+<div class="raw-msg">
+<font color="blue">#&nbsp;See&nbsp;http://www.ros.org/wiki/rviz/DisplayTypes/Marker&nbsp;and&nbsp;http://www.ros.org/wiki/rviz/Tutorials/Markers%3A%20Basic%20Shapes&nbsp;for&nbsp;more&nbsp;information&nbsp;on&nbsp;using&nbsp;this&nbsp;message&nbsp;with&nbsp;rviz</font><br/><br/>uint8&nbsp;ARROW=0<br/>uint8&nbsp;CUBE=1<br/>uint8&nbsp;SPHERE=2<br/>uint8&nbsp;CYLINDER=3<br/>uint8&nbsp;LINE_STRIP=4<br/>uint8&nbsp;LINE_LIST=5<br/>uint8&nbsp;CUBE_LIST=6<br/>uint8&nbsp;SPHERE_LIST=7<br/>uint8&nbsp;POINTS=8<br/>uint8&nbsp;TEXT_VIEW_FACING=9<br/>uint8&nbsp;MESH_RESOURCE=10<br/>uint8&nbsp;TRIANGLE_LIST=11<br/><br/>uint8&nbsp;ADD=0<br/>uint8&nbsp;MODIFY=0<br/>uint8&nbsp;DELETE=2<br/>uint8&nbsp;DELETEALL=3<br/><br/>Header&nbsp;header&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;header&nbsp;for&nbsp;time/frame&nbsp;information</font><br/>string&nbsp;ns&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;Namespace&nbsp;to&nbsp;place&nbsp;this&nbsp;object&nbsp;in...&nbsp;used&nbsp;in&nbsp;conjunction&nbsp;with&nbsp;id&nbsp;to&nbsp;create&nbsp;a&nbsp;unique&nbsp;name&nbsp;for&nbsp;the&nbsp;object</font><br/>int32&nbsp;id&nbsp;		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;object&nbsp;ID&nbsp;useful&nbsp;in&nbsp;conjunction&nbsp;with&nbsp;the&nbsp;namespace&nbsp;for&nbsp;manipulating&nbsp;and&nbsp;deleting&nbsp;the&nbsp;object&nbsp;later</font><br/>int32&nbsp;type&nbsp;		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;Type&nbsp;of&nbsp;object</font><br/>int32&nbsp;action&nbsp;	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;0&nbsp;add/modify&nbsp;an&nbsp;object,&nbsp;1&nbsp;(deprecated),&nbsp;2&nbsp;deletes&nbsp;an&nbsp;object,&nbsp;3&nbsp;deletes&nbsp;all&nbsp;objects</font><br/>geometry_msgs/Pose&nbsp;pose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;Pose&nbsp;of&nbsp;the&nbsp;object</font><br/>geometry_msgs/Vector3&nbsp;scale&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;Scale&nbsp;of&nbsp;the&nbsp;object&nbsp;1,1,1&nbsp;means&nbsp;default&nbsp;(usually&nbsp;1&nbsp;meter&nbsp;square)</font><br/>std_msgs/ColorRGBA&nbsp;color&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;Color&nbsp;[0.0-1.0]</font><br/>duration&nbsp;lifetime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;How&nbsp;long&nbsp;the&nbsp;object&nbsp;should&nbsp;last&nbsp;before&nbsp;being&nbsp;automatically&nbsp;deleted.&nbsp;&nbsp;0&nbsp;means&nbsp;forever</font><br/>bool&nbsp;frame_locked&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;If&nbsp;this&nbsp;marker&nbsp;should&nbsp;be&nbsp;frame-locked,&nbsp;i.e.&nbsp;retransformed&nbsp;into&nbsp;its&nbsp;frame&nbsp;every&nbsp;timestep</font><br/><br/><font color="blue">#Only&nbsp;used&nbsp;if&nbsp;the&nbsp;type&nbsp;specified&nbsp;has&nbsp;some&nbsp;use&nbsp;for&nbsp;them&nbsp;(eg.&nbsp;POINTS,&nbsp;LINE_STRIP,&nbsp;...)</font><br/>geometry_msgs/Point[]&nbsp;points<br/><font color="blue">#Only&nbsp;used&nbsp;if&nbsp;the&nbsp;type&nbsp;specified&nbsp;has&nbsp;some&nbsp;use&nbsp;for&nbsp;them&nbsp;(eg.&nbsp;POINTS,&nbsp;LINE_STRIP,&nbsp;...)</font><br/><font color="blue">#number&nbsp;of&nbsp;colors&nbsp;must&nbsp;either&nbsp;be&nbsp;0&nbsp;or&nbsp;equal&nbsp;to&nbsp;the&nbsp;number&nbsp;of&nbsp;points</font><br/><font color="blue">#NOTE:&nbsp;alpha&nbsp;is&nbsp;not&nbsp;yet&nbsp;used</font><br/>std_msgs/ColorRGBA[]&nbsp;colors<br/><br/><font color="blue">#&nbsp;NOTE:&nbsp;only&nbsp;used&nbsp;for&nbsp;text&nbsp;markers</font><br/>string&nbsp;text<br/><br/><font color="blue">#&nbsp;NOTE:&nbsp;only&nbsp;used&nbsp;for&nbsp;MESH_RESOURCE&nbsp;markers</font><br/>string&nbsp;mesh_resource<br/>bool&nbsp;mesh_use_embedded_materials<br/><br/>
+</div>
+
+<h2>Compact Message Definition</h2>
+<div class="fancy-msg">
+uint8 ARROW=0<br />uint8 CUBE=1<br />uint8 SPHERE=2<br />uint8 CYLINDER=3<br />uint8 LINE_STRIP=4<br />uint8 LINE_LIST=5<br />uint8 CUBE_LIST=6<br />uint8 SPHERE_LIST=7<br />uint8 POINTS=8<br />uint8 TEXT_VIEW_FACING=9<br />uint8 MESH_RESOURCE=10<br />uint8 TRIANGLE_LIST=11<br />uint8 ADD=0<br />uint8 MODIFY=0<br />uint8 DELETE=2<br />uint8 DELETEALL=3<br /><a href="../../../std_msgs/html/msg/Header.html">std_msgs/Header</a> header<br />string ns<br />int32 id<br />int32 type<br />int32 action<br /><a href="../../../geometry_msgs/html/msg/Pose.html">geometry_msgs/Pose</a> pose<br /><a href="../../../geometry_msgs/html/msg/Vector3.html">geometry_msgs/Vector3</a> scale<br /><a href="../../../std_msgs/html/msg/ColorRGBA.html">std_msgs/ColorRGBA</a> color<br />duration lifetime<br />bool frame_locked<br /><a href="../../../geometry_msgs/html/msg/Point.html">geometry_msgs/Point[]</a> points<br /><a href="../../../std_msgs/html/msg/ColorRGBA.html">std_msgs/ColorRGBA[]</a> colors<br />string text<br />string mesh_resource<br />bool mesh_use_embedded_materials<br />
+</div>
+
+
+</div>
+
+<p class="footer"><small><em>autogenerated on Mon, 06 Nov 2023 03:08:43</em></small></p>
+
+</div>
+
+</body>
+</html>

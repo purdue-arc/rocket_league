@@ -1,0 +1,14 @@
+actions: []
+authors: Dave Hershberger
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+description: Placeholder package enabling generic export of media paths.
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/media_export

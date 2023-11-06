@@ -1,0 +1,23 @@
+actions: []
+authors: Dorian Scholz
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_py_console/issues
+depends:
+- rospy
+- qt_gui
+- python_qt_binding
+- rqt_gui_py
+- python3-rospkg
+- python-rospkg
+- qt_gui_py_common
+- catkin
+- rqt_gui
+description: rqt_py_console is a Python GUI plugin providing an interactive Python
+  console.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_py_console
+srvs: []
+url: http://wiki.ros.org/rqt_py_console

@@ -1,0 +1,17 @@
+actions: []
+authors: Josh Faust, Troy Straszheim, Morgen Kjaergaard
+brief: ''
+bugtracker: https://github.com/ros/gencpp/issues
+depends:
+- catkin
+- python-setuptools
+- python3-setuptools
+- genmsg
+description: C++ ROS message and service generators.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/gencpp
+srvs: []
+url: ''

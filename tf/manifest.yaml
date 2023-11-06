@@ -1,0 +1,43 @@
+actions: []
+authors: Tully Foote, Eitan Marder-Eppstein, Wim Meeussen
+brief: ''
+bugtracker: ''
+depends:
+- message_runtime
+- rosunit
+- rostest
+- sensor_msgs
+- message_generation
+- rostime
+- std_msgs
+- graphviz
+- rosconsole
+- roscpp
+- roswtf
+- message_filters
+- catkin
+- geometry_msgs
+- tf2_ros
+- angles
+description: "tf is a package that lets the user keep track of multiple coordinate\n\
+  frames over time. tf maintains the relationship between coordinate\nframes in a\
+  \ tree structure buffered in time, and lets the user\ntransform points, vectors,\
+  \ etc between any two coordinate frames at\nany desired point in time.\n\n    <p><b>Migration</b>:\
+  \ Since ROS Hydro, tf has been &quot;deprecated&quot; in favor of <a href=\"http://wiki.ros.org/tf2\"\
+  >tf2</a>. tf2 is an iteration on tf providing generally the same feature set more\
+  \ efficiently. As well as adding a few new features.<br/>\n    As tf2 is a major\
+  \ change the tf API has been maintained in its current form. Since tf2 has a superset\
+  \ of the tf features with a subset of the dependencies the tf implementation has\
+  \ been removed and replaced with calls to tf2 under the hood. This will mean that\
+  \ all users will be compatible with tf2. It is recommended for new work to use tf2\
+  \ directly as it has a cleaner interface. However tf will continue to be supported\
+  \ for through at least J Turtle.\n    </p>"
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs:
+- tfMessage
+package_type: package
+repo_url: ''
+srvs:
+- FrameGraph
+url: http://www.ros.org/wiki/tf

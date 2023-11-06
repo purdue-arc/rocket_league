@@ -1,0 +1,21 @@
+actions: []
+authors: Ken Conley, Troy Straszheim, Morten Kjaergaard, Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros/genpy/issues
+depends:
+- genmsg
+- python3-yaml
+- catkin
+- python3-setuptools
+- python-numpy
+- python3-numpy
+- python-yaml
+- python-setuptools
+description: Python ROS message and service generators.
+license: BSD
+maintainers: Mabel Zhang <mabel@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/genpy
+srvs: []
+url: http://wiki.ros.org/genpy

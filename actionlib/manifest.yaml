@@ -1,0 +1,52 @@
+actions:
+- Test
+- TestRequest
+- TwoInts
+authors: Eitan Marder-Eppstein, Vijay Pradeep, Mikael Arguedas
+brief: ''
+bugtracker: https://github.com/ros/actionlib/issues
+depends:
+- rosunit
+- actionlib_msgs
+- rostest
+- rosnode
+- roscpp
+- std_msgs
+- rospy
+- message_runtime
+- message_generation
+- libboost-thread-dev
+- catkin
+- libboost-dev
+description: "The actionlib stack provides a standardized interface for\n    interfacing\
+  \ with preemptable tasks. Examples of this include moving\n    the base to a target\
+  \ location, performing a laser scan and returning\n    the resulting point cloud,\
+  \ detecting the handle of a door, etc."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Jacob Perron <jacob@openrobotics.org>
+msgs:
+- TestRequestFeedback
+- TwoIntsActionResult
+- TestFeedback
+- TwoIntsResult
+- TestRequestActionResult
+- TestRequestGoal
+- TwoIntsFeedback
+- TestRequestActionGoal
+- TestActionFeedback
+- TestGoal
+- TestResult
+- TestRequestAction
+- TestActionGoal
+- TwoIntsActionFeedback
+- TwoIntsGoal
+- TwoIntsActionGoal
+- TestRequestActionFeedback
+- TestActionResult
+- TestAction
+- TestRequestResult
+- TwoIntsAction
+package_type: package
+repo_url: https://github.com/ros/actionlib
+srvs: []
+url: http://www.ros.org/wiki/actionlib

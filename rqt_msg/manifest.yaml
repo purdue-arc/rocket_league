@@ -1,0 +1,26 @@
+actions: []
+authors: Aaron Blasdel, Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_msg/issues
+depends:
+- python_qt_binding
+- rospy
+- roslib
+- catkin
+- rqt_console
+- rqt_gui
+- rqt_gui_py
+- python3-rospkg
+- rosmsg
+- python-rospkg
+- rqt_py_common
+description: "A Python GUI plugin for introspecting available ROS message types.\n\
+  \  Note that the msgs available through this plugin is the ones that are stored\n\
+  \  on your machine, not on the ROS core your rqt instance connects to."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_msg
+srvs: []
+url: http://wiki.ros.org/rqt_msg

@@ -1,0 +1,17 @@
+actions: []
+authors: Bhaskara Marti <bhaskara@willowgarage.com>
+brief: ''
+bugtracker: ''
+depends:
+- python-setuptools
+- genmsg
+- catkin
+- python3-setuptools
+description: Common-Lisp ROS message and service generators.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>, Georg Bartels <georg.bartels@cs.uni-bremen.de>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/roslisp

@@ -1,0 +1,23 @@
+actions: []
+authors: Ze'ev Klapow
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_nav_view/issues
+depends:
+- python_qt_binding
+- catkin
+- qt_gui
+- nav_msgs
+- rqt_gui
+- tf
+- rqt_py_common
+- rospy
+- rqt_gui_py
+- geometry_msgs
+description: rqt_nav_view provides a gui for viewing navigation maps and paths.
+license: BSD
+maintainers: Aaron Blasdel <ablasdel@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_nav_view
+srvs: []
+url: http://wiki.ros.org/rqt_nav_view

@@ -1,0 +1,21 @@
+actions: []
+authors: Kevin Watts, Brice Rebsamen <brice.rebsamen@gmail.com>, Eric Berger, Kevin
+  Watts
+brief: ''
+bugtracker: ''
+depends:
+- roslib
+- catkin
+- rosbag
+- diagnostic_msgs
+- rostest
+description: "The diagnostic_analysis package can convert a log of diagnostics data\n\
+  \    into a series of CSV files. Robot logs are recorded with rosbag, and\n    can\
+  \ be processed offline using the scripts in this package."
+license: BSD
+maintainers: Guglielmo Gemignani <guglielmo.gemignani@gmail.com>, Austin Hendrix <namniart@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/diagnostics_analysis

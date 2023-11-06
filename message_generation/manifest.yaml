@@ -1,0 +1,21 @@
+actions: []
+authors: ''
+brief: ''
+bugtracker: https://github.com/ros/message_generation/issues
+depends:
+- genlisp
+- geneus
+- genmsg
+- gennodejs
+- gencpp
+- catkin
+- genpy
+description: Package modeling the build-time dependencies for generating language
+  bindings of messages.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/message_generation
+srvs: []
+url: http://ros.org/wiki/message_generation

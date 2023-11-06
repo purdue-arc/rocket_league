@@ -1,0 +1,19 @@
+actions: []
+authors: Stuart Glaser, William Woodall, Robert Haschke
+brief: ''
+bugtracker: https://github.com/ros/xacro/issues
+depends:
+- rostest
+- roslint
+- catkin
+- roslaunch
+description: "Xacro (XML Macros)\n\n    Xacro is an XML macro language. With xacro,\
+  \ you can construct shorter and more readable XML files by using macros that expand\
+  \ to larger XML expressions."
+license: BSD
+maintainers: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>, Morgan Quigley <morgan@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/xacro
+srvs: []
+url: http://ros.org/wiki/xacro

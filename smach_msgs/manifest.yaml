@@ -1,0 +1,21 @@
+actions: []
+authors: Jonathan Bohren
+brief: ''
+bugtracker: ''
+depends:
+- message_runtime
+- std_msgs
+- catkin
+- message_generation
+description: "this package contains a set of messages that are used by the introspection\n\
+  \    interfaces for smach."
+license: BSD
+maintainers: Isaac I. Y. Saito <gm130s@gmail.com>
+msgs:
+- SmachContainerStatus
+- SmachContainerStructure
+- SmachContainerInitialStatusCmd
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

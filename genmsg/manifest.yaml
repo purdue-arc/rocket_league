@@ -1,0 +1,19 @@
+actions: []
+authors: Troy Straszheim, Morten Kjaergaard, Ken Conley, Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros/genmsg/issues
+depends:
+- catkin
+- python-empy
+- python3-empy
+- python-setuptools
+- python3-setuptools
+description: Standalone Python library for generating ROS message and service data
+  structures for various languages.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/genmsg
+srvs: []
+url: http://wiki.ros.org/genmsg

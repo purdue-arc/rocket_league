@@ -1,0 +1,28 @@
+actions: []
+authors: Dorian Scholz
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_pose_view/issues
+depends:
+- rospy
+- catkin
+- rqt_py_common
+- python3-opengl
+- rqt_gui
+- geometry_msgs
+- rostopic
+- python_qt_binding
+- rqt_gui_py
+- tf
+- python-rospkg
+- python-opengl
+- gl_dependency
+- python3-rospkg
+description: rqt_pose_view provides a GUI plugin for visualizing 3D poses.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>, Dorian Scholz <scholz@sim.tu-darmstadt.de>,
+  Aaron Blasdel <ablasdel@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_pose_view
+srvs: []
+url: http://wiki.ros.org/rqt_pose_view

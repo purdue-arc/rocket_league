@@ -1,0 +1,18 @@
+actions: []
+authors: Patrick Mihelich, Julius Kammerl
+brief: ''
+bugtracker: ''
+depends:
+- dynamic_reconfigure
+- catkin
+- image_transport
+- cv_bridge
+description: "Compressed_image_transport provides a plugin to image_transport for\
+  \ transparently sending images\n    encoded as JPEG or PNG."
+license: BSD
+maintainers: David Gossow <dgossow@willowgarage.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/image_transport_plugins

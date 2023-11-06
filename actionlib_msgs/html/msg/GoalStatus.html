@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>actionlib_msgs/GoalStatus Documentation</title>
+<link type="text/css" rel="stylesheet" href="../msg-styles.css" />
+</head>
+<body>
+
+<div id="container">
+
+<h1 class="msg-title"><a href="../index-msg.html">actionlib_msgs</a>/GoalStatus Message</h1>
+
+<div class="msg">
+
+<h2>File: <span class="filename">actionlib_msgs/GoalStatus.msg</filename></h2>
+
+<h2>Raw Message Definition</h2>
+<div class="raw-msg">
+GoalID&nbsp;goal_id<br/>uint8&nbsp;status<br/>uint8&nbsp;PENDING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;0&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;has&nbsp;yet&nbsp;to&nbsp;be&nbsp;processed&nbsp;by&nbsp;the&nbsp;action&nbsp;server</font><br/>uint8&nbsp;ACTIVE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;1&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;is&nbsp;currently&nbsp;being&nbsp;processed&nbsp;by&nbsp;the&nbsp;action&nbsp;server</font><br/>uint8&nbsp;PREEMPTED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;2&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;received&nbsp;a&nbsp;cancel&nbsp;request&nbsp;after&nbsp;it&nbsp;started&nbsp;executing</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;&nbsp;&nbsp;and&nbsp;has&nbsp;since&nbsp;completed&nbsp;its&nbsp;execution&nbsp;(Terminal&nbsp;State)</font><br/>uint8&nbsp;SUCCEEDED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;3&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;was&nbsp;achieved&nbsp;successfully&nbsp;by&nbsp;the&nbsp;action&nbsp;server&nbsp;(Terminal&nbsp;State)</font><br/>uint8&nbsp;ABORTED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;4&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;was&nbsp;aborted&nbsp;during&nbsp;execution&nbsp;by&nbsp;the&nbsp;action&nbsp;server&nbsp;due</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;some&nbsp;failure&nbsp;(Terminal&nbsp;State)</font><br/>uint8&nbsp;REJECTED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;5&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;was&nbsp;rejected&nbsp;by&nbsp;the&nbsp;action&nbsp;server&nbsp;without&nbsp;being&nbsp;processed,</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;because&nbsp;the&nbsp;goal&nbsp;was&nbsp;unattainable&nbsp;or&nbsp;invalid&nbsp;(Terminal&nbsp;State)</font><br/>uint8&nbsp;PREEMPTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;6&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;received&nbsp;a&nbsp;cancel&nbsp;request&nbsp;after&nbsp;it&nbsp;started&nbsp;executing</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;has&nbsp;not&nbsp;yet&nbsp;completed&nbsp;execution</font><br/>uint8&nbsp;RECALLING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;7&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;received&nbsp;a&nbsp;cancel&nbsp;request&nbsp;before&nbsp;it&nbsp;started&nbsp;executing,</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;the&nbsp;action&nbsp;server&nbsp;has&nbsp;not&nbsp;yet&nbsp;confirmed&nbsp;that&nbsp;the&nbsp;goal&nbsp;is&nbsp;canceled</font><br/>uint8&nbsp;RECALLED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;8&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;The&nbsp;goal&nbsp;received&nbsp;a&nbsp;cancel&nbsp;request&nbsp;before&nbsp;it&nbsp;started&nbsp;executing</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;was&nbsp;successfully&nbsp;cancelled&nbsp;(Terminal&nbsp;State)</font><br/>uint8&nbsp;LOST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;9&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;An&nbsp;action&nbsp;client&nbsp;can&nbsp;determine&nbsp;that&nbsp;a&nbsp;goal&nbsp;is&nbsp;LOST.&nbsp;This&nbsp;should&nbsp;not&nbsp;be</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;sent&nbsp;over&nbsp;the&nbsp;wire&nbsp;by&nbsp;an&nbsp;action&nbsp;server</font><br/><br/><font color="blue">#Allow&nbsp;for&nbsp;the&nbsp;user&nbsp;to&nbsp;associate&nbsp;a&nbsp;string&nbsp;with&nbsp;GoalStatus&nbsp;for&nbsp;debugging</font><br/>string&nbsp;text<br/><br/><br/>
+</div>
+
+<h2>Compact Message Definition</h2>
+<div class="fancy-msg">
+uint8 PENDING=0<br />uint8 ACTIVE=1<br />uint8 PREEMPTED=2<br />uint8 SUCCEEDED=3<br />uint8 ABORTED=4<br />uint8 REJECTED=5<br />uint8 PREEMPTING=6<br />uint8 RECALLING=7<br />uint8 RECALLED=8<br />uint8 LOST=9<br /><a href="../../../actionlib_msgs/html/msg/GoalID.html">actionlib_msgs/GoalID</a> goal_id<br />uint8 status<br />string text<br />
+</div>
+
+
+</div>
+
+<p class="footer"><small><em>autogenerated on Mon, 06 Nov 2023 03:08:11</em></small></p>
+
+</div>
+
+</body>
+</html>

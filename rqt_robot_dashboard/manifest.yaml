@@ -1,0 +1,26 @@
+actions: []
+authors: Ze'ev Klapow
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_robot_dashboard/issues
+depends:
+- diagnostic_msgs
+- rqt_nav_view
+- catkin
+- rqt_console
+- python-setuptools
+- rqt_robot_monitor
+- python3-setuptools
+- qt_gui
+- rospy
+- rqt_gui
+- rqt_gui_py
+- python_qt_binding
+description: rqt_robot_dashboard provides an infrastructure for building robot dashboard
+  plugins in rqt.
+license: BSD
+maintainers: Aaron Blasdel <ablasdel@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_robot_dashboard
+srvs: []
+url: http://wiki.ros.org/rqt_robot_dashboard

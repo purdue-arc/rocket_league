@@ -1,0 +1,21 @@
+actions: []
+authors: Wim Meeussen
+brief: ''
+bugtracker: ''
+depends:
+- tf2
+- tf2_ros
+- liborocos-kdl-dev
+- catkin
+- rostest
+- python3-pykdl
+- ros_environment
+- geometry_msgs
+description: tf2_geometry_msgs
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/tf2_ros

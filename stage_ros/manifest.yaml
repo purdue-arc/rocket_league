@@ -1,0 +1,24 @@
+actions: []
+authors: Brian Gerky <gerky@osrfoundation.org>
+brief: ''
+bugtracker: https://github.com/ros-simulation/stage_ros/issues
+depends:
+- std_msgs
+- nav_msgs
+- sensor_msgs
+- roscpp
+- boost
+- stage
+- geometry_msgs
+- rostest
+- std_srvs
+- tf
+- catkin
+description: This package provides ROS specific hooks for stage
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-simulation/stage_ros
+srvs: []
+url: http://ros.org/wiki/stage_ros

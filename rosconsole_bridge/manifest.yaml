@@ -1,0 +1,18 @@
+actions: []
+authors: Ioan Sucan
+brief: ''
+bugtracker: https://github.com/ros/rosconsole_bridge/issues
+depends:
+- cpp_common
+- catkin
+- rosconsole
+- libconsole-bridge-dev
+description: rosconsole_bridge is a package used in conjunction with console_bridge
+  and rosconsole for connecting console_bridge-based logging to rosconsole-based logging.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>, Ioan Sucan <isucan@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/rosconsole_bridge
+srvs: []
+url: http://www.ros.org/wiki/rosconsole_bridge

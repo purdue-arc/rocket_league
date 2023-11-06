@@ -1,0 +1,19 @@
+actions: []
+authors: Tully Foote <tfoote@osrfoundation.org>, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros/issues
+depends:
+- python-setuptools
+- catkin
+- python-rospkg
+- python3-rospkg
+- python3-setuptools
+description: "rosmake is a ros dependency aware build tool which can be used to\n\
+  \     build all dependencies in the correct order."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros
+srvs: []
+url: http://wiki.ros.org/rosmake

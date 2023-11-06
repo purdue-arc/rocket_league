@@ -1,0 +1,32 @@
+actions: []
+authors: Ken Conley, Eitan Marder-Eppstein <eitan@hidof.com>
+brief: ''
+bugtracker: https://github.com/ros-infrastructure/rosdoc_lite/issues
+depends:
+- python3-yaml
+- epydoc
+- python3-catkin-pkg-modules
+- python3-rospkg-modules
+- python3-sphinx
+- python-catkin-pkg-modules
+- genmsg
+- python-yaml
+- python3-setuptools
+- python-setuptools
+- python-rospkg-modules
+- graphviz
+- python-sphinx
+- python3-kitchen
+- doxygen
+- catkin
+- python-kitchen
+description: "This ROS package wraps documentation tools like doxygen, sphinx,\n \
+  \   and epydoc, making it convenient to generate ROS package\n    documentation.\n\
+  \n    It also generates online documentation for the ROS wiki."
+license: BSD
+maintainers: Jack O'Quin <jack.oquin@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-infrastructure/rosdoc_lite.git
+srvs: []
+url: http://wiki.ros.org/rosdoc_lite

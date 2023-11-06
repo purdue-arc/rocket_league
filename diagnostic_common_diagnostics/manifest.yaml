@@ -1,0 +1,21 @@
+actions: []
+authors: Brice Rebsamen <brice.rebsamen@gmail.com>
+brief: ''
+bugtracker: ''
+depends:
+- diagnostic_updater
+- catkin
+- hddtemp
+- tf
+- python3-psutil
+- rospy
+- rostest
+- lm-sensors
+description: diagnostic_common_diagnostics
+license: BSD
+maintainers: Guglielmo Gemignani <guglielmo.gemignani@gmail.com>, Austin Hendrix <namniart@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/diagnostic_common_diagnostics

@@ -1,0 +1,18 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros/issues
+depends:
+- catkin
+- python-rospkg
+- python3-setuptools
+- python-setuptools
+- python3-rospkg
+description: 'rosclean: cleanup filesystem resources (e.g. log files).'
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros
+srvs: []
+url: http://wiki.ros.org/rosclean

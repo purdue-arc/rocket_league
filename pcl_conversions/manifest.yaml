@@ -1,0 +1,21 @@
+actions: []
+authors: William Woodall <william@osrfoundation.org>
+brief: ''
+bugtracker: https://github.com/ros-perception/perception_pcl/issues
+depends:
+- roscpp
+- pcl_msgs
+- eigen
+- std_msgs
+- catkin
+- sensor_msgs
+- libpcl-all-dev
+description: Provides conversions from PCL data types and ROS message types
+license: BSD
+maintainers: Paul Bovbel <paul@bovbel.com>, Kentaro Wada <www.kentaro.wada@gmail.com>,
+  Steve Macenski <stevenmacenski@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-perception/perception_pcl
+srvs: []
+url: http://wiki.ros.org/pcl_conversions

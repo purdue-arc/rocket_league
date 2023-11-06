@@ -1,0 +1,23 @@
+actions: []
+authors: Dorian Scholz
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_rviz/issues
+depends:
+- catkin
+- qtbase5-dev
+- rqt_gui
+- rqt_gui_cpp
+- pluginlib
+- boost
+- rviz
+- class_loader
+description: "rqt_rviz provides a GUI plugin embedding <a href=\"http://www.ros.org/wiki/rviz\"\
+  >RViz</a>.\n    Note that this rqt plugin does NOT supersede RViz but depends on\
+  \ it."
+license: BSD
+maintainers: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>, Louise Poubel <louise@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_rviz
+srvs: []
+url: http://wiki.ros.org/rqt_rviz

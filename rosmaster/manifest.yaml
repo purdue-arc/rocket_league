@@ -1,0 +1,17 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros_comm/issues
+depends:
+- rosgraph
+- python-defusedxml
+- catkin
+- python3-defusedxml
+description: ROS <a href="http://ros.org/wiki/Master">Master</a> implementation.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_comm
+srvs: []
+url: http://wiki.ros.org/rosmaster

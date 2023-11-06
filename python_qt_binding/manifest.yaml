@@ -1,0 +1,24 @@
+actions: []
+authors: Dave Hershberger, Dorian Scholz, Dirk Thomas
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- python3-qt5-bindings
+- python-qt5-bindings
+- rosbuild
+- qtbase5-dev
+description: "This stack provides Python bindings for Qt.\n    There are two providers:\
+  \ pyside and pyqt.  PySide is released under\n    the LGPL.  PyQt is released under\
+  \ the GPL.\n\n    Both the bindings and tools to build bindings are included from\
+  \ each\n    available provider.  For PySide, it is called &quot;Shiboken&quot;.\
+  \  For PyQt,\n    this is called &quot;SIP&quot;.\n\n    Also provided is adapter\
+  \ code to make the user's Python code\n    independent of which binding provider\
+  \ was actually used which makes\n    it very easy to switch between these."
+license: BSD
+maintainers: Claire Wang <clairewang@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/python_qt_binding

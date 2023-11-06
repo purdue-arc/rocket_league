@@ -1,0 +1,23 @@
+actions: []
+authors: James Baxter <baxter26@purdue.edu>, Justin Lee <lee3228@purdue.edu>, Darren
+  Lie <lied@purdue.edu>, Robert Ketler <rketler@purdue.edu>, AJ Ernandes <aernande@purdue.edu>
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- rosunit
+- rosserial_arduino
+- topic_tools
+- nav_msgs
+- joy
+- geometry_msgs
+- std_msgs
+- rospy
+description: Velocity controller for the ARC Rocket League project.
+license: BSD 3 Clause
+maintainers: Autonomous Robotics Club of Purdue <autonomy@purdue.edu>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.purduearc.com

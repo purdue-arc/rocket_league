@@ -1,0 +1,91 @@
+:py:mod:`rktl_planner.bezier_curve`
+===================================
+
+.. py:module:: rktl_planner.bezier_curve
+
+.. autoapi-nested-parse::
+
+   This module implements a Bezier curve class with various methods. A Bezier
+   curve is defined by its order and control points.
+
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   rktl_planner.bezier_curve.BezierCurve
+
+
+
+
+.. py:class:: BezierCurve(*args, **kwargs)
+
+   A class representing a Bezier Curve and a duration. If `order` and `control_points` are given in
+   kwargs, then it is used to initialize the instance. Otherwise, args is used to initialize the 
+   instance. When not using kwargs, 4 options exist. Either a list of control points
+   (geometry_msgs.msg.Points), the order of the bezier curve, both the order and the list of
+   control points, or the control points as indiviudal arguments can be given.
+
+   For example, All examples below give an instance of a `BezierCurve` of order 3. When points
+   are specified, they are the control points used for the curve.
+
+   ```python
+   curve = BezierCurve(3)
+   curve = BezierCurve(3, [Point(0, 0, 0), Point(1, 2, 3), Point(3, 2, 1), Point(4, 2, 0)])
+   curve = BezierCurve([Point(0, 0, 0), Point(1, 2, 3), Point(3, 2, 1), Point(4, 2, 0)]))
+   curve = BezierCurve(Point(0, 0, 0), Point(1, 2, 3), Point(3, 2, 1), Point(4, 2, 0)))
+   curve = BezierCurve(order=3, control_points=[Point(0, 0, 0), Point(1, 2, 3), Point(3, 2, 1), Point(4, 2, 0)]))
+   curve = BezierCurve(control_points=[Point(0, 0, 0), Point(1, 2, 3), Point(3, 2, 1), Point(4, 2, 0)]))```
+
+   .. py:attribute:: _coefficients
+      :value: [[1]]
+
+      Table used internally to generate the coefficients of the bezier curve faster
+
+
+   .. py:method:: __repr__()
+
+      Returns a string representation of the instance.
+
+
+   .. py:method:: __str__()
+
+      Returns a string representation of the instance.
+
+
+   .. py:method:: calc_coefficients()
+
+      Calculates and returns the list of binomial coefficients for a given n.
+
+
+   .. py:method:: at(t)
+
+      Returns a Point object representing the location of the curve at the given parameter value `t`.
+
+
+   .. py:method:: hodograph()
+
+      Returns a `BezierCurve` object representing the hodograph (derivative) of the curve.
+
+
+   .. py:method:: deriv(t)
+
+      Returns a `geometry_msgs/Point` object representing the derivative of the curve at the given parameter value `t`.
+
+
+   .. py:method:: de_casteljau(t)
+
+      Splits this curve into 2 curves at the the point specified by `t`. Returns the two new `BezierCurve` objects.
+
+
+

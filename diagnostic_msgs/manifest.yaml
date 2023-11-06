@@ -1,0 +1,28 @@
+actions: []
+authors: Tully Foote <tfoote@osrfoundation.org>
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- message_generation
+- message_runtime
+- std_msgs
+description: "This package holds the diagnostic messages which provide the\n    standardized\
+  \ interface for the diagnostic and runtime monitoring\n    systems in ROS. These\
+  \ messages are currently used by\n    the <a href=\"http://wiki.ros.org/diagnostics\"\
+  >diagnostics</a>\n    Stack, which provides libraries for simple ways to set and\
+  \ access\n    the messages, as well as automated ways to process the diagnostic\n\
+  \    data.\n\n    These messages are used for long term logging and will not be\n\
+  \    changed unless there is a very important reason."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>
+msgs:
+- KeyValue
+- DiagnosticArray
+- DiagnosticStatus
+package_type: package
+repo_url: ''
+srvs:
+- AddDiagnostics
+- SelfTest
+url: http://wiki.ros.org/diagnostic_msgs

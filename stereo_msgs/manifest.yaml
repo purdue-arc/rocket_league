@@ -1,0 +1,20 @@
+actions: []
+authors: Patrick Mihelich, Kurt Konolige, Tully Foote <tfoote@osrfoundation.org>
+brief: ''
+bugtracker: ''
+depends:
+- message_runtime
+- sensor_msgs
+- message_generation
+- catkin
+- std_msgs
+description: stereo_msgs contains messages specific to stereo processing, such as
+  disparity images.
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>
+msgs:
+- DisparityImage
+package_type: package
+repo_url: ''
+srvs: []
+url: http://wiki.ros.org/stereo_msgs

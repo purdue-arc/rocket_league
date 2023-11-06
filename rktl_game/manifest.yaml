@@ -1,0 +1,20 @@
+actions: []
+authors: AJ Ernandes <aernande@purdue.edu>
+brief: ''
+bugtracker: ''
+depends:
+- nav_msgs
+- rktl_msgs
+- nodelet
+- rospy
+- rosbridge_server
+- roscpp
+- catkin
+description: Game manager for ARC Rocket League project
+license: BSD 3 Clause
+maintainers: Autonomous Robotics Club of Purdue <autonomy@purdue.edu>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.purduearc.com

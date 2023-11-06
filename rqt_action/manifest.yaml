@@ -1,0 +1,22 @@
+actions: []
+authors: Isaac Isao Saito
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_action/issues
+depends:
+- rqt_py_common
+- rqt_msg
+- rospy
+- catkin
+description: "rqt_action provides a feature to introspect all available ROS\n  action\
+  \ (from actionlib) types. By utilizing rqt_msg, the output format is\n  unified\
+  \ with it and rqt_srv. Note that the actions shown on this plugin\n  is the ones\
+  \ that are stored on your machine, not on the ROS core your rqt\n  instance connects\
+  \ to."
+license: BSD
+maintainers: Mikael Arguedas <mikael@osrfoundation.org>, Aaron Blasdel <ablasdel@gmail.com>,
+  Geoffrey Biggs <geoffrey.biggs@aist.go.jp>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_action
+srvs: []
+url: http://wiki.ros.org/rqt_action

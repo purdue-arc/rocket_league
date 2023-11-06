@@ -1,0 +1,29 @@
+actions: []
+authors: Thibault Kruse
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_tf_tree/issues
+depends:
+- python-setuptools
+- rospy
+- python3-rospkg
+- rqt_gui_py
+- tf2_ros
+- python-mock
+- catkin
+- qt_dotgraph
+- rqt_gui
+- python_qt_binding
+- python3-setuptools
+- tf2_msgs
+- python-rospkg
+- rqt_graph
+- python3-mock
+description: rqt_tf_tree provides a GUI plugin for visualizing the ROS TF frame tree.
+license: BSD
+maintainers: Isaac I.Y. Saito <gm130s@gmail.com>, Peter Han <peter9606@gmail.com>,
+  Mabel Zhang <mabel@openrobotics.org>, Arne Hitzmann <arne.hitzmann@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_tf_tree
+srvs: []
+url: http://wiki.ros.org/rqt_tf_tree

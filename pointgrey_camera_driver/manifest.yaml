@@ -1,0 +1,31 @@
+actions: []
+authors: Chad Rockey
+brief: ''
+bugtracker: ''
+depends:
+- wfov_camera_msgs
+- image_transport
+- image_exposure_msgs
+- stereo_image_proc
+- roslaunch
+- libusb-1.0-dev
+- roscpp
+- dpkg
+- dynamic_reconfigure
+- camera_info_manager
+- roslint
+- diagnostic_updater
+- nodelet
+- catkin
+- sensor_msgs
+- image_proc
+- curl
+- libraw1394-dev
+description: Point Grey camera driver based on libflycapture2.
+license: BSD
+maintainers: Mike Purvis <mpurvis@clearpathrobotics.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/pointgrey_camera_driver

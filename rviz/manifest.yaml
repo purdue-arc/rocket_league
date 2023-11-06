@@ -1,0 +1,58 @@
+actions: []
+authors: Dave Hershberger, David Gossow, Josh Faust, William Woodall <william@osrfoundation.org>
+brief: ''
+bugtracker: https://github.com/ros-visualization/rviz/issues
+depends:
+- qtbase5-dev
+- liburdfdom-headers-dev
+- sensor_msgs
+- catkin
+- media_export
+- liburdfdom-dev
+- roscpp
+- eigen
+- message_runtime
+- nav_msgs
+- interactive_markers
+- python_qt_binding
+- visualization_msgs
+- message_generation
+- assimp-dev
+- libogre
+- libogre-dev
+- std_srvs
+- rostest
+- libqt5-opengl
+- urdf
+- laser_geometry
+- rospy
+- map_msgs
+- tf2_ros
+- libqt5-opengl-dev
+- opengl
+- libqt5-gui
+- assimp
+- tinyxml2
+- cmake_modules
+- yaml-cpp
+- libqt5-widgets
+- rosunit
+- image_transport
+- message_filters
+- geometry_msgs
+- pluginlib
+- roslib
+- rosconsole
+- tf2_geometry_msgs
+- resource_retriever
+- std_msgs
+- libqt5-core
+description: 3D visualization tool for ROS.
+license: BSD, Creative Commons
+maintainers: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rviz
+srvs:
+- SendFilePath
+url: http://wiki.ros.org/rviz

@@ -1,0 +1,29 @@
+actions: []
+authors: "St\xE9phane Magnenat"
+brief: ''
+bugtracker: https://github.com/ros-planning/navigation_msgs/issues
+depends:
+- message_generation
+- message_runtime
+- sensor_msgs
+- catkin
+- nav_msgs
+- std_msgs
+description: This package defines messages commonly used in mapping packages.
+license: BSD
+maintainers: David V. Lu!! <davidvlu@gmail.com>, Michael Ferguson <mferguson@fetchrobotics.com>
+msgs:
+- ProjectedMap
+- OccupancyGridUpdate
+- PointCloud2Update
+- ProjectedMapInfo
+package_type: package
+repo_url: ''
+srvs:
+- GetPointMap
+- GetPointMapROI
+- ProjectedMapsInfo
+- SaveMap
+- SetMapProjections
+- GetMapROI
+url: http://ros.org/wiki/map_msgs

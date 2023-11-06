@@ -1,0 +1,68 @@
+:py:mod:`visualizer.window`
+===========================
+
+.. py:module:: visualizer.window
+
+.. autoapi-nested-parse::
+
+   Contains the Window class.
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   visualizer.window.Window
+
+
+
+
+.. py:class:: Window(map_width, map_length, wall_thickness, name='Rocket League Visualizer')
+
+   Bases: :py:obj:`object`
+
+   Interfaces PyGame for rendering.
+
+   .. py:attribute:: BACKGROUND_COLOR
+      :value: (0, 0, 0)
+
+      
+
+   .. py:attribute:: GOAL_COLOR
+      :value: (0, 200, 0)
+
+      
+
+   .. py:attribute:: WALL_COLOR
+      :value: (0, 0, 0)
+
+      
+
+   .. py:method:: createAsset(id, width, length, initPos=None, imgPath=None, color=None, radius=None, lines=False, circle=False)
+
+
+   .. py:method:: updateAssetPos(id, x, y)
+
+
+   .. py:method:: updateAssetRadius(id, radius)
+
+
+   .. py:method:: updateAssetAngle(id, angle)
+
+
+   .. py:method:: resetAssetLines(id)
+
+
+   .. py:method:: show()
+
+
+

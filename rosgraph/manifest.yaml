@@ -1,0 +1,24 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros_comm/issues
+depends:
+- python-netifaces
+- python3-netifaces
+- python-rospkg
+- catkin
+- python3-yaml
+- python3-rospkg
+- python3-mock
+- python-mock
+- python-yaml
+description: "rosgraph contains the rosgraph command-line tool, which prints\n   \
+  \ information about the ROS Computation Graph. It also provides an\n    internal\
+  \ library that can be used by graphical tools."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_comm
+srvs: []
+url: http://wiki.ros.org/rosgraph

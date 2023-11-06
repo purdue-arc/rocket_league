@@ -1,0 +1,20 @@
+actions: []
+authors: Michael Ferguson, Adam Stambler
+brief: ''
+bugtracker: ''
+depends:
+- std_msgs
+- rospy
+- rosunit
+- catkin
+- tf
+- rosbash
+- rosserial_msgs
+description: Generalized client side source for rosserial.
+license: BSD
+maintainers: Paul Bouchier <paul.bouchier@gmail.com>, Mike Purvis <mpurvis@clearpathrobotics.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rosserial_client

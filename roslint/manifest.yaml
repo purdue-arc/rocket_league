@@ -1,0 +1,15 @@
+actions: []
+authors: Mike Purvis, Jack O'Quin
+brief: ''
+bugtracker: https://github.com/ros/roslint/issues
+depends:
+- catkin
+description: "CMake lint commands for ROS packages.\n\n    The lint commands perform\
+  \ static checking of Python or C++ source\n    code for errors and standards compliance."
+license: BSD
+maintainers: Mike Purvis <mpurvis@clearpathrobotics.com>, Alex Henning <ahenning@fetchrobotics.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/roslint.git
+srvs: []
+url: http://ros.org/wiki/roslint

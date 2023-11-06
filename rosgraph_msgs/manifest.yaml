@@ -1,0 +1,21 @@
+actions: []
+authors: Ken Conley
+brief: ''
+bugtracker: ''
+depends:
+- std_msgs
+- catkin
+- message_generation
+- message_runtime
+description: Messages relating to the ROS Computation Graph. These are generally considered
+  to be low-level messages that end users do not interact with.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs:
+- Clock
+- Log
+- TopicStatistics
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rosgraph_msgs

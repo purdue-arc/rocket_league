@@ -1,0 +1,113 @@
+:py:mod:`visualizer.asset`
+==========================
+
+.. py:module:: visualizer.asset
+
+.. autoapi-nested-parse::
+
+   Contains the Asset class.
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   visualizer.asset.Asset
+   visualizer.asset.Image
+   visualizer.asset.Rectangle
+   visualizer.asset.Lines
+   visualizer.asset.Circle
+
+
+
+
+.. py:class:: Asset
+
+   Bases: :py:obj:`abc.ABC`
+
+   Helper class that provides a standard way to create an ABC using
+   inheritance.
+
+   .. py:method:: setPos()
+      :abstractmethod:
+
+
+   .. py:method:: blit()
+      :abstractmethod:
+
+
+
+.. py:class:: Image(width, length, img_path)
+
+   Bases: :py:obj:`Asset`
+
+   Helper class that provides a standard way to create an ABC using
+   inheritance.
+
+   .. py:method:: setPos(x, y)
+
+
+   .. py:method:: setAngle(angle)
+
+
+   .. py:method:: blit(screen)
+
+
+
+.. py:class:: Rectangle(width, length, color)
+
+   Bases: :py:obj:`Asset`
+
+   Helper class that provides a standard way to create an ABC using
+   inheritance.
+
+   .. py:method:: setPos(x, y)
+
+
+   .. py:method:: blit(screen)
+
+
+
+.. py:class:: Lines(color)
+
+   Bases: :py:obj:`Asset`
+
+   Helper class that provides a standard way to create an ABC using
+   inheritance.
+
+   .. py:method:: resetPoints()
+
+
+   .. py:method:: setPos(x, y)
+
+
+   .. py:method:: blit(screen)
+
+
+
+.. py:class:: Circle(color, radius)
+
+   Bases: :py:obj:`Asset`
+
+   Helper class that provides a standard way to create an ABC using
+   inheritance.
+
+   .. py:method:: setPos(x, y)
+
+
+   .. py:method:: setRadius(radius)
+
+
+   .. py:method:: blit(screen)
+
+
+

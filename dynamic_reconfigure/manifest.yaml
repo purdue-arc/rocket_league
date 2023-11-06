@@ -1,0 +1,39 @@
+actions: []
+authors: Blaise Gassend
+brief: ''
+bugtracker: https://github.com/ros/dynamic_reconfigure/issues
+depends:
+- roslib
+- roscpp_serialization
+- libboost-thread-dev
+- message_runtime
+- message_generation
+- libboost-dev
+- roscpp
+- rostest
+- rospy
+- cpp_common
+- catkin
+- std_msgs
+- rosservice
+- libboost-chrono-dev
+description: "The dynamic_reconfigure package provides a means to update parameters\n\
+  \    at runtime without having to restart the node."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs:
+- SensorLevels
+- GroupState
+- ConfigDescription
+- StrParameter
+- Group
+- Config
+- IntParameter
+- DoubleParameter
+- ParamDescription
+- BoolParameter
+package_type: package
+repo_url: https://github.com/ros/dynamic_reconfigure
+srvs:
+- Reconfigure
+url: http://ros.org/wiki/dynamic_reconfigure

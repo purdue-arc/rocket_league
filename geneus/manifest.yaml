@@ -1,0 +1,17 @@
+actions: []
+authors: Kei Okada
+brief: ''
+bugtracker: ''
+depends:
+- python3-setuptools
+- python-setuptools
+- genmsg
+- catkin
+description: EusLisp ROS message and service generators.
+license: BSD
+maintainers: Kei Okada <k-okada@jsk.t.u-tokyo.ac.jp>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

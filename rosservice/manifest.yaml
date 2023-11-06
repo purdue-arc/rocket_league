@@ -1,0 +1,23 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- genpy
+- rosgraph
+- roslib
+- rospy
+- catkin
+- rosmsg
+description: "rosservice contains the rosservice command-line tool for listing\n \
+  \   and querying ROS <a href=\"http://wiki.ros.org/Services\">Services</a>. It also\n\
+  \    contains a Python library for retrieving information about\n    Services and\
+  \ dynamically invoking them. The Python library is\n    experimental and is for\
+  \ internal-use only."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rosservice

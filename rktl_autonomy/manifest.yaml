@@ -1,0 +1,23 @@
+actions: []
+authors: James Baxter <baxter26@purdue.edu>, Meenakshi McNamara <mcnama20@purdue.edu>,
+  Haddy Alchaer <halchaer@purdue.edu>, Reuben Georgi <rgeorgi@purdue.edu>
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- std_srvs
+- std_msgs
+- rospy
+- snakesim
+- rktl_msgs
+- geometry_msgs
+- rktl_launch
+- rosunit
+description: Deep reinforcement learning for ARC Rocket League project
+license: BSD 3 Clause
+maintainers: Autonomous Robotics Club of Purdue <autonomy@purdue.edu>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.purduearc.com

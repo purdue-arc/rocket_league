@@ -1,0 +1,23 @@
+actions: []
+authors: Eitan Marder-Eppstein, Tully Foote, Dirk Thomas, Mirza Shah
+brief: ''
+bugtracker: https://github.com/ros/pluginlib/issues
+depends:
+- libboost-filesystem-dev
+- class_loader
+- catkin
+- tinyxml2
+- rosconsole
+- cmake_modules
+- libboost-dev
+- roslib
+description: "The pluginlib package provides tools for writing and dynamically loading\
+  \ plugins using the ROS build infrastructure.\n    To work, these tools require\
+  \ plugin providers to register their plugins in the package.xml of their package."
+license: BSD
+maintainers: "Steven! Ragnar\xF6k <stevenragnarok@osrfoundation.org>"
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/pluginlib
+srvs: []
+url: http://www.ros.org/wiki/pluginlib

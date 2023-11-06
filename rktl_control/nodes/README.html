@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROS Nodes &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="rktl_game" href="../../rktl_game.html" />
+    <link rel="prev" title="Launch Files" href="../launch/README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../rktl_control.html">rktl_control</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../firmware/README.html">Microcontroller Firmware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../launch/README.html">Launch Files</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ROS Nodes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#controller">controller</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#keyboard-interface">keyboard_interface</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mean-odom-filter">mean_odom_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#particle-odom-filter">particle_odom_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pose-synchronizer">pose_synchronizer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#topic-delay">topic_delay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#xbox-interface">xbox_interface</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_control/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../rktl_control.html">rktl_control</a></li>
+      <li class="breadcrumb-item active">ROS Nodes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rktl_control/nodes/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="ros-nodes">
+<h1>ROS Nodes<a class="headerlink" href="#ros-nodes" title="Permalink to this heading"></a></h1>
+<p>These are the <a class="reference external" href="http://wiki.ros.org/Nodes">ROS Nodes</a> provided by this package.
+Most likely, you will use a launch file to run these. You can also run them
+by using <code class="docutils literal notranslate"><span class="pre">rosrun</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rosrun<span class="w"> </span>rktl_control<span class="w"> </span>&lt;Node<span class="w"> </span>name&gt;
+</pre></div>
+</div>
+<nav class="contents local" id="ros-nodes-in-the-package">
+<p class="topic-title">ROS Nodes in the package</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#controller" id="id12">controller</a></p>
+<ul>
+<li><p><a class="reference internal" href="#subscribed-topics" id="id13">Subscribed Topics</a></p></li>
+<li><p><a class="reference internal" href="#published-topics" id="id14">Published Topics</a></p></li>
+<li><p><a class="reference internal" href="#parameters" id="id15">Parameters</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#keyboard-interface" id="id16">keyboard_interface</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id1" id="id17">Published Topics</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#mean-odom-filter" id="id18">mean_odom_filter</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id2" id="id19">Subscribed Topics</a></p></li>
+<li><p><a class="reference internal" href="#id3" id="id20">Published Topics</a></p></li>
+<li><p><a class="reference internal" href="#id4" id="id21">Parameters</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#particle-odom-filter" id="id22">particle_odom_filter</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id5" id="id23">Subscribed Topics</a></p></li>
+<li><p><a class="reference internal" href="#id6" id="id24">Published Topics</a></p></li>
+<li><p><a class="reference internal" href="#id7" id="id25">Parameters</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#pose-synchronizer" id="id26">pose_synchronizer</a></p></li>
+<li><p><a class="reference internal" href="#id8" id="id27">Parameters</a></p></li>
+<li><p><a class="reference internal" href="#topic-delay" id="id28">topic_delay</a></p></li>
+<li><p><a class="reference internal" href="#xbox-interface" id="id29">xbox_interface</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id9" id="id30">Subscribed Topics</a></p></li>
+<li><p><a class="reference internal" href="#id10" id="id31">Published Topics</a></p></li>
+<li><p><a class="reference internal" href="#id11" id="id32">Parameters</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="controller">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">controller</a><a class="headerlink" href="#controller" title="Permalink to this heading"></a></h2>
+<p>Customizable controller for the car. It implements either a PID controller or a
+lead-lag controller.</p>
+<p>The controller is responsible for making the car do what you tell it to do.
+Simply, that means you give it a
+<a class="reference internal" href="#/rktl_msgs/html/msg/ControlCommand.html#http://"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">ControlCommand.msg</span></code></span></a> and it
+produces a <a class="reference internal" href="#/rktl_msgs/html/msg/ControlEffort.html#http://"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">ControlEffort.msg</span></code></span></a>
+that makes the car follow it. At a basic level, it uses the odometry produced by
+the filter and tries to minimize the error between what you want the car to do
+and what it is actually doing.</p>
+<p>The incoming message is different from the outgoing message because it is taking
+a desired motion that could be for any mechanism, and it is converting it to
+very specific hardware commands for our specific cars. This allows the software
+generating the commands to ignore the specifics of the cars, and the software /
+hardware getting the efforts to the actuators to also ignore the specifics of
+the car as a whole.</p>
+<p>The two types of controllers supported are PID and lead-lag. If you’ve never
+heard of these before, PID is going to be something you can intuitively
+understand with some work, and lead-lag is probably something you’re going to
+need to take some classes or read some textbooks to understand (ex: Purdue ME
+365, 375, 475).</p>
+<p>PID control is very well explained in many places on the internet, so I won’t
+discuss the basics here. The reason it is an option is because it is a commonly
+used controller that can be tuned intuitively by watching how the car is
+behaving. Lead-Lag is a very similar algorithm that can result in better
+performance (especially for discrete systems like this), but it is harder to
+tune. Intuitively tuning likely isn’t an option, so instead MATLAB scripts can
+be really helpful to determine the specific gains to use. These are included in
+the <code class="docutils literal notranslate"><span class="pre">scripts</span></code> directory of this package.</p>
+<p>Some possibly useful references:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.youtube.com/watch?v=UR0hOmjaHp0">https://www.youtube.com/watch?v=UR0hOmjaHp0</a></p></li>
+<li><p><a class="reference external" href="https://www.youtube.com/watch?v=wkfEZmsQqiA&amp;amp;list=PLn8PRpmsu08pQBgjxYFXSsODEF3Jqmm-y">https://www.youtube.com/watch?v=wkfEZmsQqiA&amp;list=PLn8PRpmsu08pQBgjxYFXSsODEF3Jqmm-y</a></p></li>
+<li><p><a class="reference external" href="https://www.youtube.com/watch?v=xLhvil5sDcU">https://www.youtube.com/watch?v=xLhvil5sDcU</a></p></li>
+</ul>
+<p>These are all by Brian Douglas, who has many useful videos on control concepts.</p>
+<section id="subscribed-topics">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics</a><a class="headerlink" href="#subscribed-topics" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">command</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/ControlCommand.html#http://"><span class="xref myst">rktl_msgs/ControlCommand</span></a>):
+The car’s desired movement, in terms of velocity and steering angle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>):
+Odometry data of the car’s position and velocity.</p></li>
+</ul>
+</section>
+<section id="published-topics">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics</a><a class="headerlink" href="#published-topics" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">effort</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/ControlEffort.html#http://"><span class="xref myst">rktl_msgs/ControlEffort</span></a>):
+The car’s desired movement, in terms of throttle and steering amount.</p></li>
+</ul>
+</section>
+<section id="parameters">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/throttle/max_speed</span></code> (float): Maximum velocity for the car, in meters
+per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/steering/max_throw</span></code> (float): Maximum steering angle for the car, in
+meters per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/length</span></code> (float): Length of the car, in meters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~limits/throttle/min</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>): Min value for the car throttle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~limits/throttle/max</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">1.0</span></code>): Max value for the car throttle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~limits/steering/min</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>): Min value for the car steering.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~limits/steering/max</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">1.0</span></code>): Max value for the car steering.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~open_loop/publish_early</span></code> (boolean, default: true): If true, data on the
+<code class="docutils literal notranslate"><span class="pre">effort</span></code> topic will be published before the controller updates its internal
+state. This means that the control effort message will be based on the
+previous error and controller output values, rather than current error and
+controller output values.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~controller_type</span></code> (string): One of <code class="docutils literal notranslate"><span class="pre">'lead_lag'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pid'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'none'</span></code>. Sets
+the controller type to use a lead-lag controller, a PID controller, or no
+controller, respectively.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lead/gain</span></code> (float): Parameter for the lead-lag controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lead/alpha</span></code> (float): Parameter for the lead-lag controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lead/beta</span></code> (float): Parameter for the lead-lag controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lag/alpha</span></code> (float): Parameter for the lead-lag controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lag/beta</span></code> (float): Parameter for the lead-lag controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~pid/kp</span></code> (float): Parameter for the PID controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~pid/ki</span></code> (float): Parameter for the PID controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~pid/kd</span></code> (float): Parameter for the PID controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~pid/anti_windup</span></code> (float): Parameter for the PID controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~pid/deadband</span></code> (float): Parameter for the PID controller.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~rate</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">10.0</span></code>): Rate at which the <code class="docutils literal notranslate"><span class="pre">effort</span></code> topic is
+published, in messages per second.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="keyboard-interface">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">keyboard_interface</a><a class="headerlink" href="#keyboard-interface" title="Permalink to this heading"></a></h2>
+<p>Allows for controlling the car using a keyboard interface. Uses the terminal
+(with ncurses) as an interface.</p>
+<section id="id1">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics</a><a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">effort</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/ControlEffort.html#http://"><span class="xref myst">rktl_msgs/ControlEffort</span></a>):
+The car’s desired movement, in terms of throttle and steering amount.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="mean-odom-filter">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">mean_odom_filter</a><a class="headerlink" href="#mean-odom-filter" title="Permalink to this heading"></a></h2>
+<p>This is a very simple filter. If you have a stream of noisy measurements,
+averaging the most recent <span class="math notranslate nohighlight">\(N\)</span> measurements will give you a pretty good estimate.
+This gets slightly complicated when handling angles, since they wrap around at
+<span class="math notranslate nohighlight">\(\pm\pi\)</span>, but it still works.</p>
+<p>The downside is that if you average 10 measurements, your estimate is
+time-delayed by 5 sampling periods. Therefore, a balance needs to be struck
+between the desired noise reduction and the acceptable delay.</p>
+<p>This filter also runs into problems when taking derivatives of the input. Simply
+taking the derivative of the two most recent measurements, filtered or
+unfiltered, will result in significant noise. To combat this, the filter computes
+derivatives for each pair of points (ex: <span class="math notranslate nohighlight">\(t-1\)</span> and <span class="math notranslate nohighlight">\(t-2\)</span>, <span class="math notranslate nohighlight">\(t-2\)</span> and <span class="math notranslate nohighlight">\(t-3\)</span>, <span class="math notranslate nohighlight">\(t-3\)</span>
+and <span class="math notranslate nohighlight">\(t-4\)</span>), then averages those velocity predictions using the same averaging
+buffer algorithm.</p>
+<p>Overall, this filter is simple and works well enough for position as long as slight delay is acceptable. For velocity, it runs into problems since the noise is greater and the sampling frequency isn’t high enough to get a low delay signal.</p>
+<section id="id2">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics</a><a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pose_sync</span></code> (<a class="reference internal" href="#/geometry_msgs/html/msg/PoseWithCovarianceStamped.html#http://"><span class="xref myst">geometry_msgs/PoseWithCovarianceStamped</span></a>):
+The position, rotation, and timestamp of a given element on the field,
+synchronized across all cameras.</p></li>
+</ul>
+</section>
+<section id="id3">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics</a><a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>):
+Odometry data of a field element’s position and velocity.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~frame_ids/map</span></code> (string, default: <code class="docutils literal notranslate"><span class="pre">'map'</span></code>): Frame ID of the common reference
+frame for all objects. In the context of the project, this is the frame
+centered on the middle of the field, with the <span class="math notranslate nohighlight">\(x\)</span>-axis pointed towards a goal,
+the <span class="math notranslate nohighlight">\(y\)</span>-axis pointing towards a sideline, and the <span class="math notranslate nohighlight">\(z\)</span>-axis pointed up. By
+convention, this should be called <code class="docutils literal notranslate"><span class="pre">'map'</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~frame_ids/body</span></code> (string, default: <code class="docutils literal notranslate"><span class="pre">'base_link'</span></code>): Frame ID of the object
+being tracked.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~buffer_size/position</span></code> (int, default: <code class="docutils literal notranslate"><span class="pre">3</span></code>): Buffer size for the rolling
+average for position.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~buffer_size/velocity</span></code> (int, default: <code class="docutils literal notranslate"><span class="pre">3</span></code>): Buffer size for the rolling
+average for velocity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~delay/compensate</span></code> (boolean, default: false): If true, the published odom is
+extrapolated to a future time defined by <code class="docutils literal notranslate"><span class="pre">~delay/duration</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~delay/duration</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): The time, in seconds, in the future
+that should be predicted. Requires <code class="docutils literal notranslate"><span class="pre">~delay/compensate</span></code> to be true to have
+any effect.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="particle-odom-filter">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">particle_odom_filter</a><a class="headerlink" href="#particle-odom-filter" title="Permalink to this heading"></a></h2>
+<p>This is a much more complex algorithm. The basic premise of why the algorithm is
+useful is that by considering the noise in each individual measurement, not just
+the mean value, there is more detail that can be used to improve the accuracy vs
+delay trade off. Several similar algorithms were considered and are briefly
+discussed below.</p>
+<p>The basic premise is that a particle filter has many different estimates of what
+the car is doing and where it is (called a particle; perhaps 1,000 in this
+application). For each new measurement that comes in:</p>
+<ul class="simple">
+<li><p>Each and every one of these particles are simulated one time step (using a
+bicycle model) to get a prediction of the current state of the particle</p></li>
+<li><p>For each particle, the question is asked, “Given this measurement and what I
+know about it’s standard deviation, what is the probability that this
+particle is correct?”</p></li>
+<li><p>That result is used to compute a weighed average of all the particles.</p></li>
+<li><p>This average is then post processed a little bit to produce an odometry
+estimate since the internal states don’t exactly match</p></li>
+</ul>
+<p>This then repeats until the end of time.</p>
+<p>Initially, the particles are randomly distributed all over the field, but they
+eventually converge (pretty quickly) to the real state of the car. To do this,
+the filter will periodically delete bad particles, and replace them with new
+random ones. These random ones are uniformly distributed if there isn’t a good
+guess of where the car is (like when the filter first starts), or distributed
+normally about the most recent guess</p>
+<p>The specific state of the car is tracked by five-ish variables:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(x\)</span>, the <span class="math notranslate nohighlight">\(x\)</span> location of the car’s center of mass in the field’s reference frame</p></li>
+<li><p><span class="math notranslate nohighlight">\(y\)</span>, the <span class="math notranslate nohighlight">\(y\)</span> location of the car’s center of mass in the field’s reference frame</p></li>
+<li><p><span class="math notranslate nohighlight">\(\sin(\theta)\)</span>, the <span class="math notranslate nohighlight">\(y\)</span> component of the car’s heading angle in the field’s
+reference frame</p></li>
+<li><p><span class="math notranslate nohighlight">\(\cos(\theta)\)</span>, the <span class="math notranslate nohighlight">\(x\)</span> component of the car’s heading angle in the field’s
+reference frame</p></li>
+<li><p><span class="math notranslate nohighlight">\(v_{rear}\)</span>, the linear velocity of the rear tires of the car</p></li>
+<li><p><span class="math notranslate nohighlight">\(\psi\)</span>, the steering angle (relative to the car’s center)</p></li>
+</ul>
+<p><span class="math notranslate nohighlight">\(\theta\)</span> is split into two state variables to prevent issues with wrap around
+and summation.</p>
+<p>From these, a kinematic bicycle model is used to calculate out everything needed
+for an <a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">odometry message</span></a>. Basically, this
+just assumes there is no side-slip by the tires and it uses a lot of
+trigonometry. Details are in the MATLAB script [<code class="docutils literal notranslate"><span class="pre">scripts/bicycle_model.m</span></code>].</p>
+<p>When advancing each particle one time-step, either the known control vector
+(from listening to controller output) or a random control vector is used. If the
+known vector is used, a small amount of random noise is added. If a completely
+random one is used, they are uniformly distributed between actuator saturation
+limits. From these, a new wheel velocity and steering angle are predicted
+(using a 1st order and 0 order velocity model) and fed into the bicycle model.</p>
+<p>All parameters to the filter are defined in <code class="docutils literal notranslate"><span class="pre">config/particle_odom_filter.yaml</span></code>.
+The relevant ones to tweak are:</p>
+<p><a class="reference external" href="https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/12-Particle-Filters.ipynb">Here</a>
+is a good resource on particle filters for more information.</p>
+<section id="id5">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics</a><a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pose_sync</span></code> (<a class="reference internal" href="#/geometry_msgs/html/msg/PoseWithCovarianceStamped.html#http://"><span class="xref myst">geometry_msgs/PoseWithCovarianceStamped</span></a>):
+The position, rotation, and timestamp of the car, synchronized across all
+cameras.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">effort</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/ControlEffort.html#http://"><span class="xref myst">rktl_msgs/ControlEffort</span></a>):
+The car’s desired movement, in terms of throttle and steering amount.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics</a><a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>): Odometry data
+of a field element’s position and velocity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">odom_particles</span></code> (<a class="reference internal" href="#/geometry_msgs/html/msg/PoseArray.html#http://"><span class="xref myst">geometry_msgs</span></a>):
+Poses of all particles used in the filter. Useful for debugging. Only
+published if <code class="docutils literal notranslate"><span class="pre">~publish_particles</span></code> is true.</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/field/width</span></code> (float): Width of the playing field, in meters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/field/length</span></code> (float): Length of the playing field, in meters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/length</span></code> (float): Length of the car, in meters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/throttle/max_speed</span></code> (float): Maximum speed of the car, in meters per
+second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/throttle/tau</span></code> (float): The throttle time constant, in seconds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/steering/max_throw</span></code> (float): The maximum steering throw, in radians.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/steering/rate</span></code> (float): The maximum steering rate, in radians per
+second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~frame_ids/map</span></code> (string, default: <code class="docutils literal notranslate"><span class="pre">'map'</span></code>): Frame ID of the common reference
+frame for all objects. In the context of the project, this is the frame
+centered on the middle of the field, with the <span class="math notranslate nohighlight">\(x\)</span>-axis pointed towards a goal,
+the <span class="math notranslate nohighlight">\(y\)</span>-axis pointing towards a sideline, and the <span class="math notranslate nohighlight">\(z\)</span>-axis pointed up. By
+convention, this should be called <code class="docutils literal notranslate"><span class="pre">'map'</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~frame_ids/body</span></code> (string, default: <code class="docutils literal notranslate"><span class="pre">'base_link'</span></code>): Frame ID of the object
+being tracked.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~rate</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">10.0</span></code>): Rate at which the <code class="docutils literal notranslate"><span class="pre">effort</span></code> topic is
+published, in messages per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~supersampling</span></code> (int, default: <code class="docutils literal notranslate"><span class="pre">1</span></code>): Supersampling steps in the particle
+dynamics calculation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~publish_particles</span></code> (boolean, default: false): If true, poses of all
+particles used in the filter are published on the <code class="docutils literal notranslate"><span class="pre">odom_particles</span></code> topic.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~allowable_latency</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">1.2</span></code>): Allowable latency used for the
+watchdog timer for dropped pose messages.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~open_loop_limit</span></code> (int, default: <code class="docutils literal notranslate"><span class="pre">10</span></code>): Used in the watchdog timer for
+dropped pose messages</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~delay/compensate</span></code> (boolean, default: false): If true, the published odom is
+extrapolated to a future time defined by <code class="docutils literal notranslate"><span class="pre">~delay/duration</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~delay/duration</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): The time, in seconds, in the future
+that should be predicted. Requires <code class="docutils literal notranslate"><span class="pre">~delay/compensate</span></code> to be true to have
+any effect.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~boundary_check</span></code> (boolean, default: false): If true, the filter artificially
+punishes particles outside of the assumed field boundaries.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~num_particles</span></code> (int, default: <code class="docutils literal notranslate"><span class="pre">1000</span></code>): Number of particles used in the
+filter. A higher number of particles should increase the accuracy of
+the filter, but will consume higher computational resources.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~resample_proportion</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.1</span></code>): The percentage of particles
+replaced with random guesses at every timestep.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~measurement_error/location</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.05</span></code>): Assumed standard
+deviation of the perception data coming in.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~measurement_error/orientation</span></code> (float, default: <span class="math notranslate nohighlight">\(5^\circ\)</span>): Assumed standard
+deviation of the perception data coming in.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~generator_noise/location</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.05</span></code>): Standard deviations of
+the gaussian noise added.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~generator_noise/orientation</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.05</span></code>): Standard deviations
+of the gaussian noise added.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~generator_noise/velocity</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.05</span></code>): Standard deviations of
+the gaussian noise added.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~generator_noise/steering_angle</span></code> (float, default: <span class="math notranslate nohighlight">\(1^\circ\)</span>): Standard
+deviations of the gaussian noise added.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~efforts/enable</span></code> (boolean, default: false): If true, the filter uses historic
+effort data to get a more accurate idea of where the car is.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~efforts/buffer_size</span></code> (int, default: <code class="docutils literal notranslate"><span class="pre">0</span></code>): Buffer size of the buffer for
+effort messages.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">efforts/throttle/noise</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.05</span></code>): Standard deviation of
+gaussian noise added.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">efforts/steering/noise</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.05</span></code>): Standard deviation of
+gaussian noise added.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~efforts/throttle/max</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">1.0</span></code>): Max value for the car throttle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~efforts/throttle/min</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>): Min value for the car throttle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~efforts/steering/max</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">1.0</span></code>): Max value for the car steering.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~efforts/steering/min</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">-1.0</span></code>): Min value for the car steering.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="pose-synchronizer">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">pose_synchronizer</a><a class="headerlink" href="#pose-synchronizer" title="Permalink to this heading"></a></h2>
+<p>Downsample the raw perception data to produce synchronized poses.</p>
+<p>For every topic defined by <code class="docutils literal notranslate"><span class="pre">~topics</span></code>, that topic is subscribed to and
+republished at a rate defined by <code class="docutils literal notranslate"><span class="pre">~rate</span></code>. The name of the topic published
+is the original name of the topic with <code class="docutils literal notranslate"><span class="pre">_sync</span></code> appended to the end.</p>
+</section>
+<section id="id8">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#id8" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~map_frame</span></code> (string, default: <code class="docutils literal notranslate"><span class="pre">'map'</span></code>): Frame ID of the common reference
+frame for all objects. In the context of the project, this is the frame
+centered on the middle of the field, with the <span class="math notranslate nohighlight">\(x\)</span>-axis pointed towards a goal,
+the <span class="math notranslate nohighlight">\(y\)</span>-axis pointing towards a sideline, and the <span class="math notranslate nohighlight">\(z\)</span>-axis pointed up. By
+convention, this should be called <code class="docutils literal notranslate"><span class="pre">'map'</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~topics</span></code> (array): Array of topic names to synchronize.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~rate</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">10.0</span></code>): Rate at which the synchronized topics are
+published, in messages per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~delay</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.15</span></code>): Rate at which the synchronized topics are
+published, in messages per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~publish_latency</span></code> (boolean, default: false): If true, the latency from
+synchronizing each topic is also published</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~use_weights</span></code> (array) :Unused</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="topic-delay">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">topic_delay</a><a class="headerlink" href="#topic-delay" title="Permalink to this heading"></a></h2>
+<p>Delay an arbitrary ROS topic without modifying message</p>
+</section>
+<hr class="docutils" />
+<section id="xbox-interface">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">xbox_interface</a><a class="headerlink" href="#xbox-interface" title="Permalink to this heading"></a></h2>
+<p>Allows for controlling the car using a joystick input, e.g. an Xbox controller.</p>
+<section id="id9">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics</a><a class="headerlink" href="#id9" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">joy</span></code> (<a class="reference internal" href="#/sensor_msgs/html/msg/Joy.html#http://"><span class="xref myst">sensor_msgs/Joy</span></a>): State of
+all buttons and axes on the Xbox controller.</p></li>
+</ul>
+</section>
+<section id="id10">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics</a><a class="headerlink" href="#id10" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">effort</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/ControlEffort.html#http://"><span class="xref myst">rktl_msgs/ControlEffort</span></a>):
+The car’s desired movement, in terms of throttle and steering amount.</p></li>
+</ul>
+</section>
+<section id="id11">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#id11" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~base_throttle</span></code> (float): Throttle when not boosting.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~boost_throttle</span></code> (float): Throttle when boosting.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~cooldown_ratio</span></code> (float): How long should one second of boost take to recharge?</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~max_boost</span></code> (float): Max time boost can be active.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../launch/README.html" class="btn btn-neutral float-left" title="Launch Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../rktl_game.html" class="btn btn-neutral float-right" title="rktl_game" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

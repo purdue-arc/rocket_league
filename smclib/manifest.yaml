@@ -1,0 +1,20 @@
+actions: []
+authors: Various
+brief: ''
+bugtracker: https://github.com/ros/bond_core/issues
+depends:
+- python-setuptools
+- catkin
+- python3-setuptools
+description: "The State Machine Compiler (SMC) from http://smc.sourceforge.net/\n\
+  \    converts a language-independent description of a state machine\n    into the\
+  \ source code to support that state machine.\n\n    This package contains the libraries\
+  \ that a compiled state machine\n    depends on, but it does not contain the compiler\
+  \ itself."
+license: Mozilla Public License Version 1.1
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/bond_core
+srvs: []
+url: http://smc.sourceforge.net/

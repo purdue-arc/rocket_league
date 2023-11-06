@@ -1,0 +1,19 @@
+actions: []
+authors: ''
+brief: ''
+bugtracker: https://github.com/ros/message_runtime/issues
+depends:
+- roscpp_traits
+- roscpp_serialization
+- genpy
+- catkin
+- cpp_common
+- rostime
+description: Package modeling the run-time dependencies for language bindings of messages.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/message_runtime
+srvs: []
+url: http://ros.org/wiki/message_runtime

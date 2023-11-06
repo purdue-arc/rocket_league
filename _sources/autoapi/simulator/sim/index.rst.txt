@@ -1,0 +1,130 @@
+:py:mod:`simulator.sim`
+=======================
+
+.. py:module:: simulator.sim
+
+.. autoapi-nested-parse::
+
+   Contains the Sim class.
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   simulator.sim.Sim
+
+
+
+
+.. py:class:: Sim(props, urdf_paths, spawn_bounds, field_setup, render_enabled)
+
+   Bases: :py:obj:`object`
+
+   Oversees instance-based parameters and objects of the simulator.
+   Cars, ball objects, goal position, etc.
+
+   .. py:method:: configure_dynamics(body_id, body_type)
+
+      Set the car's curvature and general car behavior.
+      @param body_id: The id of the object to be configured.
+      @param body_type: The specific type of object (ie ball,car,goal,etc).
+      @return: Error if not initialized.
+
+
+   .. py:method:: create_ball(urdf_name, init_pose=None, init_speed=None, noise=None, init_vel=None)
+
+      @param urdf_name: The id for the specific pybullet object.
+      @param init_pose: The initial position of the ball (override randomization).
+      @param init_speed: The max speed of the ball (override known speed parameter).
+      @param noise: The noise and if it should be present in the location of the object.
+      @param init_vel: The initial velocity of the ball (override randomization).
+      @return: The ball id if the creation was successful.
+
+
+   .. py:method:: create_car(urdf_name, init_pose=None, noise=None, car_props=None)
+
+      Creates instance based car properties(pose,vel,orient) and configures car dynamics.
+      @param urdf_name: The id for the specific pybullet object.
+      @param init_pose: The initial position of the ball (override randomization).
+      @param noise: The noise and if it should be present in the location of the object.
+      @param car_props: Configuration based car properties.
+      @return: The car id if the creation was successful.
+
+
+   .. py:method:: delete_car(car_id)
+
+      Removes a car from being tracked in the _cars and _car_data lists.
+      @param car_id: The id of the car in the simulator class.
+      @return: Whether the deletion was successful.
+
+
+   .. py:method:: set_car_command(msg)
+
+      Set the command for the car
+
+
+   .. py:method:: step(car_cmd, dt)
+
+      Moves the sim forward one timestep, checking if a goal is score to end the sim round.
+      @param dt: The change in time (delta-t) for this sim step.
+
+
+   .. py:method:: get_decreased_velocity(linear, angular, dt)
+
+
+   .. py:method:: get_car_pose(id, add_noise=False)
+
+
+   .. py:method:: get_car_velocity(id)
+
+      Returns a tuple of linear and angular velocity for the car.
+
+
+   .. py:method:: set_car_command(id, cmd)
+
+
+   .. py:method:: get_ball_pose(add_noise=False)
+
+      @param add_noise: State whether you want noise to get the ball position (default=False).
+
+
+   .. py:method:: get_ball_velocity()
+
+
+   .. py:method:: reset(spawn_bounds, car_properties, ball_init_pose, ball_init_speed)
+
+      Resets the ball, score, winner, spawn bounds, cars and ball.
+      @param spawn_bounds: The new spawn bounds.
+      @param car_properties: The new car properties.
+
+
+   .. py:method:: reset_car(car, car_properties)
+
+      Loops over the cars and generates new initial positions (if they were not specified).
+      @param car_properties: The new car config properties.
+
+
+   .. py:method:: check_if_pos_overlap(car_pos)
+
+      Checks if two cars spawn bounds overlap with each other.
+      @param car_pos: The position of the car.
+      @return: Whether overlap happens (true = need to generate new bounds).
+
+
+   .. py:method:: generate_new_car_pos()
+
+
+   .. py:method:: reset_ball()
+
+
+

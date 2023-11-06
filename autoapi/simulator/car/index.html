@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>simulator.car &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="simulator.sim" href="../sim/index.html" />
+    <link rel="prev" title="simulator" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../../rktl_sim.html">rktl_sim</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../../rktl_sim/launch/README.html">Launch Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../rktl_sim/nodes/README.html">ROS Nodes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Package Module (Simulator)</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../visualizer/index.html">Package Module (Visualizer)</a></li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_sim/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../../rktl_sim.html">rktl_sim</a></li>
+          <li class="breadcrumb-item"><a href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulator</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulator.car</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/simulator/car/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-simulator.car">
+<span id="simulator-car"></span><h1><a class="reference internal" href="#module-simulator.car" title="simulator.car"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulator.car</span></code></a><a class="headerlink" href="#module-simulator.car" title="Permalink to this heading"></a></h1>
+<p>Contains the Car class.
+License:</p>
+<blockquote>
+<div><p>BSD 3-Clause License
+Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+All rights reserved.</p>
+</div></blockquote>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading"></a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#simulator.car.Car" title="simulator.car.Car"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Car</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#simulator.car.JOINT_IDS" title="simulator.car.JOINT_IDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JOINT_IDS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#simulator.car.BASE_QUATERNION" title="simulator.car.BASE_QUATERNION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BASE_QUATERNION</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="simulator.car.JOINT_IDS">
+<span class="sig-prename descclassname"><span class="pre">simulator.car.</span></span><span class="sig-name descname"><span class="pre">JOINT_IDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(1,</span> <span class="pre">0,</span> <span class="pre">2)</span></em><a class="headerlink" href="#simulator.car.JOINT_IDS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="simulator.car.BASE_QUATERNION">
+<span class="sig-prename descclassname"><span class="pre">simulator.car.</span></span><span class="sig-name descname"><span class="pre">BASE_QUATERNION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[0.0,</span> <span class="pre">0.0,</span> <span class="pre">0.0]</span></em><a class="headerlink" href="#simulator.car.BASE_QUATERNION" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="simulator.car.Car">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">simulator.car.</span></span><span class="sig-name descname"><span class="pre">Car</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">car_properties</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.car.Car" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.car.Car.set_properties">
+<span class="sig-name descname"><span class="pre">set_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_properties</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.car.Car.set_properties" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.car.Car.setCmd">
+<span class="sig-name descname"><span class="pre">setCmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.car.Car.setCmd" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.car.Car.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.car.Car.step" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.car.Car.get_pose">
+<span class="sig-name descname"><span class="pre">get_pose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.car.Car.get_pose" title="Permalink to this definition"></a></dt>
+<dd><p>Randomizes and sets a new position for the car.
+&#64;param noise: The sensor noise and if it is present (None=no noise).
+&#64;return: The position and orientation of the car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.car.Car.get_velocity">
+<span class="sig-name descname"><span class="pre">get_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#simulator.car.Car.get_velocity" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the linear and angular velocity of the car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.car.Car.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orient</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.car.Car.reset" title="Permalink to this definition"></a></dt>
+<dd><p>Resets the car state with the new pose and orient.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="simulator.car.Car.check_overlap">
+<span class="sig-name descname"><span class="pre">check_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulator.car.Car.check_overlap" title="Permalink to this definition"></a></dt>
+<dd><p>Returns whether the position will overlap with the current car.
+&#64;param pos: The position of the other object.
+&#64;return: Boolean if the positions overlap (true = overlap).</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../sim/index.html" class="btn btn-neutral float-right" title="simulator.sim" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

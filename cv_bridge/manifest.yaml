@@ -1,0 +1,23 @@
+actions: []
+authors: Patrick Mihelich, James Bowman
+brief: ''
+bugtracker: https://github.com/ros-perception/vision_opencv/issues
+depends:
+- python3-opencv
+- sensor_msgs
+- python3
+- rosconsole
+- boost
+- python3-numpy
+- rostest
+- catkin
+- libopencv-dev
+description: "This contains CvBridge, which converts between ROS\n    Image messages\
+  \ and OpenCV images."
+license: BSD
+maintainers: Vincent Rabaud <vincent.rabaud@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-perception/vision_opencv
+srvs: []
+url: http://www.ros.org/wiki/cv_bridge

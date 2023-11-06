@@ -1,0 +1,19 @@
+actions: []
+authors: Hans-Joachim Krauch <achim@intermodalics.eu>
+brief: ''
+bugtracker: ''
+depends:
+- message_runtime
+- catkin
+- message_generation
+- std_msgs
+description: Package containing message files
+license: BSD
+maintainers: Hans-Joachim Krauch <achim@intermodalics.eu>
+msgs:
+- ConnectedClient
+- ConnectedClients
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

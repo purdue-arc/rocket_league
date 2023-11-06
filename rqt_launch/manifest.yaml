@@ -1,0 +1,22 @@
+actions: []
+authors: Isaac Saito, Stuart Glaser
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_launch/issues
+depends:
+- roslaunch
+- rqt_gui
+- rqt_console
+- python_qt_binding
+- rqt_gui_py
+- rospy
+- catkin
+- rqt_py_common
+description: "This rqt plugin ROS package provides easy view of .launch files.\n \
+  \ User can also start and end node by node that are defined in those files."
+license: BSD
+maintainers: Isaac I.Y. Saito <iisaito@kinugarage.com>, Ryan Sinnet <ryan@rwsinnet.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_launch
+srvs: []
+url: http://wiki.ros.org/rqt_launch

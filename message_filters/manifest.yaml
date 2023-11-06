@@ -1,0 +1,21 @@
+actions: []
+authors: Josh Faust, Vijay Pradeep, Dirk Thomas <dthomas@osrfoundation.org>, Jacob
+  Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- roscpp
+- libboost-thread-dev
+- rosconsole
+- rosunit
+- rostest
+- catkin
+description: A set of message filters which take in messages and may output those
+  messages at a later time, based on the conditions that filter needs met.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/message_filters

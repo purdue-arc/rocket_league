@@ -1,0 +1,19 @@
+actions: []
+authors: Kevin Watts, Brice Rebsamen <brice.rebsamen@gmail.com>, Jeremy Leibs and
+  Blaise Gassend
+brief: ''
+bugtracker: ''
+depends:
+- diagnostic_updater
+- diagnostic_msgs
+- rostest
+- catkin
+- roscpp
+description: self_test
+license: BSD
+maintainers: Guglielmo Gemignani <guglielmo.gemignani@gmail.com>, Austin Hendrix <namniart@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/self_test

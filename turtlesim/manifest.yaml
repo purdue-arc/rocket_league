@@ -1,0 +1,36 @@
+actions: []
+authors: Josh Faust
+brief: ''
+bugtracker: https://github.com/ros/ros_tutorials/issues
+depends:
+- libqt5-gui
+- std_srvs
+- catkin
+- rostime
+- std_msgs
+- rosconsole
+- message_runtime
+- message_generation
+- geometry_msgs
+- roscpp
+- roscpp_serialization
+- libqt5-core
+- roslib
+- libboost-thread-dev
+- qt5-qmake
+- qtbase5-dev
+description: turtlesim is a tool made for teaching ROS and ROS packages.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs:
+- Pose
+- Color
+package_type: package
+repo_url: https://github.com/ros/ros_tutorials
+srvs:
+- Spawn
+- TeleportRelative
+- TeleportAbsolute
+- Kill
+- SetPen
+url: http://www.ros.org/wiki/turtlesim

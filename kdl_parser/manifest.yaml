@@ -1,0 +1,27 @@
+actions: []
+authors: Wim Meeussen <wim@willowgarage.com>, Ioan Sucan <isucan@gmail.com>, Jackie
+  Kay <jacquelinekay1@gmail.com>
+brief: ''
+bugtracker: https://github.com/ros/kdl_parser/issues
+depends:
+- rostest
+- liborocos-kdl-dev
+- urdf
+- cmake_modules
+- roscpp
+- tinyxml
+- rosconsole
+- liburdfdom-headers-dev
+- catkin
+- tinyxml2
+description: "The Kinematics and Dynamics Library (KDL) defines a tree structure\n\
+  \   to represent the kinematic and dynamic parameters of a robot\n   mechanism.\
+  \ <tt>kdl_parser</tt> provides tools to construct a KDL\n   tree from an XML robot\
+  \ representation in URDF."
+license: BSD
+maintainers: Chris Lalancette <clalancette@osrfoundation.org>, Shane Loretz <sloretz@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/kdl_parser
+srvs: []
+url: http://ros.org/wiki/kdl_parser

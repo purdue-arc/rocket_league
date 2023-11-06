@@ -1,0 +1,56 @@
+actions: []
+authors: John Hsu
+brief: ''
+bugtracker: https://github.com/ros-simulation/gazebo_ros_pkgs/issues
+depends:
+- sensor_msgs
+- std_msgs
+- std_srvs
+- geometry_msgs
+- message_runtime
+- catkin
+- message_generation
+- trajectory_msgs
+description: Message and service data structures for interacting with Gazebo from
+  ROS.
+license: BSD
+maintainers: Jose Luis Rivero <jrivero@osrfoundation.org>
+msgs:
+- ODEPhysics
+- ODEJointProperties
+- LinkState
+- ModelState
+- ContactState
+- ContactsState
+- SensorPerformanceMetric
+- WorldState
+- ModelStates
+- PerformanceMetrics
+- LinkStates
+package_type: package
+repo_url: https://github.com/ros-simulation/gazebo_ros_pkgs
+srvs:
+- GetModelState
+- SetModelConfiguration
+- SetJointProperties
+- DeleteModel
+- SetJointTrajectory
+- ApplyBodyWrench
+- GetWorldProperties
+- GetLinkState
+- SpawnModel
+- GetJointProperties
+- GetLightProperties
+- DeleteLight
+- GetLinkProperties
+- ApplyJointEffort
+- SetModelState
+- GetModelProperties
+- SetPhysicsProperties
+- SetLinkProperties
+- SetLinkState
+- SetLightProperties
+- JointRequest
+- GetPhysicsProperties
+- BodyRequest
+url: http://gazebosim.org/tutorials?cat=connect_ros

@@ -1,0 +1,17 @@
+actions: []
+authors: Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt/issues
+depends:
+- rospy
+- catkin
+- rqt_gui
+- qt_gui
+description: rqt_gui_py enables GUI plugins to use the Python client library for ROS.
+license: BSD
+maintainers: Michael Jeronimo <michael.jeronimo@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt
+srvs: []
+url: http://ros.org/wiki/rqt_gui_py

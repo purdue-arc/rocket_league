@@ -1,0 +1,25 @@
+actions: []
+authors: Melonee Wise, Sachin Chitta, John Hsu
+brief: ''
+bugtracker: https://github.com/ros-controls/control_toolbox/issues
+depends:
+- catkin
+- roscpp
+- std_msgs
+- message_generation
+- control_msgs
+- message_runtime
+- tinyxml
+- realtime_tools
+- cmake_modules
+- dynamic_reconfigure
+- rosunit
+description: The control toolbox contains modules that are useful across all controllers.
+license: BSD
+maintainers: Bence Magyar <bence.magyar.robotics@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-controls/control_toolbox/
+srvs:
+- SetPidGains
+url: http://ros.org/wiki/control_toolbox

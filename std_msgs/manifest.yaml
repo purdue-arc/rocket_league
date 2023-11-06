@@ -1,0 +1,52 @@
+actions: []
+authors: Morgan Quigley <mquigley@cs.stanford.edu>, Ken Conley <kwc@willowgarage.com>,
+  Jeremy Leibs <leibs@willowgarage.com>
+brief: ''
+bugtracker: https://github.com/ros/std_msgs/issues
+depends:
+- message_runtime
+- message_generation
+- catkin
+description: "Standard ROS Messages including common message types representing primitive\
+  \ data types and other basic message constructs, such as multiarrays.\n    For common,\
+  \ generic robot-specific message types, please see <a href=\"http://www.ros.org/wiki/common_msgs\"\
+  >common_msgs</a>."
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs:
+- Header
+- Empty
+- UInt16
+- Float32
+- MultiArrayLayout
+- Int64MultiArray
+- Int32MultiArray
+- Int16MultiArray
+- ByteMultiArray
+- UInt64MultiArray
+- UInt8MultiArray
+- Time
+- Bool
+- Char
+- Duration
+- Int16
+- Float64MultiArray
+- Byte
+- ColorRGBA
+- MultiArrayDimension
+- Int64
+- Float64
+- UInt8
+- UInt32
+- Float32MultiArray
+- String
+- Int8
+- UInt64
+- UInt16MultiArray
+- UInt32MultiArray
+- Int8MultiArray
+- Int32
+package_type: package
+repo_url: https://github.com/ros/std_msgs
+srvs: []
+url: http://www.ros.org/wiki/std_msgs

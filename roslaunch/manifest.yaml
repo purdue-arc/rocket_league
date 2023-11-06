@@ -1,0 +1,34 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros_comm/issues
+depends:
+- python-yaml
+- rosparam
+- python3-yaml
+- rosmaster
+- python3-paramiko
+- python-rospkg
+- catkin
+- rosclean
+- roslib
+- rosout
+- rosunit
+- rosbuild
+- python3-rospkg
+- rosgraph_msgs
+- python-paramiko
+description: "roslaunch is a tool for easily launching multiple ROS <a href=\"http://ros.org/wiki/Nodes\"\
+  >nodes</a> locally and remotely\n    via SSH, as well as setting parameters on the\
+  \ <a href=\"http://ros.org/wiki/Parameter Server\">Parameter\n    Server</a>. It\
+  \ includes options to automatically respawn processes\n    that have already died.\
+  \ roslaunch takes in one or more XML\n    configuration files (with the <tt>.launch</tt>\
+  \ extension) that\n    specify the parameters to set and nodes to launch, as well\
+  \ as the\n    machines that they should be run on."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_comm
+srvs: []
+url: http://wiki.ros.org/roslaunch

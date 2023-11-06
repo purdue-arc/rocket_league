@@ -1,0 +1,26 @@
+actions: []
+authors: James Baxter <baxter26@purdue.edu>, Daniel Gerblick <dgerblic@purdue.edu>,
+  AJ Ernandes <aernande@purdue.edu>
+brief: ''
+bugtracker: ''
+depends:
+- rviz
+- pointgrey_camera_driver
+- tf2
+- roscpp
+- cv_bridge
+- image_transport
+- image_proc
+- catkin
+- nodelet
+- apriltag_ros
+- camera_calibration
+- tf2_ros
+description: Perception for ARC Rocket League project
+license: BSD 3 Clause
+maintainers: Autonomous Robotics Club of Purdue <autonomy@purdue.edu>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.purduearc.com

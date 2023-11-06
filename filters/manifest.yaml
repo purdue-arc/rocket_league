@@ -1,0 +1,23 @@
+actions: []
+authors: ''
+brief: ''
+bugtracker: ''
+depends:
+- roslib
+- libboost-dev
+- pluginlib
+- rosconsole
+- roscpp
+- rostest
+- catkin
+description: "This library provides a standardized interface for processing data as\
+  \ a sequence \n    of filters.  This package contains a base class upon which to\
+  \ build specific implementations\n    as well as an interface which dynamically\
+  \ loads filters based on runtime parameters."
+license: BSD
+maintainers: Tully Foote <tfoote@willowgarage.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/filters

@@ -1,0 +1,28 @@
+actions: []
+authors: Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- rostest
+- roscpp_serialization
+- bzip2
+- roslz4
+- libconsole-bridge-dev
+- libssl-dev
+- cpp_common
+- rostime
+- roscpp_traits
+- std_msgs
+- catkin
+- pluginlib
+- libgpgme-dev
+- libboost-filesystem-dev
+description: "This is a set of tools for recording from and playing back ROS\n   \
+  \ message without relying on the ROS client library."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

@@ -1,0 +1,22 @@
+actions: []
+authors: James Bowman, Isaac Saito <isaito@willowgarage.com>
+brief: ''
+bugtracker: https://github.com/ros/geometry_tutorials/issues
+depends:
+- roscpp
+- catkin
+- rospy
+- std_msgs
+- tf
+- geometry_msgs
+- turtlesim
+description: turtle_tf demonstrates how to write a tf broadcaster and listener with
+  the turtlesim. The tutle_tf_listener commands turtle2 to follow turtle1 around as
+  you drive turtle1 using the keyboard.
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/geometry_tutorials
+srvs: []
+url: http://ros.org/wiki/turtle_tf

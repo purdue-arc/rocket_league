@@ -1,0 +1,17 @@
+actions: []
+authors: ''
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- python3-qt5-bindings-gl
+- python-qt5-bindings-gl
+description: This encapsulates the GL dependency for a specific ROS distribution and
+  its Qt version
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: ''

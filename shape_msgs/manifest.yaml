@@ -1,0 +1,23 @@
+actions: []
+authors: Ioan Sucan <isucan@willowgarage.com>
+brief: ''
+bugtracker: ''
+depends:
+- message_generation
+- std_msgs
+- catkin
+- geometry_msgs
+- message_runtime
+description: "This package contains messages for defining shapes, such as simple solid\n\
+  \    object primitives (cube, sphere, etc), planes, and meshes."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>
+msgs:
+- MeshTriangle
+- Plane
+- Mesh
+- SolidPrimitive
+package_type: package
+repo_url: ''
+srvs: []
+url: http://wiki.ros.org/shape_msgs

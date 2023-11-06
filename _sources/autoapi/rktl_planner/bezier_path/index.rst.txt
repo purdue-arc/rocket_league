@@ -1,0 +1,101 @@
+:py:mod:`rktl_planner.bezier_path`
+==================================
+
+.. py:module:: rktl_planner.bezier_path
+
+.. autoapi-nested-parse::
+
+   A module for handling Bezier curves and paths.
+
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   rktl_planner.bezier_path.BezierPath
+
+
+
+
+.. py:class:: BezierPath(*args, **kwargs)
+
+   A class representing a Bezier curve path, which is a `BezierCurve` and a duration. If `msg`,
+   `bezier_curve`, and/or `duration` is given as kwargs, they are used to convert from
+   `rktl_msgs/BezierPathMsg`, used as the bezier curve for this path, and/or used for as the
+   duration path; respectively. Otherwise, args is used to initalize this object. If one argument
+   is given, it is expected to be of type `rktl_msgs.msgs.BezierPathMsg`. If two arguments are
+   given, the first should be either a `BezierCurve` object or a list of control points to generate
+   a `BezierCurve` object. The second argument should be a `std_msgs.msg.Duration` or a `float`
+   dictating how long this segment should last.    
+
+   .. py:method:: __repr__()
+
+      Returns a string representation of the instance.
+
+
+   .. py:method:: __str__()
+
+      Returns a string representation of the instance.
+
+
+   .. py:method:: to_param(secs)
+
+      Returns the parameter value corresponding to a time in seconds.
+
+
+   .. py:method:: from_param(vec)
+
+      Returns a `Vector3` object corresponding to a parameter value.
+
+
+   .. py:method:: at(secs)
+
+      Returns a `Vector3` object representing the position on the path at a given time in seconds.
+
+
+   .. py:method:: vel_at(secs)
+
+      Returns a `Vector3` object representing the velocity on the path at a given time in seconds.
+
+
+   .. py:method:: speed_at(secs)
+
+      Returns the (tangential) speed on the path at a given time in seconds.
+
+
+   .. py:method:: accel_at(secs)
+
+      Returns a Vector3 object representing the acceleration on the path at a given time in seconds.
+
+
+   .. py:method:: angle_at(secs)
+
+      Returns the angle of the tangent vector of the curve at a given time in seconds.
+
+
+   .. py:method:: angular_vel_at(secs)
+
+      Returns the angular velocity of the curve at a given time in seconds.
+
+
+   .. py:method:: to_msg()
+
+      Returns a `rktl_msg/BezierPathMsg` object representing the `BezierPath` object.
+
+
+   .. py:method:: split(secs)
+
+      Splits this path into 2 paths at a given time in seconds. Returns the two new `BezierPath` objects.
+
+
+

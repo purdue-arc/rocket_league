@@ -1,0 +1,17 @@
+actions: []
+authors: Josh Faust, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- python-setuptools
+- python3-setuptools
+- catkin
+description: Contains scripts used by the rosboost-cfg tool for determining cflags/lflags/etc.
+  of boost on your system
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rosboost_cfg

@@ -1,0 +1,21 @@
+actions: []
+authors: Stuart Glaser
+brief: ''
+bugtracker: https://github.com/ros/bond_core/issues
+depends:
+- std_msgs
+- message_runtime
+- catkin
+- message_generation
+description: "A bond allows two processes, A and B, to know when the other has\n \
+  \   terminated, either cleanly or by crashing.  The bond remains\n    connected\
+  \ until it is either broken explicitly or until a\n    heartbeat times out."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs:
+- Constants
+- Status
+package_type: package
+repo_url: https://github.com/ros/bond_core
+srvs: []
+url: http://www.ros.org/wiki/bond

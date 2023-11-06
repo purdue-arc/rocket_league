@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nodes &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Training Scripts" href="../scripts/README.html" />
+    <link rel="prev" title="Launch Files" href="../launch/README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../rktl_autonomy.html">rktl_autonomy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../YAMLEditor/README.html">YAMLEditor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../launch/README.html">Launch Files</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Nodes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cartpole-env">cartpole_env</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plotter">plotter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rocket-league-agent">rocket_league_agent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#snake-agent">snake_agent</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../scripts/README.html">Training Scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rktl_autonomy/index.html">Package Module</a></li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_autonomy/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../rktl_autonomy.html">rktl_autonomy</a></li>
+      <li class="breadcrumb-item active">Nodes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rktl_autonomy/nodes/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="nodes">
+<h1>Nodes<a class="headerlink" href="#nodes" title="Permalink to this heading"></a></h1>
+<p>These are the <a class="reference external" href="http://wiki.ros.org/Nodes">ROS Nodes</a> provided by this package.
+Most likely, you will use a launch file to run these. You can also run them
+by using <code class="docutils literal notranslate"><span class="pre">rosrun</span></code>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>rosrun<span class="w"> </span>rktl_autonomy<span class="w"> </span>&lt;Node<span class="w"> </span>name&gt;
+</pre></div>
+</div>
+<nav class="contents local" id="ros-nodes-in-the-package">
+<p class="topic-title">ROS Nodes in the package</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#cartpole-env" id="id8">cartpole_env</a></p>
+<ul>
+<li><p><a class="reference internal" href="#subscribed-topics" id="id9">Subscribed Topics</a></p></li>
+<li><p><a class="reference internal" href="#published-topics" id="id10">Published Topics</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#plotter" id="id11">plotter</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id1" id="id12">Subscribed Topics</a></p></li>
+<li><p><a class="reference internal" href="#parameters" id="id13">Parameters</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#rocket-league-agent" id="id14">rocket_league_agent</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id2" id="id15">Subscribed Topics</a></p></li>
+<li><p><a class="reference internal" href="#id3" id="id16">Published Topics</a></p></li>
+<li><p><a class="reference internal" href="#id4" id="id17">Parameters</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#snake-agent" id="id18">snake_agent</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id5" id="id19">Subscribed Topics</a></p></li>
+<li><p><a class="reference internal" href="#id6" id="id20">Published Topics</a></p></li>
+<li><p><a class="reference internal" href="#id7" id="id21">Parameters</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="cartpole-env">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">cartpole_env</a><a class="headerlink" href="#cartpole-env" title="Permalink to this heading"></a></h2>
+<p>This node creates a connection between the CartPole-v0 environment from OpenAI’s
+Gym library and ROS for testing and simulation purposes. It subscribes to the
+<code class="docutils literal notranslate"><span class="pre">cartpole/action</span></code> topic, which receives a message containing an action (an
+integer) that is taken by the agent. It also publishes messages to the
+<code class="docutils literal notranslate"><span class="pre">cartpole/observation</span></code>, <code class="docutils literal notranslate"><span class="pre">cartpole/reward</span></code>, and <code class="docutils literal notranslate"><span class="pre">cartpole/done</span></code> topics, which
+contain the current observation (a Float32MultiArray), the current reward (a
+Float32), and a Boolean indicating whether the episode is done or not,
+respectively.</p>
+<section id="subscribed-topics">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics</a><a class="headerlink" href="#subscribed-topics" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cartpole/action</span></code> (<a class="reference internal" href="#/std_msgs/html/msg/Int32.html#http://"><span class="xref myst">std_msgs/Int32</span></a>):
+The action that should be performed.</p></li>
+</ul>
+</section>
+<section id="published-topics">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics</a><a class="headerlink" href="#published-topics" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cartpole/observation</span></code> (<a class="reference internal" href="#/std_msgs/html/msg/Float32MultiArray.html#http://"><span class="xref myst">std_msgs/Float32MultiArray</span></a>):
+Observation of the system at any given point.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cartpole/reward</span></code> (<a class="reference internal" href="#/std_msgs/html/msg/Float32.html#http://"><span class="xref myst">std_msgs/Float32</span></a>):
+Reward for training.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cartpole/done</span></code> (<a class="reference internal" href="#/std_msgs/html/msg/Bool.html#http://"><span class="xref myst">std_msgs/Bool</span></a>):
+Boolean representing the whether or not the simulation is complete.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="plotter">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">plotter</a><a class="headerlink" href="#plotter" title="Permalink to this heading"></a></h2>
+<p>This node plots the progress of a machine learning algorithm. The progress is
+subscribed to via the <code class="docutils literal notranslate"><span class="pre">diagnostic_msgs/DiagnosticStatus</span></code> message. The node uses
+the <code class="docutils literal notranslate"><span class="pre">mpl_toolkits</span></code> library to plot the progress of the training, which is then
+saved as a PNG image file.</p>
+<section id="id1">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics</a><a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~log</span></code> (<a class="reference internal" href="#/diagnostic_msgs/html/msg/DiagnosticStatus.html#http://"><span class="xref myst">diagnostic_msgs/DiagnosticStatus</span></a>):
+Log for the training algorithm.</p></li>
+</ul>
+</section>
+<section id="parameters">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~log/base_dir</span></code> (string): The base directory where the training log files are
+stored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~log/plot_freq</span></code> (int, default: <code class="docutils literal notranslate"><span class="pre">25</span></code>): The frequency of plotting, i.e., how
+often the node updates the plot with new data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~log/basic</span></code> (list, default: <code class="docutils literal notranslate"><span class="pre">['duration']</span></code>): A list of basic variables to
+plot. These variables have only one line on the plot.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~log/advanced</span></code> (list, default: <code class="docutils literal notranslate"><span class="pre">['net_reward']</span></code>): A list of advanced
+variables to plot. These variables have three lines on the plot: the
+average, the minimum, and the maximum.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~frequency</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">1/30</span></code>): Frequency of the main simulation loop.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="rocket-league-agent">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">rocket_league_agent</a><a class="headerlink" href="#rocket-league-agent" title="Permalink to this heading"></a></h2>
+<p>This node runs the agent trained for the Rocket League project. It uses the
+<code class="docutils literal notranslate"><span class="pre">RocketLeagueInterface</span></code> class in <code class="docutils literal notranslate"><span class="pre">rocket_league_interface.py</span></code>.</p>
+<section id="id2">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics</a><a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cars/car0/odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>):
+Odometry data of the car’s position and velocity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ball/odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>):
+Odometry data of the car’s position and velocity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">match_status</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/MatchStatus.html#http://"><span class="xref myst">rktl_msgs/MatchStatus</span></a>):
+Match status data containing the current score of the game.</p></li>
+</ul>
+</section>
+<section id="id3">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics</a><a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/car0/command</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/ControlCommand.html#http://"><span class="xref myst">rktl_msgs/ControlCommand</span></a>):
+ontrol commands for the car.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~weights</span></code> (string): The location of weights for where the model was saved.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/throttle/max_speed</span></code> (float): Maximum velocity for the car, in meters
+per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/steering/max_throw</span></code> (float): Maximum steering angle for the car, in
+meters per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~action_space/velocity/min</span></code> (float): Optional. Action space override for
+velocity for the car, in meters per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~action_space/velocity/max</span></code> (float): Optional. Action space override for
+velocity for the car, in meters per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~action_space/curvature/min</span></code> (float): Optional. Action space override for
+steering angle for the car, in meters per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~action_space/curvature/max</span></code> (float): Optional. Action space override for
+steering angle for the car, in meters per second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/length</span></code> (float): Length of the car, in meters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/field/width</span></code> (float): Width of the field, in meters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/field/length</span></code> (float): Length of the field, in meters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~observation/goal_depth</span></code> (float, default, <code class="docutils literal notranslate"><span class="pre">0.075</span></code>): Depth of the goal, in
+meters.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~observation/velocity/max_abs</span></code> (float, default, <code class="docutils literal notranslate"><span class="pre">3.0</span></code>): Max absolute velocity
+for observation. (default is 3.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~observation/angular_velocity/max_abs</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">2π</span></code>): Max absolute
+angular velocity for observation. (default is 2*pi)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~max_episode_time</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">30.0</span></code>): Maximum time in seconds for an
+episode.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/constant</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): Constant reward for each step.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/ball_dist_sq</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): Reward for getting closer to
+the ball.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/goal_dist_sq</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): Reward for getting closer to
+the goal.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/direction_change</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): Reward for changing the
+direction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/win</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">100.0</span></code>): Reward for winning.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/loss</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): Reward for losing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/reverse</span></code>:  (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>)Reward for reversing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/walls/value</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): Reward for hitting walls.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/walls/threshold</span></code> (float, default: <code class="docutils literal notranslate"><span class="pre">0.0</span></code>): Distance from the wall at
+which reward is given.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="snake-agent">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">snake_agent</a><a class="headerlink" href="#snake-agent" title="Permalink to this heading"></a></h2>
+<p>This node runs the agent trained for the snake environment. It uses the
+<code class="docutils literal notranslate"><span class="pre">SnakeInterface</span></code> class in <code class="docutils literal notranslate"><span class="pre">snake_interface.py</span></code>.</p>
+<section id="id5">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics</a><a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">snake/pose</span></code> (<a class="reference internal" href="#/geometry_msgs/html/msg/PoseArray.html#http://"><span class="xref myst">geometry_msgs/PoseArray</span></a>):
+Pose of the snake parts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">snake/goal</span></code> (<a class="reference internal" href="#/geometry_msgs/html/msg/PointStamped.html#http://"><span class="xref myst">geometry_msgs/PointStamped</span></a>):
+Location of the apple.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">snake/score</span></code> (<a class="reference internal" href="#/std_msgs/html/msg/Int32.html#http://"><span class="xref myst">std_msgs/Int32</span></a>):
+Current Score.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">snake/active</span></code> (<a class="reference internal" href="#/std_msgs/html/msg/Bool.html#http://"><span class="xref myst">std_msgs/Bool</span></a>):
+Whether or not the snake is active.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics</a><a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">snake/cmd_vel</span></code> (<a class="reference internal" href="#/geometry_msgs/html/msg/Twist.html#http://"><span class="xref myst">geometry_msgs/Twist</span></a>):
+Command for the snake to follow.</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~num_segments</span></code> (int, default: 7): Initial number of segments of the snake.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~field_size</span></code> (float, default: 10): Size of the field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~control/max_angular_velocity</span></code> (float, default: 3.0): Max angular velocity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~control/max_linear_velocity</span></code> (float,  default: 3.0): Max velocity.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/death</span></code> (float, default: 0.0): Penalty for death.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/goal</span></code> (float, default: 50.0): Reward for eating an apple.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/distance</span></code> (float, default: 0.0): Reward for distance traveled.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reward/constant</span></code> (float, default: 0.0): Constant reward.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~max_episode_time</span></code> (float, default: 30.0): Maximum time in seconds for an
+episode.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../launch/README.html" class="btn btn-neutral float-left" title="Launch Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../scripts/README.html" class="btn btn-neutral float-right" title="Training Scripts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

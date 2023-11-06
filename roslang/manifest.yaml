@@ -1,0 +1,17 @@
+actions: []
+authors: Brian Gerkey <gerkey@willowgarage.com>, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- genmsg
+- catkin
+description: "roslang is a common package that all <a href=\"http://www.ros.org/wiki/Client%20Libraries\"\
+  >ROS client libraries</a> depend on.\n    This is mainly used to find client libraries\
+  \ (via 'rospack depends-on1 roslang')."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/roslang

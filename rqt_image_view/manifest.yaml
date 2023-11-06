@@ -1,0 +1,23 @@
+actions: []
+authors: Dirk Thomas <dthomas@osrfoundation.org>, Mabel Zhang <mabel@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_image_view/issues
+depends:
+- python3-setuptools
+- image_transport
+- cv_bridge
+- python-setuptools
+- sensor_msgs
+- rqt_gui
+- catkin
+- rqt_gui_cpp
+- geometry_msgs
+- qtbase5-dev
+description: rqt_image_view provides a GUI plugin for displaying images using image_transport.
+license: BSD
+maintainers: William Woodall <william@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_image_view
+srvs: []
+url: http://wiki.ros.org/rqt_image_view

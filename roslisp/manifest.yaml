@@ -1,0 +1,21 @@
+actions: []
+authors: Bhaskara Marthi, Brian Gerkey, Lorenz Moesenlechner <moesenle@cs.tum.edu>,
+  Thibault Kruse
+brief: ''
+bugtracker: ''
+depends:
+- ros_environment
+- std_srvs
+- roslang
+- catkin
+- sbcl
+- rosgraph_msgs
+- rospack
+description: Lisp client library for ROS, the Robot Operating System.
+license: BSD
+maintainers: Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/roslisp

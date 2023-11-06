@@ -1,0 +1,21 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- rosmaster
+- catkin
+- libboost-thread-dev
+- rosgraph
+- rosunit
+- rospy
+- roslaunch
+description: Integration test suite based on roslaunch that is compatible with xUnit
+  frameworks.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rostest

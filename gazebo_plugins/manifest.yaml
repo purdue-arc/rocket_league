@@ -1,0 +1,43 @@
+actions: []
+authors: John Hsu
+brief: ''
+bugtracker: https://github.com/ros-simulation/gazebo_ros_pkgs/issues
+depends:
+- trajectory_msgs
+- rostest
+- nav_msgs
+- polled_camera
+- catkin
+- urdf
+- std_srvs
+- visualization_msgs
+- gazebo_dev
+- roscpp
+- std_msgs
+- dynamic_reconfigure
+- message_generation
+- sensor_msgs
+- rospy
+- cv_bridge
+- rosconsole
+- gazebo_msgs
+- tf2_ros
+- tf
+- rosgraph_msgs
+- geometry_msgs
+- message_runtime
+- gazebo_ros
+- diagnostic_updater
+- image_transport
+- nodelet
+- angles
+- camera_info_manager
+description: Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable
+  components.
+license: BSD, Apache 2.0
+maintainers: Jose Luis Rivero <jrivero@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-simulation/gazebo_ros_pkgs
+srvs: []
+url: http://gazebosim.org/tutorials?cat=connect_ros

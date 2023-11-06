@@ -1,0 +1,26 @@
+actions: []
+authors: Tully Foote
+brief: ''
+bugtracker: ''
+depends:
+- nodelet
+- message_filters
+- dynamic_reconfigure
+- roscpp
+- tf
+- catkin
+- laser_geometry
+- filters
+- sensor_msgs
+- pluginlib
+- angles
+- rostest
+description: "Assorted filters designed to operate on 2D planar laser scanners,\n\
+  \    which use the sensor_msgs/LaserScan type."
+license: BSD
+maintainers: Jon Binney <jon.binney@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/laser_filters

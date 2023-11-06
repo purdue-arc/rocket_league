@@ -1,0 +1,17 @@
+actions: []
+authors: Wim Meeussen
+brief: ''
+bugtracker: https://github.com/ros-controls/ros_control/issues
+depends:
+- hardware_interface
+- roscpp
+- catkin
+description: Interface base class for controllers.
+license: BSD
+maintainers: "Bence Magyar <bence.magyar.robotics@gmail.com>, Enrique Fernandez <enrique.fernandez.perdomo@gmail.com>,\
+  \ Mathias L\xFCdtke <mathias.luedtke@ipa.fraunhofer.de>"
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-controls/ros_control
+srvs: []
+url: https://github.com/ros-controls/ros_control/wiki

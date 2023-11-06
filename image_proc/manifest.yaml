@@ -1,0 +1,25 @@
+actions: []
+authors: Patrick Mihelich, Kurt Konolige, Jeremy Leibs
+brief: ''
+bugtracker: ''
+depends:
+- sensor_msgs
+- roscpp
+- cv_bridge
+- nodelet_topic_tools
+- image_transport
+- nodelet
+- rostest
+- camera_calibration_parsers
+- dynamic_reconfigure
+- boost
+- image_geometry
+- catkin
+description: Single image rectification and color processing.
+license: BSD
+maintainers: Vincent Rabaud <vincent.rabaud@gmail.com>, Autonomoustuff team <software@autonomoustuff.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/image_proc

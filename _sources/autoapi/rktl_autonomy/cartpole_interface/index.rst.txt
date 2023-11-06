@@ -1,0 +1,117 @@
+:py:mod:`rktl_autonomy.cartpole_interface`
+==========================================
+
+.. py:module:: rktl_autonomy.cartpole_interface
+
+.. autoapi-nested-parse::
+
+   Cartpole is a very simple environment included within OpenAI Gym. There is not
+   much of a reason to use it, except for verifying the functionality of this
+   library. Two different interfaces are provided, `CartpoleInterface` and
+   `CartpoleDirectInterface`. The former uses the `ROSInterface` class and the
+   latter directly owns the Gym environment. To verify the `ROSInterface` worked,
+   it was confirmed that they both behave the same way.
+
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   rktl_autonomy.cartpole_interface.CartpoleActions
+   rktl_autonomy.cartpole_interface.CartpoleInterface
+
+
+
+
+.. py:class:: CartpoleActions
+
+   Bases: :py:obj:`enum.IntEnum`
+
+   Possible actions for deep learner.
+
+   .. py:attribute:: LEFT
+      :value: 0
+
+      
+
+   .. py:attribute:: RIGHT
+
+      
+
+   .. py:attribute:: SIZE
+
+      
+
+
+.. py:class:: CartpoleInterface(eval=False, launch_file=['rktl_autonomy', 'cartpole_train.launch'], launch_args=[], run_id=None)
+
+   Bases: :py:obj:`rktl_autonomy.ROSInterface`
+
+   ROS interface for the cartpole game.
+
+   .. py:property:: action_space
+
+      The Space object corresponding to valid actions.
+
+
+   .. py:property:: observation_space
+
+      The Space object corresponding to valid observations.
+
+
+   .. py:method:: _reset_env()
+
+      Reset environment for a new training episode.
+
+
+   .. py:method:: _reset_self()
+
+      Reset internally for a new episode.
+
+
+   .. py:method:: _has_state()
+
+      Determine if the new state is ready.
+
+
+   .. py:method:: _clear_state()
+
+      Clear state variables / flags in preparation for new ones.
+
+
+   .. py:method:: _get_state()
+
+      Get state tuple (observation, reward, done, info).
+
+
+   .. py:method:: _publish_action(action)
+
+      Publish an action to the ROS network.
+
+
+   .. py:method:: _obs_cb(obs_msg)
+
+      Callback for observation of game.
+
+
+   .. py:method:: _reward_cb(reward_msg)
+
+      Callback for reward of game.
+
+
+   .. py:method:: _done_cb(done_msg)
+
+      Callback for if episode is done.
+
+
+

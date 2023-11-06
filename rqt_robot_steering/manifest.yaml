@@ -1,0 +1,22 @@
+actions: []
+authors: Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_robot_steering/issues
+depends:
+- geometry_msgs
+- python-rospkg
+- python_qt_binding
+- python3-rospkg
+- rqt_gui
+- rostopic
+- rqt_gui_py
+- catkin
+description: rqt_robot_steering provides a GUI plugin for steering a robot using Twist
+  messages.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>, Aaron Blasdel <ablasdel@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_robot_steering
+srvs: []
+url: http://wiki.ros.org/rqt_robot_steering

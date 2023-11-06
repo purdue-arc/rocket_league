@@ -1,0 +1,30 @@
+actions: []
+authors: Brian Gerkey, Morgan Quigley, Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros/rospack/issues
+depends:
+- libboost-filesystem-dev
+- python-catkin-pkg-modules
+- python
+- python3-rosdep-modules
+- python3
+- tinyxml2
+- ros_environment
+- libboost-system-dev
+- libboost-program-options-dev
+- catkin
+- python-rosdep-modules
+- pkg-config
+- cmake_modules
+- python-coverage
+- python3-catkin-pkg-modules
+- gtest
+- python3-coverage
+description: ROS Package Tool
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/rospack
+srvs: []
+url: http://wiki.ros.org/rospack

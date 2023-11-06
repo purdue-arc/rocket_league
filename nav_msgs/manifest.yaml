@@ -1,0 +1,37 @@
+actions:
+- GetMap
+authors: Tully Foote <tfoote@osrfoundation.org>
+brief: ''
+bugtracker: ''
+depends:
+- geometry_msgs
+- catkin
+- message_generation
+- std_msgs
+- message_runtime
+- actionlib_msgs
+description: "nav_msgs defines the common messages used to interact with the\n   \
+  \ <a href=\"http://wiki.ros.org/navigation\">navigation</a> stack."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>
+msgs:
+- GetMapFeedback
+- GetMapActionResult
+- MapMetaData
+- GetMapGoal
+- GetMapActionFeedback
+- GridCells
+- GetMapActionGoal
+- GetMapResult
+- Odometry
+- Path
+- GetMapAction
+- OccupancyGrid
+package_type: package
+repo_url: ''
+srvs:
+- LoadMap
+- SetMap
+- GetPlan
+- GetMap
+url: http://wiki.ros.org/nav_msgs

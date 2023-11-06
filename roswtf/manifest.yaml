@@ -1,0 +1,30 @@
+actions: []
+authors: Ken Conley, Dirk Thomas <dthomas@osrfoundation.org>, Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros_comm/issues
+depends:
+- python3-paramiko
+- rosbag
+- catkin
+- rosnode
+- roslib
+- rosgraph
+- rosservice
+- cmake_modules
+- roslaunch
+- roslang
+- rostest
+- python3-rospkg
+- python-paramiko
+- std_srvs
+- python-rospkg
+- rosbuild
+description: roswtf is a tool for diagnosing issues with a running ROS system. Think
+  of it as a FAQ implemented in code.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_comm
+srvs: []
+url: http://wiki.ros.org/roswtf

@@ -1,0 +1,17 @@
+actions: []
+authors: Tully Foote
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- std_msgs
+- roscpp
+- nodelet
+description: Package for Nodelet tutorial.
+license: BSD
+maintainers: Daniel Stonier <d.stonier@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/nodelet_tutorial_math

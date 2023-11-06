@@ -1,0 +1,20 @@
+actions: []
+authors: Vijay Pradeep, Adolfo Rodriguez Tsouroukdissian
+brief: ''
+bugtracker: https://github.com/ros-controls/ros_controllers/issues
+depends:
+- controller_interface
+- realtime_tools
+- roscpp
+- hardware_interface
+- catkin
+- std_msgs
+description: forward_command_controller
+license: BSD
+maintainers: "Bence Magyar <bence.magyar.robotics@gmail.com>, Mathias L\xFCdtke <mathias.luedtke@ipa.fraunhofer.de>,\
+  \ Enrique Fernandez <enrique.fernandez.perdomo@gmail.com>"
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-controls/ros_controllers
+srvs: []
+url: https://github.com/ros-controls/ros_controllers/wiki

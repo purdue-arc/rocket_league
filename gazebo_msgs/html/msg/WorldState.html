@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>gazebo_msgs/WorldState Documentation</title>
+<link type="text/css" rel="stylesheet" href="../msg-styles.css" />
+</head>
+<body>
+
+<div id="container">
+
+<h1 class="msg-title"><a href="../index-msg.html">gazebo_msgs</a>/WorldState Message</h1>
+
+<div class="msg">
+
+<h2>File: <span class="filename">gazebo_msgs/WorldState.msg</filename></h2>
+
+<h2>Raw Message Definition</h2>
+<div class="raw-msg">
+<font color="blue">#&nbsp;This&nbsp;is&nbsp;a&nbsp;message&nbsp;that&nbsp;holds&nbsp;data&nbsp;necessary&nbsp;to&nbsp;reconstruct&nbsp;a&nbsp;snapshot&nbsp;of&nbsp;the&nbsp;world</font><br/><font color="blue">#</font><br/><font color="blue">#&nbsp;=&nbsp;Approach&nbsp;to&nbsp;Message&nbsp;Passing&nbsp;=</font><br/><font color="blue">#&nbsp;The&nbsp;state&nbsp;of&nbsp;the&nbsp;world&nbsp;is&nbsp;defined&nbsp;by&nbsp;either</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;1.&nbsp;Inertial&nbsp;Model&nbsp;pose,&nbsp;twist</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;kinematic&nbsp;data&nbsp;-&nbsp;connectivity&nbsp;graph&nbsp;from&nbsp;Model&nbsp;to&nbsp;each&nbsp;Link</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;joint&nbsp;angles</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;joint&nbsp;velocities</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Applied&nbsp;forces&nbsp;-&nbsp;Body&nbsp;wrench</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;relative&nbsp;transform&nbsp;from&nbsp;Body&nbsp;to&nbsp;each&nbsp;collision&nbsp;Geom</font><br/><font color="blue">#&nbsp;Or</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;2.&nbsp;Inertial&nbsp;(absolute)&nbsp;Body&nbsp;pose,&nbsp;twist,&nbsp;wrench</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;relative&nbsp;transform&nbsp;from&nbsp;Body&nbsp;to&nbsp;each&nbsp;collision&nbsp;Geom&nbsp;-&nbsp;constant,&nbsp;so&nbsp;not&nbsp;sent&nbsp;over&nbsp;wire</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;back&nbsp;compute&nbsp;from&nbsp;canonical&nbsp;body&nbsp;info&nbsp;to&nbsp;get&nbsp;Model&nbsp;pose&nbsp;and&nbsp;twist.</font><br/><font color="blue">#</font><br/><font color="blue">#&nbsp;Chooing&nbsp;(2.)&nbsp;because&nbsp;it&nbsp;matches&nbsp;most&nbsp;physics&nbsp;engines&nbsp;out&nbsp;there</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;and&nbsp;is&nbsp;simpler.</font><br/><font color="blue">#</font><br/><font color="blue">#&nbsp;=&nbsp;Future&nbsp;=</font><br/><font color="blue">#&nbsp;Consider&nbsp;impacts&nbsp;on&nbsp;using&nbsp;reduced&nbsp;coordinates&nbsp;/&nbsp;graph&nbsp;(parent/child&nbsp;links)&nbsp;approach</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;constraint&nbsp;and&nbsp;physics&nbsp;solvers.</font><br/><font color="blue">#</font><br/><font color="blue">#&nbsp;=&nbsp;Application&nbsp;=</font><br/><font color="blue">#&nbsp;This&nbsp;message&nbsp;is&nbsp;used&nbsp;to&nbsp;do&nbsp;the&nbsp;following:</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;*&nbsp;reconstruct&nbsp;the&nbsp;world&nbsp;and&nbsp;objects&nbsp;for&nbsp;sensor&nbsp;generation</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;*&nbsp;stop&nbsp;/&nbsp;start&nbsp;simulation&nbsp;-&nbsp;need&nbsp;pose,&nbsp;twist,&nbsp;wrench&nbsp;of&nbsp;each&nbsp;body</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;*&nbsp;collision&nbsp;detection&nbsp;-&nbsp;need&nbsp;pose&nbsp;of&nbsp;each&nbsp;collision&nbsp;geometry.&nbsp;&nbsp;velocity/acceleration&nbsp;if</font><br/><font color="blue">#</font><br/><font color="blue">#&nbsp;=&nbsp;Assumptions&nbsp;=</font><br/><font color="blue">#&nbsp;Assuming&nbsp;that&nbsp;each&nbsp;(physics)&nbsp;processor&nbsp;node&nbsp;locally&nbsp;already&nbsp;has</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;*&nbsp;collision&nbsp;information&nbsp;-&nbsp;Trimesh&nbsp;for&nbsp;Geoms,&nbsp;etc</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;*&nbsp;relative&nbsp;transforms&nbsp;from&nbsp;Body&nbsp;to&nbsp;Geom&nbsp;-&nbsp;this&nbsp;is&nbsp;assumed&nbsp;to&nbsp;be&nbsp;fixed,&nbsp;do&nbsp;not&nbsp;send&nbsp;oved&nbsp;wire</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;*&nbsp;inertial&nbsp;information&nbsp;-&nbsp;does&nbsp;not&nbsp;vary&nbsp;in&nbsp;time</font><br/><font color="blue">#&nbsp;&nbsp;&nbsp;*&nbsp;visual&nbsp;information&nbsp;-&nbsp;does&nbsp;not&nbsp;vary&nbsp;in&nbsp;time</font><br/><font color="blue">#</font><br/><br/>Header&nbsp;header<br/><br/>string[]&nbsp;name<br/>geometry_msgs/Pose[]&nbsp;pose<br/>geometry_msgs/Twist[]&nbsp;twist<br/>geometry_msgs/Wrench[]&nbsp;wrench<br/><br/>
+</div>
+
+<h2>Compact Message Definition</h2>
+<div class="fancy-msg">
+<a href="../../../std_msgs/html/msg/Header.html">std_msgs/Header</a> header<br />string[] name<br /><a href="../../../geometry_msgs/html/msg/Pose.html">geometry_msgs/Pose[]</a> pose<br /><a href="../../../geometry_msgs/html/msg/Twist.html">geometry_msgs/Twist[]</a> twist<br /><a href="../../../geometry_msgs/html/msg/Wrench.html">geometry_msgs/Wrench[]</a> wrench<br />
+</div>
+
+
+</div>
+
+<p class="footer"><small><em>autogenerated on Mon, 06 Nov 2023 03:08:15</em></small></p>
+
+</div>
+
+</body>
+</html>

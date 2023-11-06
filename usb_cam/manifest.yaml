@@ -1,0 +1,24 @@
+actions: []
+authors: Benjamin Pitzer <benjamin.pitzer@bosch.com>
+brief: ''
+bugtracker: https://github.com/ros-drivers/usb_cam/issues
+depends:
+- sensor_msgs
+- catkin
+- std_msgs
+- cv_bridge
+- camera_info_manager
+- ffmpeg
+- roscpp
+- std_srvs
+- v4l-utils
+- image_transport
+description: A ROS Driver for V4L USB Cameras
+license: BSD
+maintainers: Andrey Vukolov <andrey.vukolov@elettra.eu>, Shingo Kitagawa <shingogo.5511@gmail.com>,
+  Russell Toris <rctoris@wpi.edu>, ROS Orphaned Package Maintainers <ros-orphaned-packages@googlegroups.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-drivers/usb_cam
+srvs: []
+url: http://wiki.ros.org/usb_cam

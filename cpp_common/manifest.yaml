@@ -1,0 +1,21 @@
+actions: []
+authors: John Faust, Dirk Thomas
+brief: ''
+bugtracker: ''
+depends:
+- libboost-system-dev
+- libboost-thread-dev
+- catkin
+- libconsole-bridge-dev
+description: "cpp_common contains C++ code for doing things that are not necessarily\
+  \ ROS\n    related, but are useful for multiple packages. This includes things like\n\
+  \    the ROS_DEPRECATED and ROS_FORCE_INLINE macros, as well as code for getting\n\
+  \    backtraces.\n\n    This package is a component of <a href=\"http://www.ros.org/wiki/roscpp\"\
+  >roscpp</a>."
+license: BSD
+maintainers: Martin Pecka <peckama2@fel.cvut.cz>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/cpp_common

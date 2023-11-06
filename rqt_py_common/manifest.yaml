@@ -1,0 +1,29 @@
+actions: []
+authors: Dorian Scholz, Isaac Saito, Dirk Thomas
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_common_plugins/issues
+depends:
+- std_msgs
+- python_qt_binding
+- genmsg
+- genpy
+- qt_gui
+- roslib
+- catkin
+- rostopic
+- rosbag
+- rospy
+- actionlib
+description: "rqt_py_common provides common functionality for rqt plugins written\
+  \ in Python.\n    Despite no plugin is provided, this package is part of the rqt_common_plugins\n\
+  \    repository to keep refactoring generic functionality from these common plugins\n\
+  \    into this package as easy as possible.\n\n    Functionality included in this\
+  \ package should cover generic ROS concepts and\n    should not introduce any special\
+  \ dependencies beside &quot;ros_base&quot;."
+license: BSD
+maintainers: Dorian Scholz <scholz@sim.tu-darmstadt.de>, Michael Jeronimo <michael.jeronimo@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_common_plugins
+srvs: []
+url: http://ros.org/wiki/rqt_py_common

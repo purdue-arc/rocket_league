@@ -1,0 +1,24 @@
+actions: []
+authors: Open Perception, Julius Kammerl <jkammerl@willowgarage.com>, William Woodall
+  <william@osrfoundation.org>
+brief: ''
+bugtracker: https://github.com/ros-perception/pcl_msgs/issues
+depends:
+- catkin
+- message_runtime
+- sensor_msgs
+- message_generation
+- std_msgs
+description: Package containing PCL (Point Cloud Library)-related ROS messages.
+license: BSD
+maintainers: Paul Bovbel <paul@bovbel.com>, Bill Morris <bill@neautomation.com>
+msgs:
+- PolygonMesh
+- ModelCoefficients
+- PointIndices
+- Vertices
+package_type: package
+repo_url: https://github.com/ros-perception/pcl_msgs
+srvs:
+- UpdateFilename
+url: http://wiki.ros.org/pcl_msgs

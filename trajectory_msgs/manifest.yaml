@@ -1,0 +1,25 @@
+actions: []
+authors: Stuart Glaser, Tully Foote <tfoote@osrfoundation.org>
+brief: ''
+bugtracker: ''
+depends:
+- message_runtime
+- geometry_msgs
+- rosbag_migration_rule
+- catkin
+- message_generation
+- std_msgs
+description: "This package defines messages for defining robot trajectories. These\
+  \ messages are\n    also the building blocks of most of the\n    <a href=\"http://wiki.ros.org/control_msgs\"\
+  >control_msgs</a> actions."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>
+msgs:
+- JointTrajectoryPoint
+- JointTrajectory
+- MultiDOFJointTrajectory
+- MultiDOFJointTrajectoryPoint
+package_type: package
+repo_url: ''
+srvs: []
+url: http://wiki.ros.org/trajectory_msgs

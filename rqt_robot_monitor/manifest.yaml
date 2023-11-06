@@ -1,0 +1,37 @@
+actions: []
+authors: Austin Hendrix, Isaac Saito, Ze'ev Klapow, Kevin Watts, Josh Faust
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_robot_monitor/issues
+depends:
+- python3-rospkg-modules
+- python_qt_binding
+- catkin
+- rqt_py_common
+- diagnostic_msgs
+- qt_gui_py_common
+- rqt_gui
+- rqt_gui_py
+- rqt_bag
+- qt_gui
+- python3-setuptools
+- rospy
+- python-setuptools
+- python-rospkg-modules
+description: "rqt_robot_monitor displays diagnostics_agg topics messages that\n  \
+  \ are published by <a href=\"http://www.ros.org/wiki/diagnostic_aggregator\">diagnostic_aggregator</a>.\n\
+  \   rqt_robot_monitor is a direct port to rqt of\n   <a href=\"http://www.ros.org/wiki/robot_monitor\"\
+  >robot_monitor</a>. All\n   diagnostics are fall into one of three tree panes depending\
+  \ on the status of\n   diagnostics (normal, warning, error/stale). Status are shown\
+  \ in trees to\n   represent their hierarchy. Worse status dominates the higher level\
+  \ status.<br/>\n   <ul>\n    Ex. 'Computer' category has 3 sub devices. 2 are green\
+  \ but 1 is error. Then\n        'Computer' becomes error.\n   </ul>\n  You can look\
+  \ at the detail of each status by double-clicking the tree nodes.<br/>\n\n  Currently\
+  \ re-usable API to other pkgs are not explicitly provided."
+license: BSD
+maintainers: Aaron Blasdel <ablasdel@gmail.com>, Arne Hitzmann <arne.hitzmann@gmail.com>,
+  Austin Hendrix <namniart@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_robot_monitor
+srvs: []
+url: http://wiki.ros.org/rqt_robot_monitor

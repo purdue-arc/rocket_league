@@ -1,0 +1,21 @@
+actions: []
+authors: Ken Conley <kwc@willowgarage.com>, Dirk Thomas <dthomas@osrfoundation.org>
+brief: ''
+bugtracker: https://github.com/ros/ros/issues
+depends:
+- python-setuptools
+- roslib
+- python-rospkg
+- python3-setuptools
+- python3-rospkg
+- catkin
+description: "roscreate contains a tool that assists in the creation of ROS filesystem\
+  \ resources.\n     It provides: <tt>roscreate-pkg</tt>, which creates a new package\
+  \ directory,\n     including the appropriate build and manifest files."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros
+srvs: []
+url: http://wiki.ros.org/roscreate

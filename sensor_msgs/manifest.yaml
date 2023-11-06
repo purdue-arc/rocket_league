@@ -1,0 +1,51 @@
+actions: []
+authors: Tully Foote <tfoote@osrfoundation.org>
+brief: ''
+bugtracker: ''
+depends:
+- python-setuptools
+- rosbag
+- geometry_msgs
+- rosunit
+- message_generation
+- catkin
+- python3-setuptools
+- message_runtime
+- std_msgs
+description: "This package defines messages for commonly used sensors, including\n\
+  \    cameras and scanning laser rangefinders."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>
+msgs:
+- MultiDOFJointState
+- FluidPressure
+- Illuminance
+- PointCloud2
+- MultiEchoLaserScan
+- CompressedImage
+- JointState
+- LaserScan
+- RelativeHumidity
+- Range
+- RegionOfInterest
+- MagneticField
+- NavSatFix
+- ChannelFloat32
+- CameraInfo
+- JoyFeedbackArray
+- BatteryState
+- JoyFeedback
+- LaserEcho
+- PointCloud
+- Image
+- Joy
+- PointField
+- TimeReference
+- Temperature
+- NavSatStatus
+- Imu
+package_type: package
+repo_url: ''
+srvs:
+- SetCameraInfo
+url: http://ros.org/wiki/sensor_msgs

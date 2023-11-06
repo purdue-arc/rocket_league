@@ -1,0 +1,17 @@
+actions: []
+authors: Johannes Meyer
+brief: ''
+bugtracker: https://github.com/ros-simulation/gazebo_ros_pkgs/issues
+depends:
+- catkin
+- gazebo11
+- libgazebo11-dev
+description: Provides a cmake config for the default version of Gazebo for the ROS
+  distribution.
+license: Apache 2.0
+maintainers: John Hsu <hsu@osrfoundation.org>, Dave Coleman <davetcoleman@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-simulation/gazebo_ros_pkgs
+srvs: []
+url: http://gazebosim.org/tutorials?cat=connect_ros

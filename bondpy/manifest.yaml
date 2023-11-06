@@ -1,0 +1,21 @@
+actions: []
+authors: Stuart Glaser
+brief: ''
+bugtracker: https://github.com/ros/bond_core/issues
+depends:
+- python3-setuptools
+- uuid
+- rospy
+- catkin
+- python-setuptools
+- bond
+- smclib
+description: "Python implementation of bond, a mechanism for checking when\n    another\
+  \ process has terminated."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/bond_core
+srvs: []
+url: http://www.ros.org/wiki/bondpy

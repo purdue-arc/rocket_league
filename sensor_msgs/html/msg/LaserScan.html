@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>sensor_msgs/LaserScan Documentation</title>
+<link type="text/css" rel="stylesheet" href="../msg-styles.css" />
+</head>
+<body>
+
+<div id="container">
+
+<h1 class="msg-title"><a href="../index-msg.html">sensor_msgs</a>/LaserScan Message</h1>
+
+<div class="msg">
+
+<h2>File: <span class="filename">sensor_msgs/LaserScan.msg</filename></h2>
+
+<h2>Raw Message Definition</h2>
+<div class="raw-msg">
+<font color="blue">#&nbsp;Single&nbsp;scan&nbsp;from&nbsp;a&nbsp;planar&nbsp;laser&nbsp;range-finder</font><br/><font color="blue">#</font><br/><font color="blue">#&nbsp;If&nbsp;you&nbsp;have&nbsp;another&nbsp;ranging&nbsp;device&nbsp;with&nbsp;different&nbsp;behavior&nbsp;(e.g.&nbsp;a&nbsp;sonar</font><br/><font color="blue">#&nbsp;array),&nbsp;please&nbsp;find&nbsp;or&nbsp;create&nbsp;a&nbsp;different&nbsp;message,&nbsp;since&nbsp;applications</font><br/><font color="blue">#&nbsp;will&nbsp;make&nbsp;fairly&nbsp;laser-specific&nbsp;assumptions&nbsp;about&nbsp;this&nbsp;data</font><br/><br/>Header&nbsp;header&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;timestamp&nbsp;in&nbsp;the&nbsp;header&nbsp;is&nbsp;the&nbsp;acquisition&nbsp;time&nbsp;of&nbsp;</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;the&nbsp;first&nbsp;ray&nbsp;in&nbsp;the&nbsp;scan.</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;in&nbsp;frame&nbsp;frame_id,&nbsp;angles&nbsp;are&nbsp;measured&nbsp;around&nbsp;</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;the&nbsp;positive&nbsp;Z&nbsp;axis&nbsp;(counterclockwise,&nbsp;if&nbsp;Z&nbsp;is&nbsp;up)</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;with&nbsp;zero&nbsp;angle&nbsp;being&nbsp;forward&nbsp;along&nbsp;the&nbsp;x&nbsp;axis</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>float32&nbsp;angle_min&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;start&nbsp;angle&nbsp;of&nbsp;the&nbsp;scan&nbsp;[rad]</font><br/>float32&nbsp;angle_max&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;end&nbsp;angle&nbsp;of&nbsp;the&nbsp;scan&nbsp;[rad]</font><br/>float32&nbsp;angle_increment&nbsp;&nbsp;<font color="blue">#&nbsp;angular&nbsp;distance&nbsp;between&nbsp;measurements&nbsp;[rad]</font><br/><br/>float32&nbsp;time_increment&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;time&nbsp;between&nbsp;measurements&nbsp;[seconds]&nbsp;-&nbsp;if&nbsp;your&nbsp;scanner</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;is&nbsp;moving,&nbsp;this&nbsp;will&nbsp;be&nbsp;used&nbsp;in&nbsp;interpolating&nbsp;position</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;of&nbsp;3d&nbsp;points</font><br/>float32&nbsp;scan_time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;time&nbsp;between&nbsp;scans&nbsp;[seconds]</font><br/><br/>float32&nbsp;range_min&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;minimum&nbsp;range&nbsp;value&nbsp;[m]</font><br/>float32&nbsp;range_max&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;maximum&nbsp;range&nbsp;value&nbsp;[m]</font><br/><br/>float32[]&nbsp;ranges&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;range&nbsp;data&nbsp;[m]&nbsp;(Note:&nbsp;values&nbsp;<&nbsp;range_min&nbsp;or&nbsp;>&nbsp;range_max&nbsp;should&nbsp;be&nbsp;discarded)</font><br/>float32[]&nbsp;intensities&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;intensity&nbsp;data&nbsp;[device-specific&nbsp;units].&nbsp;&nbsp;If&nbsp;your</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;device&nbsp;does&nbsp;not&nbsp;provide&nbsp;intensities,&nbsp;please&nbsp;leave</font><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="blue">#&nbsp;the&nbsp;array&nbsp;empty.</font><br/><br/>
+</div>
+
+<h2>Compact Message Definition</h2>
+<div class="fancy-msg">
+<a href="../../../std_msgs/html/msg/Header.html">std_msgs/Header</a> header<br />float32 angle_min<br />float32 angle_max<br />float32 angle_increment<br />float32 time_increment<br />float32 scan_time<br />float32 range_min<br />float32 range_max<br />float32[] ranges<br />float32[] intensities<br />
+</div>
+
+
+</div>
+
+<p class="footer"><small><em>autogenerated on Mon, 06 Nov 2023 03:08:38</em></small></p>
+
+</div>
+
+</body>
+</html>

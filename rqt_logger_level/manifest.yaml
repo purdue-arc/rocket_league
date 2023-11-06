@@ -1,0 +1,26 @@
+actions: []
+authors: Aaron Blasdel
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_logger_level/issues
+depends:
+- rosservice
+- python3-setuptools
+- rqt_gui
+- catkin
+- rosnode
+- rospy
+- python_qt_binding
+- python3-rospkg
+- python-setuptools
+- python-rospkg
+- rqt_gui_py
+description: "rqt_logger_level provides a GUI plugin for configuring the logger level\
+  \ of ROS nodes.<br/>\n   <br/>\n  rqt_logger_level takes over `wx`-based tool [[rxloggerlevel]]."
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>, Aaron Blasdel <ablasdel@gmail.com>,
+  Arne Hitzmann <arne.hitzmann@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_logger_level
+srvs: []
+url: http://wiki.ros.org/rqt_logger_level

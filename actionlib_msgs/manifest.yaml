@@ -1,0 +1,23 @@
+actions: []
+authors: Vijay Pradeep, Tully Foote <tfoote@osrfoundation.org>
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- message_runtime
+- std_msgs
+- message_generation
+description: "actionlib_msgs defines the common messages to interact with an\n   \
+  \  action server and an action client.  For full documentation of\n     the actionlib\
+  \ API see\n     the <a href=\"http://wiki.ros.org/actionlib\">actionlib</a>\n  \
+  \   package."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>
+msgs:
+- GoalID
+- GoalStatus
+- GoalStatusArray
+package_type: package
+repo_url: ''
+srvs: []
+url: http://wiki.ros.org/actionlib_msgs

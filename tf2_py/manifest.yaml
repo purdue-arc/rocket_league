@@ -1,0 +1,16 @@
+actions: []
+authors: ''
+brief: ''
+bugtracker: ''
+depends:
+- tf2
+- rospy
+- catkin
+description: The tf2_py package
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/tf2_py

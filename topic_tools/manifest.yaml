@@ -1,0 +1,38 @@
+actions: []
+authors: Morgan Quigley, Brian Gerkey, Dirk Thomas <dthomas@osrfoundation.org>, Jacob
+  Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- message_generation
+- catkin
+- rosunit
+- std_msgs
+- roscpp
+- rostest
+- rosconsole
+- message_runtime
+- rosbash
+- rostime
+- xmlrpcpp
+- cpp_common
+description: "Tools for directing, throttling, selecting, and otherwise messing with\n\
+  \    ROS topics at a meta level. None of the programs in this package actually\n\
+  \    know about the topics whose streams they are altering; instead, these\n   \
+  \ tools deal with messages as generic binary blobs. This means they can be\n   \
+  \ applied to any ROS topic."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs:
+- DemuxAdd
+- MuxAdd
+- DemuxList
+- MuxList
+- MuxDelete
+- MuxSelect
+- DemuxSelect
+- DemuxDelete
+url: http://ros.org/wiki/topic_tools

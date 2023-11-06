@@ -1,0 +1,18 @@
+actions: []
+authors: Brian Gerkey, Troy Straszheim, Morgan Quigley, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- message_generation
+- message_runtime
+- catkin
+- pkg-config
+description: rosbuild contains scripts for managing the CMake-based build system for
+  ROS.
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/rosbuild

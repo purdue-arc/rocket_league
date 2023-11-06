@@ -1,0 +1,19 @@
+actions: []
+authors: Michael Ferguson
+brief: ''
+bugtracker: ''
+depends:
+- message_runtime
+- message_generation
+- catkin
+description: Messages for automatic topic configuration using rosserial.
+license: BSD
+maintainers: Paul Bouchier <paul.bouchier@gmail.com>, Mike Purvis <mpurvis@clearpathrobotics.com>
+msgs:
+- Log
+- TopicInfo
+package_type: package
+repo_url: ''
+srvs:
+- RequestParam
+url: http://ros.org/wiki/rosserial_msgs

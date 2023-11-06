@@ -1,0 +1,49 @@
+actions: []
+authors: Jonathan Mace <jonathan.c.mace@gmail.com>
+brief: ''
+bugtracker: https://github.com/RobotWebTools/rosbridge_suite/issues
+depends:
+- rosnode
+- python3-setuptools
+- message_generation
+- rospy
+- message_runtime
+- rosgraph
+- python-setuptools
+- catkin
+- rosbridge_library
+description: "Provides service calls for getting ros meta-information, like list of\n\
+  \    topics, services, params, etc."
+license: BSD
+maintainers: Russell Toris <rctoris@wpi.edu>, Jihoon Lee <jihoonlee.in@gmail.com>
+msgs:
+- TypeDef
+package_type: package
+repo_url: https://github.com/RobotWebTools/rosbridge_suite
+srvs:
+- ServiceResponseDetails
+- SearchParam
+- GetParamNames
+- TopicType
+- Publishers
+- GetActionServers
+- MessageDetails
+- Subscribers
+- ServicesForType
+- SetParam
+- Nodes
+- ServiceProviders
+- Topics
+- HasParam
+- GetParam
+- NodeDetails
+- ServiceHost
+- ServiceNode
+- Services
+- TopicsForType
+- TopicsAndRawTypes
+- GetTime
+- ServiceRequestDetails
+- DeleteParam
+- ServiceType
+url: http://ros.org/wiki/rosapi

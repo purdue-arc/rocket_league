@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROS Nodes &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="rktl_planner" href="../../autoapi/rktl_planner/index.html" />
+    <link rel="prev" title="Launch Files" href="../launch/README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../rktl_planner.html">rktl_planner</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../launch/README.html">Launch Files</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">ROS Nodes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bezier-path-server">bezier_path_server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#path-follower">path_follower</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#path-planner">path_planner</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#patrol-planner">patrol_planner</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/rktl_planner/index.html">Package Module</a></li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_planner/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../rktl_planner.html">rktl_planner</a></li>
+      <li class="breadcrumb-item active">ROS Nodes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rktl_planner/nodes/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="ros-nodes">
+<h1>ROS Nodes<a class="headerlink" href="#ros-nodes" title="Permalink to this heading"></a></h1>
+<p>These are the <a class="reference external" href="http://wiki.ros.org/Nodes">ROS Nodes</a> provided by this package.
+Most likely, you will use a launch file to run these. You can also run them
+by using <code class="docutils literal notranslate"><span class="pre">rosrun</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rosrun<span class="w"> </span>rktl_planner<span class="w"> </span>&lt;Node<span class="w"> </span>name&gt;
+</pre></div>
+</div>
+<nav class="contents local" id="ros-nodes-in-the-package">
+<p class="topic-title">ROS Nodes in the package</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#bezier-path-server" id="id8">bezier_path_server</a></p>
+<ul>
+<li><p><a class="reference internal" href="#services" id="id9">Services:</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#path-follower" id="id10">path_follower</a></p>
+<ul>
+<li><p><a class="reference internal" href="#subscribed-topics" id="id11">Subscribed Topics:</a></p></li>
+<li><p><a class="reference internal" href="#published-topics" id="id12">Published Topics:</a></p></li>
+<li><p><a class="reference internal" href="#parameters" id="id13">Parameters:</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#path-planner" id="id14">path_planner</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id1" id="id15">Subscribed Topics:</a></p></li>
+<li><p><a class="reference internal" href="#id2" id="id16">Published Topics:</a></p></li>
+<li><p><a class="reference internal" href="#id3" id="id17">Services:</a></p></li>
+<li><p><a class="reference internal" href="#id4" id="id18">Parameters:</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#patrol-planner" id="id19">patrol_planner</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id5" id="id20">Subscribed Topics:</a></p></li>
+<li><p><a class="reference internal" href="#id6" id="id21">Published Topics:</a></p></li>
+<li><p><a class="reference internal" href="#id7" id="id22">Parameters:</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="bezier-path-server">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">bezier_path_server</a><a class="headerlink" href="#bezier-path-server" title="Permalink to this heading"></a></h2>
+<p>This node is a ROS service that creates a Bezier path using a series of input
+poses, target durations, and segment durations. The output includes the Bezier
+path (which is a series of connected Bezier curves) and a linear path (which is
+a series of linear segments that approximate the Bezier path). The Bezier path
+is designed to allow for smooth turns and gradual acceleration and deceleration,
+while the linear path is used for easier computation and execution.</p>
+<section id="services">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Services:</a><a class="headerlink" href="#services" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">create_bezier_path</span></code> (<a class="reference internal" href="#/rktl_planner/html/msg/CreateBezierPath.html#http://"><span class="xref myst">rktl_planner/CreateBezierPath</span></a>):
+A service that creates a Bezier path using the input poses and durations.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="path-follower">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">path_follower</a><a class="headerlink" href="#path-follower" title="Permalink to this heading"></a></h2>
+<p>This node ensures the car follows a given trajectory using the pure pursuit
+algorithm. It subscribes to the <code class="docutils literal notranslate"><span class="pre">/cars/{car_name}/odom</span></code> topic to obtain the
+car’s odometry information and the <code class="docutils literal notranslate"><span class="pre">/linear_path</span></code> topic to receive the desired
+path. It then publishes the control commands to the <code class="docutils literal notranslate"><span class="pre">/cars/{car_name}/command</span></code>
+topic.</p>
+<section id="subscribed-topics">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics:</a><a class="headerlink" href="#subscribed-topics" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/{car_name}/odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>):
+The car’s odometry information containing its position, orientation, and velocities.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">linear_path</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/Path.html#http://"><span class="xref myst">rktl_msgs/Path</span></a>):
+The desired path that the car should follow.</p></li>
+</ul>
+</section>
+<section id="published-topics">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics:</a><a class="headerlink" href="#published-topics" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/{car_name}/command</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/ControlCommand.html#http://"><span class="xref myst">rktl_msgs/ControlCommand</span></a>):
+The control commands to be sent to the car to follow the desired path</p></li>
+</ul>
+</section>
+<section id="parameters">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters:</a><a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~frame_id</span></code> (str, default: ‘map’): The frame ID for the path and pose messages.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~max_speed</span></code> (float, default: 0.1): The maximum speed at which the car should
+travel along the path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lookahead_dist</span></code> (float, default: 0.15): The distance ahead of the car to
+look for the next point on the path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lookahead_gain</span></code> (float, default: 0.035): The coefficient used to adjust the
+lookahead distance based on the car’s current speed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lookahead_pnts</span></code> (int, default: -1): The number of points to search along the
+path for the next valid intersection. If set to -1, the entire path is searched.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~car_name</span></code> (str): The name of the car to which this node belongs.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="path-planner">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">path_planner</a><a class="headerlink" href="#path-planner" title="Permalink to this heading"></a></h2>
+<p>This node uses <code class="docutils literal notranslate"><span class="pre">bezier_path_server</span></code> to generate bezier paths between a car and
+the ball in order to hit the ball into a goal. Options exist for generating a
+‘simple’ or ‘complex’ path to the ball. A ‘simple’ path is a direct path between
+the current position of the car and the ball’s position, while a ‘complex’ path
+takes into account the orientation of the car and decides whether to take a
+direct path or to generate a path in reverse.</p>
+<section id="id1">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics:</a><a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/{car_name}/odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>):
+The car’s odometry information containing its position, orientation, and velocities.</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics:</a><a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">linear_path</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/Path.html#http://"><span class="xref myst">rktl_msgs/Path</span></a>):
+The desired path that the car should follow, split into linear segments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bezier_path</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/BezierPath.html#http://"><span class="xref myst">rktl_msgs/BezierPath</span></a>):
+The desired path that the car should follow, split into bezier segments</p></li>
+</ul>
+</section>
+<section id="id3">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Services:</a><a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">reset_planner</span></code> (<a class="reference internal" href="#/std_srvs/html/msg/Empty.html#http://"><span class="xref myst">std_srvs/Empty</span></a>):
+An empty service that is used to trigger the generation/regeneration of the
+path based on the odemetry of the car and ball. The new path is published on
+the topics above.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters:</a><a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">~frame_id</span></code> (str, default: ‘map’): The frame ID for the path and pose messages.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~max_speed</span></code> (float, default: 0.1): The maximum speed at which the car should
+travel along the path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lookahead_dist</span></code> (float, default: 0.15): The distance ahead of the car to
+look for the next point on the path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lookahead_gain</span></code> (float, default: 0.035): The coefficient used to adjust the
+lookahead distance based on the car’s current speed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~lookahead_pnts</span></code> (int, default: -1): The number of points to search along the
+path for the next valid intersection. If set to -1, the entire path is searched.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~car_name</span></code> (str): The name of the car to which this node belongs.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="patrol-planner">
+<h2><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">patrol_planner</a><a class="headerlink" href="#patrol-planner" title="Permalink to this heading"></a></h2>
+<p>This node implements a “patrol”-based algorithm to control the car. The car
+“patrols” around the field in a circle and makes a beeline towards the ball if
+it seems like it would result in a goal. Logic is in place for both offensive
+and defensive modes. A Proportional Derivative (PD) controller is used to
+determine how much to turn.</p>
+<section id="id5">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Subscribed Topics:</a><a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>):
+The car’s odometry information, containing its position, orientation, and velocities.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/ball/odom</span></code> (<a class="reference internal" href="#/nav_msgs/html/msg/Odometry.html#http://"><span class="xref myst">nav_msgs/Odometry</span></a>):
+The ball’s odometry information, containing its position, orientation, and velocities.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Published Topics:</a><a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">command</span></code> (<a class="reference internal" href="#/rktl_msgs/html/msg/ControlCommand.html#http://"><span class="xref myst">rktl_msgs/ControlCommand</span></a>):
+The control commands to be sent to the car to perform the patrol algorithm</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3><a class="toc-backref" href="#ros-nodes-in-the-package" role="doc-backlink">Parameters:</a><a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">/field/width</span></code> (float): Physical constant, width of the field</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/field/length</span></code> (float): Physical constant, length of the field</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/steering/max_throw</span></code> (float): Physical constant, maximum steering throw</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">/cars/length</span></code> (float): Physical constant, car length</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~speed</span></code> (float, default: 1.0): Maximum speed of the car</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~curvature_gain/kp</span></code> (float, default: 1.0): Parameter for PD Controller</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~curvature_gain/kd</span></code> (float, default: 0.0): Parameter for PD Controller</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~curvature_gain/falloff</span></code> (float, default: 1e-9): Parameter for PD Controller</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~patrol_wall_dist</span></code> (float, default: 0.5)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~wall_avoidance/reverse_time</span></code> (float, default: 0.25)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~wall_avoidance/distance_margin</span></code> (float, default: 0.5)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~wall_avoidance/heading_margin</span></code> (float, default: π/4)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~attempt_timeout</span></code> (float, default: 5.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~defensive_line</span></code> (float: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~reverse_line</span></code> (float: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~scoring/heading_margin</span></code> (float, default: π/8)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~scoring/car_lookahead_dist</span></code> (float, default: 1.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~scoring/ball_lookahead_time</span></code> (float, default: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~scoring/goal_depth_target</span></code> (float, default: 0.0)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">~defense/reverse_time_gain</span></code> (float, default: 0.5)</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../launch/README.html" class="btn btn-neutral float-left" title="Launch Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../autoapi/rktl_planner/index.html" class="btn btn-neutral float-right" title="rktl_planner" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

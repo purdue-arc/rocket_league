@@ -1,0 +1,33 @@
+actions: []
+authors: Isaac Saito
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_moveit/issues
+depends:
+- rqt_topic
+- python_qt_binding
+- rqt_gui
+- rqt_py_common
+- rospy
+- rosnode
+- sensor_msgs
+- python-setuptools
+- python3-setuptools
+- rostopic
+- catkin
+- rqt_gui_py
+description: "An rqt-based tool that assists monitoring tasks\n   for <a href=\"http://ros.org/wiki/moveit\"\
+  >MoveIt!</a> motion planner\n   developers and users. Currently the following items\
+  \ are monitored if they\n   are either running, existing or published:\n   <ul>\n\
+  \   <li>Node: /move_group</li>\n   <li>Parameter: [/robot_description, /robot_description_semantic]</li>\n\
+  \   <li>Topic: Following types are monitored. Published &quot;names&quot; are ignored.<br/>\n\
+  \       [sensor_msgs/PointCloud, sensor_msgs/PointCloud2,\n        sensor_msgs/Image,\
+  \ sensor_msgs/CameraInfo]</li>\n   </ul>\n   Since this package is not made by the\
+  \ MoveIt! development team (although with\n   assistance from the them), please\
+  \ post issue reports to the designated\n   tracker (not MoveIt!'s main tracker)."
+license: BSD
+maintainers: Isaac I.Y. Saito <iisaito@kinugarage.com>, Arne Hitzmann <arne.hitzmann@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_moveit
+srvs: []
+url: http://wiki.ros.org/rqt_moveit

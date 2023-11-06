@@ -1,0 +1,16 @@
+actions: []
+authors: Eitan Marder-Eppstein
+brief: ''
+bugtracker: https://github.com/ros/common_tutorials/issues
+depends:
+- roscpp
+- catkin
+- pluginlib
+description: The pluginlib_tutorials package
+license: BSD
+maintainers: Daniel Stonier <d.stonier@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/common_tutorials/
+srvs: []
+url: http://www.ros.org/wiki/pluginlib/Tutorials

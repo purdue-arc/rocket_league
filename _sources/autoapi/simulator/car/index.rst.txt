@@ -1,0 +1,85 @@
+:py:mod:`simulator.car`
+=======================
+
+.. py:module:: simulator.car
+
+.. autoapi-nested-parse::
+
+   Contains the Car class.
+   License:
+     BSD 3-Clause License
+     Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+     All rights reserved.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   simulator.car.Car
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   simulator.car.JOINT_IDS
+   simulator.car.BASE_QUATERNION
+
+
+.. py:data:: JOINT_IDS
+   :value: (1, 0, 2)
+
+   
+
+.. py:data:: BASE_QUATERNION
+   :value: [0.0, 0.0, 0.0]
+
+   
+
+.. py:class:: Car(car_id, pos, orient, car_properties)
+
+   Bases: :py:obj:`object`
+
+   .. py:method:: set_properties(car_properties)
+
+
+   .. py:method:: setCmd(cmd)
+
+
+   .. py:method:: step(dt)
+
+
+   .. py:method:: get_pose(noise=None)
+
+      Randomizes and sets a new position for the car.
+      @param noise: The sensor noise and if it is present (None=no noise).
+      @return: The position and orientation of the car.
+
+
+   .. py:method:: get_velocity()
+
+      Returns the linear and angular velocity of the car.
+
+
+   .. py:method:: reset(pos, orient)
+
+      Resets the car state with the new pose and orient.
+
+
+   .. py:method:: check_overlap(pos)
+
+      Returns whether the position will overlap with the current car.
+      @param pos: The position of the other object.
+      @return: Boolean if the positions overlap (true = overlap).
+
+
+

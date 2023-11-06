@@ -1,0 +1,42 @@
+actions: []
+authors: Tim Field, Jeremy Leibs, James Bowman, Dirk Thomas <dthomas@osrfoundation.org>,
+  Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros_comm/issues
+depends:
+- libboost-filesystem-dev
+- xmlrpcpp
+- genpy
+- libboost-regex-dev
+- genmsg
+- python3-gnupg
+- roslib
+- roscpp
+- std_srvs
+- rosconsole
+- cpp_common
+- topic_tools
+- python-rospkg
+- rosbag_storage
+- roscpp_serialization
+- python3-pil
+- libboost-program-options-dev
+- rospy
+- python-pycryptodome
+- python3-rospkg
+- python3-pycryptodome
+- libboost-date-time-dev
+- python-gnupg
+- python-imaging
+- libboost-thread-dev
+- catkin
+description: "This is a set of tools for recording from and playing back to ROS\n\
+  \    topics.  It is intended to be high performance and avoids\n    deserialization\
+  \ and reserialization of the messages."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros_comm
+srvs: []
+url: http://wiki.ros.org/rosbag

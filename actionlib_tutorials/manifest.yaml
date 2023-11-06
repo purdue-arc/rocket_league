@@ -1,0 +1,36 @@
+actions:
+- Fibonacci
+- Averaging
+authors: Melonee Wise
+brief: ''
+bugtracker: https://github.com/ros/common_tutorials/issues
+depends:
+- roscpp
+- message_runtime
+- std_msgs
+- actionlib
+- actionlib_msgs
+- message_generation
+- catkin
+description: The actionlib_tutorials package
+license: BSD
+maintainers: Daniel Stonier <d.stonier@gmail.com>
+msgs:
+- AveragingResult
+- AveragingActionGoal
+- AveragingActionResult
+- FibonacciResult
+- AveragingAction
+- AveragingGoal
+- FibonacciAction
+- FibonacciFeedback
+- FibonacciActionResult
+- FibonacciActionGoal
+- AveragingFeedback
+- FibonacciActionFeedback
+- FibonacciGoal
+- AveragingActionFeedback
+package_type: package
+repo_url: https://github.com/ros/common_tutorials
+srvs: []
+url: http://www.ros.org/wiki/actionlib/Tutorials

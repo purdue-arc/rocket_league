@@ -1,0 +1,24 @@
+actions: []
+authors: "Denis \u0160togl <denis.stogl@mailbox.org>"
+brief: ''
+bugtracker: https://github.com/ros/geometry_tutorials/issues
+depends:
+- geometry_msgs
+- turtlesim
+- tf2_geometry_msgs
+- catkin
+- tf2_ros
+- tf2
+- roscpp
+- std_msgs
+- rospy
+description: turtle_tf2 demonstrates how to write a tf2 broadcaster and listener with
+  the turtlesim. The tutle_tf2_listener commands turtle2 to follow turtle1 around
+  as you drive turtle1 using the keyboard.
+license: BSD
+maintainers: "Denis \u0160togl <denis.stogl@mailbox.org>"
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/geometry_tutorials
+srvs: []
+url: ''

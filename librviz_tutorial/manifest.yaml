@@ -1,0 +1,21 @@
+actions: []
+authors: Dave Hershberger
+brief: ''
+bugtracker: ''
+depends:
+- roscpp
+- libqt5-widgets
+- rviz
+- qtbase5-dev
+- libqt5-core
+- catkin
+- libqt5-gui
+description: Tutorial showing how to compile your own C++ program with RViz displays
+  and features.
+license: BSD
+maintainers: William Woodall <william@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://ros.org/wiki/librviz_tutorial

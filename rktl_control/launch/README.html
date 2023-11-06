@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launch Files &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ROS Nodes" href="../nodes/README.html" />
+    <link rel="prev" title="Microcontroller Firmware" href="../firmware/README.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../rktl_control.html">rktl_control</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../firmware/README.html">Microcontroller Firmware</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Launch Files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#ball-launch">ball.launch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#car-launch">car.launch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hardware-interface-launch">hardware_interface.launch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#keyboard-control-launch">keyboard_control.launch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#xbox-control-launch">xbox_control.launch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../nodes/README.html">ROS Nodes</a></li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_control/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../rktl_control.html">rktl_control</a></li>
+      <li class="breadcrumb-item active">Launch Files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rktl_control/launch/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="launch-files">
+<h1>Launch Files<a class="headerlink" href="#launch-files" title="Permalink to this heading"></a></h1>
+<p>These are <a class="reference external" href="https://wiki.ros.org/roslaunch/XML">.launch files</a> that can be run
+using <a class="reference external" href="https://wiki.ros.org/roslaunch">roslaunch</a>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>roslaunch<span class="w"> </span>rktl_control<span class="w"> </span>&lt;launch<span class="w"> </span>file&gt;
+</pre></div>
+</div>
+<nav class="contents local" id="launch-files-in-the-package">
+<p class="topic-title">Launch Files in the package</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#ball-launch" id="id6">ball.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#nodes" id="id7">Nodes</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#car-launch" id="id8">car.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#launch-arguments" id="id9">Launch Arguments</a></p></li>
+<li><p><a class="reference internal" href="#id1" id="id10">Nodes</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#hardware-interface-launch" id="id11">hardware_interface.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id2" id="id12">Nodes</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#keyboard-control-launch" id="id13">keyboard_control.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id3" id="id14">Nodes</a></p></li>
+<li><p><a class="reference internal" href="#parameters" id="id15">Parameters</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#xbox-control-launch" id="id16">xbox_control.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id4" id="id17">Nodes</a></p></li>
+<li><p><a class="reference internal" href="#id5" id="id18">Parameters</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="ball-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">ball.launch</a><a class="headerlink" href="#ball-launch" title="Permalink to this heading"></a></h2>
+<p>This launches a <a class="reference internal" href="../nodes/README.html#mean-odom-filter"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">mean_odom_filter</span></code></span></a> node
+to start the ball tracking with parameters supplied by
+<code class="docutils literal notranslate"><span class="pre">rktl_control/config/mean_odom_filter.yaml</span></code>.</p>
+<section id="nodes">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#nodes" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ball/mean_odom_filter</span></code>:
+<a class="reference internal" href="../nodes/README.html#mean-odom-filter"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">mean_odom_filter</span></code></span></a> node from the
+<a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. Parameters supplied by
+<code class="docutils literal notranslate"><span class="pre">rktl_control/config/mean_odom_filter.yaml</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="car-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">car.launch</a><a class="headerlink" href="#car-launch" title="Permalink to this heading"></a></h2>
+<p>This launches the filter (either a
+<a class="reference internal" href="../nodes/README.html#particle-odom-filter"><span class="std std-ref">particle filter</span></a> or a
+<a class="reference internal" href="../nodes/README.html#mean-odom-filter"><span class="std std-ref">rolling average</span></a>) to track the car, as
+well as the <a class="reference internal" href="../nodes/README.html#controller"><span class="std std-ref">controller</span></a> needed to control it.
+The type of filter can be changed by the <code class="docutils literal notranslate"><span class="pre">use_particle_filter</span></code> argument.
+Parameters are provided by <code class="docutils literal notranslate"><span class="pre">rktl_control/config/particle_odom_filter.yaml</span></code> or
+<code class="docutils literal notranslate"><span class="pre">rktl_control/config/mean_odom_filter.yaml</span></code> (depending on the filter chosen) and
+<code class="docutils literal notranslate"><span class="pre">rktl_control/config/controller.yaml</span></code>.</p>
+<section id="launch-arguments">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Launch Arguments</a><a class="headerlink" href="#launch-arguments" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">car_name</span></code> (default: <code class="docutils literal notranslate"><span class="pre">car0</span></code>): Name of the car to launch the agent for.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_particle_filter</span></code> (default: true): If true, a
+<a class="reference internal" href="../nodes/README.html#particle-odom-filter"><span class="std std-ref">particle filter</span></a> is used.
+Otherwise, a <a class="reference internal" href="../nodes/README.html#mean-odom-filter"><span class="std std-ref">rolling average</span></a> is used.</p></li>
+</ul>
+</section>
+<section id="id1">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mean_odom_filter</span></code>:
+<a class="reference internal" href="../nodes/README.html#mean-odom-filter"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">mean_odom_filter</span></code></span></a> node from the
+<a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. Only run if <code class="docutils literal notranslate"><span class="pre">use_particle_filter</span></code> is
+set to false. Parameters supplied by <code class="docutils literal notranslate"><span class="pre">rktl_control/config/mean_odom_filter.yaml</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">particle_odom_filter</span></code>:
+<a class="reference internal" href="../nodes/README.html#particle-odom-filter"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">particle_odom_filter</span></code></span></a> node from
+the <a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. Only run if <code class="docutils literal notranslate"><span class="pre">use_particle_filter</span></code>
+is set to true (the default). Parameters supplied by
+<code class="docutils literal notranslate"><span class="pre">rktl_control/config/particle_odom_filter.yaml</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">controller</span></code>:  <a class="reference internal" href="../nodes/README.html#controller"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">controller</span></code></span></a> node from the
+<a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. Parameters supplied by
+<code class="docutils literal notranslate"><span class="pre">rktl_control/config/controller.yaml</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="hardware-interface-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">hardware_interface.launch</a><a class="headerlink" href="#hardware-interface-launch" title="Permalink to this heading"></a></h2>
+<p>This takes a <a class="reference internal" href="#/rktl_msgs/html/msg/ControlEffort.html#http://"><span class="xref myst">rktl_msgs/ControlEffort</span></a>
+message and sends it to a physical car. The efforts in the message range from
+-1.0 to +1.0 corresponding to full reverse for full forward motor speed, or
+full left or full right steering angle respectively. Technically, you can also
+feed in values with an absolute value greater than 1.0. This is useful for
+having higher actuator saturation limits in the controller, or perhaps
+implementing a “boost” for human controlled cars.</p>
+<p>Physically, the interface code runs on a
+<a class="reference external" href="https://www.pjrc.com/store/teensy32.html">Teensy 3.2</a> microcontroller. The
+microcontroller is connected to a computer via USB, and code running on the
+computer allows it to pull control effort messages from the ROS network. The
+microcontroller is also connected to <a class="reference external" href="https://www.frsky-rc.com/xjt/">FrSky XJT</a>
+radio transmitter, which allows it to send these controls to the car.</p>
+<p>Note that in order for this node to work, it need to be run on a Linux computer
+with that the <a class="reference internal" href="#../../docker/README.md"><span class="xref myst">docker container</span></a> needs to be run with
+the <code class="docutils literal notranslate"><span class="pre">--privileged</span></code> option.</p>
+<section id="id2">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">hardware_interface</span></code>: <code class="docutils literal notranslate"><span class="pre">serial_node.py</span></code> node from the
+<a class="reference external" href="https://wiki.ros.org/rosserial_arduino"><code class="docutils literal notranslate"><span class="pre">rosserial_arduino</span></code></a> package. This
+node allows the firmware on a connected Teensy to interface with the rest
+of the ROS network. Parameters, including the serial port used by the
+Teensy, are supplied by <code class="docutils literal notranslate"><span class="pre">rktl_control/config/hardware_interface.yaml</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="keyboard-control-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">keyboard_control.launch</a><a class="headerlink" href="#keyboard-control-launch" title="Permalink to this heading"></a></h2>
+<p>This launches a <a class="reference internal" href="../nodes/README.html#keyboard-interface"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">keyboard_interface</span></code></span></a>
+node to allow for controlling the car using the keyboard.</p>
+<section id="id3">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cars/{car_name}/keyboard_interface</span></code>:
+<a class="reference internal" href="../nodes/README.html#keyboard-interface"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">keyboard_interface</span></code></span></a> node from the
+<a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. The namespace of this node is
+affected by the <code class="docutils literal notranslate"><span class="pre">car_name</span></code> parameter to ensure that the node interacts with
+the correct topics.</p></li>
+</ul>
+</section>
+<section id="parameters">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">car_name</span></code> (default: <code class="docutils literal notranslate"><span class="pre">car0</span></code>): Name of the car to control with the keyboard
+interface.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="xbox-control-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">xbox_control.launch</a><a class="headerlink" href="#xbox-control-launch" title="Permalink to this heading"></a></h2>
+<p>This launches a <a class="reference internal" href="../nodes/README.html#xbox-interface"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">xbox_interface</span></code></span></a>
+node and all related nodes to allow for controlling the car using an xbox
+controller.</p>
+<section id="id4">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cars/{car_name}/joy_node</span></code>:
+<a class="reference external" href="https://wiki.ros.org/joy#joy_node"><code class="docutils literal notranslate"><span class="pre">joy_node</span></code></a> node from the
+<a class="reference external" href="https://wiki.ros.org/joy"><code class="docutils literal notranslate"><span class="pre">joy</span></code></a> package. This node publishes the current
+state of the joystick to be used by the
+<a class="reference internal" href="../nodes/README.html#xbox-interface"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">xbox_interface</span></code></span></a> node. The namespace
+of this node is affected by the <code class="docutils literal notranslate"><span class="pre">car_name</span></code> parameter to ensure that the
+node interacts with the correct topics.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cars/{car_name}/xbox_interface</span></code>:
+<a class="reference internal" href="../nodes/README.html#xbox-interface"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">xbox_interface</span></code></span></a> node from the
+<a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. The namespace of this node is
+affected by the <code class="docutils literal notranslate"><span class="pre">car_name</span></code> parameter to ensure that the node interacts with
+the correct topics.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cars/{car_name}/controller_delay</span></code>:
+<a class="reference internal" href="../nodes/README.html#topic-delay"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">topic_delay</span></code></span></a> node from the
+<a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. This adds delay to the output of
+the <code class="docutils literal notranslate"><span class="pre">joy_node</span></code> topic The namespace of this node is affected by the
+<code class="docutils literal notranslate"><span class="pre">car_name</span></code> parameter to ensure that the node interacts with
+the correct topics.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cars/{car_name}/controller_delay_mux</span></code>:
+<a class="reference external" href="https://wiki.ros.org/topic_tools/mux"><code class="docutils literal notranslate"><span class="pre">mux</span></code></a> node from the
+<a class="reference external" href="https://wiki.ros.org/topic_tools"><code class="docutils literal notranslate"><span class="pre">topic_tools</span></code></a> package. This node
+subscribes to the raw joystick and delayed joystick topics and republishes
+it onto a combined topic. The namespace of this node is affected by the
+<code class="docutils literal notranslate"><span class="pre">car_name</span></code> parameter to ensure that the node interacts with the correct
+topics.</p></li>
+</ul>
+</section>
+<section id="id5">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">device</span></code> (default: <code class="docutils literal notranslate"><span class="pre">/dev/input/js0</span></code>): Device file of the joystick.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">car_name</span></code> (default: <code class="docutils literal notranslate"><span class="pre">car0</span></code>): Name of the car to control with the keyboard
+interface.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">delay</span></code> (default: <code class="docutils literal notranslate"><span class="pre">0.1</span></code>): Amount of simulated delay to add to the controller
+input</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../firmware/README.html" class="btn btn-neutral float-left" title="Microcontroller Firmware" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../nodes/README.html" class="btn btn-neutral float-right" title="ROS Nodes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+actions: []
+authors: Isaac Saito, Ze'ev Klapow
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_reconfigure/issues
+depends:
+- rqt_py_common
+- python-yaml
+- rqt_gui
+- python3-yaml
+- roslint
+- python-setuptools
+- rospy
+- dynamic_reconfigure
+- catkin
+- python3-setuptools
+- python_qt_binding
+- rostest
+- rqt_gui_py
+- rqt_console
+description: "This rqt plugin succeeds former dynamic_reconfigure's GUI\n    (reconfigure_gui),\
+  \ and provides the way to view and edit the parameters\n    that are accessible\
+  \ via dynamic_reconfigure.<br/>\n    <br/>\n    (12/27/2012) In the future, arbitrary\
+  \ parameters that are not associated\n    with any nodes (which are not handled\
+  \ by dynamic_reconfigure) might\n    become handled.\n    However, currently as\
+  \ the name indicates, this pkg solely is dependent\n    on dynamic_reconfigure that\
+  \ allows access to only those params latched\n    to nodes."
+license: BSD
+maintainers: Scott K Logan <logans@cottsay.net>, Michael Jeronimo <michael.jeronimo@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_reconfigure
+srvs: []
+url: http://wiki.ros.org/rqt_reconfigure

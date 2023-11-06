@@ -1,0 +1,22 @@
+actions: []
+authors: Wim Meeussen
+brief: ''
+bugtracker: https://github.com/ros-controls/ros_controllers/issues
+depends:
+- pluginlib
+- realtime_tools
+- roscpp
+- sensor_msgs
+- catkin
+- hardware_interface
+- rostest
+- controller_interface
+description: Controller to publish joint state
+license: BSD
+maintainers: "Bence Magyar <bence.magyar.robotics@gmail.com>, Mathias L\xFCdtke <mathias.luedtke@ipa.fraunhofer.de>,\
+  \ Enrique Fernandez <enrique.fernandez.perdomo@gmail.com>"
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-controls/ros_controllers
+srvs: []
+url: https://github.com/ros-controls/ros_controllers/wiki

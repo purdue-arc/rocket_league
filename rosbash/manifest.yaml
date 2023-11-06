@@ -1,0 +1,15 @@
+actions: []
+authors: Jeremy Leibs, Thibault Kruse, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- rospack
+- catkin
+description: Assorted shell commands for using ros with bash.
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/rosbash

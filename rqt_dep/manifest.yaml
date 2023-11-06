@@ -1,0 +1,24 @@
+actions: []
+authors: Aaron Blasdel, Dirk Thomas, Thibault Kruse
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_dep/issues
+depends:
+- rqt_gui_py
+- qt_dotgraph
+- rqt_graph
+- python_qt_binding
+- python3-mock
+- python-mock
+- python3-rospkg
+- python-rospkg
+- qt_gui_py_common
+- qt_gui
+- catkin
+description: rqt_dep provides a GUI plugin for visualizing the ROS dependency graph.
+license: BSD
+maintainers: Ivan Paunovic <ivanpauno@ekumenlabs.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_dep
+srvs: []
+url: http://wiki.ros.org/rqt_dep

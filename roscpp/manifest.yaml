@@ -1,0 +1,40 @@
+actions: []
+authors: Morgan Quigley, Josh Faust, Brian Gerkey, Troy Straszheim, Dirk Thomas <dthomas@osrfoundation.org>,
+  Jacob Perron <jacob@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- std_msgs
+- roscpp_serialization
+- message_generation
+- libboost-filesystem-dev
+- cpp_common
+- xmlrpcpp
+- libboost-chrono-dev
+- rosconsole
+- pkg-config
+- message_runtime
+- roscpp_traits
+- rosgraph_msgs
+- rostime
+- catkin
+- libboost-system-dev
+- roslang
+description: "roscpp is a C++ implementation of ROS. It provides\n    a <a href=\"\
+  http://wiki.ros.org/Client%20Libraries\">client\n    library</a> that enables C++\
+  \ programmers to quickly interface with\n    ROS <a href=\"http://ros.org/wiki/Topics\"\
+  >Topics</a>,\n    <a href=\"http://ros.org/wiki/Services\">Services</a>,\n    and\
+  \ <a href=\"http://ros.org/wiki/Parameter Server\">Parameters</a>.\n\n    roscpp\
+  \ is the most widely used ROS client library and is designed to\n    be the high-performance\
+  \ library for ROS."
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>, Shane Loretz <sloretz@openrobotics.org>
+msgs:
+- Logger
+package_type: package
+repo_url: ''
+srvs:
+- SetLoggerLevel
+- GetLoggers
+- Empty
+url: http://ros.org/wiki/roscpp

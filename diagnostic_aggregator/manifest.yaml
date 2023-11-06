@@ -1,0 +1,22 @@
+actions: []
+authors: Kevin Watts, Brice Rebsamen <brice.rebsamen@gmail.com>
+brief: ''
+bugtracker: ''
+depends:
+- pluginlib
+- bondcpp
+- rostest
+- bondpy
+- catkin
+- rospy
+- diagnostic_msgs
+- xmlrpcpp
+- roscpp
+description: diagnostic_aggregator
+license: BSD
+maintainers: Guglielmo Gemignani <guglielmo.gemignani@gmail.com>, Austin Hendrix <namniart@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/diagnostic_aggregator

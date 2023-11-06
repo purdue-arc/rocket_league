@@ -1,0 +1,28 @@
+actions:
+- LookupTransform
+authors: Eitan Marder-Eppstein
+brief: ''
+bugtracker: ''
+depends:
+- actionlib_msgs
+- catkin
+- message_generation
+- geometry_msgs
+description: tf2_msgs
+license: BSD
+maintainers: Tully Foote <tfoote@osrfoundation.org>
+msgs:
+- TF2Error
+- LookupTransformAction
+- TFMessage
+- LookupTransformActionGoal
+- LookupTransformActionFeedback
+- LookupTransformGoal
+- LookupTransformFeedback
+- LookupTransformActionResult
+- LookupTransformResult
+package_type: package
+repo_url: ''
+srvs:
+- FrameGraph
+url: http://www.ros.org/wiki/tf2_msgs

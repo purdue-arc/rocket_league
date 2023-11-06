@@ -1,0 +1,24 @@
+actions: []
+authors: Dirk Thomas, Dorian Scholz
+brief: ''
+bugtracker: https://github.com/ros-visualization/rqt_publisher/issues
+depends:
+- catkin
+- python-rospkg
+- rqt_gui
+- rosmsg
+- qt_gui_py_common
+- python_qt_binding
+- rqt_gui_py
+- rqt_py_common
+- python3-rospkg
+- roslib
+description: rqt_publisher provides a GUI plugin for publishing arbitrary messages
+  with fixed or computed field values.
+license: BSD
+maintainers: Michael Carroll <michael@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-visualization/rqt_publisher
+srvs: []
+url: http://wiki.ros.org/rqt_publisher

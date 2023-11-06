@@ -1,0 +1,26 @@
+actions: []
+authors: Ken Conley <kwc@willowgarage.com>, Josh Faust <jfaust@willowgarage.com>,
+  Morgan Quigley <mquigley@cs.stanford.edu>, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: https://github.com/ros/ros/issues
+depends:
+- libboost-filesystem-dev
+- python3-setuptools
+- catkin
+- rospack
+- rosmake
+- libboost-thread-dev
+- python-setuptools
+- ros_environment
+- python3-rospkg
+- python-rospkg
+description: "Base dependencies and support libraries for ROS.\n    roslib contains\
+  \ many of the common data structures and tools that are shared across ROS client\
+  \ library implementations."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros/ros
+srvs: []
+url: http://wiki.ros.org/roslib

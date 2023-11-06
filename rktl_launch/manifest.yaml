@@ -1,0 +1,22 @@
+actions: []
+authors: James Baxter <baxter26@purdue.edu>, Harrison McCarty <mccarth@purdue.edu>,
+  Arianna McNamara <mcnama20@purdue.edu>, Vincent Vu <vvvu@purdue.edu>
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- rosbridge_server
+- rktl_sim
+- rktl_control
+- rktl_game
+- rktl_planner
+- rqt_gui
+- rktl_perception
+description: Launch files for the ARC Rocket League project
+license: BSD 3 Clause
+maintainers: Autonomous Robotics Club of Purdue <autonomy@purdue.edu>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: https://www.purduearc.com

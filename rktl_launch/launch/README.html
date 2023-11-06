@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="../../_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="../../_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="../../_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="../../_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="../../_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launch Files &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="rktl_msgs" href="../../rktl_msgs.html" />
+    <link rel="prev" title="rktl_launch" href="../../rktl_launch.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="../../_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../packages.html">Packages</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../rktl_launch.html">rktl_launch</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Launch Files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#c3po-launch">c3po.launch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#r2d2-launch">r2d2.launch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rocket-league-launch">rocket_league.launch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rocket-league-sim-launch">rocket_league_sim.launch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference external" href="/rktl_launch/html/index-msg.html#http://">Msg/Srv Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../packages.html">Packages</a></li>
+          <li class="breadcrumb-item"><a href="../../rktl_launch.html">rktl_launch</a></li>
+      <li class="breadcrumb-item active">Launch Files</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/rktl_launch/launch/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="launch-files">
+<h1>Launch Files<a class="headerlink" href="#launch-files" title="Permalink to this heading"></a></h1>
+<p>These are <a class="reference external" href="https://wiki.ros.org/roslaunch/XML">.launch files</a> that can be run
+using <a class="reference external" href="https://wiki.ros.org/roslaunch">roslaunch</a>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>roslaunch<span class="w"> </span>rktl_launch<span class="w"> </span>&lt;launch<span class="w"> </span>file&gt;
+</pre></div>
+</div>
+<nav class="contents local" id="launch-files-in-the-package">
+<p class="topic-title">Launch Files in the package</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#c3po-launch" id="id9">c3po.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#launch-arguments" id="id10">Launch Arguments</a></p></li>
+<li><p><a class="reference internal" href="#nodes" id="id11">Nodes</a></p></li>
+<li><p><a class="reference internal" href="#included-launch-files" id="id12">Included Launch Files</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#r2d2-launch" id="id13">r2d2.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id1" id="id14">Nodes</a></p></li>
+<li><p><a class="reference internal" href="#id2" id="id15">Included Launch Files</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#rocket-league-launch" id="id16">rocket_league.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id3" id="id17">Launch Arguments</a></p></li>
+<li><p><a class="reference internal" href="#id4" id="id18">Nodes</a></p></li>
+<li><p><a class="reference internal" href="#id5" id="id19">Included Launch Files</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#rocket-league-sim-launch" id="id20">rocket_league_sim.launch</a></p>
+<ul>
+<li><p><a class="reference internal" href="#parameters" id="id21">Parameters</a></p></li>
+<li><p><a class="reference internal" href="#id6" id="id22">Launch Arguments</a></p></li>
+<li><p><a class="reference internal" href="#id7" id="id23">Nodes</a></p></li>
+<li><p><a class="reference internal" href="#id8" id="id24">Included Launch Files</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="c3po-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">c3po.launch</a><a class="headerlink" href="#c3po-launch" title="Permalink to this heading"></a></h2>
+<p>This launch file includes two instances of the <code class="docutils literal notranslate"><span class="pre">camera.launch</span></code> file from the
+<a class="reference internal" href="../../rktl_perception/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_perception</span></code></span></a> package with different
+values for the <code class="docutils literal notranslate"><span class="pre">camera_name</span></code> argument. This is the launch file that will be run
+on the computer named “c3po” on the Rocket League cart.</p>
+<section id="launch-arguments">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Launch Arguments</a><a class="headerlink" href="#launch-arguments" title="Permalink to this heading"></a></h3>
+<p>This launch file does not define any arguments of its own.</p>
+</section>
+<section id="nodes">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#nodes" title="Permalink to this heading"></a></h3>
+<p>This launch file does not define any nodes of its own.</p>
+</section>
+<section id="included-launch-files">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Included Launch Files</a><a class="headerlink" href="#included-launch-files" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_perception</span> <span class="pre">camera.launch</span></code> (Included twice, once with <code class="docutils literal notranslate"><span class="pre">camera_name</span></code> set
+to <code class="docutils literal notranslate"><span class="pre">cam0</span></code> and once with <code class="docutils literal notranslate"><span class="pre">camera_name</span></code> set to <code class="docutils literal notranslate"><span class="pre">cam1</span></code>)</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="r2d2-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">r2d2.launch</a><a class="headerlink" href="#r2d2-launch" title="Permalink to this heading"></a></h2>
+<p>This launch file includes two instances of the <code class="docutils literal notranslate"><span class="pre">camera.launch</span></code> file from the
+<a class="reference internal" href="../../rktl_perception/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_perception</span></code></span></a> package with different
+values for the <code class="docutils literal notranslate"><span class="pre">camera_name</span></code> argument, launches a node from the
+<a class="reference internal" href="../../rktl_control/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package, and includes the
+<code class="docutils literal notranslate"><span class="pre">rocket_league.launch</span></code> file from the <a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_launch</span></code></span></a> package.
+This is the launch file that will be run on the computer named “r2d2” on the
+Rocket League cart.</p>
+<section id="id1">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_control</span> <span class="pre">pose_sync_node</span></code> (parameters are loaded from
+<code class="docutils literal notranslate"><span class="pre">rktl_control/config/pose_synchronizer.yaml</span></code>)</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Included Launch Files</a><a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_perception</span> <span class="pre">camera.launch</span></code> (Included twice, once with <code class="docutils literal notranslate"><span class="pre">camera_name</span></code> set
+to <code class="docutils literal notranslate"><span class="pre">cam2</span></code> and once with <code class="docutils literal notranslate"><span class="pre">camera_name</span></code> set to <code class="docutils literal notranslate"><span class="pre">cam3</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_launch</span> <span class="pre">rocket_league.launch</span></code></p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="rocket-league-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">rocket_league.launch</a><a class="headerlink" href="#rocket-league-launch" title="Permalink to this heading"></a></h2>
+<p>This roslaunch file launches everything that is needed to run the system using
+actual hardware. It can be run with different types of agents and includes
+launch files for the game manager, control GUI, ball, cars, and agents based on
+the selected agent type.</p>
+<section id="id3">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Launch Arguments</a><a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">render</span></code> (default: <code class="docutils literal notranslate"><span class="pre">true</span></code>): A boolean argument that determines whether to
+enable the visualizer or not.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">agent_type</span></code> (default: <code class="docutils literal notranslate"><span class="pre">patrol</span></code>): A string argument that specifies the type of
+agent to use. Valid options are <code class="docutils literal notranslate"><span class="pre">planner</span></code>, <code class="docutils literal notranslate"><span class="pre">autonomy</span></code>, or <code class="docutils literal notranslate"><span class="pre">patrol</span></code>.</p></li>
+<li><p>autonomy_weights (default: <code class="docutils literal notranslate"><span class="pre">model</span></code>): A string argument that specifies the name
+of the autonomy weights file to use. This argument is only used if
+<code class="docutils literal notranslate"><span class="pre">agent_type</span></code> is set to <code class="docutils literal notranslate"><span class="pre">'autonomy'</span></code>.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rqt_gui</span></code>: <code class="docutils literal notranslate"><span class="pre">rqt_gui</span></code> node from the <code class="docutils literal notranslate"><span class="pre">rqt_gui</span></code> package</p></li>
+</ul>
+</section>
+<section id="id5">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Included Launch Files</a><a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_sim</span> <span class="pre">visualizer.launch</span></code> (Only included if <code class="docutils literal notranslate"><span class="pre">render</span></code> is set to <code class="docutils literal notranslate"><span class="pre">true</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_game</span> <span class="pre">game.launch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_control</span> <span class="pre">ball.launch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_control</span> <span class="pre">car.launch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_control</span> <span class="pre">hardware_interface.launch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_planner</span> <span class="pre">simple_agent.launch</span></code> (Only included if <code class="docutils literal notranslate"><span class="pre">agent_type</span></code> is set to
+<code class="docutils literal notranslate"><span class="pre">'planner'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_autonomy</span> <span class="pre">rocket_league_agent.launch</span></code>: (Only included if <code class="docutils literal notranslate"><span class="pre">agent_type</span></code> is
+set to <code class="docutils literal notranslate"><span class="pre">'autonomy'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_planner</span> <span class="pre">patrol_agent.launch</span></code>: (Only included if <code class="docutils literal notranslate"><span class="pre">agent_type</span></code> is set to
+<code class="docutils literal notranslate"><span class="pre">'patrol'</span></code>)</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="rocket-league-sim-launch">
+<h2><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">rocket_league_sim.launch</a><a class="headerlink" href="#rocket-league-sim-launch" title="Permalink to this heading"></a></h2>
+<p>This roslaunch file launches a simulation of the environment. It includes a
+visualizer, a simulator, simulated perception delays, and control/filtering
+stacks for the ball and cars. It also includes agents for controlling the cars,
+with options for a planner, an autonomy (ML) agent, or a patrol agent.</p>
+<section id="parameters">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Parameters</a><a class="headerlink" href="#parameters" title="Permalink to this heading"></a></h3>
+<p>This launch file loads parametes from the <code class="docutils literal notranslate"><span class="pre">config/global_params.yaml</span></code> file
+in the <a class="reference internal" href="../README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_launch</span></code></span></a> package.</p>
+</section>
+<section id="id6">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Launch Arguments</a><a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">render</span></code> (default: <code class="docutils literal notranslate"><span class="pre">true</span></code>) - whether to launch the visualizer or not.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sim_mode</span></code> (default: <code class="docutils literal notranslate"><span class="pre">realistic</span></code>) - the simulation mode to use, either
+realistic or ideal.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">perception_delay</span></code> (default: <code class="docutils literal notranslate"><span class="pre">0.15</span></code>) - the delay time to use for perception
+in the simulation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">agent_type</span></code> (default: <code class="docutils literal notranslate"><span class="pre">patrol</span></code>) - the type of agent to use for controlling
+the car, either <code class="docutils literal notranslate"><span class="pre">planner</span></code>, <code class="docutils literal notranslate"><span class="pre">autonomy</span></code>, or <code class="docutils literal notranslate"><span class="pre">patrol</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">autonomy_weights</span></code> (default: <code class="docutils literal notranslate"><span class="pre">model</span></code>) - the weights to use for the autonomy
+agent if agent_type is set to autonomy.</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Nodes</a><a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pose_sync_node</span></code>: A <code class="docutils literal notranslate"><span class="pre">pose_sync_node</span></code> node from the
+<a class="reference internal" href="../../rktl_control/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ball/pose_delay</span></code>: A <code class="docutils literal notranslate"><span class="pre">topic_delay</span></code> node from the
+<a class="reference internal" href="../../rktl_control/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. Uses the
+<code class="docutils literal notranslate"><span class="pre">perception_delay</span></code> argument. Only run if <code class="docutils literal notranslate"><span class="pre">sim_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">'realistic'</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cars/car0/pose_delay</span></code>: A <code class="docutils literal notranslate"><span class="pre">topic_delay</span></code> node from the
+<a class="reference internal" href="../../rktl_control/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">rktl_control</span></code></span></a> package. Uses the
+<code class="docutils literal notranslate"><span class="pre">perception_delay</span></code> argument. Only run if <code class="docutils literal notranslate"><span class="pre">sim_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">'realistic'</span></code>.</p></li>
+</ul>
+</section>
+<section id="id8">
+<h3><a class="toc-backref" href="#launch-files-in-the-package" role="doc-backlink">Included Launch Files</a><a class="headerlink" href="#id8" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_sim</span> <span class="pre">visualizer.launch</span></code> (Only included if <code class="docutils literal notranslate"><span class="pre">render</span></code> is set to <code class="docutils literal notranslate"><span class="pre">true</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_sim</span> <span class="pre">simulator.launch</span></code> (Passes the <code class="docutils literal notranslate"><span class="pre">sim_mode</span></code> argument)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_control</span> <span class="pre">ball.launch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_control</span> <span class="pre">car.launch</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_planner</span> <span class="pre">simple_agent.launch</span></code> (Only included if <code class="docutils literal notranslate"><span class="pre">agent_type</span></code> is set to
+<code class="docutils literal notranslate"><span class="pre">'planner'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_autonomy</span> <span class="pre">rocket_league_agent.launch</span></code>: (Only included if <code class="docutils literal notranslate"><span class="pre">agent_type</span></code> is
+set to <code class="docutils literal notranslate"><span class="pre">'autonomy'</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rktl_planner</span> <span class="pre">patrol_agent.launch</span></code>: (Only included if <code class="docutils literal notranslate"><span class="pre">agent_type</span></code> is set to
+<code class="docutils literal notranslate"><span class="pre">'patrol'</span></code>)</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../rktl_launch.html" class="btn btn-neutral float-left" title="rktl_launch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../rktl_msgs.html" class="btn btn-neutral float-right" title="rktl_msgs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

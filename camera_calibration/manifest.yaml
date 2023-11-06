@@ -1,0 +1,22 @@
+actions: []
+authors: James Bowman, Patrick Mihelich
+brief: ''
+bugtracker: ''
+depends:
+- std_srvs
+- message_filters
+- rospy
+- sensor_msgs
+- rostest
+- cv_bridge
+- image_geometry
+- catkin
+description: "camera_calibration allows easy calibration of monocular or stereo\n\
+  \     cameras using a checkerboard calibration target."
+license: BSD
+maintainers: Vincent Rabaud <vincent.rabaud@gmail.com>, Autonomoustuff team <software@autonomoustuff.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/camera_calibration

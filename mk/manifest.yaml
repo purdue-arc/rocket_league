@@ -1,0 +1,19 @@
+actions: []
+authors: Brian Gerkey, Morgan Quigley, Dirk Thomas <dthomas@openrobotics.org>
+brief: ''
+bugtracker: ''
+depends:
+- rosbuild
+- rospack
+- catkin
+description: "A collection of .mk include files for building ROS architectural elements.\n\
+  \    Most package authors should use cmake .mk, which calls CMake for the build\
+  \ of the package.\n    The other files in this package are intended for use in exotic\
+  \ situations that mostly arise when importing 3rdparty code."
+license: BSD
+maintainers: Michel Hidalgo <michel@ekumenlabs.com>, Jacob Perron <jacob@openrobotics.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/ROS

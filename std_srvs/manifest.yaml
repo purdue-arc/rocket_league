@@ -1,0 +1,19 @@
+actions: []
+authors: Morgan Quigley
+brief: ''
+bugtracker: ''
+depends:
+- catkin
+- message_generation
+- message_runtime
+description: Common service definitions.
+license: BSD
+maintainers: Dirk Thomas <dthomas@osrfoundation.org>
+msgs: []
+package_type: package
+repo_url: ''
+srvs:
+- SetBool
+- Trigger
+- Empty
+url: http://ros.org/wiki/std_srvs

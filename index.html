@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <link href="_static/favicons/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="_static/favicons/favicon-16x16.png" sizes="16x16" rel="icon" type="image/png">
+    <link href="_static/favicons/favicon-32x32.png" sizes="32x32" rel="icon" type="image/png">
+    <link rel="apple-touch-icon" href="_static/favicons/apple-touch-icon.png" sizes="180x180" type="image/png">
+    <link rel="android-chrome" href="_static/favicons/android-chrome-192x192.png" sizes="192x192" type="image/png">
+    <link rel="android-chrome" href="_static/favicons/android-chrome-512-512.png" type="image/png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rocket League &mdash; Purdue ARC—Rocket League IRL  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Packages" href="packages.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Purdue ARC—Rocket League IRL
+              <img src="_static/arc_logo.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">Packages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Purdue ARC—Rocket League IRL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Rocket League</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="rocket-league">
+<h1>Rocket League<a class="headerlink" href="#rocket-league" title="Permalink to this heading"></a></h1>
+<p>This repo contains all the files necessary for the <a class="reference external" href="https://www.purduearc.com/wiki/active-projects/rocket-league/">Rocket League project</a>.
+This project aims to recreate the video game of the same name via a team of
+autonomously controlled RC cars competing against human controlled ones.</p>
+<p>The repo is broken down into several ROS packages.</p>
+<section id="rktl-autonomy">
+<h2>rktl_autonomy<a class="headerlink" href="#rktl-autonomy" title="Permalink to this heading"></a></h2>
+<p>This package contains all code for the “High Level Planner” section. It provides
+an interface between ROS and OpenAI Gym, and is therefore capable of running a
+deep reinforcement learning agent capable of controlling the car.</p>
+<p>For further information see its specific <a class="reference internal" href="rktl_autonomy/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">README.md</span></code></span></a> file.</p>
+</section>
+<section id="rktl-planner">
+<h2>rktl_planner<a class="headerlink" href="#rktl-planner" title="Permalink to this heading"></a></h2>
+<p>This package contains the “Mid Level Software” group. It provides an alternative
+method to the <code class="docutils literal notranslate"><span class="pre">rktl_autonomy</span></code> stack to control the car.</p>
+<p>For further information see its specific <a class="reference internal" href="rktl_planner/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">README.md</span></code></span></a> file.</p>
+</section>
+<section id="rktl-control">
+<h2>rktl_control<a class="headerlink" href="#rktl-control" title="Permalink to this heading"></a></h2>
+<p>This package performs several jobs that allow it to move physical cars according
+to commands from either the planning or autonomy code.</p>
+<p>Specifically it has three main components:</p>
+<ul class="simple">
+<li><p>It filters the raw perception data using either a moving average filter or a
+particle filter, while also producing estimated odometry (which includes velocity
+in addition to the position given by the raw perception data)</p></li>
+<li><p>It has a closed loop controller which reduces the error between the desired and
+estimated motion of the car by producing control signals.</p></li>
+<li><p>It has a hardware interface, which sends those control signals to the physical cars.</p></li>
+</ul>
+<p>It also contains several MATLAB scripts that are useful in tuning and validating
+the Python code used for this project.</p>
+<p>For further information see its specific <a class="reference internal" href="rktl_control/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">README.md</span></code></span></a> file.</p>
+</section>
+<section id="rktl-perception">
+<h2>rktl_perception<a class="headerlink" href="#rktl-perception" title="Permalink to this heading"></a></h2>
+<p>This package contains the “Perception” code. This interfaces with cameras, processes
+the data, and outputs position estimates for all physical elements on the field.</p>
+<p>For further information see its specific <a class="reference internal" href="rktl_perception/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">README.md</span></code></span></a> file.</p>
+</section>
+<section id="rktl-sim">
+<h2>rktl_sim<a class="headerlink" href="#rktl-sim" title="Permalink to this heading"></a></h2>
+<p>This contains a simulator, which is used to train the autonomy code.</p>
+<p>For further information see its specific <a class="reference internal" href="rktl_sim/README.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">README.md</span></code></span></a> file.</p>
+</section>
+<section id="rktl-msgs">
+<h2>rktl_msgs<a class="headerlink" href="#rktl-msgs" title="Permalink to this heading"></a></h2>
+<p>This contains custom ROS messages for the project.</p>
+</section>
+<section id="rktl-launch">
+<h2>rktl_launch<a class="headerlink" href="#rktl-launch" title="Permalink to this heading"></a></h2>
+<p>This contains several convenience launch files for running several packages at once.</p>
+</section>
+<section id="additional-folders-files">
+<h2>Additional Folders / Files<a class="headerlink" href="#additional-folders-files" title="Permalink to this heading"></a></h2>
+<section id="docker">
+<h3>docker<a class="headerlink" href="#docker" title="Permalink to this heading"></a></h3>
+<p>This contains scripts for building and running the Docker environment used for the project.
+For more information, see the below <strong>Building and Running the Project</strong> section.</p>
+</section>
+<section id="github">
+<h3>.github<a class="headerlink" href="#github" title="Permalink to this heading"></a></h3>
+<p>This contains GitHub actions used for continuous integration. Primarily, it automates:</p>
+<ul class="simple">
+<li><p>building the development Docker container</p></li>
+<li><p>running automated tests on PRs and pushes to main</p></li>
+</ul>
+</section>
+<section id="start-py">
+<h3>start.py<a class="headerlink" href="#start-py" title="Permalink to this heading"></a></h3>
+<p>This contains a Python script used to launch the production system on the computer
+cart. It launches Docker containers on multiple computers (defined in <code class="docutils literal notranslate"><span class="pre">hosts.yaml</span></code>),
+and launches the necessary ROS nodes inside of them.</p>
+</section>
+</section>
+<section id="building-and-running-the-project">
+<h2>Building and Running the Project<a class="headerlink" href="#building-and-running-the-project" title="Permalink to this heading"></a></h2>
+<section id="pre-requisites">
+<h3>Pre-Requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this heading"></a></h3>
+<p>This project is built on <a class="reference external" href="https://www.ros.org/">ROS (Robot Operating System)</a>
+You should be familiar with using ROS on Linux inside Docker through previous
+experience, or by following our super cool <a class="reference external" href="https://wiki.purduearc.com/wiki/tutorials/ros">tutorials</a>.</p>
+<p>The project runs inside a development Docker container, so the host machine only
+needs to be able to run Docker. All software pre-requisites are installed in the
+image.</p>
+</section>
+<section id="building">
+<h3>Building<a class="headerlink" href="#building" title="Permalink to this heading"></a></h3>
+<p>First, make sure your code is in the proper place. There is a specific directory
+structure required, which is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">catkin_ws</span>
+ <span class="o">-&gt;</span> <span class="n">src</span>
+     <span class="o">-&gt;</span> <span class="n">rocket_league</span> <span class="p">(</span><span class="n">this</span> <span class="n">repo</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Starting from scratch in the parent directory for <code class="docutils literal notranslate"><span class="pre">catkin_ws</span></code>, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="n">catkin_ws</span><span class="o">/</span><span class="n">src</span>
+<span class="n">cd</span> <span class="n">catkin_ws</span><span class="o">/</span><span class="n">src</span>
+<span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">purdue</span><span class="o">-</span><span class="n">arc</span><span class="o">/</span><span class="n">rocket_league</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>You should have a different catkin workspace for each project, so if you already
+use ROS for something else (other than the ARC tutorials), you should name the
+workspace something different such as <code class="docutils literal notranslate"><span class="pre">arc_ws</span></code> or <code class="docutils literal notranslate"><span class="pre">rktl_ws</span></code>.</p>
+</div></blockquote>
+<p>Run all future commands inside the <code class="docutils literal notranslate"><span class="pre">rocket_league</span></code> folder.</p>
+<p>First, pull a mostly built Docker container, and customize it for your machine:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">docker</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">build</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>Next, launch the Docker container:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">docker</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">run</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>Your terminal will be transported into the container. The directory <code class="docutils literal notranslate"><span class="pre">~/catkin_ws</span></code>
+inside the container is mapped to the workspace wherever you put it, and whatever
+you named it outside the container. Changes in here are permanent when the container
+exist, but installing software and other actions are all isolated from your main
+computer and will be lost when you exit the container.</p>
+<p>Finally, build the code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">catkin_ws</span>
+<span class="n">catkin</span> <span class="n">build</span>
+</pre></div>
+</div>
+<p>Optionally, run the automated tests:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">catkin</span> <span class="n">test</span>
+</pre></div>
+</div>
+</section>
+<section id="running">
+<h3>Running<a class="headerlink" href="#running" title="Permalink to this heading"></a></h3>
+<blockquote>
+<div><p>This resumes where <strong>Building</strong> left off, so run all these commands in the
+container, not your host computer</p>
+</div></blockquote>
+<p>To run the project’s simulator and visualizer, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">roslaunch</span> <span class="n">rktl_launch</span> <span class="n">rocket_league_sim</span><span class="o">.</span><span class="n">launch</span>
+</pre></div>
+</div>
+<p>To manually give the car input, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">roslaunch</span> <span class="n">rktl_control</span> <span class="n">keyboard_control</span><span class="o">.</span><span class="n">launch</span>
+</pre></div>
+</div>
+<blockquote>
+<div><p>This must be done while the first command is still running. You can either:</p>
+<ul class="simple">
+<li><p>run <code class="docutils literal notranslate"><span class="pre">./docker/docker-join.sh</span></code> in another terminal on your host machine to
+transport that terminal into the same container</p></li>
+<li><p>use <code class="docutils literal notranslate"><span class="pre">CTRL+Z</span></code> and <code class="docutils literal notranslate"><span class="pre">bg</span></code> to push the current process into the background, so that
+you can run another command. (use <code class="docutils literal notranslate"><span class="pre">fg</span></code> to bring it back into the foreground)</p></li>
+<li><p>use <a class="reference external" href="https://tmuxcheatsheet.com/"><code class="docutils literal notranslate"><span class="pre">tmux</span></code></a> to have multiple terminals inside one</p></li>
+</ul>
+</div></blockquote>
+<p>To stop the current process, type <code class="docutils literal notranslate"><span class="pre">CTRL+C</span></code>.
+To exit the container, simply type <code class="docutils literal notranslate"><span class="pre">exit</span></code> or <code class="docutils literal notranslate"><span class="pre">CTRL+D</span></code>.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="packages.html">Packages</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rktl_autonomy.html">rktl_autonomy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rktl_control.html">rktl_control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rktl_game.html">rktl_game</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rktl_launch.html">rktl_launch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rktl_msgs.html">rktl_msgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rktl_perception.html">rktl_perception</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rktl_planner.html">rktl_planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rktl_sim.html">rktl_sim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/rktl_autonomy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rktl_autonomy</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/rktl_planner/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">rktl_planner</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/simulator/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">simulator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="autoapi/visualizer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">visualizer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="packages.html" class="btn btn-neutral float-right" title="Packages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Autonomous Robotics Club of Purdue (Purdue ARC).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

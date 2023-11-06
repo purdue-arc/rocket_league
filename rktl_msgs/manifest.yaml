@@ -1,0 +1,26 @@
+actions: []
+authors: Arianna McNamara <mcnama20@purdue.edu>, James Baxter <baxter26@purdue.edu>
+brief: ''
+bugtracker: ''
+depends:
+- geometry_msgs
+- message_runtime
+- message_generation
+- catkin
+- std_msgs
+description: Custom messages for ARC Rocket League Project
+license: BSD 3 Clause
+maintainers: Autonomous Robotics Club of Purdue <autonomy@purdue.edu>
+msgs:
+- ControlCommand
+- Waypoint
+- BezierPath
+- BezierPathList
+- Score
+- Path
+- ControlEffort
+- MatchStatus
+package_type: package
+repo_url: ''
+srvs: []
+url: https://www.purduearc.com

@@ -1,0 +1,24 @@
+actions: []
+authors: Patrick Mihelich
+brief: ''
+bugtracker: https://github.com/ros-perception/image_common/issues
+depends:
+- sensor_msgs
+- catkin
+- pkg-config
+- rosunit
+- yaml-cpp
+- rosbash
+- roscpp
+- boost
+- roscpp_serialization
+- rosconsole
+description: camera_calibration_parsers contains routines for reading and writing
+  camera calibration parameters.
+license: BSD
+maintainers: Jack O'Quin <jack.oquin@gmail.com>, Vincent Rabaud <vincent.rabaud@gmail.com>
+msgs: []
+package_type: package
+repo_url: https://github.com/ros-perception/image_common
+srvs: []
+url: http://ros.org/wiki/camera_calibration_parsers

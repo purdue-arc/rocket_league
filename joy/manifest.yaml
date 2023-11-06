@@ -1,0 +1,23 @@
+actions: []
+authors: Morgan Quigley, Brian Gerkey, Kevin Watts, Blaise Gassend
+brief: ''
+bugtracker: https://github.com/ros-drivers/joystick_drivers/issues
+depends:
+- sensor_msgs
+- rosbag
+- roslint
+- catkin
+- diagnostic_updater
+- joystick
+- roscpp
+description: "ROS driver for a generic Linux joystick.\n    The joy package contains\
+  \ joy_node, a node that interfaces a\n    generic Linux joystick to ROS. This node\
+  \ publishes a &quot;Joy&quot;\n    message, which contains the current state of\
+  \ each one of the\n    joystick's buttons and axes."
+license: BSD
+maintainers: Jonathan Bohren <jbo@jhu.edu>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://www.ros.org/wiki/joy
