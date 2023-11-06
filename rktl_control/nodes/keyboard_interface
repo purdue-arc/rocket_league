@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Use keyboard data to control car in sim.
+"""
+Allows for controlling the car using a keyboard interface. Uses the terminal
+(with ncurses) as an interface.
+
 License:
   BSD 3-Clause License
-  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
@@ -12,6 +15,7 @@ from std_srvs.srv import Empty
 
 from curses import wrapper
 from time import sleep
+
 
 def main(win):
     win.nodelay(True)
@@ -58,8 +62,9 @@ def main(win):
         win.addstr("q to quit")
         sleep(0.01)
 
-rospy.init_node('keyboard')
-effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
-reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
+if __name__ == "__main__":
+    rospy.init_node('keyboard')
+    effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
+    reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
 
-wrapper(main)
+    wrapper(main)

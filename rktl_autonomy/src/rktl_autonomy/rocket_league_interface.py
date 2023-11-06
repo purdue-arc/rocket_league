@@ -1,7 +1,12 @@
-"""Interface to the Rocket League project.
+"""
+This the main environment intended for use. It interfaces the agent with the
+mess of other nodes that exist in this repository. Look at higher level
+documentation to learn more about the inputs and outputs from this node and how
+they are consumed or created by others.
+
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
@@ -77,8 +82,21 @@ class RocketLeagueInterface(ROSInterface):
         self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
         self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
         self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
-        self._WIN_REWARD = rospy.get_param('~reward/win', 100.0)[self.env_number]
-        self._LOSS_REWARD = rospy.get_param('~reward/loss', 0.0)[self.env_number]
+        self._DIRECTION_CHANGE_REWARD = rospy.get_param('~reward/direction_change', 0.0)
+        if isinstance(rospy.get_param('~reward/win', [100.0]), int):
+            self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])
+        else:
+            if len(rospy.get_param('~reward/win', [100.0])) >= self.env_number:
+                self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[0]
+            else:
+                self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[self.env_number]
+        if isinstance(rospy.get_param('~reward/loss', [100.0]), int):
+            self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])
+        else:
+            if len(rospy.get_param('~reward/loss', [100.0])) >= self.env_number:
+                self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[0]
+            else:
+                self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[self.env_number]
         self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
         self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
         self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
@@ -92,6 +110,7 @@ class RocketLeagueInterface(ROSInterface):
         self._ball_odom = None
         self._score = None
         self._start_time = None
+        self._prev_vel = None
 
         # Subscribers
         rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
@@ -192,6 +211,13 @@ class RocketLeagueInterface(ROSInterface):
                 reward += self._LOSS_REWARD
 
         x, y, __, v, __ = self._car_odom
+
+        if self._prev_vel is None:
+            self._prev_vel = v
+        if self._prev_vel * v < 0:
+            reward += self._DIRECTION_CHANGE_REWARD
+        self._prev_vel = v
+
         if v < 0:
             reward += self._REVERSE_REWARD
         if (abs(x) > self._FIELD_LENGTH/2 - self._WALL_THRESHOLD or

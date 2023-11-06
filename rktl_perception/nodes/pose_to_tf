@@ -2,7 +2,7 @@
 """publish info from a PoseWithCovarianceStamped to the TF tree
 License:
   BSD 3-Clause License
-  Copyright (c) 2022, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
@@ -11,8 +11,10 @@ import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, TransformStamped
 from tf2_ros import TransformBroadcaster
 
+
 class Publisher(object):
     """Workaround class until TF is implemented"""
+
     def __init__(self):
         rospy.init_node('pose_to_tf')
 
@@ -35,6 +37,7 @@ class Publisher(object):
         tf.transform.rotation.z = pose_msg.pose.pose.orientation.z
         tf.transform.rotation.w = pose_msg.pose.pose.orientation.w
         self.broadcaster.sendTransform(tf)
+
 
 if __name__ == "__main__":
     Publisher()

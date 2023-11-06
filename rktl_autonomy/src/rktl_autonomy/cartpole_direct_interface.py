@@ -1,7 +1,14 @@
-"""Fake interface to CartPole-v0 for testing purposes.
+"""
+Cartpole is a very simple environment included within OpenAI Gym. There is not
+much of a reason to use it, except for verifying the functionality of this
+library. Two different interfaces are provided, `CartpoleInterface` and
+`CartpoleDirectInterface`. The former uses the `ROSInterface` class and the
+latter directly owns the Gym environment. To verify the `ROSInterface` worked,
+it was confirmed that they both behave the same way.
+
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 

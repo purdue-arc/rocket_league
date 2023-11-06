@@ -24,6 +24,10 @@
     <include file="$(find rktl_sim)/launch/simulator.launch">
         <arg name="sim_mode" value="$(arg sim_mode)"/>
     </include>
+    
+    <!-- Control GUI -->
+    <node if="$(arg render)" pkg="rqt_gui" type="rqt_gui" name="rqt_gui" args="--perspective-file $(find rktl_launch)/rqt/rktl.perspective"/>
+
 
     <!-- Perception Delays -->
     <group if="$(eval sim_mode == 'realistic')">

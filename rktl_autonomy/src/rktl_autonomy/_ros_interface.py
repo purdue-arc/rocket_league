@@ -1,7 +1,10 @@
-"""Contains the ROSInterface class, a generic implementation for binding Gym to ROS.
+"""
+This handles the base behavior of manipulating time and interfacing with ROS.
+It gets subclassed to customize it to a specific ROS network's environment.
+
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 

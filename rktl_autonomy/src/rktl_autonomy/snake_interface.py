@@ -1,7 +1,13 @@
-"""Interface to the Snake game in ARC Tutorials for testing.
+"""
+This provides an interface to the snake game created in the
+[ARC Tutorials](https://github.com/purdue-arc/arc_tutorials/tree/snake_dqn).
+This was largely to gain experience in training reinforcement learning agents
+and there isn't much need for it anymore. It may be useful for testing new types
+of agents or onboarding new members.
+
 License:
   BSD 3-Clause License
-  Copyright (c) 2021, Autonomous Robotics Club of Purdue (Purdue ARC)
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
   All rights reserved.
 """
 
