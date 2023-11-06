@@ -4,7 +4,9 @@ WS_DIR=$(realpath $(dirname $0)/../../../)
 REPO_NAME="purduearc/rocket-league"
 CONTAINER_NAME="${CONTAINER_NAME:-$USER-arc-rocket-league-dev}"
 MY_DISPLAY=$([ $(uname -s) == 'Darwin' ] && echo "host.docker.internal:0" || echo "$DISPLAY")
+XAUTHORITY="$HOME/.Xauthority"
 echo "Using display $MY_DISPLAY"
+echo "Using $XAUTHORITY as Xauthority"
 echo "mounting host directory $WS_DIR as container directory /home/$USER/catkin_ws"
 
 # tty-specific options
