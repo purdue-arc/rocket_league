@@ -29,9 +29,10 @@ def line(p: Point, v: Vector3, t: float):
     point.z = p.z + t * v.z
     return point
 
-
+#def create_segment(start_pose: Pose, end_pose: Pose, velocity: float, 
+    duration: rclpy.Duration, segment_duration: rclpy.Duration):
 def create_segment(start_pose: Pose, end_pose: Pose, velocity: float, 
-    duration: rospy.Duration, segment_duration: rospy.Duration):
+    duration: rclpy.Duration, segment_duration: rclpy.Duration):
     control_points = [start_pose.position, end_pose.position]
     start_vel, start_head = vel(start_pose, velocity)
     end_vel, end_head = vel(end_pose, velocity)
@@ -98,8 +99,8 @@ def bezier_path_server(req: CreateBezierPathRequest):
 
 if __name__ == '__main__':
     #rospy.init_node('bezier_path_server')
-    self.init_node('bezier_path_server')
-    service = rospy.Service('create_bezier_path',
+    rclpy.init_node('bezier_path_server')
+    service = rclpy.Service('create_bezier_path',
         CreateBezierPath, bezier_path_server)
     #rospy.spin()
-    rospy.spin()
+    rclpy.spin()
