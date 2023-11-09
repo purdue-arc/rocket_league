@@ -7,12 +7,12 @@ License:
 """
 
 import rclpy
-from external.transformations import euler_from_quaternion
+from rktl_dependencies.rktl_dependencies.transformations import euler_from_quaternion
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import ControlCommand
 
 import math, time
-from external.angles import shortest_angular_distance as sad
+from rktl_dependencies.rktl_dependencies.angles import shortest_angular_distance as sad
 
 class PatrolPlanner(object):
     """A very simple strategy for rktl. Patrol around the field in a circle and
