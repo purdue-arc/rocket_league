@@ -51,94 +51,94 @@ class RocketLeagueInterface(ROSInterface):
         self.env_number = env_number
         # Actions
         # self._MIN_VELOCITY = -rospy.get_param('/cars/throttle/max_speed')
-        self._MIN_VELOCITY = -self.node.get_parameter('/cars/throttle/max_speed')
+        self._MIN_VELOCITY = -self.node.get_parameter('/cars/throttle/max_speed').get_parameter_value().double_value
         # self._MAX_VELOCITY =  rospy.get_param('/cars/throttle/max_speed')
-        self._MAX_VELOCITY =  self.node.get_parameter('/cars/throttle/max_speed')
+        self._MAX_VELOCITY =  self.node.get_parameter('/cars/throttle/max_speed').get_parameter_value().double_value
         # self._MIN_CURVATURE = -tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
-        self._MIN_CURVATURE = -tan(self.node.get_parameter('/cars/steering/max_throw')) / self.node.get_parameter('cars/length')
+        self._MIN_CURVATURE = -tan(self.node.get_parameter('/cars/steering/max_throw').get_parameter_value().double_value) / self.node.get_parameter('cars/length').get_parameter_value().double_value
         # self._MAX_CURVATURE =  tan(rospy.get_param('/cars/steering/max_throw')) / rospy.get_param('cars/length')
-        self._MAX_CURVATURE =  tan(self.node.get_parameter('/cars/steering/max_throw')) / self.node.get_parameter('cars/length')
+        self._MAX_CURVATURE =  tan(self.node.get_parameter('/cars/steering/max_throw').get_parameter_value().double_value) / self.node.get_parameter('cars/length').get_parameter_value().double_value
 
 
         # Action space overrides
         # if rospy.has_param('~action_space/velocity/min'):
         if self.node.has_parameter('~action_space/velocity/min'):
             # min_velocity = rospy.get_param('~action_space/velocity/min')
-            min_velocity = self.node.get_parameter('~action_space/velocity/min')
+            min_velocity = self.node.get_parameter('~action_space/velocity/min').get_parameter_value().double_value
             assert min_velocity > self._MIN_VELOCITY
             self._MIN_VELOCITY = min_velocity
         # if rospy.has_param('~action_space/velocity/max'):
         if self.node.has_parameter('~action_space/velocity/max'):
             # max_velocity = rospy.get_param('~action_space/velocity/max')
-            max_velocity = self.node.get_parameter('~action_space/velocity/max')
+            max_velocity = self.node.get_parameter('~action_space/velocity/max').get_parameter_value().double_value
             assert max_velocity < self._MAX_VELOCITY
             self._MAX_VELOCITY = max_velocity
         # if rospy.has_param('~action_space/curvature/min'):
         if self.node.has_parameter('~action_space/curvature/min'):
             # min_curvature = rospy.get_param('~action_space/curvature/min')
-            min_curvature = self.node.get_parameter('~action_space/curvature/min')
+            min_curvature = self.node.get_parameter('~action_space/curvature/min').get_parameter_value().double_value
             assert min_curvature > self._MIN_CURVATURE
             self._MIN_CURVATURE = min_curvature
         # if rospy.has_param('~action_space/curvature/max'):
         if self.node.has_parameter('~action_space/curvature/max'):
             # max_curvature = rospy.get_param('~action_space/curvature/max')
-            max_curvature = self.node.get_parameter('~action_space/curvature/max')
+            max_curvature = self.node.get_parameter('~action_space/curvature/max').get_parameter_value().double_value
             assert max_curvature < self._MAX_CURVATURE
             self._MAX_CURVATURE = max_curvature
 
         # Observations
         # self._FIELD_WIDTH = rospy.get_param('/field/width')
-        self._FIELD_WIDTH = self.node.get_parameter('/field/width')
+        self._FIELD_WIDTH = self.node.get_parameter('/field/width').value
         # self._FIELD_LENGTH = rospy.get_param('/field/length')
-        self._FIELD_LENGTH = self.node.get_parameter('/field/length')
+        self._FIELD_LENGTH = self.node.get_parameter('/field/length').value
         # self._GOAL_DEPTH = rospy.get_param('~observation/goal_depth', 0.075)
-        self._GOAL_DEPTH = self.node.get_parameter_or('~observation/goal_depth', Parameter(0.075))
+        self._GOAL_DEPTH = self.node.get_parameter_or('~observation/goal_depth', Parameter(0.075)).value
         # self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
-        self._MAX_OBS_VEL = self.node.get_parameter_or('~observation/velocity/max_abs', Parameter(3.0))
+        self._MAX_OBS_VEL = self.node.get_parameter_or('~observation/velocity/max_abs', Parameter(3.0)).value
         # self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
-        self._MAX_OBS_ANG_VEL = self.node.get_parameter_or('~observation/angular_velocity/max_abs', Parameter(2*pi))
+        self._MAX_OBS_ANG_VEL = self.node.get_parameter_or('~observation/angular_velocity/max_abs', Parameter(2*pi)).value
 
         # Learning
         # self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
-        self._MAX_TIME = self.node.get_parameter_or('~max_episode_time', Parameter(30.0))
+        self._MAX_TIME = self.node.get_parameter_or('~max_episode_time', Parameter(30.0)).value
         # self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
-        self._CONSTANT_REWARD = self.node.get_parameter_or('~reward/constant', Parameter(0.0))
+        self._CONSTANT_REWARD = self.node.get_parameter_or('~reward/constant', Parameter(0.0)).value
         # self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
-        self._BALL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/ball_dist_sq', Parameter(0.0))
+        self._BALL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/ball_dist_sq', Parameter(0.0)).value
         # self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
-        self._GOAL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/goal_dist_sq', Parameter(0.0))
+        self._GOAL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/goal_dist_sq', Parameter(0.0)).value
         # self._DIRECTION_CHANGE_REWARD = rospy.get_param('~reward/direction_change', 0.0)
-        self._DIRECTION_CHANGE_REWARD = self.node.get_parameter_or('~reward/direction_change', Parameter(0.0))
+        self._DIRECTION_CHANGE_REWARD = self.node.get_parameter_or('~reward/direction_change', Parameter(0.0)).value
         # if isinstance(rospy.get_param('~reward/win', [100.0]), int):
-        if isinstance(self.node.get_parameter_or('~reward/win', Parameter([100.0])), int):
+        if isinstance(self.node.get_parameter_or('~reward/win', Parameter([100.0])).value, int):
             # self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])
-            self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0]))
+            self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).value
         else:
             # if len(rospy.get_param('~reward/win', [100.0])) >= self.env_number:
-            if len(self.node.get_parameter('~reward/win', [100.0])) >= self.env_number:
+            if len(self.node.get_parameter_or('~reward/win', Parameter([100.0])).value) >= self.env_number:
                 # self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[0]
-                self._WIN_REWARD = self.node.get_parameter('~reward/win', [100.0])[0]
+                self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).value[0]
             else:
                 # self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[self.env_number]
-                self._WIN_REWARD = self.node.get_parameter('~reward/win', [100.0])[self.env_number]
+                self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).value[self.env_number]
         # if isinstance(rospy.get_param('~reward/loss', [100.0]), int):
-        if isinstance(self.node.get_parameter('~reward/loss', [100.0]), int):
+        if isinstance(self.node.get_parameter_or('~reward/loss', Parameter([100.0])), int):
             # self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])
-            self._LOSS_REWARD = self.node.get_parameter('~reward/loss', [100.0])
+            self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0]))
         else:
             # if len(rospy.get_param('~reward/loss', [100.0])) >= self.env_number:
-            if len(self.node.get_parameter('~reward/loss', [100.0])) >= self.env_number:
+            if len(self.node.get_parameter_or('~reward/loss', Parameter([100.0])).value) >= self.env_number:
                 # self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[0]
-                self._LOSS_REWARD = self.node.get_parameter('~reward/loss', [100.0])[0]
+                self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0], type_=8)).value[0]
             else:
                 # self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[self.env_number]
-                self._LOSS_REWARD = self.node.get_parameter('~reward/loss', [100.0])[self.env_number]
+                self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0])).value[self.env_number]
         # self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
-        self._REVERSE_REWARD = self.node.get_parameter('~reward/reverse', 0.0)
+        self._REVERSE_REWARD = self.node.get_parameter_or('~reward/reverse', Parameter(0.0)).value
         # self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
-        self._WALL_REWARD = self.node.get_parameter('~reward/walls/value', 0.0)
+        self._WALL_REWARD = self.node.get_parameter_or('~reward/walls/value', Parameter(0.0)).value
         # self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
-        self._WALL_THRESHOLD = self.node.get_parameter('~reward/walls/threshold', 0.0)
+        self._WALL_THRESHOLD = self.node.get_parameter_or('~reward/walls/threshold', Parameter(0.0)).value
 
         self.node = Node('rocket_league_interface')
         # Publishers
