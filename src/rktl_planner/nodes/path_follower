@@ -34,33 +34,33 @@ class PathFollower(object):
         self.max_speed = None
 
         #self.frame_id = rospy.get_param('~frame_id', 'map')
-        self.frame_id = node.declare_parameter('~frame_id', 'map')
+        self.frame_id = self.declare_parameter('~frame_id', 'map')
 
         # Max speed to travel path
         #self.max_speed = node.get_param('~max_speed', 0.1)
-        self.max_speed = node.declare_parameter('~max_speed', 0.1)
+        self.max_speed = self.declare_parameter('~max_speed', 0.1)
 
         # Radius to search for intersections
         #self.lookahead_dist = node.getParam('~lookahead_dist', 0.15)
-        self.lookahead_dist = node.declare_parameter('~lookahead_dist', 0.15)
+        self.lookahead_dist = self.declare_parameter('~lookahead_dist', 0.15)
 
         # Coeffient to adjust lookahead distance by speed
         #self.lookahead_gain = node.getParam('~lookahead_gain', 0.035)
-        self.lookahead_gain = node.declare_parameter('~lookahead_gain', 0.035)
+        self.lookahead_gain = self.declare_parameter('~lookahead_gain', 0.035)
 
         # Number of waypoints to search per pass (-1 is full path)
         #self.lookahead_pnts = node.getParam('~lookahead_pnts', -1)
-        self.lookahead_pnts = node.declare_parameter('~lookahead_pnts', -1)
+        self.lookahead_pnts = self.declare_parameter('~lookahead_pnts', -1)
 
         # Publishers
-        car_name = node.declare_parameter('~car_name')
         car_name = self.declare_parameter('~car_name')
-        self.bot_velocity_cmd = node.create_publisher(f'/cars/{car_name}/command',
+        car_name = self.declare_parameter('~car_name')
+        self.bot_velocity_cmd = self.create_publisher(f'/cars/{car_name}/command',
             ControlCommand, queue_size=1)
 
         # Subscribers
-        node.create_subscription(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
-        node.create_subscription('linear_path', Path, self.path_cb)
+        self.create_subscription(f'/cars/{car_name}/odom', Odometry, self.odom_cb)
+        self.create_subscription('linear_path', Path, self.path_cb)
 
         #rospy.spin()
         rclpy.spin()
@@ -131,7 +131,8 @@ class PathFollower(object):
             # If no intersection found, stop moving
             if intersect is None:
                 self.bot_velocity_cmd.publish(ControlCommand())
-                rospy.logwarn("No intersection could be found.")
+                #rospy.logwarn("No intersection could be found.")
+                rclpy.logwarn("No intersection could be found.")
                 return
 
             # Calculate curvature
