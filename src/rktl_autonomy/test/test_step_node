@@ -69,7 +69,7 @@ class TestStep(unittest.TestCase):
         self.send_match = MatchStatus(status=MatchStatus.ONGOING)
         self.want_reset = True
         #max_time = self.last_time + rospy.Duration.from_sec(0.6)
-        max_time = self.last_time + rclpy.duration.Duration.from_sec(0.6)
+        max_time = self.last_time + Duration(nanoseconds = 600)
 
         obs = env.reset()
 
@@ -82,7 +82,7 @@ class TestStep(unittest.TestCase):
         self.send_match = MatchStatus(status=MatchStatus.ONGOING)
         self.want_reset = False
         #max_time = self.last_time + rospy.Duration.from_sec(0.2)
-        max_time = self.last_time + rclpy.duration.Duration.from_sec(0.2)
+        max_time = self.last_time + Duration(nanoseconds=200)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
@@ -112,7 +112,7 @@ class TestStep(unittest.TestCase):
         self.send_match = MatchStatus(status=MatchStatus.ONGOING)
         self.want_reset = False
         #max_time = self.last_time + rospy.Duration.from_sec(0.2)
-        max_time = self.last_time + rclpy.duration.Duration.from_sec(0.2)
+        max_time = self.last_time + Duration(nanoseconds = 200)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
@@ -127,7 +127,7 @@ class TestStep(unittest.TestCase):
         self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_A)
         self.want_reset = False
         #max_time = self.last_time + rospy.Duration.from_sec(0.2)
-        max_time = self.last_time + rclpy.duration.Duration.from_sec(0.2)
+        max_time = self.last_time + Duration(nanoseconds = 200)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
@@ -142,7 +142,7 @@ class TestStep(unittest.TestCase):
         self.send_match = MatchStatus(status=MatchStatus.VICTORY_TEAM_B)
         self.want_reset = False
         #max_time = self.last_time + rospy.Duration.from_sec(0.2)
-        max_time = self.last_time + rclpy.duration.Duration.from_sec(0.2)
+        max_time = self.last_time + Duration(nanoseconds=200)
 
         obs, reward, done, __ = env.step(env.action_space.sample())
 
