@@ -4,7 +4,7 @@ package_name = 'rktl_dependencies'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='1.0.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -13,10 +13,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='sixfootsix50',
-    maintainer_email='sixfootsix50@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='Adam Schmok',
+    maintainer_email='aschmok@purdue.edu',
+    description='Contains external dependencies required for other packages.',
+    license='BSD 3 Clause',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
