@@ -18,6 +18,7 @@ from gym.spaces import Box, Discrete
 # import rospy
 import rclpy
 from rclpy import Node
+from rclpy.parameter import Parameter
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import ControlCommand, MatchStatus
 from std_srvs.srv import Empty
@@ -91,27 +92,27 @@ class RocketLeagueInterface(ROSInterface):
         # self._FIELD_LENGTH = rospy.get_param('/field/length')
         self._FIELD_LENGTH = self.node.get_parameter('/field/length')
         # self._GOAL_DEPTH = rospy.get_param('~observation/goal_depth', 0.075)
-        self._GOAL_DEPTH = self.node.get_parameter('~observation/goal_depth', 0.075)
+        self._GOAL_DEPTH = self.node.get_parameter_or('~observation/goal_depth', Parameter(0.075))
         # self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
-        self._MAX_OBS_VEL = self.node.get_parameter('~observation/velocity/max_abs', 3.0)
+        self._MAX_OBS_VEL = self.node.get_parameter_or('~observation/velocity/max_abs', Parameter(3.0))
         # self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
-        self._MAX_OBS_ANG_VEL = self.node.get_parameter('~observation/angular_velocity/max_abs', 2*pi)
+        self._MAX_OBS_ANG_VEL = self.node.get_parameter_or('~observation/angular_velocity/max_abs', Parameter(2*pi))
 
         # Learning
         # self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
-        self._MAX_TIME = self.node.get_parameter('~max_episode_time', 30.0)
+        self._MAX_TIME = self.node.get_parameter_or('~max_episode_time', Parameter(30.0))
         # self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
-        self._CONSTANT_REWARD = self.node.get_parameter('~reward/constant', 0.0)
+        self._CONSTANT_REWARD = self.node.get_parameter_or('~reward/constant', Parameter(0.0))
         # self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
-        self._BALL_DISTANCE_REWARD = self.node.get_parameter('~reward/ball_dist_sq', 0.0)
+        self._BALL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/ball_dist_sq', Parameter(0.0))
         # self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
-        self._GOAL_DISTANCE_REWARD = self.node.get_parameter('~reward/goal_dist_sq', 0.0)
+        self._GOAL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/goal_dist_sq', Parameter(0.0))
         # self._DIRECTION_CHANGE_REWARD = rospy.get_param('~reward/direction_change', 0.0)
-        self._DIRECTION_CHANGE_REWARD = self.node.get_parameter('~reward/direction_change', 0.0)
+        self._DIRECTION_CHANGE_REWARD = self.node.get_parameter_or('~reward/direction_change', Parameter(0.0))
         # if isinstance(rospy.get_param('~reward/win', [100.0]), int):
-        if isinstance(self.node.get_parameter('~reward/win', [100.0]), int):
+        if isinstance(self.node.get_parameter_or('~reward/win', Parameter([100.0])), int):
             # self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])
-            self._WIN_REWARD = self.node.get_parameter('~reward/win', [100.0])
+            self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0]))
         else:
             # if len(rospy.get_param('~reward/win', [100.0])) >= self.env_number:
             if len(self.node.get_parameter('~reward/win', [100.0])) >= self.env_number:
