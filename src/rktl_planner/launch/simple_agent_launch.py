@@ -3,7 +3,7 @@ import rclpy
 import roslaunch
 def launch_agent_nodes(agent_name="agent0", car_name="car0"):
     #rospy.init_node('agent_launcher', anonymous=True)
-    self.init_node('agent_launcher', anonymous=True)
+    rclpy.init_node('agent_launcher', anonymous=True)
 
     # Set the namespace for the agent
     agent_ns = "agents/" + agent_name
@@ -19,13 +19,13 @@ def launch_agent_nodes(agent_name="agent0", car_name="car0"):
 
     # Load path follower parameters from a YAML file
     #path_follower_param_file = rospy.get_param('rktl_planner') + "/config/path_follower.yaml"
-    path_follower_param_file = node.declare_parameter('rktl_planner') + "/config/path_follower.yaml"
+    path_follower_param_file = rclpy.declare_parameter('rktl_planner') + "/config/path_follower.yaml"
     #self.set_param(agent_ns + '/path_follower', path_follower_param_file)
-    self.set_parameter(agent_ns + '/path_follower', path_follower_param_file)
+    rclpy.set_parameter(agent_ns + '/path_follower', path_follower_param_file)
     
 
     # Set the car_name parameter for the path follower node
-    self.set_parameter(agent_ns + '/path_follower/car_name', car_name)
+    rclpy.set_parameter(agent_ns + '/path_follower/car_name', car_name)
     #rospy.set_param(agent_ns + '/path_follower/car_name', car_name)
 
     # Load path planning parameters
@@ -47,12 +47,13 @@ def launch_agent_nodes(agent_name="agent0", car_name="car0"):
     )
 
     # Load path planner parameters from a YAML file
-    path_planner_param_file = rospy.get_param('rktl_planner') + "/config/path_planner.yaml"
-    node.set_parameter(agent_ns + '/path_planner', path_planner_param_file)
+    #path_planner_param_file = rospy.get_param('rktl_planner') + "/config/path_planner.yaml"
+    path_planner_param_file = rclpy.get_param('rktl_planner') + "/config/path_planner.yaml"
+    rclpy.set_parameter(agent_ns + '/path_planner', path_planner_param_file)
     #rospy.set_param(agent_ns + '/path_planner', path_planner_param_file)
 
     # Set the car_name parameter for the path planner node
-    node.set_parameter(agent_ns + '/path_planner/car_name', car_name)
+    rclpy.set_parameter(agent_ns + '/path_planner/car_name', car_name)
     #rospy.set_param(agent_ns + '/path_planner/car_name', car_name)
 
     # Create a ROS launch object and launch the nodes
@@ -64,11 +65,11 @@ def launch_agent_nodes(agent_name="agent0", car_name="car0"):
 
 if __name__ == '__main__':
     #agent_name = rospy.get_param('~agent_name', 'agent0')
-    agent_name = node.declare_parameter('~agent_name', 'agent0')
+    agent_name = rclpy.declare_parameter('~agent_name', 'agent0')
     #car_name = self.get_param('~car_name', 'car0')
-    car_name = self.declare_parameter('~car_name', 'car0')
+    car_name = rclpy.declare_parameter('~car_name', 'car0')
     #car_name = rospy.get_param('~car_name', 'car0')
-    car_name = node.declare_parameter('~car_name', 'car0')
+    car_name = rclpy.declare_parameter('~car_name', 'car0')
     launch_agent_nodes(agent_name, car_name)
     #rospy.spin()
     rclpy.spin()
