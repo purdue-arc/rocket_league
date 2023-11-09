@@ -3,7 +3,7 @@
 #import rospy
 import rclpy
 import math
-from external.transformations import euler_from_quaternion, quaternion_from_euler
+from rktl_dependencies.rktl_dependencies.transformations import euler_from_quaternion, quaternion_from_euler
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest, CreateBezierPathResponse
 from rktl_planner.src.rktl_planner import BezierPath
 from rktl_msgs.msg import Path as PathMsg, Waypoint as WaypointMsg
