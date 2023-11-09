@@ -1,10 +1,8 @@
 #NOT FINISHED 10/18/2023
-from ament_index_python import get_package_share_directory
 import launch
-from launch_ros.actions import Node, SetParametersFromFile
+from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-import os
 
 def generate_launch_description():
     load_manager = DeclareLaunchArgument('load_manager', default_value='true')
@@ -35,7 +33,7 @@ def generate_launch_description():
                 ]
             ),
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(get_package_share_directory('image_proc'), 'launch', 'image_proc.launch')),
+                PythonLaunchDescriptionSource([Find the path to image_proc package]),
                 launch_arguments={'manager': launch.substitutions.LaunchConfiguration('manager_name')}.items(),
             ),
             Node(
@@ -45,13 +43,12 @@ def generate_launch_description():
                 namespace=['cams/', launch.substitutions.LaunchConfiguration('camera_name')],
                 parameters=[
                     {'camera_frame': launch.substitutions.LaunchConfiguration('camera_name')},
-                    {'publish_tag_detections_image': True},
-                    os.path.join(get_package_share_directory('rktl_perception'), 'config', 'apriltag_settings.yaml'),
-                    os.path.join(get_package_share_directory('rktl_perception'), 'config', 'tags.yaml')
+                    {'publish_tag_detections_image': True}
+                ],
+                remappings=[
+                    ('/tag_detections_image', '/tag_detections_image')
                 ]
             ),
-            SetParametersFromFile(filename=os.path.join(get_package_share_directory('rktl_perception'), 'config', launch.substitutions.LaunchConfiguration('camera_name'), 'pointgrey.yaml')),
-
             Node(
                 package='rktl_perception',
                 executable='localizer',
@@ -84,10 +81,10 @@ def generate_launch_description():
                 executable='ball_detection',
                 name='ball_detection',
                 namespace=['cams/', launch.substitutions.LaunchConfiguration('camera_name')],
-                parameters = os.path.join(get_package_share_directory('rktl_perception'), 'config', launch.substitutions.LaunchConfiguration('camera_name'), 'ball_settings.yaml')
+                parameters=[Find the path to ball_settings.yaml and load it]
             )
         ],
         namespace='cams/' + launch.substitutions.LaunchConfiguration('camera_name')
     )
 
-    return launch.LaunchDescription([load_manager, manager_name, manager_threads, camera_name, ns_group])
+    return LaunchDescription([load_manager, manager_name, manager_threads, camera_name, ns_group])
