@@ -10,6 +10,8 @@ License:
 
 # ROS
 import rclpy
+from rclpy.node import Node
+from rclpy import Parameter
 from std_msgs.msg import Bool, Header
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
@@ -17,11 +19,11 @@ from std_srvs.srv import Empty, EmptyResponse
 
 class ScoreKeeper():
     def __init__(self):
-        rospy.init_node('score_keeper')
+        super().__init__('score_keeper')
 
         self.orange_score = 0
         self.blue_score = 0
-        self.orange_goal = (rospy.get_param('/field/length', 1) - 0.15) / 2 
+        self.orange_goal = (self.get_parameter_or('/field/length', 1) - 0.15) / 2 
         self.blue_goal = (rospy.get_param('/field/length', 1)  - 0.15) / -2
         self.enabled = False
         self.match_status = 0
