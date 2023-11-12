@@ -1,22 +1,31 @@
 <?xml version="1.0"?>
-<package format="2">
-  <name>rktl_sim</name>
-  <version>1.0.0</version>
-  <description>Simulator and Visualizer for ARC Rocket League project</description>
-  <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
-  <license>BSD 3 Clause</license>
-  <url type="website">https://www.purduearc.com</url>
-  <author email="mccarth@purdue.edu">Harrison McCarty</author>
-  <author email="sarkar40@purdue.edu">Dhiro Sarkar</author>
-  <author email="jtockerm@purdue.edu">Jake Tockerman</author>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>rktl_sim</name>
+    <version>1.0.0</version>
+    <description>Simulator and Visualizer for ARC Rocket League project</description>
+    <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
+    <license>BSD 3 Clause</license>
+    <url type="website">https://www.purduearc.com</url>
+    <author email="mccarth@purdue.edu">Harrison McCarty</author>
+    <author email="sarkar40@purdue.edu">Dhiro Sarkar</author>
+    <author email="jtockerm@purdue.edu">Jake Tockerman</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <test_depend>rosunit</test_depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>pygame</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>nav_msgs</exec_depend>
-  <exec_depend>std_srvs</exec_depend>
-  <exec_depend>PyBullet</exec_depend>
-  <exec_depend>rktl_msgs</exec_depend>
+
+    <test_depend>ament_copyright</test_depend>
+    <test_depend>ament_flake8</test_depend>
+    <test_depend>ament_pep257</test_depend>
+    <test_depend>python3-pytest</test_depend>
+    <test_depend>rosunit</test_depend>
+    <exec_depend>rclpy</exec_depend>
+    <exec_depend>pygame</exec_depend>
+    <exec_depend>geometry_msgs</exec_depend>
+    <exec_depend>nav_msgs</exec_depend>
+    <exec_depend>std_srvs</exec_depend>
+    <exec_depend>PyBullet</exec_depend>
+    <exec_depend>rktl_msgs</exec_depend>
+
+    <export>
+        <build_type>ament_python</build_type>
+    </export>
 </package>
