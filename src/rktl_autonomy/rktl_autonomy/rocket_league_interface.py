@@ -92,27 +92,27 @@ class RocketLeagueInterface(ROSInterface):
         # self._FIELD_LENGTH = rospy.get_param('/field/length')
         self._FIELD_LENGTH = self.node.get_parameter('/field/length').get_parameter_value().double_value
         # self._GOAL_DEPTH = rospy.get_param('~observation/goal_depth', 0.075)
-        self._GOAL_DEPTH = self.node.get_parameter_or('~observation/goal_depth', Parameter(0.075)).value
+        self._GOAL_DEPTH = self.node.get_parameter_or('~observation/goal_depth', Parameter(0.075)).get_parameter_value().double_value
         # self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
-        self._MAX_OBS_VEL = self.node.get_parameter_or('~observation/velocity/max_abs', Parameter(3.0)).value
+        self._MAX_OBS_VEL = self.node.get_parameter_or('~observation/velocity/max_abs', Parameter(3.0)).get_parameter_value().double_value
         # self._MAX_OBS_ANG_VEL = rospy.get_param('~observation/angular_velocity/max_abs', 2*pi)
-        self._MAX_OBS_ANG_VEL = self.node.get_parameter_or('~observation/angular_velocity/max_abs', Parameter(2*pi)).value
+        self._MAX_OBS_ANG_VEL = self.node.get_parameter_or('~observation/angular_velocity/max_abs', Parameter(2*pi)).get_parameter_value().double_value
 
         # Learning
         # self._MAX_TIME = rospy.get_param('~max_episode_time', 30.0)
-        self._MAX_TIME = self.node.get_parameter_or('~max_episode_time', Parameter(30.0)).value
+        self._MAX_TIME = self.node.get_parameter_or('~max_episode_time', Parameter(30.0)).get_parameter_value().double_value
         # self._CONSTANT_REWARD = rospy.get_param('~reward/constant', 0.0)
-        self._CONSTANT_REWARD = self.node.get_parameter_or('~reward/constant', Parameter(0.0)).value
+        self._CONSTANT_REWARD = self.node.get_parameter_or('~reward/constant', Parameter(0.0)).get_parameter_value().double_value
         # self._BALL_DISTANCE_REWARD = rospy.get_param('~reward/ball_dist_sq', 0.0)
-        self._BALL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/ball_dist_sq', Parameter(0.0)).value
+        self._BALL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/ball_dist_sq', Parameter(0.0)).get_parameter_value().double_value
         # self._GOAL_DISTANCE_REWARD = rospy.get_param('~reward/goal_dist_sq', 0.0)
-        self._GOAL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/goal_dist_sq', Parameter(0.0)).value
+        self._GOAL_DISTANCE_REWARD = self.node.get_parameter_or('~reward/goal_dist_sq', Parameter(0.0)).get_parameter_value().double_value
         # self._DIRECTION_CHANGE_REWARD = rospy.get_param('~reward/direction_change', 0.0)
-        self._DIRECTION_CHANGE_REWARD = self.node.get_parameter_or('~reward/direction_change', Parameter(0.0)).value
+        self._DIRECTION_CHANGE_REWARD = self.node.get_parameter_or('~reward/direction_change', Parameter(0.0)).get_parameter_value().double_value
         # if isinstance(rospy.get_param('~reward/win', [100.0]), int):
-        if isinstance(self.node.get_parameter_or('~reward/win', Parameter([100.0])).value, int):
+        if isinstance(self.node.get_parameter_or('~reward/win', Parameter([100.0])).get_parameter_value().double_array_value, int):
             # self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])
-            self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).value
+            self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).get_parameter_value().double_array_value
         else:
             # if len(rospy.get_param('~reward/win', [100.0])) >= self.env_number:
             if len(self.node.get_parameter_or('~reward/win', Parameter([100.0])).get_parameter_value().double_array_value) >= self.env_number:
@@ -124,7 +124,7 @@ class RocketLeagueInterface(ROSInterface):
         # if isinstance(rospy.get_param('~reward/loss', [100.0]), int):
         if isinstance(self.node.get_parameter_or('~reward/loss', Parameter([100.0])).get_parameter_value().double_array_value, int):
             # self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])
-            self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0]))
+            self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0])).get_parameter_value().double_array_value
         else:
             # if len(rospy.get_param('~reward/loss', [100.0])) >= self.env_number:
             if len(self.node.get_parameter_or('~reward/loss', Parameter([100.0])).get_parameter_value().double_array_value) >= self.env_number:
@@ -134,11 +134,11 @@ class RocketLeagueInterface(ROSInterface):
                 # self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[self.env_number]
                 self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0])).get_parameter_value().double_array_value[self.env_number]
         # self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
-        self._REVERSE_REWARD = self.node.get_parameter_or('~reward/reverse', Parameter(0.0)).value
+        self._REVERSE_REWARD = self.node.get_parameter_or('~reward/reverse', Parameter(0.0)).get_parameter_value().double_value
         # self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
-        self._WALL_REWARD = self.node.get_parameter_or('~reward/walls/value', Parameter(0.0)).value
+        self._WALL_REWARD = self.node.get_parameter_or('~reward/walls/value', Parameter(0.0)).get_parameter_value().double_value
         # self._WALL_THRESHOLD = rospy.get_param('~reward/walls/threshold', 0.0)
-        self._WALL_THRESHOLD = self.node.get_parameter_or('~reward/walls/threshold', Parameter(0.0)).value
+        self._WALL_THRESHOLD = self.node.get_parameter_or('~reward/walls/threshold', Parameter(0.0)).get_parameter_value().double_value
 
         self.node = Node('rocket_league_interface')
         # Publishers
