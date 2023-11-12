@@ -15,8 +15,8 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
     req = CreateBezierPathRequest()
 
     req.velocity = 0.5
-    req.bezier_segment_duration.data = rclpy.Duration(0.5)
-    req.linear_segment_duration.data = rclpy.Duration(0.01)
+    req.bezier_segment_duration.data = node.create_rate(0.5)
+    req.linear_segment_duration.data = node.create_rate(0.01)
 
     # Target 0 (car pos)
     pose0 = Pose()
@@ -25,7 +25,7 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
     pose0.position.z = 0.0
     pose0.orientation = car_odom.pose.pose.orientation
     req.target_poses.append(pose0)
-    req.target_durations.append(Duration(data=rclpy.Duration(5.0)))
+    req.target_durations.append(Duration(data=node.create_rate(5.0)))
 
     # Target 1 (ball pos)
     final_vec_x = goal_pos[0] - ball_odom.pose.pose.position.x
@@ -42,7 +42,7 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
     pose1.orientation.z = final_quat[2]
     pose1.orientation.w = final_quat[3]
     req.target_poses.append(pose1)
-    req.target_durations.append(Duration(data=rclpy.Duration(1.0)))
+    req.target_durations.append(Duration(data=node.create_rate(1.0)))
 
     # Target 2 (stop)
     pose2 = Pose()
@@ -57,8 +57,8 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
 def create_backup_path_req(car_odom, ball_odom, goal_pos):
     req = CreateBezierPathRequest()
     req.velocity = -0.5
-    req.bezier_segment_duration.data = rclpy.Duration(0.5)
-    req.linear_segment_duration.data = rclpy.Duration(0.01)
+    req.bezier_segment_duration.data = node.create_rate(0.5)
+    req.linear_segment_duration.data = node.create_rate(0.01)
 
     # Target 0 (car pos)
     pose0 = Pose()
@@ -67,7 +67,7 @@ def create_backup_path_req(car_odom, ball_odom, goal_pos):
     pose0.position.z = 0.0
     pose0.orientation = car_odom.pose.pose.orientation
     req.target_poses.append(pose0)
-    req.target_durations.append(Duration(data=rclpy.Duration(1.0)))
+    req.target_durations.append(Duration(data=node.create_rate(1.0)))
 
     # Target 1 (in front of ball)
     final_vec_x = goal_pos[0] - ball_odom.pose.pose.position.x
@@ -100,6 +100,7 @@ def create_complex_path_req(car_odom, ball_odom, goal_pos):
 class PathPlanner(object):
     def __init__(self):
         rclpy.init()
+        global node
         node = rclpy.create_node('path_planner')
 
         planner_type = node.declare_parameter('~planner_type', 'simple')
