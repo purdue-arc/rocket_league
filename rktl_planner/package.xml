@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
     <name>rktl_planner</name>
     <version>1.0.0</version>
     <description>Handles localized actions to plan and follow trajectories.</description>
-
     <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
     <license>BSD 3 Clause</license>
     <url type="website">https://www.purduearc.com</url>
@@ -13,7 +13,10 @@
     <author email="ateigen@purdue.edu">Adrian Teigen</author>
     <author email="dgerblic@purdue.edu">Daniel Gerblick</author>
 
-    <buildtool_depend>catkin</buildtool_depend>
+    <test_depend>ament_copyright</test_depend>
+    <test_depend>ament_flake8</test_depend>
+    <test_depend>ament_pep257</test_depend>
+    <test_depend>python3-pytest</test_depend>
     <exec_depend>geometry_msgs</exec_depend>
     <exec_depend>rospy</exec_depend>
     <exec_depend>std_msgs</exec_depend>
@@ -23,7 +26,12 @@
     <exec_depend>tf</exec_depend>
     <exec_depend>python-numpy</exec_depend>
     <exec_depend>rktl_msgs</exec_depend>
+    <exec_depend>rktl_dependencies</exec_depend>
     <build_depend>rktl_msgs</build_depend>
     <build_depend>message_generation</build_depend>
     <exec_depend>message_runtime</exec_depend>
+
+    <export>
+        <build_type>ament_python</build_type>
+    </export>
 </package>

@@ -3,7 +3,7 @@
 import math
 import rclpy
 import numpy as np
-from rktl_dependencies.rktl_dependencies.transformations import quaternion_from_euler, euler_from_quaternion
+from rktl_dependencies.transformations import quaternion_from_euler, euler_from_quaternion
 from std_msgs.msg import Duration
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
