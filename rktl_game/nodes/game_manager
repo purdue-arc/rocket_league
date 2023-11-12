@@ -9,43 +9,49 @@ License:
 
 
 # ROS
+<<<<<<< HEAD:rktl_game/rktl_game/nodes/game_manager
 import rclpy
+from rclpy.node import Node
+from rclpy.parameter import Parameter
+=======
+import rospy
+>>>>>>> ca905a3b4d4e46424951436dcabe807b814ea5ee:rktl_game/nodes/game_manager
 from std_msgs.msg import Bool, Header
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
 from std_srvs.srv import Empty, EmptyResponse
 
 class ScoreKeeper():
-    def __init__(self):
-        rospy.init_node('score_keeper')
+    def __init__(self, node_name='score_keeper'):
+        super().__init__()
 
         self.orange_score = 0
         self.blue_score = 0
-        self.orange_goal = (rospy.get_param('/field/length', 1) - 0.15) / 2 
-        self.blue_goal = (rospy.get_param('/field/length', 1)  - 0.15) / -2
+        self.orange_goal = (self.node.get_parameter_or('/field/length', 1).get_parameter_value().integer_value - 0.15) / 2 
+        self.blue_goal = (self.node.get_parameter_or('/field/length', 1).get_paramter_value().integer_value  - 0.15) / -2
         self.enabled = False
         self.match_status = 0
-        self.game_clock = rospy.get_param('/game_length', 90)
-        self.manager_rate = rospy.get_param('manager_rate', 10)
+        self.game_clock = self.node.get_parameter_or('/game_length', 90).get_paramter_value().integer_value
+        self.manager_rate = self.node.get_parameter_or('manager_rate', 10).get_parameter_value().integer_value
 
         # Publishers
-        self.match_status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
-        self.active_pub = rospy.Publisher('cars/enable', Bool, queue_size=1)
+        self.match_status_pub = self.node.create_publisher(MatchStatus, 'match_status', qos_profile=1)
+        self.active_pub = self.node.create_publisher(Bool, 'cars/enable', qos_profile=1)
 
         # Subscribers
         node.create_subscription(Odometry, 'ball/odom', self.check_goal)
         node.create_subscription(Bool, 'cars/enable', self.enable)
 
         # Services
-        rospy.Service('reset_game', Empty, self.reset)
-        rospy.Service('unpause_game', Empty, self.unpause)
-        rospy.Service('pause_game', Empty, self.pause)
+        rclpy.Service('reset_game', Empty, self.reset)
+        rclpy.Service('unpause_game', Empty, self.unpause)
+        rclpy.Service('pause_game', Empty, self.pause)
 
         # Counts loops and decrements game clock every second
         self.timer_ctr = 0
         # main loop
-        rate = rospy.Rate(self.manager_rate)
-        while not rospy.is_shutdown():
+        rate = self.node.Rate(self.manager_rate)
+        while not self.node.is_shutdown():
             if self.match_status == 1:
                 self.timer_ctr += 1
                 if self.timer_ctr == self.manager_rate:
@@ -62,7 +68,7 @@ class ScoreKeeper():
                 self.match_status = 4
         score = Score(self.orange_score, self.blue_score)
         header = Header()
-        header.stamp = rospy.Time.now()
+        header.stamp = self.node.Time.now()
         self.match_status_pub.publish(MatchStatus(header, self.match_status, self.game_clock, score))
 
     def pause(self, _):
@@ -76,10 +82,10 @@ class ScoreKeeper():
         self.blue_score = 0
         self.enabled = False
         self.match_status = 0
-        self.game_clock = rospy.get_param('/game_length', 90)
+        self.game_clock = self.node.get_parameter_or('/game_length', 90).get_paramter_value().integer_value
         self.active_pub.publish(False)
         header = Header()
-        header.stamp = rospy.Time.now()
+        header.stamp = self.node.Time.now()
         self.match_status_pub.publish(MatchStatus(header, 0, self.game_clock, Score(0, 0)))
         return EmptyResponse()
 
