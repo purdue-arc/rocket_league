@@ -15,8 +15,8 @@ import time
 from nav_msgs.msg import Odometry
 
 # Local modules
-import rktl_planner.src.rktl_planner.convert as convert
-import rktl_planner.src.rktl_planner.pure_pursuit as pursuit
+import rktl_planner.convert as convert
+import rktl_planner.pure_pursuit as pursuit
 from rktl_msgs.msg import Path, ControlCommand
 
 

@@ -291,11 +291,11 @@ class Sim(object):
         del self._car_data[car_id]
         return True
 
-    def set_car_command(car_id, msg):
+    def set_car_command(self, car_id, msg):
         """
         Set the command for the car
         """
-        cars[car_id].setCmd(msg)
+        self._cars[car_id].setCmd(msg)
 
     def step(self, car_cmd, dt):
         """
