@@ -14,7 +14,8 @@ import time, uuid, socket, os
 
 from gym import Env
 
-import rclpy, roslaunch
+import rclpy
+from rclpy.duration import Duration
 from rosgraph_msgs.msg import Clock
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 
@@ -102,12 +103,12 @@ class ROSInterface(Env):
             # self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
             # self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
 
-            self.__DELTA_T = rclpy.duration.Duration(seconds=1.0 / self.node.get_parameter_or('~rate', 30.0))
-            self.__clock_pub = self.node.create_publisher(Clock, '/clock', queue_size=1, latch=True)
+            self.__DELTA_T = Duration(nanoseconds = int(1e9 / self.node.get_parameter_or('~rate', rclpy.Parameter(30.0)).get_parameter_value().double_value))
+            self.__clock_pub = self.node.create_publisher(Clock, '/clock', qos_profile=1)
 
             # initialize sim time
             # self.__time = rospy.Time.from_sec(time.time())
-            self.__time = rclpy.duration.Duration(seconds=time.time())
+            self.__time = Duration(seconds=int(time.time()))
             self.__clock_pub.publish(self.__time)
 
         # additional set up for logging
@@ -117,7 +118,7 @@ class ROSInterface(Env):
             port = 11311
         self.__LOG_ID = f'{run_id}:{port}'
         # self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
-        self.__log_pub = self.node.create_publisher(DiagnosticStatus, '~log', queue_size=1)
+        self.__log_pub = self.node.create_publisher(DiagnosticStatus, '~log', qos_profile=1)
         self.__episode = 0
         self.__net_reward = 0
         # self.__start_time = rospy.Time.now()
@@ -164,7 +165,7 @@ class ROSInterface(Env):
                 'episode'    : self.__episode,
                 'net_reward' : self.__net_reward,
                 # 'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
-                'duration'   : (self.node.get_clock().now() - self.__start_time).seconds()
+                'duration'   : self.node.get_clock().now() - self.__start_time
             }
             info.update(self._get_state()[3])
             # send message

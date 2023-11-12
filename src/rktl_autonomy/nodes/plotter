@@ -9,6 +9,7 @@ License:
 # import rospy
 import rclpy
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 from diagnostic_msgs.msg import DiagnosticStatus
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
@@ -24,19 +25,19 @@ class Plotter(rclpy.Node):
         super().__init__('model_progress_plotter')
 
         # Constants
-        self.LOG_DIR = normpath(expanduser(self.get_parameter('~log/base_dir')))
+        self.LOG_DIR = normpath(expanduser(self.get_parameter('~log/base_dir').get_parameter_value().string_value))
         #self.PLOT_FREQ = rospy.get_param('~log/plot_freq', 25)
-        self.PLOT_FREQ = self.get_parameter_or('~log/plot_freq', 25)
+        self.PLOT_FREQ = self.get_parameter_or('~log/plot_freq', Parameter(25)).get_parameter_value().integer_value
         #self.BASIC_VARS = rospy.get_param('~log/basic', ["duration"])
-        self.BASIC_VARS = self.get_parameter_or('~log/basic', ["duration"])
+        self.BASIC_VARS = self.get_parameter_or('~log/basic', Parameter(["duration"])).get_parameter_value().string_array_value
         #self.ADVANCED_VARS = rospy.get_param('~log/advanced', ["net_reward"])
-        self.ADVANCED_VARS = self.get_parameter_or('~log/advanced', ["net_reward"])
+        self.ADVANCED_VARS = self.get_parameter_or('~log/advanced', Parameter(["net_reward"])).get_parameter_value().string_array_value
 
         self.KEYS = ["episode"] + self.BASIC_VARS + self.ADVANCED_VARS
         
         # Subscribers
         #rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
-        self.create_subscription(DiagnosticStatus, '~log', self.progress_cb)
+        self.create_subscription(DiagnosticStatus, '~log', self.progress_cb, qos_profile=10)
 
         self.history = None
         self.LOG_NAME = None

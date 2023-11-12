@@ -88,9 +88,9 @@ class RocketLeagueInterface(ROSInterface):
 
         # Observations
         # self._FIELD_WIDTH = rospy.get_param('/field/width')
-        self._FIELD_WIDTH = self.node.get_parameter('/field/width').value
+        self._FIELD_WIDTH = self.node.get_parameter('/field/width').get_parameter_value().double_value
         # self._FIELD_LENGTH = rospy.get_param('/field/length')
-        self._FIELD_LENGTH = self.node.get_parameter('/field/length').value
+        self._FIELD_LENGTH = self.node.get_parameter('/field/length').get_parameter_value().double_value
         # self._GOAL_DEPTH = rospy.get_param('~observation/goal_depth', 0.075)
         self._GOAL_DEPTH = self.node.get_parameter_or('~observation/goal_depth', Parameter(0.075)).value
         # self._MAX_OBS_VEL = rospy.get_param('~observation/velocity/max_abs', 3.0)
@@ -115,24 +115,24 @@ class RocketLeagueInterface(ROSInterface):
             self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).value
         else:
             # if len(rospy.get_param('~reward/win', [100.0])) >= self.env_number:
-            if len(self.node.get_parameter_or('~reward/win', Parameter([100.0])).value) >= self.env_number:
+            if len(self.node.get_parameter_or('~reward/win', Parameter([100.0])).get_parameter_value().double_array_value) >= self.env_number:
                 # self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[0]
-                self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).value[0]
+                self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).get_parameter_value().double_array_value[0]
             else:
                 # self._WIN_REWARD = rospy.get_param('~reward/win', [100.0])[self.env_number]
-                self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).value[self.env_number]
+                self._WIN_REWARD = self.node.get_parameter_or('~reward/win', Parameter([100.0])).get_parameter_value().double_array_value[self.env_number]
         # if isinstance(rospy.get_param('~reward/loss', [100.0]), int):
-        if isinstance(self.node.get_parameter_or('~reward/loss', Parameter([100.0])), int):
+        if isinstance(self.node.get_parameter_or('~reward/loss', Parameter([100.0])).get_parameter_value().double_array_value, int):
             # self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])
             self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0]))
         else:
             # if len(rospy.get_param('~reward/loss', [100.0])) >= self.env_number:
-            if len(self.node.get_parameter_or('~reward/loss', Parameter([100.0])).value) >= self.env_number:
+            if len(self.node.get_parameter_or('~reward/loss', Parameter([100.0])).get_parameter_value().double_array_value) >= self.env_number:
                 # self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[0]
-                self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0], type_=8)).value[0]
+                self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0], type_=8)).get_parameter_value().double_array_value[0]
             else:
                 # self._LOSS_REWARD = rospy.get_param('~reward/loss', [100.0])[self.env_number]
-                self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0])).value[self.env_number]
+                self._LOSS_REWARD = self.node.get_parameter_or('~reward/loss', Parameter([100.0])).get_parameter_value().double_array_value[self.env_number]
         # self._REVERSE_REWARD = rospy.get_param('~reward/reverse', 0.0)
         self._REVERSE_REWARD = self.node.get_parameter_or('~reward/reverse', Parameter(0.0)).value
         # self._WALL_REWARD = rospy.get_param('~reward/walls/value', 0.0)
@@ -156,11 +156,11 @@ class RocketLeagueInterface(ROSInterface):
 
         # Subscribers
         # rospy.Subscriber('cars/car0/odom', Odometry, self._car_odom_cb)
-        self.node.create_subscription(Odometry, 'cars/car0/odom', self._car_odom_cb)
+        self.node.create_subscription(Odometry, 'cars/car0/odom', self._car_odom_cb, qos_profile=1)
         # rospy.Subscriber('ball/odom', Odometry, self._ball_odom_cb)
-        self.node.create_subscription(Odometry, 'ball/odom', self._ball_odom_cb)
+        self.node.create_subscription(Odometry, 'ball/odom', self._ball_odom_cb, qos_profile=1)
         # rospy.Subscriber('match_status', MatchStatus, self._score_cb)
-        self.node.create_subscription(MatchStatus, 'match_status', self._score_cb)
+        self.node.create_subscription(MatchStatus, 'match_status', self._score_cb, qos_profile=1)
 
         # block until environment is ready
         # if not eval:

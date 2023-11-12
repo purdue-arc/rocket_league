@@ -11,6 +11,7 @@ from stable_baselines3 import PPO
 from os.path import expanduser
 # import rospy
 import rclpy
+from rclpy.exceptions import ROSInterruptException
 
 
 
@@ -29,5 +30,5 @@ while True:
     try:
         obs, __, __, __ = env.step(action)
     # except rospy.ROSInterruptException:
-    except rclpy.ROSInterruptException:
+    except ROSInterruptException:
         exit()
