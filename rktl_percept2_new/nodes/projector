@@ -28,7 +28,7 @@ class Projector(rclpy.Node):
 
         # constants
         #self.GROUND_HEIGHT = rospy.get_param('~ground_height', 0.0)
-        self.GROUND_HEIGHT = rclpy.get_parameter_or('~ground_height', 0.0).get_parameter_value().float_value
+        self.GROUND_HEIGHT = self.get_parameter_or('~ground_height', 0.0).get_parameter_value().float_value
 
         # used to access TF tree
         buffer = Buffer()
@@ -47,7 +47,7 @@ class Projector(rclpy.Node):
         # rate at which to re-compute depth map
         #rate = rospy.Rate(1.0/rospy.get_param('~update_period', 1))
         #rate = rclpy.Rate(1.0/rclpy.get_parameter_or('~update_period', 1).get_parameter_value().integer_value)
-        self._loop_rate = self.create_rate(1.0/rclpy.get_parameter_or('~update_period', 1).get_parameter_value().integer_value, self.get_clock())
+        self._loop_rate = self.create_rate(1.0/self.get_parameter_or('~update_period', 1).get_parameter_value().integer_value, self.get_clock())
 
         # compute depth map in main loop and cache since it is slow changing
         # publish latest in callback so that the stamps match (for rviz)

@@ -38,7 +38,7 @@ def generate_launch_description():
             package="rviz",
             executable="rviz",
             name="rviz",
-            arguments= "-d $(find rktl_perception)/rviz/field.rviz"
+            arguments= "-d " + os.path.join(get_package_share_directory('rktl_perception'), 'rviz', 'field.rviz')
         )
     ]
 
