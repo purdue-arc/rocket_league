@@ -13,10 +13,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='jcrm1',
-    maintainer_email='jcrm1@todo.todo',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='Autonomous Robotics Club of Purdue',
+    maintainer_email='autonomy@purdue.eduo',
+    description='Simulator and Visualizer for ARC Rocket League project',
+    license='BSD 3 Clause',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
