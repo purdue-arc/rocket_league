@@ -29,11 +29,13 @@ class Plotter(rclpy.Node):
         #self.PLOT_FREQ = rospy.get_param('~log/plot_freq', 25)
         self.PLOT_FREQ = self.get_parameter_or('~log/plot_freq', Parameter(25)).get_parameter_value().integer_value
         #self.BASIC_VARS = rospy.get_param('~log/basic', ["duration"])
-        self.BASIC_VARS = self.get_parameter_or('~log/basic', Parameter(["duration"])).get_parameter_value().string_array_value
+        self.BASIC_VARS = self.get_parameter_or('~log/basic', Parameter(["duration"])).get_parameter_value().string_value
         #self.ADVANCED_VARS = rospy.get_param('~log/advanced', ["net_reward"])
-        self.ADVANCED_VARS = self.get_parameter_or('~log/advanced', Parameter(["net_reward"])).get_parameter_value().string_array_value
+        self.ADVANCED_VARS = self.get_parameter_or('~log/advanced', Parameter(["net_reward"])).get_parameter_value().string_value
 
-        self.KEYS = ["episode"] + self.BASIC_VARS + self.ADVANCED_VARS
+        self.KEYS = ["episode"]
+        self.KEYS.append(self.BASIC_VARS)
+        self.KEYS.append(self.ADVANCED_VARS)
         
         # Subscribers
         #rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
