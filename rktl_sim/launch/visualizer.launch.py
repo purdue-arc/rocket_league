@@ -14,20 +14,11 @@ def generate_launch_description():
             name='visualizer',
             output='screen',
             parameters=[
-                {
-                    'media/ball': get_package_share_directory('rktl_sim') + '/media/ball.png'
-                },
-                {
-                    'media/car': get_package_share_directory('rktl_sim') + '/media/car.png'
-                },
-                {
-                    'media/goal': get_package_share_directory('rktl_sim') + '/media/goal.png'
-                },
-                {
-                    'media/field': get_package_share_directory('rktl_sim') + '/media/field.jpg'
-                },
-                get_package_share_directory(
-                    'rktl_sim') + '/config/visualization.yaml'
+                {'media/ball': get_package_share_directory('rktl_sim') + '/media/ball.png'},
+                {'media/car': get_package_share_directory('rktl_sim') + '/media/car.png'},
+                {'media/goal': get_package_share_directory('rktl_sim') + '/media/goal.png'},
+                {'media/field': get_package_share_directory('rktl_sim') + '/media/field.jpg'},
+                get_package_share_directory('rktl_sim') + '/config/visualization.yaml'
             ]
         )
     ])

@@ -23,32 +23,15 @@ def generate_launch_description():
             output='screen',
             on_exit=launch.actions.Shutdown(),
             parameters=[
-                {
-                    'mode': launch.substitutions.LaunchConfiguration('sim_mode')
-                },
-                {
-                    'render': launch.substitutions.LaunchConfiguration('pybullet_render')
-                },
-                {
-                    'urdf/ball': get_package_share_directory('rktl_sim') + '/urdf/ball.urdf'
-                },
-                {
-                    'urdf/car': get_package_share_directory('rktl_sim') + '/urdf/car.urdf'
-                },
-                {
-                    'urdf/goal': get_package_share_directory('rktl_sim') + '/urdf/goal.urdf'
-                },
-                {
-                    'urdf/sidewall': get_package_share_directory('rktl_sim') + '/urdf/sidewall.urdf'
-                },
-                {
-                    'urdf/backwall': get_package_share_directory('rktl_sim') + '/urdf/backwall.urdf'
-                },
-                {
-                    'urdf/plane': get_package_share_directory('rktl_sim') + '/urdf/plane.urdf'
-                },
-                get_package_share_directory(
-                    'rktl_sim') + '/config/simulation.yaml'
+                {'mode': launch.substitutions.LaunchConfiguration('sim_mode')},
+                {'render': launch.substitutions.LaunchConfiguration('pybullet_render')},
+                {'urdf/ball': get_package_share_directory('rktl_sim') + '/urdf/ball.urdf'},
+                {'urdf/car': get_package_share_directory('rktl_sim') + '/urdf/car.urdf'},
+                {'urdf/goal': get_package_share_directory('rktl_sim') + '/urdf/goal.urdf'},
+                {'urdf/sidewall': get_package_share_directory('rktl_sim') + '/urdf/sidewall.urdf'},
+                {'urdf/backwall': get_package_share_directory('rktl_sim') + '/urdf/backwall.urdf'},
+                {'urdf/plane': get_package_share_directory('rktl_sim') + '/urdf/plane.urdf'},
+                get_package_share_directory('rktl_sim') + '/config/simulation.yaml'
             ]
         )
     ])

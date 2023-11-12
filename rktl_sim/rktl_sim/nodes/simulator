@@ -103,6 +103,7 @@ class Simulator(object):
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
+
         # TODO: find a better way to not have duplicate code segment
         self.car_properties = {'length': self.get_sim_param('/cars/length'),
                                'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
@@ -176,15 +177,13 @@ class Simulator(object):
         """Sets a car's effort with throttle and steering (overwrites commands)."""
         self.cmd_lock.acquire()
 
-        self.sim.set_car_command(car_id,
-                                 (effort_msg.throttle, effort_msg.steering))
+        self.sim.set_car_command(car_id, (effort_msg.throttle, effort_msg.steering))
         self.cmd_lock.release()
 
     def cmd_cb(self, cmd_msg, car_id):
         """Sets a car's command with the velocity and curvature. (overwrites effort)."""
         self.cmd_lock.acquire()
-        self.sim.set_car_command(car_id,
-                                 (cmd_msg.velocity, cmd_msg.curvature))
+        self.sim.set_car_command(car_id, (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
 
     def reset_cb(self, _):
