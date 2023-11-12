@@ -46,7 +46,7 @@ class TestStep(unittest.TestCase):
         self.node.create_subscription(Clock, '/clock', self.clock_cb, 10)
         
         #rospy.Service('sim_reset', Empty, self.reset)
-        self.node.create_service(Empty, 'sim_reset', self.reset)
+        self.node.create_service(Empty, 'sim_reset', callback=self.reset)
 
         # member variables used for test
         self.send_car = None
