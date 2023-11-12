@@ -21,7 +21,7 @@ class Publisher(rclpy.Node):
 
         self.broadcaster = TransformBroadcaster()
         #self.FRAME = rospy.get_param('~cam_frame_id', 'cam0')
-        self.FRAME = rclpy.get_parameter_or('~cam_frame_id', 'cam0').get_parameter_value().string_value
+        self.FRAME = self.get_parameter_or('~cam_frame_id', 'cam0').get_parameter_value().string_value
 
         #rospy.Subscriber("pose", PoseWithCovarianceStamped, self.pose_cb)
         self.subscription = self.create_subscription(PoseWithCovarianceStamped, "pose", self.pose_cb)
