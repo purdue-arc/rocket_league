@@ -1,0 +1,16 @@
+<launch>
+    <arg name="pybullet_render" default="false"/>
+    <arg name="sim_mode" default="realistic"/> <!--Either realistic or ideal (check docs) -->
+
+    <node pkg="rktl_sim" type="simulator" name="simulator" output="screen" required="true">
+        <rosparam command="load" file="$(find rktl_sim)/config/simulation.yaml"/>
+        <param name="mode"          value="$(arg sim_mode)"/>
+        <param name="render"        value="$(arg pybullet_render)"/>
+        <param name="urdf/ball"     value="$(find rktl_sim)/urdf/ball.urdf"/>
+        <param name="urdf/car"      value="$(find rktl_sim)/urdf/car.urdf"/>
+        <param name="urdf/goal"     value="$(find rktl_sim)/urdf/goal.urdf"/>
+        <param name="urdf/sidewall" value="$(find rktl_sim)/urdf/sidewall.urdf"/>
+        <param name="urdf/backwall" value="$(find rktl_sim)/urdf/backwall.urdf"/>
+        <param name="urdf/plane"    value="$(find rktl_sim)/urdf/plane.urdf"/>
+    </node>
+</launch>

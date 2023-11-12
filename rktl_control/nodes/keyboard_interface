@@ -9,7 +9,7 @@ License:
   All rights reserved.
 """
 
-import rospy
+import rclpy
 from rktl_msgs.msg import ControlEffort
 from std_srvs.srv import Empty
 
@@ -21,7 +21,7 @@ def main(win):
     win.nodelay(True)
     throttle_effort = 0
     steering_effort = 0
-    while not rospy.is_shutdown():
+    while not rclpy.is_shutdown():
         key = ""
         try:
             key = win.getkey()
@@ -47,7 +47,7 @@ def main(win):
         steering_effort = max(min(steering_effort, 1.0), -1.0)
 
         msg = ControlEffort()
-        msg.header.stamp = rospy.Time.now()
+        msg.header.stamp = rclpy.Time.now()
         msg.throttle = throttle_effort
         msg.steering = steering_effort
         effort_pub.publish(msg)
@@ -62,9 +62,10 @@ def main(win):
         win.addstr("q to quit")
         sleep(0.01)
 
+
 if __name__ == "__main__":
-    rospy.init_node('keyboard')
-    effort_pub = rospy.Publisher('effort', ControlEffort, queue_size=1)
-    reset_srv = rospy.ServiceProxy('/sim_reset', Empty)
+    node = rclpy.create_node('keyboard')
+    effort_pub = node.create_publisher(ControlEffort, 'effort', queue_size=1)
+    reset_srv = node.create_client(Empty, '/sim_reset')
 
     wrapper(main)
