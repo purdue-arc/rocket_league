@@ -199,7 +199,8 @@ class RocketLeagueInterface(ROSInterface):
 
     def _reset_env(self):
         """Reset environment for a new training episode."""
-        self._reset_srv.call()
+
+        self._reset_srv.call(Empty)
 
     def _reset_self(self):
         """Reset internally for a new episode."""

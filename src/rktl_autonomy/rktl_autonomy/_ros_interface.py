@@ -103,19 +103,21 @@ class ROSInterface(Env):
             # self.__DELTA_T = rospy.Duration.from_sec(1.0 / rospy.get_param('~rate', 30.0))
             # self.__clock_pub = rospy.Publisher('/clock', Clock, queue_size=1, latch=True)
 
-            self.__DELTA_T = Duration(nanoseconds = int(1e9 / self.node.get_parameter_or('~rate', rclpy.Parameter(30.0)).get_parameter_value().double_value))
+            self.__DELTA_T = int(1e9 / self.node.get_parameter_or('~rate', rclpy.Parameter(30.0)).get_parameter_value().double_value)  # nanoseconds
             self.__clock_pub = self.node.create_publisher(Clock, '/clock', qos_profile=1)
 
             # initialize sim time
             # self.__time = rospy.Time.from_sec(time.time())
-            self.__time = Duration(seconds=int(time.time()))
-            self.__clock_pub.publish(self.__time)
+            self.__time = int(time.time() * 1e9) # nanoseconds
+            self.__clock_pub.publish(Duration(nanoseconds=self.__time))
 
         # additional set up for logging
         if run_id is None:
             run_id = uuid.uuid4()
         if self.__EVAL_MODE:
             port = 11311
+        else:
+            port = None
         self.__LOG_ID = f'{run_id}:{port}'
         # self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
         self.__log_pub = self.node.create_publisher(DiagnosticStatus, '~log', qos_profile=1)
@@ -201,7 +203,7 @@ class ROSInterface(Env):
                     raise SimTimeException
                 else:
                     self.__time += self.__DELTA_T
-                    self.__clock_pub.publish(self.__time)
+                    self.__clock_pub.publish(Duration(nanoseconds = int(self.__time)))
                     retries += 1
         else:
             while not self.__wait_once_for_state():
