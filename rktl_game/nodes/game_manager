@@ -9,13 +9,9 @@ License:
 
 
 # ROS
-<<<<<<< HEAD:rktl_game/rktl_game/nodes/game_manager
 import rclpy
 from rclpy.node import Node
 from rclpy.parameter import Parameter
-=======
-import rospy
->>>>>>> ca905a3b4d4e46424951436dcabe807b814ea5ee:rktl_game/nodes/game_manager
 from std_msgs.msg import Bool, Header
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
