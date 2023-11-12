@@ -37,19 +37,18 @@ namespace rktl_perception {
 
 class FocusVis {
 public:
-    FocusVis(const std::shared_ptr<rclcpp::Node> nh);
+    FocusVis(const std::shared_ptr<rclcpp::Node> node);
     ~FocusVis() = default;
 
 private:
     void focusCallback(const sensor_msgs::ImageConstPtr& msg,
                        const sensor_msgs::CameraInfoConstPtr& info);
 
-    std::shared_ptr<rclcpp::Node> _nh;
-    std::shared_ptr<rclcpp::Node> _pnh;
+    std::shared_ptr<rclcpp::Node> _node;
     image_transport::ImageTransport _it;
     image_transport::CameraSubscriber _cameraSub;
     image_transport::Publisher _imgPub;
-    ros::Subscriber _detectionSub;
+    rclcpp::Subscribtion _detectionSub;
     image_geometry::PinholeCameraModel _camera;
 };
 
