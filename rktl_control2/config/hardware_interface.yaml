@@ -1,0 +1,34 @@
+# hardware configuration
+port: /dev/ttyACM0
+
+# servo adjustments (uS)
+car0:
+  throttle_throw:   90
+  steering_left:    950
+  steering_center:  1450
+  steering_right:   1850
+car1:
+  throttle_throw:   90
+  steering_left:    950
+  steering_center:  1450
+  steering_right:   1850
+car2:
+  throttle_throw:   90
+  steering_left:    950
+  steering_center:  1450
+  steering_right:   1850
+car3:
+  throttle_throw:   90
+  steering_left:    950
+  steering_center:  1450
+  steering_right:   1850
+car4:
+  throttle_throw:   90
+  steering_left:    950
+  steering_center:  1450
+  steering_right:   1850
+car5:
+  throttle_throw:   90
+  steering_left:    950
+  steering_center:  1450
+  steering_right:   1850
