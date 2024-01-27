@@ -10,17 +10,19 @@ License:
 """
 
 import rclpy
+import sys
 from rktl_msgs.msg import ControlEffort
 from std_srvs.srv import Empty
 
 from curses import wrapper
 from time import sleep
 
+
 def main(win):
     win.nodelay(True)
     throttle_effort = 0
     steering_effort = 0
-    while not rclpy.ok():
+    while rclpy.ok():
         key = ""
         try:
             key = win.getkey()
@@ -46,7 +48,7 @@ def main(win):
         steering_effort = max(min(steering_effort, 1.0), -1.0)
 
         msg = ControlEffort()
-        msg.header.stamp = rclpy.Time.now()
+        msg.header.stamp = node.get_clock().now().to_msg()
         msg.throttle = throttle_effort
         msg.steering = steering_effort
         effort_pub.publish(msg)
@@ -62,8 +64,10 @@ def main(win):
         sleep(0.01)
 
 if __name__ == "__main__":
+    rclpy.init(args=sys.argv)
     node = rclpy.create_node('keyboard')
-    effort_pub = node.create_publisher('effort', ControlEffort, queue_size=1)
+
+    effort_pub = node.create_publisher(ControlEffort, 'effort', queue_size=1)
     reset_srv = node.create_client(Empty, '/sim_reset')
 
     wrapper(main)
