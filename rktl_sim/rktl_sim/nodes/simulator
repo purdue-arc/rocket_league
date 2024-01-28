@@ -13,7 +13,6 @@ import sys
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 import os
-import rclpy
 import time
 
 #import rospy
