@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rktl_launch</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>Launch files for the ARC Rocket League project</description>
 
   <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
@@ -17,14 +17,14 @@
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
-
-  <export>
-    <build_type>ament_python</build_type>
-  </export>
   <exec_depend>rktl_perception</exec_depend>
   <exec_depend>rktl_game</exec_depend>
   <exec_depend>rktl_planner</exec_depend>
   <exec_depend>rktl_sim</exec_depend>
   <exec_depend>rktl_control</exec_depend>
   <exec_depend>rqt_gui</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
 </package>
