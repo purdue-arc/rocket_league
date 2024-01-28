@@ -23,6 +23,9 @@
 /* messages */
 #include <sensor_msgs/Image.h>
 
+#include <string>
+#include <algorithm>
+
 const int max_value_H = 360 / 2;
 const int max_value = 255;
 const std::string window_capture_name = "Video Capture";
@@ -99,7 +102,6 @@ int main(int argc, char* argv[]) {
     //ros::NodeHandle nh;
     rclcpp::init(argc, argv);
     auto node = rclcpp:Node::make_shared("image_listener");
-
 
     cv::namedWindow(window_detection_name);
 

@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'rktl_percept2_new'
+package_name = 'rktl_perception'
 
 setup(
     name=package_name,

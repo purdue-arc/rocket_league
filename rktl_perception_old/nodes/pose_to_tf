@@ -7,25 +7,22 @@ License:
 """
 
 # ROS
-import rclpy
+import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped, TransformStamped
 from tf2_ros import TransformBroadcaster
 
 
-class Publisher(rclpy.Node):
+class Publisher(object):
     """Workaround class until TF is implemented"""
 
     def __init__(self):
-        #rospy.init_node('pose_to_tf')
-        rclpy.init_node('pose_to_tf')
+        rospy.init_node('pose_to_tf')
 
         self.broadcaster = TransformBroadcaster()
-        #self.FRAME = rospy.get_param('~cam_frame_id', 'cam0')
-        self.FRAME = self.get_parameter_or('~cam_frame_id', 'cam0').get_parameter_value().string_value
+        self.FRAME = rospy.get_param('~cam_frame_id', 'cam0')
 
-        #rospy.Subscriber("pose", PoseWithCovarianceStamped, self.pose_cb)
-        self.subscription = self.create_subscription(PoseWithCovarianceStamped, "pose", self.pose_cb)
-        #rospy.spin() -> Moved into main function
+        rospy.Subscriber("pose", PoseWithCovarianceStamped, self.pose_cb)
+        rospy.spin()
 
     def pose_cb(self, pose_msg):
         """Publish a pose corresponding to the TF."""
@@ -41,12 +38,6 @@ class Publisher(rclpy.Node):
         tf.transform.rotation.w = pose_msg.pose.pose.orientation.w
         self.broadcaster.sendTransform(tf)
 
-def main(args=None):
-    rclpy.init(arg = args)
-    publisher = Publisher()
-    rclpy.spin(publisher)
-    publisher.destroy_node()
-    rclpy.shutdown()
 
 if __name__ == "__main__":
-    main()
+    Publisher()

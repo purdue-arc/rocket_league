@@ -9,7 +9,7 @@
 
 namespace rktl_perception {
 
-Localizer::Localizer() : _node(node) {
+Localizer::Localizer(const ros::NodeHandle& nh, const ros::NodeHandle& pnh) : _nh(nh), _pnh(pnh) {
     std::string detectionTopic;
     std::string pubTopic;
     std::map<std::string, std::string> pubTopics;
@@ -17,23 +17,23 @@ Localizer::Localizer() : _node(node) {
     std::string ballPubTopic;
     int queueSize;
 
-    _node->param<std::string>("dectection_topic", detectionTopic, "tag_detections");
-    _node->param<std::string>("origin_id", _originId, "0");
-    _node->getParam("pub_topic", pubTopic);
-    _node->getParam("pub_topics", pubTopics);
-    _node->param<std::string>("ball_sub_topic", ballSubTopic, "ball_vector");
-    _node->param<std::string>("ball_pub_topic", ballPubTopic, "ball_pos");
-    _node->param<double>("ball_radius", _ballRadius, 0.05);
-    _node->param<int>("buffer_size", _bufferSize, 10);
-    _node->param<int>("queue_size", queueSize, 100);
+    _pnh.param<std::string>("dectection_topic", detectionTopic, "tag_detections");
+    _pnh.param<std::string>("origin_id", _originId, "0");
+    _pnh.getParam("pub_topic", pubTopic);
+    _pnh.getParam("pub_topics", pubTopics);
+    _pnh.param<std::string>("ball_sub_topic", ballSubTopic, "ball_vector");
+    _pnh.param<std::string>("ball_pub_topic", ballPubTopic, "ball_pos");
+    _pnh.param<double>("ball_radius", _ballRadius, 0.05);
+    _pnh.param<int>("buffer_size", _bufferSize, 10);
+    _pnh.param<int>("queue_size", queueSize, 100);
 
-    _sub = _node->subscribe(detectionTopic, queueSize, &Localizer::apriltagCallback, this);
-    _pub = _node->advertise<geometry_msgs::PoseWithCovarianceStamped>(pubTopic, queueSize);
-    _ballSub = _node->subscribe(ballSubTopic, queueSize, &Localizer::ballCallback, this);
-    _ballPub = _node->advertise<geometry_msgs::PoseWithCovarianceStamped>(ballPubTopic, queueSize);
+    _sub = _nh.subscribe(detectionTopic, queueSize, &Localizer::apriltagCallback, this);
+    _pub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(pubTopic, queueSize);
+    _ballSub = _nh.subscribe(ballSubTopic, queueSize, &Localizer::ballCallback, this);
+    _ballPub = _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(ballPubTopic, queueSize);
     for (auto& kv : pubTopics)
         _pubs[kv.first] =
-            _node->advertise<geometry_msgs::PoseWithCovarianceStamped>(kv.second, queueSize);
+            _nh.advertise<geometry_msgs::PoseWithCovarianceStamped>(kv.second, queueSize);
 
     _bufferPos = 0;
     _buffer.reserve(_bufferSize);
@@ -134,7 +134,7 @@ Eigen::Matrix4d Localizer::combineMatrices(const Eigen::Matrix3d& rot, const Eig
 }
 
 geometry_msgs::PoseWithCovarianceStamped Localizer::toMsg(const Eigen::Matrix4d& transform,
-                                                          rclcpp::Time stamp,
+                                                          ros::Time stamp,
                                                           const std::string& frameId) {
     Eigen::Quaterniond rot(transform.topLeftCorner<3, 3>());
     Eigen::Vector3d pos(transform.col(3).head<3>());

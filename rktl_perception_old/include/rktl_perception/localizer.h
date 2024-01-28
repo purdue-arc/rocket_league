@@ -8,7 +8,7 @@
 #ifndef __RKTL_PERCEPTION_LOCALIZER_H__
 #define __RKTL_PERCEPTION_LOCALIZER_H__
 
-#include <rclcpp/rclcpp.hpp>
+#include <ros/ros.h>
 #include <apriltag_ros/AprilTagDetectionArray.h>
 #include <geometry_msgs/Vector3Stamped.h>
 #include <Eigen/Dense>
@@ -17,7 +17,7 @@ namespace rktl_perception {
 
 class Localizer {
 public:
-    Localizer(const std::shared_ptr<rclcpp::Node>& node);
+    Localizer(const ros::NodeHandle& nh, const ros::NodeHandle& pnh);
     ~Localizer() = default;
 
     static std::string idsToString(std::vector<int> ids);
@@ -27,16 +27,17 @@ private:
     void ballCallback(geometry_msgs::Vector3StampedConstPtr msg);
     Eigen::Matrix4d combineMatrices(const Eigen::Matrix3d& rot, const Eigen::Vector3d& pos);
     geometry_msgs::PoseWithCovarianceStamped toMsg(const Eigen::Matrix4d& transform,
-                                                   rclcpp::Time stamp,
+                                                   ros::Time stamp,
                                                    const std::string& frameId = "map");
 
-    std::shared_ptr<rclcpp::Node> _node;
-    rclcpp::Subscribtion _sub;
+    ros::NodeHandle _nh;
+    ros::NodeHandle _pnh;
+    ros::Subscriber _sub;
     std::string _originId;
-    rclcpp::Publisher _pub;
-    std::map<std::string, rclcpp::Publisher> _pubs;
-    rclcpp::Subscribtion _ballSub;
-    rclcpp::Publisher _ballPub;
+    ros::Publisher _pub;
+    std::map<std::string, ros::Publisher> _pubs;
+    ros::Subscriber _ballSub;
+    ros::Publisher _ballPub;
     int _bufferSize;
     int _bufferPos;
     double _ballRadius;
