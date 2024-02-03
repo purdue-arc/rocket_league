@@ -23,14 +23,15 @@ async def socket_handler(websocket):
     print(len(packet))
     await websocket.send(packet)
 
-async def main():
+async def main(self):
   try:
     async with websockets.serve(socket_handler, None, 8765):
       await asyncio.Future()
   except asyncio.CancelledError:
     running = False
     print("Quitting")
-    rospy.signal_shutdown()
+    # was rospy.signal_shutdown()
+    self.destroy_node()
     os._exit(0)
 
 def receive_callback(thr, str, data):
@@ -54,5 +55,6 @@ if __name__ == '__main__':
     loop.run_until_complete(task)
     print("Spinning")
   finally:
-    rospy.signal_shutdown()
+    # was rospy.signal_shutdown()
+    rclpy.shutdown()
     loop.close()
