@@ -1,17 +1,16 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>rktl_perception</name>
   <version>0.0.0</version>
-  <description>Perception for ARC Rocket League project</description>
-  <maintainer email="autonomy@purdue.edu">Autonomous Robotics Club of Purdue</maintainer>
-  <license>BSD 3 Clause</license>
-  <url type="website">http://www.purduearc.com</url>
-  <author email="baxter26@purdue.edu">James Baxter</author>
-  <author email="dgerblic@purdue.edu">Daniel Gerblick</author>
-  <author email="aernande@purdue.edu">AJ Ernandes</author>
+  <description>TODO: Package description</description>
+  <maintainer email="DinoSage@todo.todo">DinoSage</maintainer>
+  <license>TODO: License declaration</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <depend>roscpp</depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+<!-- added dependencies from previous-->
   <depend>pointgrey_camera_driver</depend>
   <depend>image_proc</depend>
   <depend>apriltag_ros</depend>
@@ -20,6 +19,23 @@
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
   <depend>nodelet</depend>
+<!-- added dependencies missing from previous--> 
+  <depend>OpenCV</depend>
+  <depend>Eigen3</depened>
+  <depend>geometry_msgs</depend>
+  <depend>image_geometry</depened>
+
+
   <exec_depend>camera_calibration</exec_depend>
   <exec_depend>rviz</exec_depend>
+
+  <!-- from "migrating interface package"-->
+  
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

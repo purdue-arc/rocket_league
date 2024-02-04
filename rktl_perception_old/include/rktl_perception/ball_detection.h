@@ -9,8 +9,8 @@
 #define __RKTL_PERCEPTION_BALL_DETECTION_H__
 
 /* ros */
-#include <rclcpp/rclcpp.hpp>
-
+#include <ros/ros.h>
+#include <ros/console.h>
 
 /* image */
 #include <image_transport/image_transport.h>
@@ -31,25 +31,25 @@
 /* math & vectors */
 #include <vector>
 #include <math.h>
-#include <memory>
 
 namespace rktl_perception {
 
 class BallDetection {
 public:
-    BallDetection(const std::shared_ptr<rclcpp::Node>& node);
+    BallDetection(const ros::NodeHandle& nh, const ros::NodeHandle& pnh);
     ~BallDetection() = default;
 
 private:
     void ballCallback(const sensor_msgs::ImageConstPtr& msg,
                       const sensor_msgs::CameraInfoConstPtr& info);
 
-    std::shared_ptr<rclcpp::Node> _node;
+    ros::NodeHandle _nh;
+    ros::NodeHandle _pnh;
     image_transport::ImageTransport _it;
     image_transport::CameraSubscriber _cameraSub;
     image_transport::Publisher _imgPub;
-    rclcpp::Publisher _vecPub;
-    rclcpp::Subscribtion _detectionSub;
+    ros::Publisher _vecPub;
+    ros::Subscriber _detectionSub;
     int _minHue, _minSat, _minVib, _maxHue, _maxSat, _maxVib, _minSize, _erodeAmnt, _dilateAmnt;
     double _originX, _originY;
     bool _publishThresh;

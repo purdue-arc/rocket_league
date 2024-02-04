@@ -6,6 +6,7 @@
  */
 
 #include "rktl_perception/ball_detection.h"
+#include "rclcpp/rclcpp.hpp"
 
 namespace rktl_perception {
 

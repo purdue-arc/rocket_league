@@ -7,7 +7,7 @@ License:
 """
 
 # ROS
-import rclpy
+import rospy
 from sensor_msgs.msg import Image, CameraInfo
 from tf2_ros import Buffer, TransformListener
 from tf.transformations import translation_matrix, quaternion_matrix
@@ -15,20 +15,16 @@ from tf.transformations import translation_matrix, quaternion_matrix
 import numpy as np
 
 
-class Projector(rclpy.Node):
+class Projector(object):
     """Class to synchronize and buffer all poses."""
 
     def __init__(self):
-        #self.init_node('projector')
-        super().init_node('projector')
-        #self.depth_pub = rospy.Publisher('depth_rect', Image, queue_size=1)
-        self.depth_pub = self.create_publisher(Image, 'depth_rect', queue_size=1)
-        #rospy.Subscriber('camera_info', CameraInfo, self.camera_info_cb)
-        self.subscription = self.create_subscription(CameraInfo, 'camera_info',self.camera_info_cb)
+        rospy.init_node('projector')
+        self.depth_pub = rospy.Publisher('depth_rect', Image, queue_size=1)
+        rospy.Subscriber('camera_info', CameraInfo, self.camera_info_cb)
 
         # constants
-        #self.GROUND_HEIGHT = rospy.get_param('~ground_height', 0.0)
-        self.GROUND_HEIGHT = self.get_parameter_or('~ground_height', 0.0).get_parameter_value().float_value
+        self.GROUND_HEIGHT = rospy.get_param('~ground_height', 0.0)
 
         # used to access TF tree
         buffer = Buffer()
@@ -45,25 +41,19 @@ class Projector(rclpy.Node):
         self.img_msg = None
 
         # rate at which to re-compute depth map
-        #rate = rospy.Rate(1.0/rospy.get_param('~update_period', 1))
-        #rate = rclpy.Rate(1.0/rclpy.get_parameter_or('~update_period', 1).get_parameter_value().integer_value)
-        self._loop_rate = self.create_rate(1.0/self.get_parameter_or('~update_period', 1).get_parameter_value().integer_value, self.get_clock())
+        rate = rospy.Rate(1.0/rospy.get_param('~update_period', 1))
 
         # compute depth map in main loop and cache since it is slow changing
         # publish latest in callback so that the stamps match (for rviz)
-        while not rclpy.ok():
+        while not rospy.is_shutdown():
             # check if camera_info callback has been run
             if not self.initialized:
                 continue
 
             # get camera location via TF tree
-            #try:
-            #    map_to_cam_msg = buffer.lookup_transform(
-            #        self.frame_id, 'map', rospy.Time())
-            #except:
             try:
                 map_to_cam_msg = buffer.lookup_transform(
-                    self.frame_id, 'map', self.get_clock().now().to_msg())
+                    self.frame_id, 'map', rospy.Time())
             except:
                 continue
 
@@ -125,8 +115,7 @@ class Projector(rclpy.Node):
 
             # delay since making the depth map is expensive
             try:
-                self._loop_rate.sleep()
-                #rate.sleep()
+                rate.sleep()
             except:
                 pass
 
@@ -145,11 +134,6 @@ class Projector(rclpy.Node):
             self.img_msg.header.stamp = info_msg.header.stamp
             self.depth_pub.publish(self.img_msg)
 
-def main(args=None):
-    rclpy.init(args=args)
-    projector = Projector()
-    rclpy.spin(projector)
-    rclpy.shutdown()
 
 if __name__ == "__main__":
-    main()
+    Projector()

@@ -8,14 +8,11 @@
 #include <rktl_perception/localizer.h>
 
 int main(int argc, char* argv[]) {
-    // ros::init(argc, argv, "localizer");
-    // ros::NodeHandle nh;
-    // ros::NodeHandle pnh("~");
+    ros::init(argc, argv, "localizer");
 
-    rclcpp::init(argc, argv);
-    auto node = rclcpp:Node::make_shared("localizer");
-
-    rktl_perception::Localizer localizer(node);
+    ros::NodeHandle nh;
+    ros::NodeHandle pnh("~");
+    rktl_perception::Localizer localizer(nh, pnh);
 
     ros::spin();
     return 0;
