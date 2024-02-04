@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="rktl_game" type="game_manager" name="game_manager" output="screen"/>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+</launch>

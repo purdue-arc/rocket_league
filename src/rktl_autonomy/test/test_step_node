@@ -15,7 +15,7 @@ from rktl_msgs.msg import MatchStatus
 from std_srvs.srv import Empty, EmptyResponse
 from rosgraph_msgs.msg import Clock
 import numpy as np
-from rktl_autonomy import RocketLeagueInterface
+from rktl_autonomy.rocket_league_interface import RocketLeagueInterface
 import uuid
 
 def easy_odom(x, y, v):
