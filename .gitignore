@@ -154,3 +154,7 @@ dmypy.json
 # docker files
 /docker/.vscode-server
 /docker/.zsh_history
+
+# colcon build stuff (I think)
+/install
+/log

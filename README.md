@@ -3,9 +3,7 @@ This repo contains all the files necessary for the [Rocket League project](https
 This project aims to recreate the video game of the same name via a team of
 autonomously controlled RC cars competing against human controlled ones.
 
-The repo is broken down into several ROS packages, closely matching the system outline:
-
-![System outline](https://www.purduearc.com/wiki/active-projects/rocket-league/images/system-overview.png)
+The repo is broken down into several ROS packages.
 
 ### rktl_autonomy
 This package contains all code for the "High Level Planner" section. It provides
