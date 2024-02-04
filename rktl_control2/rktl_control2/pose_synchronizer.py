@@ -56,7 +56,7 @@ class PoseSynchronizer(object):
 
         # main loop
         rate = self.node.create_rate(1/self.PERIOD.to_sec())
-        while not rclpy.ok():
+        while rclpy.ok():
             now = self.node.get_clock().now().to_msg()()
             for topic in self.TOPICS:
                 self.send_pose(topic, now)

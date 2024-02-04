@@ -38,7 +38,7 @@ class Delay(object):
         self.node.create_subscription(msg_class, input_name, self.msg_cb)
         self.buffer = deque()
 
-        while not rclpy.ok():
+        while rclpy.ok():
             if len(self.buffer) > 0:
                 time, msg = self.buffer.popleft()
                 wait = delay - (self.node.get_clock().now().to_msg() - time).to_sec()
