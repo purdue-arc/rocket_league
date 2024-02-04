@@ -13,10 +13,13 @@ import sys
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 import os
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
 import rclpy
+========
 import time
 
 #import rospy
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
 from std_srvs.srv import Empty, EmptyResponse
 from threading import Lock
 from enum import Enum
@@ -61,26 +64,41 @@ class Simulator(object):
         self.car_properties = None
 
         # setting config parameters (stay constant for the whole simulator run)
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+        rclpy.init(args=sys.argv)
+        node = rclpy.create_node('simulator')
+
+        #rclpy.init_node('simulator')
+
+========
         # rospy.init_node('simulator')
         rclpy.init(args=sys.argv)
         global node
         node = rclpy.create_node("simulator")
         
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
         mode = self.get_sim_param('~mode')
         if mode == 'ideal':
             self.mode = SimulatorMode.IDEAL
         elif mode == 'realistic':
             self.mode = SimulatorMode.REALISTIC
         else:
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+            rclpy.shutdown('unknown sim mode set "{}"'.format(mode))
+========
             #rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
             self.destroy_node('unknown sim mode set "{}"'.format(mode))
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
 
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
         self.car_cmd = (0.0, 0.0)
 
         render_enabled = self.get_sim_param('~render', secondParam=False)
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+========
         #rate = rospy.Rate(self.get_sim_param('~rate', secondParam=30))
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
         rate = node.create_rate(self.get_sim_param('~rate', secondParam=30))
         self.frame_id = self.get_sim_param('~frame_id', secondParam='map')
         self.timeout = self.get_sim_param('~timeout', secondParam=10)
@@ -103,6 +121,7 @@ class Simulator(object):
         self.car_odom_pubs = {}
         self.car_effort_subs = {}
         self.car_cmd_subs = {}
+
         # TODO: find a better way to not have duplicate code segment
         self.car_properties = {'length': self.get_sim_param('/cars/length'),
                                'max_speed': self.get_sim_param("/cars/throttle/max_speed"),
@@ -126,6 +145,23 @@ class Simulator(object):
         self.reset_cb(None)  # janky reset call with mandatory none parameter
 
         # Publishers
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+        self.status_pub = node.create_publisher(
+            MatchStatus, 'match_status', queue_size=1)
+        self.ball_pose_pub, self.ball_odom_pub = None, None
+        if self.mode == SimulatorMode.REALISTIC:
+            self.ball_pose_pub = rclpy.node.create_publisher(PoseWithCovarianceStamped,
+                                                 '/ball/pose_sync_early', queue_size=1)
+            self.ball_odom_pub = rclpy.node.create_publisher(Odometry,
+                                                '/ball/odom_truth', queue_size=1)
+        elif self.mode == SimulatorMode.IDEAL:
+            self.ball_odom_pub = rclpy.node.create_publisher(Odometry,
+                                                '/ball/odom', queue_size=1)
+
+        # Services
+        srv = rclpy.node.create_service('sim_reset_car_and_ball', Empty, self.reset_cb)
+        srv2 = rclpy.node.create_service('sim_reset_ball', Empty, self.reset_ball_cb)
+========
         #self.status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
         self.status_pub = node.create_publisher(MatchStatus, 'match_status', 1)
         self.ball_pose_pub, self.ball_odom_pub = None, None
@@ -143,18 +179,36 @@ class Simulator(object):
         # rospy.Service('sim_reset_ball', Empty, self.reset_ball_cb)
         node.create_service(Empty, 'sim_reset_car_and_ball', self.reset_cb)
         node.create_service(Empty, 'sim_reset_ball', self.reset_ball_cb)
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
 
         while not rclpy.ok():
             self.loop_once()
             try:
                 rate.sleep()
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+
+========
             except rclpy.ROSInterruptException:
                 pass
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
 
     def check_urdf(self, urdf_path):
         """Validates that a URDF exists, then returns its file."""
 
         if urdf_path is None:
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+            rclpy.shutdown(
+                'no urdf path set for "{}"'.format(urdf_path))
+
+        i = 0
+        while not os.path.isfile(urdf_path) and i < 5:
+            rclpy.sleep(0.1)  # wait for xacro build
+            i += 1
+
+        if not os.path.isfile(urdf_path):
+            rclpy.shutdown(
+                'no urdf file exists at path {}'.format(urdf_path))
+========
             #rospy.signal_shutdown('no urdf path set for "{}"'.format(urdf_path))
             self.destroy_node('no urdf path set for "{}"'.format(urdf_path))
             try:
@@ -171,20 +225,19 @@ class Simulator(object):
         if not os.path.isfile(urdf_path):
             #rospy.signal_shutdown('no urdf file exists at path {}'.format(urdf_path))
             self.destroy_node('no urdf file exists at path {}'.format(urdf_path))
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
 
     def effort_cb(self, effort_msg, car_id):
         """Sets a car's effort with throttle and steering (overwrites commands)."""
         self.cmd_lock.acquire()
 
-        self.sim.set_car_command(car_id,
-                                 (effort_msg.throttle, effort_msg.steering))
+        self.sim.set_car_command(car_id, (effort_msg.throttle, effort_msg.steering))
         self.cmd_lock.release()
 
     def cmd_cb(self, cmd_msg, car_id):
         """Sets a car's command with the velocity and curvature. (overwrites effort)."""
         self.cmd_lock.acquire()
-        self.sim.set_car_command(car_id,
-                                 (cmd_msg.velocity, cmd_msg.curvature))
+        self.sim.set_car_command(car_id, (cmd_msg.velocity, cmd_msg.curvature))
         self.cmd_lock.release()
 
     def reset_cb(self, _):
@@ -231,9 +284,14 @@ class Simulator(object):
     def loop_once(self):
         """Step the simulation once step, updating match status, moving and publishing new car and ball positions."""
         self.reset_lock.acquire()
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+
+        now = self.node.get_clock().now()
+========
     
         #now = rospy.Time.now()
         now = self.get_clock().now()
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
         if self.last_time is not None and self.last_time != now:
             delta_t = (now - self.last_time).to_sec()
             self.sim.step(self.car_cmd, delta_t)
@@ -325,34 +383,49 @@ class Simulator(object):
         self.last_time = now
         self.reset_lock.release()
     # def get_sim_dict(self, path, returnValue=False, secondParam=None):
-    #     rospy_param = rospy.get_param(path, secondParam)
-    #     if not rospy_param:
+    #     rclpy_param = rclpy.get_param(path, secondParam)
+    #     if not rclpy_param:
     #         if returnValue:
-    #             rospy.logfatal(f'invalid file path: {path}')
+    #             rclpy.logfatal(f'invalid file path: {path}')
     #         return None
     #     else:
-    #         for param in rospy_param:
+    #         for param in rclpy_param:
                 
         
     def get_sim_param(self, path, returnValue=False, secondParam=None):
         """
-        @param secondParam: Specify if you want to pass in a second parameter to rospy.
+        @param secondParam: Specify if you want to pass in a second parameter to rclpy.
         @param path: A direct path to the variable.
         @param returnValue:
         True: None is returned if variable does not exist.
         False: An error is thrown if variable does not exist.
         @return: None or Exception.
         """
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+        rclpy_param = self.node.get_parameter_or(path, secondParam)
+        if not rclpy_param:
+            if returnValue:
+========
         #rospy_param = rospy.get_param(path, secondParam)
         rclpy_param = self.node.declare_parameter(path, secondParam).value
         if not rclpy_param:
             if returnValue:
                 #rospy.logfatal(f'invalid file path: {path}')
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
                 self.node.get_logger().fatal(f'invalid file path: {path}')
             return None
         else:
             if '~' in path:
                 if secondParam is not None:
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+
+                    return self.node.declare_parameter_or(f'{path}', secondParam)
+                else:
+
+                    return self.node.declare_parameter(f'{path}')
+
+            type_rclpy = type(rclpy_param)
+========
                     #return rospy.get_param(f'{path}', secondParam)
                     return self.node.declare_parameter(f'{path}', secondParam)
                 else:
@@ -361,13 +434,23 @@ class Simulator(object):
                     return self.node.declare_parameter(f'{path}')
 
             type_rospy = type(rclpy_param)
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
 
-            if type_rospy == dict:
+            if type_rclpy == dict:
                 if secondParam is None:
                     
                     # min_param = (float)(rospy.get_param(f'{path}/min'))
                     # max_param = (float)(rospy.get_param(f'{path}/max'))
 
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+                    min_param = (float)(self.node.get_parameter(f'{path}/min'))
+                    max_param = (float)(self.node.get_parameter(f'{path}/max'))
+                else:
+                    min_param = (float)(self.node.get_parameter_or(
+                        f'{path}/min', secondParam))
+                    max_param = (float)(self.node.get_parameter_or(
+                        f'{path}/max', secondParam))
+========
                     min_param = (float)(self.node.declare_parameter(f'{path}/min'))
                     max_param = (float)(self.node.declare_parameter(f'{path}/max'))
                 else:
@@ -375,36 +458,56 @@ class Simulator(object):
                     #     f'{path}/min', secondParam))
                     # max_param = (float)(rospy.get_param(
                     #     f'{path}/max', secondParam))
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
 
                     min_param = (float)(self.node.declare_parameter(f'{path}/min', secondParam))
                     max_param = (float)(self.node.declare_parameter(f'{path}/max', secondParam))
              
                 if not max_param:
                     if returnValue:
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+========
                         #rospy.logfatal(f'invalid file path: {path}/max')
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
                         self.node.get_logger().fatal(f'invalid file path: {path}/max')
                     return None
                 if not min_param:
                     if returnValue:
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+========
                         #rospy.logfatal(f'invalid file path: {path}/min')
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
                         self.node.get_logger().fatal(f'invalid file path: {path}/min')
                     return None
                 # accounting for bugs in yaml file
                 if min_param > max_param:
                     param_val =(float)(random.uniform(max_param, min_param))
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+========
                     #rospy.set_param(f'{path}',param_val)
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
                     self.node.declare_parameter(f'{path}',param_val)
                     
                     return param_val
                 else:
                     param_val =(float)(random.uniform(min_param, max_param))
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+                    self.node.declare_parameter(f'{path}',param_val)
+========
                     #rospy.set_param(f'{path}',param_val)
                     self.node.declare_parameter(f'{path}',param_val)
                     
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
                     return param_val
 
-            elif type_rospy == float or type_rospy == int:
+            elif type_rclpy == float or type_rclpy == int:
                 if secondParam is not None:
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+                    return self.node.declare_parameter(path, secondParam)
+                else:
+                    return self.node.declare_parameter(path)
+        if returnValue:
+========
                     #return rospy.get_param(path, secondParam)
                     return self.node.declare_parameter(path, secondParam)
                 else:
@@ -412,6 +515,7 @@ class Simulator(object):
                     return self.node.declare_parameter(path)
         if returnValue:
             #rospy.logfatal(f'invalid file path: {path}')
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
             self.node.get_logger().fatal(f'invalid file path: {path}')
         return None
 
@@ -451,8 +555,12 @@ class Simulator(object):
             init_pose = self.get_sim_param('~cars/init_pose')
 
             if 'name' not in car_config:
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+                rclpy.shutdown('no "name" set for car config in sim')
+========
                 #rospy.signal_shutdown('no "name" set for car config in sim')
                 self.destroy_node('no "name" set for car config in sim')
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
             car_name = car_config['name']
             if 'randomize_pose' in car_config:
                 init_pose = None
@@ -466,6 +574,13 @@ class Simulator(object):
                     'car', init_pose=init_pose, noise=self.car_noise, car_props=self.car_properties)
                 car_id = self.car_ids[car_name]
                 # create the car's Subscribers
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+                self.car_effort_subs[car_name] = rclpy.Subscriber(
+                    f'/cars/{car_name}/effort', ControlEffort,
+                    self.effort_cb, callback_args=car_id)
+                self.car_cmd_subs[car_name] = rclpy.Subscriber(
+                    f'/cars/{car_name}/command', ControlCommand,
+========
                 # self.car_effort_subs[car_name] = rospy.Subscriber(
                 #     f'/cars/{car_name}/effort', ControlEffort,
                 #     self.effort_cb, callback_args=car_id)
@@ -477,10 +592,22 @@ class Simulator(object):
                 #     self.cmd_cb, callback_args=car_id)
                 self.car_cmd_subs[car_name] = node.create_subscription(
                     ControlCommand, f'/cars/{car_name}/command',
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
                     self.cmd_cb, callback_args=car_id)
                 
                 # create the car's Publishers
                 if self.mode == SimulatorMode.REALISTIC:
+<<<<<<<< HEAD:rktl_sim_backup/nodes/simulator
+                    self.car_pose_pubs[car_name] = rclpy.Publisher(
+                        f'/cars/{car_name}/pose_sync_early',
+                        PoseWithCovarianceStamped, queue_size=1)
+                    self.car_odom_pubs[car_name] = rclpy.Publisher(
+                        f'/cars/{car_name}/odom_truth', Odometry, queue_size=1)
+                elif self.mode == SimulatorMode.IDEAL:
+                    self.car_odom_pubs[car_name] = rclpy.Publisher(
+                        f'/cars/{car_name}/odom', Odometry, queue_size=1)
+
+========
                     # self.car_pose_pubs[car_name] = rospy.Publisher(
                     #     f'/cars/{car_name}/pose_sync_early',
                     #     PoseWithCovarianceStamped, queue_size=1)
@@ -498,6 +625,7 @@ class Simulator(object):
                     #     f'/cars/{car_name}/odom', Odometry, queue_size=1)
                     self.car_odom_pubs[car_name] = node.create_publisher(
                         Odometry, f'/cars/{car_name}/odom', 1)
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/simulator
         return True
 
 

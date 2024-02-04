@@ -51,7 +51,7 @@ class TestMeanFilter(unittest.TestCase):
         rospy.init_node('test_mean_filter_node')
 
         pub = rospy.Publisher('pose_sync', PoseWithCovarianceStamped, queue_size=1)
-        rospy.Subscriber('odom', Odometry, self.odom_cb)
+        node.create_subscription(Odometry, 'odom', self.odom_cb)
 
         # member variables used for test
         self.odom = None

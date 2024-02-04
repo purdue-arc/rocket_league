@@ -1,3 +1,3 @@
-Header header
+std_msgs/Header header
 float64 throttle
 float64 steering

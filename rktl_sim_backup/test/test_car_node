@@ -7,17 +7,26 @@ License:
 """
 
 import unittest
-import rospy
-import simulator
+import rclpy
+import sys
+import time
+#import rospy
+from rktl_sim.nodes import simulator
 
 class TestCar(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        rospy.init_node('test_car_node')
-
+        global node
+        #rospy.init_node('test_car_node')
+        rclpy.init(args=sys.argv)
+        node = rclpy.create_node('test_car_node')
+        node.get_logger().info('Created node')
+        
         urdf_paths = {}
-        urdf_paths["car"] = rospy.get_param('~urdf/car')
-        urdf_paths["plane"] = rospy.get_param('~urdf/plane')
+        # urdf_paths["car"] = rospy.get_param('~urdf/car')
+        # urdf_paths["plane"] = rospy.get_param('~urdf/plane')
+        urdf_paths["car"] = node.node.declare_parameter('~urdf/car').value
+        urdf_paths["plane"] = node.declare_parameter('~urdf/plane').value
 
         # Creating physics simulator
         cls.sim = simulator.Sim(
@@ -41,12 +50,12 @@ class TestCar(unittest.TestCase):
 
     def test_throttle_resp(self):
         self.run_throttle_resp(1.0, 0.25, 0.632, 0.001)
-        rospy.sleep(rospy.Duration(0.5))
+        node.create_rate(0.5).sleep()
         self.run_throttle_resp(0.5, 0.5, 0.432, 0.001)
 
     def run_throttle_resp(self, i_throttle, i_wait, e_vel, e_err):
         self.sim.reset()
-        rospy.sleep(rospy.Duration(0.2))
+        node.create_rate(0.2).sleep()
 
         freq = 12.0 # must be evenly divisible by i_wait
         for _ in range(round(i_wait * freq)):

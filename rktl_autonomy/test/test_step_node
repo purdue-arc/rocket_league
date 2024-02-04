@@ -32,7 +32,7 @@ class TestStep(unittest.TestCase):
         self.car_pub = rospy.Publisher('cars/car0/odom', Odometry, queue_size=1) 
         self.ball_pub = rospy.Publisher('ball/odom', Odometry, queue_size=1)
         self.match_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
-        rospy.Subscriber('/clock', Clock, self.clock_cb)
+        node.create_subscription(Clock, '/clock', self.clock_cb)
         rospy.Service('sim_reset', Empty, self.reset)
 
         # member variables used for test

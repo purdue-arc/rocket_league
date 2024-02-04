@@ -14,19 +14,28 @@ import math
 from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 import rclpy
+<<<<<<<< HEAD:rktl_sim_backup/nodes/visualizer
 from tf.transformations import euler_from_quaternion
+========
+import sys
+
+from rktl_dependencies.transformations import euler_from_quaternion
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/visualizer
 from threading import Lock
 import numpy as np
 
+
 # Local library
-import visualizer
+from rktl_sim.nodes import visualizer
 from rktl_msgs.msg import Path, BezierPathList
 from rktl_planner import BezierPath
+
 
 class VisualizerROS(object):
     """ROS wrapper for the visualizer."""
 
     def __init__(self):
+<<<<<<<< HEAD:rktl_sim_backup/nodes/visualizer
         super().__init__("visualizer")
 
         # Collecting global parameters
@@ -35,11 +44,31 @@ class VisualizerROS(object):
         goal_width = self.get_parameter('/field/goal/width')
         wall_thickness = self.get_parameter('/field/wall_thickness')
         ball_radius = self.get_parameter("/ball/radius")
+========
+        #rospy.init_node("visualizer")
+        rclpy.init(args=sys.argv)
+        global node
+        node = rclpy.create_node("visualizer")
+        
+        # Collecting global parameters
+        # field_width = node.get_param('/field/width')
+        # field_length = rospy.get_param('/field/length')
+        # goal_width = rospy.get_param('/field/goal/width')
+        # wall_thickness = rospy.get_param('/field/wall_thickness')
+        # ball_radius = rospy.get_param("/ball/radius")
+        field_width = node.declare_parameter('/field/width').value
+        field_length = node.declare_parameter('/field/length').value
+        goal_width = node.declare_parameter('/field/goal/width').value
+        wall_thickness = node.declare_parameter('/field/wall_thickness').value
+        ball_radius = node.declare_parameter("/ball/radius").value
+
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/visualizer
 
         # Creating pygame render
         
         self.window = visualizer.Window(
             field_width, field_length, wall_thickness,
+<<<<<<<< HEAD:rktl_sim_backup/nodes/visualizer
             node.get_parameter_or('~window_name', 'Rocket League Visualizer'))
 
         # Collecting private parameters
@@ -52,6 +81,27 @@ class VisualizerROS(object):
         # Setting up field
         id = 0
         field_img_path = node.get_parameter_or("~media/field", None)
+========
+            # rospy.get_param('~window_name', 'Rocket League Visualizer'))
+            node.declare_parameter('~window_name', 'Rocket League Visualizer').value)
+        
+        # Collecting private parameters
+        # self.frame_id = rospy.get_param("~frame_id", "map")
+        # self.timeout = rospy.get_param("~timeout", 10)
+        # rate = rospy.Rate(rospy.get_param("~rate", 20))
+        # car_width = rospy.get_param("~cars/body_width")
+        # car_length = rospy.get_param("~cars/body_length")
+        self.frame_id = node.declare_parameter("~frame_id", "map").value
+        self.timeout = node.declare_parameter("~timeout", 10).value
+        rate = rclpy.create_node('simple_node').create_rate((node.declare_parameter("~rate", 20).value))
+        car_width = node.declare_parameter("~cars/body_width").value
+        car_length = node.declare_parameter("~cars/body_length").value
+
+        # Setting up field
+        id = 0
+        # field_img_path = rospy.get_param("~media/field", None)
+        field_img_path = node.declare_parameter("~media/field", None).value
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/visualizer
         if field_img_path is not None:
             self.window.createAsset(
                 id, field_width, field_length, imgPath=field_img_path,
@@ -95,7 +145,13 @@ class VisualizerROS(object):
         id += 1
 
         # Setting up car
+<<<<<<<< HEAD:rktl_sim_backup/nodes/visualizer
         car_img_path = node.get_parameter_or("~media/car", None)
+========
+        # car_img_path = rospy.get_param("~media/car", None)
+        car_img_path = node.declare_parameter("~media/car", None).value
+
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/visualizer
         if car_img_path is not None:
             self.car_id = id
             self.window.createAsset(
@@ -103,7 +159,12 @@ class VisualizerROS(object):
             id += 1
 
         # Setting up ball
+<<<<<<<< HEAD:rktl_sim_backup/nodes/visualizer
         ball_img_path = node.get_parameter_or("~media/ball", None)
+========
+        # ball_img_path = rospy.get_param("~media/ball", None)
+        ball_img_path = node.declare_parameter("~media/ball", None).value
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/visualizer
         if ball_img_path is not None:
             self.ball_id = id
             self.window.createAsset(
@@ -136,6 +197,7 @@ class VisualizerROS(object):
         self.path = None
 
         # Subscribers
+<<<<<<<< HEAD:rktl_sim_backup/nodes/visualizer
         node.create_subscription(Odometry, "/ball/odom", self.ball_odom_cb)
         node.create_subscription(Odometry, "/cars/car0/odom", self.car_odom_cb)
         node.create_subscription(Path, "/cars/car0/path", self.path_arr_cb)
@@ -143,6 +205,20 @@ class VisualizerROS(object):
         )
         node.create_subscription(BezierPathList, "/agents/agent0/bezier_path", self.bezier_path_cb)
 
+========
+        # rospy.Subscriber("/ball/odom", Odometry, self.ball_odom_cb)
+        # rospy.Subscriber("/cars/car0/odom", Odometry, self.car_odom_cb)
+        # rospy.Subscriber("/cars/car0/path", Path, self.path_arr_cb)
+        # rospy.Subscriber("/cars/car0/lookahead_pnt", Float32, self.lookahead_cb)
+        # rospy.Subscriber("/agents/agent0/bezier_path", BezierPathList, self.bezier_path_cb)
+
+        node.create_subscription(Odometry, "/ball/odom", self.ball_odom_cb)
+        node.create_subscription(Odometry, "/cars/car0/odom", self.car_odom_cb)
+        node.create_subscription(Path, "/cars/car0/path", self.path_arr_cb)
+        node.create_subscription(Float32, "/cars/car0/lookahead_pnt", self.lookahead_cb)
+        node.create_subscription(BezierPathList, "/agents/agent0/bezier_path", self.bezier_path_cb)
+        
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/visualizer
         while not rclpy.ok():
             try:
                 self.window.show()
@@ -150,6 +226,11 @@ class VisualizerROS(object):
                 exit()
             try:
                 rate.sleep()
+<<<<<<<< HEAD:rktl_sim_backup/nodes/visualizer
+========
+            except rclpy.ROSInterruptException:
+                pass
+>>>>>>>> ros-2-sim-magic:src/rktl_sim/rktl_sim/nodes/visualizer
 
     def car_odom_cb(self, odom_msg):
         x = odom_msg.pose.pose.position.x
