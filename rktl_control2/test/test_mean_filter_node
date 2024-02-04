@@ -8,6 +8,7 @@ License:
 """
 
 import unittest, rostest, rclpy, time
+import sys
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from rktl_dependencies.transformations import euler_from_quaternion, quaternion_from_euler
@@ -48,18 +49,19 @@ def get_odom(odom_msg):
 class TestMeanFilter(unittest.TestCase):
     def test_mean_filter(self):
         # initialize node and interface to code under test
-        rospy.init_node('test_mean_filter_node')
+        rclpy.init(args=sys.argv)
+        self.node = rclpy.create_node('test_mean_filter_node')
 
-        pub = rospy.Publisher('pose_sync', PoseWithCovarianceStamped, queue_size=1)
-        rospy.Subscriber('odom', Odometry, self.odom_cb)
+        pub = self.node.create_publisher(PoseWithCovarianceStamped, 'pose_sync', queue_size=1)
+        self.node.create_subscription(Odometry, 'odom', self.odom_cb)
 
         # member variables used for test
         self.odom = None
 
         # publish messages to get things going
-        t = rospy.Time.now() - rospy.Duration(0.1)
+        t = self.node.get_clock().now().to_msg() - rclpy.time.Time(0.1)
         while(self.odom is None):
-            t += rospy.Duration(0.1)
+            t += rclpy.time.Time(0.1)
             pub.publish(set_pose(t, 0.0, 0.0, 0.0))
             time.sleep(0.1)
 
@@ -69,7 +71,7 @@ class TestMeanFilter(unittest.TestCase):
 
         # send and wait (3rd msg)
         self.odom = None
-        t += rospy.Duration(0.1)
+        t += rclpy.time.Time(0.1)
         pub.publish(set_pose(t, 3.0, -3.0, 0.0))
         while(self.odom is None):
             pass
@@ -80,7 +82,7 @@ class TestMeanFilter(unittest.TestCase):
 
         # send and wait (4th msg)
         self.odom = None
-        t += rospy.Duration(0.1)
+        t += rclpy.time.Time(0.1)
         pub.publish(set_pose(t, 6.0, 0.0, 1.5708))
         while(self.odom is None):
             pass
@@ -92,7 +94,7 @@ class TestMeanFilter(unittest.TestCase):
         # send and wait (5th - 7th msgs)
         for __ in range(3):
             self.odom = None
-            t += rospy.Duration(0.1)
+            t += rclpy.time.Time(0.1)
             pub.publish(set_pose(t, 0.0, 0.0, 0.0))
             while(self.odom is None):
                 pass
@@ -103,7 +105,7 @@ class TestMeanFilter(unittest.TestCase):
 
         # send and wait (8th msg)
         self.odom = None
-        t += rospy.Duration(0.1)
+        t += rclpy.time.Time(0.1)
         pub.publish(set_pose(t, 0.0, 0.0, 0.0))
         while(self.odom is None):
             pass

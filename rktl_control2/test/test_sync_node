@@ -6,9 +6,10 @@ License:
   All rights reserved.
 """
 
-import unittest, rostest, rospy
+import unittest, rostest, rclpy
+import sys
 from geometry_msgs.msg import PoseWithCovarianceStamped
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from rktl_dependencies.transformations import euler_from_quaternion, quaternion_from_euler
 import numpy as np
 
 def set_pose(t, x, y, yaw, weight=1.0):
@@ -43,15 +44,16 @@ def get_pose(pose_msg):
 class TestSync(unittest.TestCase):
     def test_sync(self):
         # initialize node and interface to code under test
-        rospy.init_node('test_sync_node')
+        rclpy.init(args=sys.args)
+        self.node = rclpy.create_node('test_sync_node')
 
-        car0_pub = rospy.Publisher('cars/car0/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
-        car1_pub = rospy.Publisher('cars/car1/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
-        ball_pub = rospy.Publisher('ball/pose', PoseWithCovarianceStamped, queue_size=0, latch=True)
+        car0_pub = self.node.create_publisher(PoseWithCovarianceStamped, 'cars/car0/pose', queue_size=0, latch=True)
+        car1_pub = self.node.create_publisher(PoseWithCovarianceStamped, 'cars/car1/pose', queue_size=0, latch=True)
+        ball_pub = self.node.create_publisher(PoseWithCovarianceStamped, 'ball/pose', queue_size=0, latch=True)
 
-        rospy.Subscriber('cars/car0/pose_sync', PoseWithCovarianceStamped, self.car0_cb)
-        rospy.Subscriber('cars/car1/pose_sync', PoseWithCovarianceStamped, self.car1_cb)
-        rospy.Subscriber('ball/pose_sync', PoseWithCovarianceStamped, self.ball_cb)
+        self.node.create_subscription(PoseWithCovarianceStamped, 'cars/car0/pose_sync', self.car0_cb)
+        self.node.create_subscription(PoseWithCovarianceStamped, 'cars/car1/pose_sync', self.car1_cb)
+        self.node.create_subscription(PoseWithCovarianceStamped, 'ball/pose_sync', self.ball_cb)
 
         # member variables used for test
         self.last_car0 = None
@@ -60,8 +62,8 @@ class TestSync(unittest.TestCase):
 
 
         # publish messages to get things going
-        rospy.loginfo("synchronizing with node under test")
-        t = rospy.Time.now() + rospy.Duration(0.5)
+        self.node.get_logger().info("synchronizing with node under test")
+        t = self.node.get_clock().now().to_msg() + rclpy.time.Time(0.5)
         car0_pub.publish(set_pose(t, 0.0, 0.0, 0.0))
         car1_pub.publish(set_pose(t, 0.0, 0.0, 0.0))
         ball_pub.publish(set_pose(t, 0.0, 0.0, 0.0))
@@ -71,8 +73,8 @@ class TestSync(unittest.TestCase):
         self.assertTrue(self.times_match(), msg='output time is not synchronized')
 
         # case 1
-        rospy.loginfo("testing independence of channels, divide by zero, weights")
-        t_next = self.last_car0[0] + rospy.Duration(0.1)
+        self.node.get_logger().info("testing independence of channels, divide by zero, weights")
+        t_next = self.last_car0[0] + rclpy.time.Time(0.1)
         self.clear_poses()
 
         # send poses
@@ -99,11 +101,11 @@ class TestSync(unittest.TestCase):
         self.assertTrue(np.allclose(self.last_ball[1:], [2.75, -2.75, 0.0]), msg='ball pose is incorrect')
 
         # case 2
-        rospy.loginfo("testing old data rejection, caching of future data")
-        t_next = self.last_car0[0] + rospy.Duration(0.1)
+        self.node.get_logger().info("testing old data rejection, caching of future data")
+        t_next = self.last_car0[0] + rclpy.time.Time(0.1)
         self.clear_poses()
-        t_old = t_next - rospy.Duration(0.06)
-        t_future = t_next + rospy.Duration(0.06)
+        t_old = t_next - rclpy.time.Time(0.06)
+        t_future = t_next + rclpy.time.Time(0.06)
 
         # send poses
         car0_pub.publish(set_pose(t_old, 0.0, 0.0, 0.0))
@@ -130,10 +132,10 @@ class TestSync(unittest.TestCase):
         self.assertTrue(np.allclose(self.last_ball[1:], [1.0, 1.0, 1.0]), msg='ball pose is incorrect')
 
         # case 3
-        rospy.loginfo("testing caching of future data, sorting out of order data")
-        t_next = self.last_car0[0] + rospy.Duration(0.1)
+        self.node.get_logger().info("testing caching of future data, sorting out of order data")
+        t_next = self.last_car0[0] + rclpy.time.Time(0.1)
         self.clear_poses()
-        t_delayed = t_next - rospy.Duration(0.04)
+        t_delayed = t_next - rclpy.time.Time(0.04)
 
         # send poses
         car0_pub.publish(set_pose(t_delayed, 0.0, 0.0, 0.0))

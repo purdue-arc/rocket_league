@@ -6,7 +6,7 @@ License:
     All rights reserved.
 """
 
-import unittest, rostest, rospy
+import unittest, rostest, rclpy
 import numpy as np
 
 # nasty way to import ParticleOdomFilter
@@ -18,7 +18,7 @@ from particle_odom_filter import ParticleOdomFilter
 class TestBicycle(unittest.TestCase):
     def test_bicycle(self):
         # avoid spinning in init function
-        rospy.spin = lambda : None
+        rclpy.spin = lambda : None
         filter = ParticleOdomFilter()
 
         particles = np.array([
