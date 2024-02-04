@@ -1,6 +1,0 @@
-<launch>
-    <node ns="cams/cam0" pkg="rktl_perception" type="focus_vis" name="focus_vis"/>
-    <node ns="cams/cam1" pkg="rktl_perception" type="focus_vis" name="focus_vis"/>
-    <node ns="cams/cam2" pkg="rktl_perception" type="focus_vis" name="focus_vis"/>
-    <node ns="cams/cam3" pkg="rktl_perception" type="focus_vis" name="focus_vis"/>
-</launch>
