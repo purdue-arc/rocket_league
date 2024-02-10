@@ -13,8 +13,9 @@ def generate_launch_description():
             executable='serial_node.py',
             name='hardware_interface',
             parameters=[
-                get_package_share_directory(
-                    'rktl_control') + '/config/hardware_interface.yaml'
+                {
+                    launch.substitutions.PathJoinSubstitution(launch_ros.substitutions.FindPackageShare('rktl_control'), '/config/hardware_interface.yaml')
+                }
             ]
         )
     ])
