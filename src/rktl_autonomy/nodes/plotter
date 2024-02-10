@@ -41,7 +41,7 @@ class Plotter(rclpy.Node):
         #rospy.Subscriber('~log', DiagnosticStatus, self.progress_cb)
         self.create_subscription(DiagnosticStatus, '~log', self.progress_cb, qos_profile=10)
 
-        self.history = None
+        self.history = []
         self.LOG_NAME = None
         self.next_plot_episode = self.PLOT_FREQ
         self.init_plot()
@@ -110,7 +110,7 @@ class Plotter(rclpy.Node):
                 data[item.key] = float(item.value)
 
         if data["episode"] is not None:
-            if self.history is None:
+            if self.history is []:
                 self.history = [data]
             else:
                 self.history.append(data)
@@ -118,7 +118,7 @@ class Plotter(rclpy.Node):
             if data["episode"] >= self.next_plot_episode:
                 self.plot()
                 self.next_plot_episode += self.PLOT_FREQ
-                self.history = None
+                self.history = []
         else:
             #rospy.logerr("Bad progress message.")
             self.get_logger().warn("Bad progress message.")
@@ -175,8 +175,8 @@ class Plotter(rclpy.Node):
 
         # update file
         #rospy.loginfo(f"Saving training progress to {self.LOG_DIR}{self.LOG_NAME}")
-        self.get_logger().info("Saving training progress to {self.LOG_DIR}{self.LOG_NAME}")
-        plt.savefig(self.LOG_DIR + self.LOG_NAME)
+        self.get_logger().info(f"Saving training progress to {self.LOG_DIR}{self.LOG_NAME}")
+        plt.savefig(self.LOG_DIR + str(self.LOG_NAME))
 
 if __name__ == "__main__":
     Plotter()

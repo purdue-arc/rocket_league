@@ -12,10 +12,9 @@ License:
 
 # package
 from rktl_autonomy._ros_interface import ROSInterface
-from gym.spaces import Box, Discrete
+from gymnasium.spaces import Box, Discrete
 
 # ROS
-# import rospy
 import rclpy
 from rclpy import Node
 from rclpy.parameter import Parameter
@@ -25,7 +24,7 @@ from std_srvs.srv import Empty
 
 # System
 import numpy as np
-from tf.transformations import euler_from_quaternion
+from transformations import euler_from_quaternion
 from enum import IntEnum, unique, auto
 from math import pi, tan
 
@@ -143,7 +142,7 @@ class RocketLeagueInterface(ROSInterface):
         self.node = Node('rocket_league_interface')
         # Publishers
         # self._command_pub = rospy.Publisher('cars/car0/command', ControlCommand, queue_size=1)
-        self.node.create_publisher(ControlCommand, 'cars/car0/command', 1)
+        self._command_pub = self.node.create_publisher(ControlCommand, 'cars/car0/command', 1)
         # self._reset_srv = rospy.ServiceProxy('sim_reset', Empty)
         self._reset_srv = self.node.create_client(Empty, 'sim_reset')
 
@@ -256,14 +255,15 @@ class RocketLeagueInterface(ROSInterface):
         goal_dist_sq = np.sum(np.square(ball[0:2] - np.array([self._FIELD_LENGTH/2, 0])))
         reward += self._GOAL_DISTANCE_REWARD * goal_dist_sq
 
-        if self._score != 0:
+        if self._score is not None and self._score != 0:
             done = True
             if self._score > 0:
                 reward += self._WIN_REWARD
             else:
                 reward += self._LOSS_REWARD
 
-        x, y, __, v, __ = self._car_odom
+        if self._car_odom is not None:
+            x, y, __, v, __ = self._car_odom
 
         if self._prev_vel is None:
             self._prev_vel = v
