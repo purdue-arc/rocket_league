@@ -20,7 +20,7 @@ env = RocketLeagueInterface(eval=True)
 
 # load the model
 # weights = expanduser(rospy.get_param('~weights'))
-weights = expanduser(env.node.get_parameter('~weights'))
+weights = expanduser(env.node.get_parameter('~weights').get_parameter_value().string_value)
 model = PPO.load(weights)
 
 # evaluate in real-time

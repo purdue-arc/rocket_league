@@ -6,7 +6,7 @@ License:
   All rights reserved.
 """
 
-from rktl_autonomy import RocketLeagueInterface
+from rktl_autonomy.rocket_league_interface import RocketLeagueInterface
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.env_util import make_vec_env
@@ -39,7 +39,7 @@ def train(n_envs=24, n_saves=100, n_steps=240000000, env_number=0):
 
     # log model weights
     freq = n_steps / (n_saves * n_envs)
-    callback = CheckpointCallback(save_freq=freq, save_path=log_dir)
+    callback = CheckpointCallback(save_freq=int(freq), save_path=log_dir)
 
     # run training
     steps = n_steps

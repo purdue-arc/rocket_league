@@ -6,7 +6,7 @@ License:
   All rights reserved.
 """
 
-from rktl_autonomy import RocketLeagueInterface
+from rktl_autonomy.rocket_league_interface import RocketLeagueInterface
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.env_util import make_vec_env

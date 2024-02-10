@@ -12,7 +12,7 @@ from abc import abstractmethod
 from threading import Condition
 import time, uuid, socket, os
 
-from gym import Env
+from gymnasium import Env
 
 import rclpy
 from rclpy.duration import Duration

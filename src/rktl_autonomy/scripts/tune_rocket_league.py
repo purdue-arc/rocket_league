@@ -6,7 +6,7 @@ License:
   All rights reserved.
 """
 
-from rktl_autonomy import RocketLeagueInterface
+from rktl_autonomy.rocket_league_interface import RocketLeagueInterface
 import numpy as np
 from stable_baselines3 import PPO
 
