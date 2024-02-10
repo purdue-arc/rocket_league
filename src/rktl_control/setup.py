@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'rktl_control2'
+package_name = 'rktl_control'
 
 setup(
     name=package_name,
