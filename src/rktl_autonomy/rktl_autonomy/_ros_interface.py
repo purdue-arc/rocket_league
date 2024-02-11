@@ -119,11 +119,9 @@ class ROSInterface(Env):
         else:
             port = None
         self.__LOG_ID = f'{run_id}:{port}'
-        # self.__log_pub = rospy.Publisher('~log', DiagnosticStatus, queue_size=1)
         self.__log_pub = self.node.create_publisher(DiagnosticStatus, '~log', qos_profile=1)
         self.__episode = 0
         self.__net_reward = 0
-        # self.__start_time = rospy.Time.now()
         self.__start_time = self.node.get_clock().now()
 
     def step(self, action):
@@ -166,7 +164,6 @@ class ROSInterface(Env):
             info = {
                 'episode'    : self.__episode,
                 'net_reward' : self.__net_reward,
-                # 'duration'   : (rospy.Time.now() - self.__start_time).to_sec()
                 'duration'   : self.node.get_clock().now() - self.__start_time
             }
             info.update(self._get_state()[3])
@@ -198,7 +195,6 @@ class ROSInterface(Env):
             retries = 0
             while not self.__wait_once_for_state():
                 if retries >= max_retries:
-                    # rospy.logerr("Failed to get new state.")
                     self.node.get_logger().warn('Failed to get new state.')
                     raise SimTimeException
                 else:

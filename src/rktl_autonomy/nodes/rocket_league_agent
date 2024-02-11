@@ -9,17 +9,13 @@ License:
 from rktl_autonomy.rocket_league_interface import RocketLeagueInterface
 from stable_baselines3 import PPO
 from os.path import expanduser
-# import rospy
-import rclpy
 from rclpy.exceptions import ROSInterruptException
-
 
 
 # create interface (and init ROS)
 env = RocketLeagueInterface(eval=True)
 
 # load the model
-# weights = expanduser(rospy.get_param('~weights'))
 weights = expanduser(env.node.get_parameter('~weights').get_parameter_value().string_value)
 model = PPO.load(weights)
 
