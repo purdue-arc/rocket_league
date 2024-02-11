@@ -10,7 +10,7 @@ License:
 import rclpy
 from sensor_msgs.msg import Image, CameraInfo
 from tf2_ros import Buffer, TransformListener
-from tf.transformations import translation_matrix, quaternion_matrix
+from rktl_dependencies.transformations import translation_matrix, quaternion_matrix
 
 import numpy as np
 
