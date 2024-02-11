@@ -17,7 +17,7 @@ from rktl_msgs.msg import ControlEffort
 from rktl_dependencies.transformations import euler_from_quaternion, quaternion_from_euler
 
 import numpy as np
-from pfilter import ParticleFilter
+from rktl_dependencies.pfilter import ParticleFilter
 from collections import deque
 from threading import Lock
 from math import sin, cos, tan, atan, sqrt, pi, exp
