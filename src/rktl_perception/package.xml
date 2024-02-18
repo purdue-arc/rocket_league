@@ -28,6 +28,7 @@
 
   <exec_depend>camera_calibration</exec_depend>
   <exec_depend>rviz</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
 
   <!-- from "migrating interface package"-->
   
