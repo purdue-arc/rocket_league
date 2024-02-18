@@ -28,27 +28,34 @@ def generate_launch_description():
             name='autonomy_weights',
             default_value='model'
         ),
-        launch_ros.actions.SetRemap(
-            src="/cars/car0/odom",
-            dst="/cars/car0/odom_truth",
-            namespace="truth",
-            condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
-        ),
-        launch_ros.actions.SetRemap(
-            src="/ball/odom",
-            dst="/ball/odom_truth",
-            namespace="truth",
+        launch.actions.GroupAction(
+            actions=[
+                launch_ros.actions.PushRosNamespace("truth"),
+                launch_ros.actions.SetRemap(
+                    src="/cars/car0/odom",
+                    dst="/cars/car0/odom_truth",
+                ),
+                launch_ros.actions.SetRemap(
+                    src="/ball/odom",
+                    dst="/ball/odom_truth",
+                ),
+                launch.actions.GroupAction(
+                    actions=[
+                        launch_ros.actions.PushRosNamespace("visualizer"),
+                        launch_ros.actions.SetParameter(
+                            name="window_name",
+                            value="Ground Truth",
+                        )
+                    ],
+                    condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
+                )
+        
+            ],
             condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
         ),
         launch_ros.actions.SetParametersFromFile(
             filename=os.path.join(get_package_share_directory(
                     'rktl_launch'), 'config', 'global_params.yaml')
-        ),
-        launch_ros.actions.SetParameter(
-            name="window_name",
-            value="Ground Truth",
-            namespace="visualizer",
-            condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
         ),
         launch_ros.actions.Node(
             namespace='ball',
