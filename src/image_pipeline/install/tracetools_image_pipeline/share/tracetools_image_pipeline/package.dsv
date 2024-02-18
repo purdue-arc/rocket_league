@@ -1,0 +1,11 @@
+source;share/tracetools_image_pipeline/hook/cmake_prefix_path.ps1
+source;share/tracetools_image_pipeline/hook/cmake_prefix_path.dsv
+source;share/tracetools_image_pipeline/hook/cmake_prefix_path.sh
+source;share/tracetools_image_pipeline/hook/ld_library_path_lib.ps1
+source;share/tracetools_image_pipeline/hook/ld_library_path_lib.dsv
+source;share/tracetools_image_pipeline/hook/ld_library_path_lib.sh
+source;share/tracetools_image_pipeline/local_setup.bash
+source;share/tracetools_image_pipeline/local_setup.dsv
+source;share/tracetools_image_pipeline/local_setup.ps1
+source;share/tracetools_image_pipeline/local_setup.sh
+source;share/tracetools_image_pipeline/local_setup.zsh
