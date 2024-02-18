@@ -48,8 +48,14 @@ def generate_launch_description():
                         )
                     ],
                     condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
-                )
-        
+                ),
+                launch.actions.IncludeLaunchDescription(
+                    launch.launch_description_sources.PythonLaunchDescriptionSource(
+                        os.path.join(get_package_share_directory(
+                        'rktl_sim'), 'launch', 'visualizer.launch.py')
+                    ),
+                    condition=launch.conditions.LaunchConfigurationEquals('render', 'true')
+                ),
             ],
             condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
         ),
@@ -80,14 +86,6 @@ def generate_launch_description():
             condition=launch.conditions.LaunchConfigurationEquals('render', 'true'),
             arguments='--perspective-file ' + os.path.join(get_package_share_directory(
                     'rktl_launch'), 'rqt','rktl.perspective')
-        ),
-        launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
-                os.path.join(get_package_share_directory(
-                    'rktl_sim'), 'launch', 'visualizer.launch.py')
-            ),
-            namespace='truth',
-            condition=launch.conditions.LaunchConfigurationEquals('render', 'true')
         ),
         launch.actions.IncludeLaunchDescription(
             launch.launch_description_sources.PythonLaunchDescriptionSource(
