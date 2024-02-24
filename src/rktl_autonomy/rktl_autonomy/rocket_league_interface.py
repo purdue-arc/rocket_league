@@ -16,7 +16,7 @@ from gymnasium.spaces import Box, Discrete
 
 # ROS
 import rclpy
-from rclpy import Node
+from rclpy.node import Node
 from rclpy.parameter import Parameter
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import ControlCommand, MatchStatus
