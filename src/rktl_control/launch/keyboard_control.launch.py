@@ -1,6 +1,3 @@
-import os
-import sys
-
 import launch
 import launch_ros.actions
 
@@ -12,7 +9,7 @@ def generate_launch_description():
             default_value='car0'
         ),
         launch_ros.actions.Node(
-            namespace=launch.substitutions.PathJoinSubstitution('cars/', launch_ros.substitutions.FindPackageShare('car_name')),
+            namespace=launch.substitutions.PathJoinSubstitution(['cars/', launch_ros.substitutions.FindPackageShare('car_name')]),
             package='rktl_control',
             executable='keyboard_interface',
             name='keyboard_interface',

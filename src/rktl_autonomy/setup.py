@@ -14,6 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
         (os.path.join('lib', package_name), glob(os.path.join(package_name, '*.py'))),
+        (os.path.join('share', package_name, 'config'), glob(os.path.join('config', '*.yaml'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -24,7 +25,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'rocket_league_agent = rktl_autonomy.rocket_league_agent:main'
+            'rocket_league_agent = rktl_autonomy.rocket_league_agent:main',
+            'plotter = rktl_autonomy.plotter:main'
         ],
     },
 )
