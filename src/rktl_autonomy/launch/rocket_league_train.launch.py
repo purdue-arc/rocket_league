@@ -93,8 +93,8 @@ def generate_launch_description():
         sim_mode_launch_arg,
         rate_launch_arg,
         agent_type_launch_arg,
-        plot_log_info,
+        # plot_log_info,
         agent_node,
         sim_launch,
-        plotter_node
+        # plotter_node
     ])

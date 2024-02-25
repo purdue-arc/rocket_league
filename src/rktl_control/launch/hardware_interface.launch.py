@@ -14,7 +14,7 @@ def generate_launch_description():
             name='hardware_interface',
             parameters=[
                 {
-                    launch.substitutions.PathJoinSubstitution(launch_ros.substitutions.FindPackageShare('rktl_control'), '/config/hardware_interface.yaml')
+                    launch.substitutions.PathJoinSubstitution([launch_ros.substitutions.FindPackageShare('rktl_control'), '/config/hardware_interface.yaml'])
                 }
             ]
         )
