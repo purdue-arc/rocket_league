@@ -9,15 +9,15 @@ def generate_launch_description():
     weights = LaunchConfiguration('weights')  # Filepath to weights
 
     plot_log_launch_arg = DeclareLaunchArgument(
-            'plot_log',
-            default_value='false',
-            description='Set to true to enable logging for plotting performance.'
+        'plot_log',
+        default_value='false',
+        description='Set to true to enable logging for plotting performance.'
         )
     
     weights_launch_arg = DeclareLaunchArgument(
-            'weights',
-            default_value='~/catkin_ws/data/rocket_league/model',
-            description='filepath to weights.'
+        'weights',
+        default_value='~/catkin_ws/data/rocket_league/model',
+        description='filepath to weights.'
         )
     
     plot_log_info = LogInfo(condition=IfCondition(plot_log), msg="Enabling performance plotting...")
@@ -31,17 +31,18 @@ def generate_launch_description():
         )
     
     plotter_node = Node(
-            condition=IfCondition(plot_log),
-            package='rktl_autonomy',
-            executable='plotter', 
-            name='plotter',
-            output='screen',
-            remappings=[('~log', 'rocket_league_agent/log')],
+        condition=IfCondition(plot_log),
+        package='rktl_autonomy',
+        executable='plotter', 
+        name='plotter',
+        output='screen',
+        remappings=[('~log', 'rocket_league_agent/log')],
         )
     
-    return LaunchDescription([plot_log_launch_arg, 
-                              weights_launch_arg,
-                              plot_log_info,
-                              agent_node,
-                              plotter_node
-                              ])
+    return LaunchDescription([
+        plot_log_launch_arg, 
+        weights_launch_arg,
+        plot_log_info,
+        agent_node,
+        plotter_node
+        ])
