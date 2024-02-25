@@ -1,6 +1,4 @@
 import os
-import sys
-
 import launch
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 import launch_ros.actions
