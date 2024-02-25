@@ -25,7 +25,9 @@ setup(
         'console_scripts': [
             "controller = rktl_control.controller:main",
             "mean_odom_filter = rktl_control.mean_odom_filter:main",
-            "particle_odom_filter = rktl_control.particle_odom_filter:main"
+            "particle_odom_filter = rktl_control.particle_odom_filter:main",
+            "launch_test = rktl_control.launch_test:main",
+            "topic_delay = rktl_control.topic_delay:main"
         ],
     },
 )

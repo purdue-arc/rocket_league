@@ -52,5 +52,8 @@ class Delay(object):
         """Callback for enqueuing new message"""
         self.buffer.append((self.node.get_clock().now().to_msg(), msg))
 
-if __name__ == "__main__":
+def main():
     Delay()
+
+if __name__ == "__main__":
+    main()
