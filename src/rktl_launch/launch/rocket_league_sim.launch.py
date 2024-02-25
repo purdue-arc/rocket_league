@@ -1,10 +1,8 @@
 import os
-import sys
-
 import launch
 import launch_ros.actions
 from ament_index_python.packages import get_package_share_directory
-
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
     ld = launch.LaunchDescription([
@@ -50,7 +48,7 @@ def generate_launch_description():
                     condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
                 ),
                 launch.actions.IncludeLaunchDescription(
-                    launch.launch_description_sources.PythonLaunchDescriptionSource(
+                    PythonLaunchDescriptionSource(
                         os.path.join(get_package_share_directory(
                         'rktl_sim'), 'launch', 'visualizer.launch.py')
                     ),
@@ -88,7 +86,7 @@ def generate_launch_description():
                     'rktl_launch'), 'rqt','rktl.perspective')
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_sim'), 'launch/simulator.launch.py')
             ),
@@ -97,7 +95,7 @@ def generate_launch_description():
             }.items()
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_planner'), 'launch/simple_agent.launch.py')
             ),
@@ -107,7 +105,7 @@ def generate_launch_description():
             }.items()
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_autonomy'), 'launch/rocket_league/rocket_league_agent.launch.py')
             ),
@@ -116,7 +114,7 @@ def generate_launch_description():
             }.items()
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_planner'), 'launch/patrol_agent.launch.py')
             ),
