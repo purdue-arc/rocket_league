@@ -3,7 +3,9 @@ import sys
 
 import launch
 import launch_ros.actions
+from launch.substitutions import PathJoinSubstitution
 from ament_index_python.packages import get_package_share_directory
+
 
 
 def generate_launch_description():
@@ -14,7 +16,7 @@ def generate_launch_description():
         ),
         launch_ros.actions.Node(
             package='rktl_planner',
-            namespace="cars/"+launch.substitutions.LaunchConfiguration("car_name"),
+            namespace=PathJoinSubstitution(["cars/", launch.substitutions.LaunchConfiguration("car_name")]),
             executable='patrol_planner',
             name='patrol_planner',
             output='screen',

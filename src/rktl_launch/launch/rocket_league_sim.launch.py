@@ -107,7 +107,7 @@ def generate_launch_description():
         launch.actions.IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
-                    'rktl_autonomy'), 'launch/rocket_league/rocket_league_agent.launch.py')
+                    'rktl_autonomy'), 'launch/rocket_league_agent.launch.py')
             ),
             launch_arguments={
                 'weights_name': launch.substitutions.LaunchConfiguration('autonomy_weights')

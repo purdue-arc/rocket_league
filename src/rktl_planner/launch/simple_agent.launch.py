@@ -24,7 +24,7 @@ def generate_launch_description():
                     output="screen",
                     parameters=[
                         {
-                            launch.substitutions.PathJoinSubstitution(launch_ros.substitutions.FindPackageShare('rktl_planner'), '/config/path_follower.yaml')
+                            launch.substitutions.PathJoinSubstitution([launch_ros.substitutions.FindPackageShare('rktl_planner'), '/config/path_follower.yaml'])
                         },
                         {
                             "car_name": launch.substitutions.LaunchConfiguration("car_name")
@@ -44,7 +44,7 @@ def generate_launch_description():
                     output="screen",
                     parameters=[
                         {
-                            launch.substitutions.PathJoinSubstitution(launch_ros.substitutions.FindPackageShare('rktl_planner'), '/config/path_planner.yaml')
+                            launch.substitutions.PathJoinSubstitution([launch_ros.substitutions.FindPackageShare('rktl_planner'), '/config/path_planner.yaml'])
                         },
                         {
                             "car_name": launch.substitutions.LaunchConfiguration("car_name")

@@ -1,8 +1,7 @@
 import os
-import sys
-
 import launch
 import launch_ros.actions
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -15,7 +14,7 @@ def generate_launch_description():
             output='screen'
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rosbridge_server'), 'launch/rosbridge_websocket.launch.py')
             )

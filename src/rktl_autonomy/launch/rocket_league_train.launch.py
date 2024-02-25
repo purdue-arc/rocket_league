@@ -5,6 +5,8 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     plot_log_launch_arg = DeclareLaunchArgument(
@@ -63,14 +65,15 @@ def generate_launch_description():
         namespace=LaunchConfiguration('agent_name')
         )
     
+    sim_path = PathJoinSubstitution([FindPackageShare('rktl_launch'), 'launch', 'rocket_league_sim.launch.py'])
     sim_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(['src/rktl_launch/launch/rocket_league_sim.launch.py']),  # TODO: Replace with the path to the launch file
-        launch_arguments={
-            'render': LaunchConfiguration('render'),
-            'sim_mode': LaunchConfiguration('sim_mode'),
-            'agent_type': LaunchConfiguration('agent_type'),
-        }.items(),
-        )
+                PythonLaunchDescriptionSource([sim_path]),  # TODO: Replace with the path to the launch file
+                launch_arguments={
+                    'render': LaunchConfiguration('render'),
+                    'sim_mode': LaunchConfiguration('sim_mode'),
+                    'agent_type': LaunchConfiguration('agent_type'),
+                }.items(),
+                )
     
     plotter_node = Node(
         condition=IfCondition(LaunchConfiguration('plot_log')),
