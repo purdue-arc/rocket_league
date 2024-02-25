@@ -1,9 +1,9 @@
-import os
-import sys
-
 import launch
 import launch_ros.actions
+from launch.substitutions import *
+from launch.conditions import IfCondition
 
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     ld = launch.LaunchDescription([
@@ -17,20 +17,22 @@ def generate_launch_description():
         ),
         launch.actions.GroupAction(
             actions=[
-                launch_ros.actions.PushRosNamespace("cars/" + launch.substitutions.LaunchConfiguration("car_name")),
+                #launch_ros.actions.PushRosNamespace("cars/" + launch.substitutions.LaunchConfiguration("car_name")),
 
                 launch_ros.actions.Node(
                     package='rktl_control',
                     executable='particle_odom_filter',
                     name='particle_odom_filter',
                     output='screen',
-                    condition=launch.conditions.LaunchConfigurationEquals('use_particle_filter', True),
+                    condition=IfCondition(
+                        EqualsSubstitution(LaunchConfiguration('use_particle_filter'), 'true')
+                    ),
                     parameters=[
                         {
-                            launch.substitutions.PathJoinSubstitution(launch_ros.substitutions.FindPackageShare('rktl_control'), '/config/particle_odom_filter.yaml')
+                            PathJoinSubstitution([FindPackageShare('rktl_control'), '/config/particle_odom_filter.yaml'])
                         },
                         {
-                            'frame_ids/body': launch.substitutions.LaunchConfiguration('car_name')
+                            'frame_ids/body': LaunchConfiguration('car_name')
                         }
                     ]
                 ),
@@ -40,13 +42,15 @@ def generate_launch_description():
                     executable='mean_odom_filter',
                     name='mean_odom_filter',
                     output='screen',
-                    condition=launch.conditions.LaunchConfigurationNotEquals('use_particle_filter', True),
+                    condition=IfCondition(
+                        EqualsSubstitution(LaunchConfiguration('use_particle_filter'), 'true')
+                    ),
                     parameters=[
                         {
-                            launch.substitutions.PathJoinSubstitution(launch_ros.substitutions.FindPackageShare('rktl_control'), '/config/mean_odom_filter.yaml')
+                            PathJoinSubstitution([FindPackageShare('rktl_control'), '/config/mean_odom_filter.yaml'])
                         },
                         {
-                            'frame_ids/body': launch.substitutions.LaunchConfiguration('car_name')
+                            'frame_ids/body': LaunchConfiguration('car_name')
                         }
                     ]
                 ),
@@ -58,8 +62,8 @@ def generate_launch_description():
                     output='screen',
                     parameters=[
                         {
-                            launch.substitutions.PathJoinSubstitution(launch_ros.substitutions.FindPackageShare('rktl_control'), '/config/controller.yaml')
-                        },
+                            PathJoinSubstitution([FindPackageShare('rktl_control'), '/config/controller.yaml'])
+                        }
                     ]
                 )
             ]

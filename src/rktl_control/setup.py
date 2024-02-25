@@ -23,7 +23,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "controller_node = rktl_control2.controller:main"
+            "controller = rktl_control.controller:main",
+            "mean_odom_filter = rktl_control.mean_odom_filter:main",
+            "particle_odom_filter = rktl_control.particle_odom_filter:main"
         ],
     },
 )
