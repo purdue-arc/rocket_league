@@ -1,6 +1,9 @@
 import os
 
 import launch
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, EqualsSubstitution
+from launch.conditions import IfCondition
 import launch_ros.actions
 from ament_index_python.packages import get_package_share_directory
 
@@ -31,26 +34,26 @@ def generate_launch_description():
                     'rktl_launch'), 'config', 'global_params.yaml')
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_sim'), 'launch/visualizer.launch.py')
             ),
-            condition=launch.conditions.LaunchConfigurationEquals('render', 'true')
+            condition=IfCondition(EqualsSubstitution(LaunchConfiguration('render'), 'true'))
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_game'), 'launch/game.launch.py')
             )
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_control'), 'launch/ball.launch.py')
             )
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_control'), 'launch/car.launch.py')
             ),
@@ -59,13 +62,13 @@ def generate_launch_description():
             }.items()
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_control'), 'launch/hardware_interface.launch.py')
             )
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_planner'), 'launch/simple_agent.launch.py')
             ),
@@ -73,27 +76,27 @@ def generate_launch_description():
                 'agent_name': 'agent0',
                 'car_name': 'car0'
             }.items(),
-            condition=launch.conditions.LaunchConfigurationEquals('agent_type', 'planner')
+            condition=IfCondition(EqualsSubstitution(LaunchConfiguration('agent_type'), 'planner'))
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_autonomy'), 'launch/rocket_league/rocket_league_agent.launch.py')
             ),
             launch_arguments={
                 'weights_name': launch.substitutions.LaunchConfiguration('autonomy_weights')
             }.items(),
-            condition=launch.conditions.LaunchConfigurationEquals('agent_type', 'autonomy')
+            condition=IfCondition(EqualsSubstitution(LaunchConfiguration('agent_type'), 'autonomy'))
         ),
         launch.actions.IncludeLaunchDescription(
-            launch.launch_description_sources.PythonLaunchDescriptionSource(
+            PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
                     'rktl_planner'), 'launch/patrol_agent.launch.py')
             ),
             launch_arguments={
                 'car_name': 'car0'
             }.items(),
-            condition=launch.conditions.LaunchConfigurationEquals('agent_type', 'patrol')
+            condition=IfCondition(EqualsSubstitution(LaunchConfiguration('agent_type'), 'patrol'))
         )
     ])
     return ld

@@ -1,6 +1,8 @@
 import os
 import launch
 import launch_ros.actions
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration, EqualsSubstitution
 from ament_index_python.packages import get_package_share_directory
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
@@ -45,7 +47,7 @@ def generate_launch_description():
                             value="Ground Truth",
                         )
                     ],
-                    condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic')
+                    condition=IfCondition(EqualsSubstitution(LaunchConfiguration('sim_mode'), 'realistic'))
                 ),
                 launch.actions.IncludeLaunchDescription(
                     PythonLaunchDescriptionSource(
