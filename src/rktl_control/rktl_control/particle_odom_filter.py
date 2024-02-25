@@ -467,6 +467,8 @@ class ParticleOdomFilter(object):
                 random_internal),
                 axis=1)
 
+def main():
+    ParticleOdomFilter()
 
 if __name__ == "__main__":
-    ParticleOdomFilter()
+    main()

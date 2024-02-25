@@ -149,6 +149,8 @@ class MeanOdomFilter(object):
 
         return (avg_vx, avg_vy, avg_omega)
 
+def main():
+    MeanOdomFilter()
 
 if __name__ == "__main__":
-    MeanOdomFilter()
+    main()
