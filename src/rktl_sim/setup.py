@@ -13,6 +13,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
+        (os.path.join('lib', package_name), glob(os.path.join(package_name, '*.py'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -23,6 +24,12 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'simulator = rktl_sim.simulator:main',
+            'visualizer = rktl_sim.visualizer:main',
+            'car = rktl_sim.car:main',
+            'sim = rktl_sim.sim:main',
+            'asset = rktl_sim.asset:main',
+            'window = rktl_sim.window:main'
         ],
     },
 )
