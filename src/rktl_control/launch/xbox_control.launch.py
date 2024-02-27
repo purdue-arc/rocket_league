@@ -1,6 +1,7 @@
 import launch
 import launch_ros.actions
-
+from launch.substitutions import PathJoinSubstitution
+from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     ld = launch.LaunchDescription([
@@ -18,7 +19,7 @@ def generate_launch_description():
         ),
         launch.actions.GroupAction(
             actions=[
-                launch_ros.actions.PushRosNamespace("cars/" + launch.substitutions.LaunchConfiguration("car_name")),
+                launch_ros.actions.PushRosNamespace("cars" + get_package_share_directory('car_name')),
 
                 launch_ros.actions.Node(
                     package='joy',

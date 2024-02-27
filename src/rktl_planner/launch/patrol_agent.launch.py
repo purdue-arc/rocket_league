@@ -13,7 +13,7 @@ def generate_launch_description():
         ),
         launch_ros.actions.Node(
             package='rktl_planner',
-            namespace=PathJoinSubstitution(["cars/", launch.substitutions.LaunchConfiguration("car_name")]),
+            namespace=PathJoinSubstitution(["cars", launch.substitutions.LaunchConfiguration("car_name")]),
             executable='patrol_planner',
             name='patrol_planner',
             output='screen',
