@@ -15,6 +15,7 @@ setup(
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
         (os.path.join('lib', package_name), glob(os.path.join(package_name, '*.py'))),
         (os.path.join('share', package_name, 'config'), glob(os.path.join('config', '*.yaml'))),
+        (os.path.join('share', package_name, 'rqt'), glob(os.path.join('rqt', '*.perspective'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
