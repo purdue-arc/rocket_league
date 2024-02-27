@@ -1,31 +1,33 @@
 # ALL UNITS IN SI
 
 # field dimensions
-field:
-  width: 3
-    # max: 3.5
-    # min: 2.5
-  length: 4.25
-    # max: 5
-    # min: 3.5
-  wall_thickness: 0.25
-  goal:
-    width: 1
+/**:
+  ros__parameters:
+    field:
+      width: 3
+        # max: 3.5
+        # min: 2.5
+      length: 4.25
+        # max: 5
+        # min: 3.5
+      wall_thickness: 0.25
+      goal:
+        width: 1
 
-# car dimensions and physical constants
-ball:
-  radius: 0.0508 # (2 in)
+    # car dimensions and physical constants
+    ball:
+      radius: 0.0508 # (2 in)
 
-# car dimensions and physical constants
-cars:
-  length: 0.12  # front to rear wheel center to center, meters
-    # min: 0.10
-    # max: 0.30
-  steering:
-    max_throw: 0.1826  # center to side, radians
-      # min: 0.16
-      # max: 0.20
-    rate: 0.9128  # rad/s
-  throttle:
-    max_speed: 2.3  # m/s
-    tau: 0.2  # time constant, seconds
+    # car dimensions and physical constants
+    cars:
+      length: 0.12  # front to rear wheel center to center, meters
+        # min: 0.10
+        # max: 0.30
+      steering:
+        max_throw: 0.1826  # center to side, radians
+          # min: 0.16
+          # max: 0.20
+        rate: 0.9128  # rad/s
+      throttle:
+        max_speed: 2.3  # m/s
+        tau: 0.2  # time constant, seconds
