@@ -6,7 +6,7 @@ License:
 """
 
 from sim_simulator import Simulator
-from vis_visualizer import Visualizer
+from vis_visualizer import VisualizerROS as Vizualizer
 # from .cartpole_interface import CartpoleInterface
 # from .cartpole_direct_interface import CartpoleDirectInterface
 # from .snake_interface import SnakeInterface

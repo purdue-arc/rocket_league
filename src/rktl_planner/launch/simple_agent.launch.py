@@ -13,7 +13,7 @@ def generate_launch_description():
         ),
         launch.actions.GroupAction(
             actions=[
-                launch_ros.actions.PushRosNamespace(["agents/", launch.substitutions.LaunchConfiguration("agent_name")]),
+                launch_ros.actions.PushRosNamespace("agents/agent0"),
                 launch_ros.actions.Node(
                     package="rktl_planner",
                     executable="path_follower",

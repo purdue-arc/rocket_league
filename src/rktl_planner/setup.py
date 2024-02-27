@@ -25,6 +25,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'bezier_path_server = rktl_planner.nodes.bezier_path_server.py:main',
+            'path_follower = rktl_planner.nodes.path_follower:main',
+            'path_planner = rktl_planner.nodes.path_planner:main',
+            'patrol_planner = rktl_planner.nodes.patrol_planner:main'
         ],
     },
 )
