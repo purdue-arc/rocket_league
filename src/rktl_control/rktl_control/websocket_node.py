@@ -44,7 +44,7 @@ if __name__ == '__main__':
   print("Initing")
   print("Starting")
   rclpy.init(args=sys.args)
-  node = rclpy.create_node('car_websocket', anonymous=True)
+  node = rclpy.create_node('car_websocket')
   node.create_subscription(ControlEffort, f'/cars/car{car_num}/effort', receive_callback)
   print("Running")
   loop = asyncio.get_event_loop()

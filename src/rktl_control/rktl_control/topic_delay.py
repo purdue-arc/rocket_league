@@ -28,7 +28,7 @@ class Delay(object):
 
         # create node
         rclpy.init(args=sys.argv)
-        self.node = rclpy.create_node('delay', anonymous=True)
+        self.node = rclpy.create_node('delay')
 
         # get message type
     #    msg_type = None
