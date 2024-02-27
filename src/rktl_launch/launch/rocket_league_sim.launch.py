@@ -69,7 +69,7 @@ def generate_launch_description():
             executable='topic_delay',
             name='pose_delay',
             condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic'),
-            arguments=["pose_sync_early pose_sync geometry_msgs/PoseWithCovarianceStamped " + str(launch.substitutions.LaunchConfiguration('perception_delay'))]
+            arguments=["pose_sync_early", "pose_sync", "geometry_msgs/PoseWithCovarianceStamped", launch.substitutions.LaunchConfiguration('perception_delay')]
         ),
         launch_ros.actions.Node(
             namespace='cars/car0',
@@ -77,7 +77,7 @@ def generate_launch_description():
             executable='topic_delay',
             name='pose_delay',
             condition=launch.conditions.LaunchConfigurationEquals('sim_mode', 'realistic'),
-            arguments=["pose_sync_early pose_sync geometry_msgs/PoseWithCovarianceStamped " + str(launch.substitutions.LaunchConfiguration('perception_delay'))]
+            arguments=["pose_sync_early", "pose_sync", "geometry_msgs/PoseWithCovarianceStamped", launch.substitutions.LaunchConfiguration('perception_delay')]
         ),
         launch_ros.actions.Node(
             package='rqt_gui',
