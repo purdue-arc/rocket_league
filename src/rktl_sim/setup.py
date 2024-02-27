@@ -25,8 +25,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'simulator = rktl_sim.sim_simulator:main',
-            'visualizer = rktl_sim.vis_visualizer:main',
+            'simulator = rktl_sim.sim_simulator.py:main',
+            'visualizer = rktl_sim.vis_visualizer.py:main',
             'car = rktl_sim.simulator.car:main',
             'sim = rktl_sim.simulator.sim:main',
             'asset = rktl_sim.visualizer.asset:main',
