@@ -31,15 +31,15 @@ class Delay(object):
         self.node = rclpy.create_node('delay', anonymous=True)
 
         # get message type
-        msg_type = None
-        topics_types = self.node.get_topic_names_and_types()
-        for topic, type in topics_types:
-            if str(type) == topic_type:
-                msg_type = type
-        assert msg_type is not None
+    #    msg_type = None
+    #    topics_types = self.node.get_topic_names_and_types()
+    #    for topic, type in topics_types:
+    #        if str(type) == topic_type:
+    #            msg_type = type
+    #    assert msg_type is not None
 
-        pub = self.node.create_publisher(msg_type, output_name, queue_size=1)
-        self.node.create_subscription(msg_type, input_name, self.msg_cb)
+        pub = self.node.create_publisher(topic_type, output_name, queue_size=1)
+        self.node.create_subscription(topic_type, input_name, self.msg_cb)
         self.buffer = deque()
 
         while rclpy.ok():
