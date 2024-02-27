@@ -13,7 +13,7 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {
-                    PathJoinSubstitution([FindPackageShare('rktl_control'), '/config/mean_odom_filter.yaml'])
+                    PathJoinSubstitution([FindPackageShare('rktl_control'), 'config', 'mean_odom_filter.yaml'])
                 }
             ]
         )

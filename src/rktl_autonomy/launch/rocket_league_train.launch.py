@@ -7,6 +7,8 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
+from ament_index_python.packages import get_package_share_directory
+import os
 
 def generate_launch_description():
     plot_log_launch_arg = DeclareLaunchArgument(
@@ -65,7 +67,8 @@ def generate_launch_description():
         namespace=LaunchConfiguration('agent_name')
         )
     
-    sim_path = PathJoinSubstitution([FindPackageShare('rktl_launch'), 'launch', 'rocket_league_sim.launch.py'])
+    # sim_path = PathJoinSubstitution([FindPackageShare('rktl_launch'), 'launch', 'rocket_league_sim.launch.py'])
+    sim_path = os.path.join(get_package_share_directory('rktl_launch'), 'launch', 'rocket_league_sim.launch.py')
     sim_launch = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([sim_path]),  # TODO: Replace with the path to the launch file
                 launch_arguments={

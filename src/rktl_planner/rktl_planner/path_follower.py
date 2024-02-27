@@ -26,7 +26,7 @@ class PathFollower(object):
     def __init__(self):
         rclpy.init()
         global node
-        node = rclpy.create_node('path_follower')
+        node = rclpy.Node('path_follower')
 
         self.path_start_time = None
         self.path = None
@@ -53,10 +53,10 @@ class PathFollower(object):
         self.bot_velocity_cmd = node.create_publisher(ControlCommand, f'/cars/{car_name}/command', 1)
 
         # Subscribers
-        node.create_subscription(Odometry, f'/cars/{car_name}/odom', self.odom_cb, rclpy.qos.QoSProfile())
-        node.create_subscription(Path, 'linear_path', self.path_cb)
+        node.create_subscription(Odometry, f'/cars/{car_name}/odom', self.odom_cb, qos_profile=1)
+        node.create_subscription(Path, 'linear_path', self.path_cb, qos_profile=1)
 
-        rclpy.spin()
+        rclpy.spin(node)
 
     def path_cb(self, path_msg: Path):
         """Creates path using waypoints in Path message."""
@@ -78,15 +78,14 @@ class PathFollower(object):
                 odom_msg.twist)
 
             # Set lookahead dist by lookahead gain and current speed
-            lookahead_boost = np.linalg.norm(bot_linear) \
-                * self.lookahead_gain
-            lookahead_dist = self.lookahead_dist + lookahead_boost
-
+            lookahead_boost = np.linalg.norm(bot_linear) * self.lookahead_gain.get_parameter_value().double_value
+            lookahead_dist = rclpy.Parameter('~lookahead_dist', rclpy.Parameter.Type.DOUBLE, self.lookahead_dist.get_parameter_value().double_value + lookahead_boost)
+            
             # Set number of waypoints to check
-            if self.lookahead_pnts == -1:
+            if self.lookahead_pnts.get_parameter_value().integer_value == -1:
                 lookahead_pnts = len(self.path)
             else:
-                lookahead_pnts = self.lookahead_pnts
+                lookahead_pnts = self.lookahead_pnts.get_parameter_value().integer_value
 
             # Find next valid intersection along path
             intersect = None
