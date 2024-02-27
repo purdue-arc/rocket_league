@@ -1,1 +1,3 @@
-planner_type: 'complex'
+/**:
+  ros__parameters:
+    planner_type: 'complex'

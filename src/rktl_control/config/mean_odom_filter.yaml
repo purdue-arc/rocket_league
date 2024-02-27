@@ -1,6 +1,8 @@
-delay:
-  compensate: false
-  duration: 0.15
-buffer_size:
-  position: 3
-  velocity: 3
+/**:
+  ros__parameters:
+    delay:
+      compensate: false
+      duration: 0.15
+    buffer_size:
+      position: 3
+      velocity: 3
