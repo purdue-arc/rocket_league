@@ -23,7 +23,6 @@ from enum import Enum
 
 
 # local libraries
-from rktl_sim.nodes import simulator
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 
