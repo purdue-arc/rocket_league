@@ -63,7 +63,7 @@ def main(win):
         win.addstr("q to quit")
         sleep(0.01)
 
-if __name__ == "__main__":
+def main():
     rclpy.init(args=sys.argv)
     node = rclpy.create_node('keyboard')
 
@@ -71,3 +71,7 @@ if __name__ == "__main__":
     reset_srv = node.create_client(Empty, '/sim_reset')
 
     wrapper(main)
+
+if __name__ == "__main__":
+    main()
+    

@@ -97,9 +97,9 @@ class Controller(object):
         self.node = rclpy.create_node('controller')
 
         # Constants
-        self.MAX_SPEED = self.node.declare_parameter('/cars/throttle/max_speed').value
-        self.STEERING_THROW = self.node.declare_parameter('/cars/steering/max_throw').value
-        self.BODY_LENGTH = self.node.declare_parameter('/cars/length').value
+        self.MAX_SPEED = self.node.declare_parameter('/cars/throttle/max_speed', 2.3).value
+        self.STEERING_THROW = self.node.declare_parameter('/cars/steering/max_throw', 0.1826).value
+        self.BODY_LENGTH = self.node.declare_parameter('/cars/length', 0.12).value
 
         self.MIN_THROTTLE_EFFORT = self.node.declare_parameter('~limits/throttle/min', -1.0).value
         self.MAX_THROTTLE_EFFORT = self.node.declare_parameter('~limits/throttle/max',  1.0).value
@@ -108,15 +108,17 @@ class Controller(object):
 
         self.PUBLISH_EARLY = self.node.declare_parameter('~open_loop/publish_early', True).value
 
+        self.CONTROLLER_TYPE = self.node.declare_parameter('~controller_type', 'none').value
+
         # Make closed loop velocity controller
-        if self.node.declare_parameter('~controller_type').value == 'lead_lag':
+        if self.CONTROLLER_TYPE == 'lead_lag':
             self.controller = LeadLagController(
                 self.node.declare_parameter('~lead/gain').value,
                 self.node.declare_parameter('~lead/alpha').value,
                 self.node.declare_parameter('~lead/beta').value,
                 self.node.declare_parameter('~lag/alpha').value,
                 self.node.declare_parameter('~lag/beta').value)
-        elif self.node.declare_parameter('~controller_type').value == 'pid':
+        elif self.CONTROLLER_TYPE == 'pid':
             self.controller = PIDController(
                 self.node.declare_parameter('~pid/kp').value,
                 self.node.declare_parameter('~pid/ki').value,
@@ -124,7 +126,7 @@ class Controller(object):
                 self.node.declare_parameter('~pid/anti_windup').value,
                 self.node.declare_parameter('~pid/deadband').value,
                 1.0 / self.node.declare_parameter('~rate', 10.0).value)
-        elif self.node.declare_parameter('~controller_type').value == 'none':
+        elif self.CONTROLLER_TYPE == 'none':
             self.controller = None
         else:
             raise NotImplementedError(f"unrecognized controller type: {self.node.declare_parameter('controller_type').value}")
@@ -134,14 +136,14 @@ class Controller(object):
         self.psi_ref = None
 
         # Publishers
-        self.pub = self.node.create_publisher(ControlEffort, 'effort', queue_size=1)
+        self.pub = self.node.create_publisher(ControlEffort, 'effort', 1)
 
         # Subscribers
-        self.node.create_subscription(ControlCommand, 'command', self.command_cb)
-        self.node.create_subscription(Odometry, 'odom', self.odom_cb)
+        self.node.create_subscription(ControlCommand, 'command', self.command_cb, 1)
+        self.node.create_subscription(Odometry, 'odom', self.odom_cb, 1)
 
         # trust that odom_cb runs at proper rate
-        rclpy.spin()
+        rclpy.spin(self.node)
 
     def command_cb(self, cmd_msg):
         """Callback for command messages for car."""
@@ -185,6 +187,8 @@ class Controller(object):
         msg.steering = steering_effort
         self.pub.publish(msg)
 
+def main():
+    Controller()
 
 if __name__ == "__main__":
-    Controller()
+    main()
