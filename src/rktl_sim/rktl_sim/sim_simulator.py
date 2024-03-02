@@ -17,13 +17,12 @@ import time
 
 #import rospy
 
-from std_srvs.srv import Empty, EmptyResponse
+from std_srvs.srv import Empty, Empty_Response # might not need Empty_Response
 from threading import Lock
 from enum import Enum
 
 
 # local libraries
-from rktl_sim.nodes import simulator
 from rktl_msgs.msg import MatchStatus, ControlCommand, ControlEffort
 
 
@@ -171,7 +170,7 @@ class Simulator(object):
 
         self.last_time = None
         self.reset_lock.release()
-        return EmptyResponse()
+        return Empty_Response() # might be Empty()
 
     def reset_ball_cb(self, _):
         """Resets the ball sensor noise and pose WITHOUT resetting the whole sim."""
@@ -183,7 +182,7 @@ class Simulator(object):
         self.ball_init_speed = self.get_sim_param('/ball/init_speed')
 
         self.sim.reset_ball()
-        return EmptyResponse()
+        return Empty_Response() # might be Empty()
 
     def loop_once(self):
         """Step the simulation once step, updating match status, moving and publishing new car and ball positions."""

@@ -23,7 +23,6 @@ import numpy as np
 
 
 # Local library
-from rktl_sim.nodes import visualizer
 from rktl_msgs.msg import Path, BezierPathList
 from rktl_planner import BezierPath
 

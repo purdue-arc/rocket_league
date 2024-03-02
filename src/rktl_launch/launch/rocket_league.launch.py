@@ -25,8 +25,8 @@ def generate_launch_description():
             package='rqt_gui',
             executable='rqt_gui',
             name='rqt_gui',
-            arguments='--perspective-file ' + os.path.join(get_package_share_directory(
-                    'rktl_launch'), 'rqt','rktl.perspective')
+            arguments=['--perspective-file', os.path.join(get_package_share_directory(
+                    'rktl_launch'), 'rqt','rktl.perspective')]
         ),
         launch_ros.actions.SetParametersFromFile(
             filename=os.path.join(get_package_share_directory(
