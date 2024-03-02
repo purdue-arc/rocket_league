@@ -42,11 +42,11 @@ class VisualizerROS(object):
         # goal_width = rospy.get_param('/field/goal/width')
         # wall_thickness = rospy.get_param('/field/wall_thickness')
         # ball_radius = rospy.get_param("/ball/radius")
-        field_width = node.declare_parameter('/field/width').value
-        field_length = node.declare_parameter('/field/length').value
-        goal_width = node.declare_parameter('/field/goal/width').value
-        wall_thickness = node.declare_parameter('/field/wall_thickness').value
-        ball_radius = node.declare_parameter("/ball/radius").value
+        field_width = node.declare_parameter('/field/width').get_parameter_value().double_value
+        field_length = node.declare_parameter('/field/length').get_parameter_value().double_value
+        goal_width = node.declare_parameter('/field/goal/width').get_parameter_value().double_value
+        wall_thickness = node.declare_parameter('/field/wall_thickness').get_parameter_value().double_value
+        ball_radius = node.declare_parameter("/ball/radius").get_parameter_value().double_value
 
 
 
@@ -54,7 +54,6 @@ class VisualizerROS(object):
         
         self.window = visualizer.Window(
             field_width, field_length, wall_thickness,
-            # rospy.get_param('~window_name', 'Rocket League Visualizer'))
             node.declare_parameter('~window_name', 'Rocket League Visualizer').value)
         
         # Collecting private parameters
@@ -169,11 +168,11 @@ class VisualizerROS(object):
         # rospy.Subscriber("/cars/car0/lookahead_pnt", Float32, self.lookahead_cb)
         # rospy.Subscriber("/agents/agent0/bezier_path", BezierPathList, self.bezier_path_cb)
 
-        node.create_subscription(Odometry, "/ball/odom", self.ball_odom_cb)
-        node.create_subscription(Odometry, "/cars/car0/odom", self.car_odom_cb)
-        node.create_subscription(Path, "/cars/car0/path", self.path_arr_cb)
-        node.create_subscription(Float32, "/cars/car0/lookahead_pnt", self.lookahead_cb)
-        node.create_subscription(BezierPathList, "/agents/agent0/bezier_path", self.bezier_path_cb)
+        node.create_subscription(Odometry, "/ball/odom", self.ball_odom_cb, qos_profile=1)
+        node.create_subscription(Odometry, "/cars/car0/odom", self.car_odom_cb, qos_profile=1)
+        node.create_subscription(Path, "/cars/car0/path", self.path_arr_cb, qos_profile=1)
+        node.create_subscription(Float32, "/cars/car0/lookahead_pnt", self.lookahead_cb, qos_profile=1)
+        node.create_subscription(BezierPathList, "/agents/agent0/bezier_path", self.bezier_path_cb, qos_profile=1)
         
 
         while not rclpy.ok():
