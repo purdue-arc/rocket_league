@@ -1,0 +1,8 @@
+float64 velocity
+geometry_msgs/Pose[] target_poses
+builtin_interfaces/Duration[] target_durations
+builtin_interfaces/Duration bezier_segment_duration
+builtin_interfaces/Duration linear_segment_duration
+---
+rktl_msgs/BezierPath[] bezier_paths
+rktl_msgs/Path linear_path
