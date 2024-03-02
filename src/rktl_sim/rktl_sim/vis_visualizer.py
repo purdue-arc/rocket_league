@@ -15,6 +15,7 @@ from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 import rclpy
 import sys
+from rclpy.exceptions import ROSInterruptException
 
 from rktl_dependencies.transformations import euler_from_quaternion
 
@@ -64,7 +65,7 @@ class VisualizerROS(object):
         # car_length = rospy.get_param("~cars/body_length")
         self.frame_id = node.declare_parameter("~frame_id", "map").value
         self.timeout = node.declare_parameter("~timeout", 10).value
-        rate = rclpy.create_node('simple_node').create_rate((node.declare_parameter("~rate", 20).value))
+        rate = rclpy.create_node('simple_node').create_rate((node.declare_parameter("~rate", 20).get_parameter_value().double_value))
         car_width = node.declare_parameter("~cars/body_width").value
         car_length = node.declare_parameter("~cars/body_length").value
 
@@ -182,7 +183,7 @@ class VisualizerROS(object):
                 exit()
             try:
                 rate.sleep()
-            except rclpy.ROSInterruptException:
+            except ROSInterruptException:
                 pass
 
 
