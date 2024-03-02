@@ -35,7 +35,7 @@ class VisualizerROS(object):
         #rospy.init_node("visualizer")
         rclpy.init(args=sys.argv)
         global node
-        node = rclpy.create_node("visualizer", parameter_overrides=[])
+        node = rclpy.create_node("visualizer")
         
         # Collecting global parameters
         # field_width = node.get_param('/field/width')
