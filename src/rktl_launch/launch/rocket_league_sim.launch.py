@@ -84,7 +84,7 @@ def generate_launch_description():
             executable='rqt_gui',
             name='rqt_gui',
             condition=launch.conditions.LaunchConfigurationEquals('render', 'true'),
-            arguments=['--perspective-file ' + os.path.join(get_package_share_directory(
+            arguments=['--perspective-file', os.path.join(get_package_share_directory(
                     'rktl_launch'), 'rqt','rktl.perspective')]
         ),
         launch.actions.IncludeLaunchDescription(
