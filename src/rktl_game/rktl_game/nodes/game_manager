@@ -13,7 +13,7 @@ import rclpy
 from std_msgs.msg import Bool, Header
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
-from std_srvs.srv import Empty, EmptyResponse
+from std_srvs.srv import Empty, Empty_Response
 
 class ScoreKeeper():
     def __init__(self):
@@ -71,7 +71,7 @@ class ScoreKeeper():
         self.enabled = False
         self.match_status = 0
         self.active_pub.publish(False)
-        return EmptyResponse()
+        return Empty_Response()
 
     def reset(self, _):
         self.orange_score = 0
@@ -83,13 +83,13 @@ class ScoreKeeper():
         header = Header()
         header.stamp = node.get_clock().now()
         self.match_status_pub.publish(MatchStatus(header, 0, self.game_clock, Score(0, 0)))
-        return EmptyResponse()
+        return Empty_Response()
 
     def unpause(self, _):
         self.enabled = True
         self.match_status = 1
         self.active_pub.publish(True)
-        return EmptyResponse()
+        return Empty_Response()
 
     def check_goal(self, ball_pose: Odometry):
         if self.enabled:

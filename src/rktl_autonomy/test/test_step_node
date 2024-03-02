@@ -12,7 +12,7 @@ import unittest, rostest, rclpy
 from rclpy.duration import Duration
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import MatchStatus
-from std_srvs.srv import Empty, EmptyResponse
+from std_srvs.srv import Empty, Empty_Response
 from rosgraph_msgs.msg import Clock
 import numpy as np
 from rktl_autonomy.rocket_league_interface import RocketLeagueInterface
@@ -164,7 +164,7 @@ class TestStep(unittest.TestCase):
     def reset(self, __):
         """Do nothing."""
         self.assertTrue(self.want_reset, msg='env reset called when unexpected')
-        return EmptyResponse()
+        return Empty_Response()
 
 if __name__ == '__main__':
     rostest.rosrun('rktl_autonomy', 'test_rktl_rewards', TestStep)
