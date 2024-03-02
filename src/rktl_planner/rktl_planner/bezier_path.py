@@ -10,9 +10,8 @@ License:
 import math
 from rktl_planner import BezierCurve
 from rktl_msgs.msg import BezierPath as BezierPathMsg
-from rclpy import Duration
+from rclpy.duration import Duration
 from geometry_msgs.msg import Vector3
-from std_msgs.msg import Duration as DurationMsg
 
 
 class BezierPath:
@@ -127,7 +126,7 @@ class BezierPath:
 
     def to_msg(self):
         """Returns a `rktl_msg/BezierPathMsg` object representing the `BezierPath` object."""
-        duration_msg = DurationMsg(self.duration)
+        duration_msg = Duration(self.duration).to_msg()
         msg = BezierPathMsg(
             order=self.bezier_curve.order,
             control_points=self.bezier_curve.control_points,
