@@ -137,7 +137,7 @@ class PathPlanner(object):
     def ball_odom_cb(self, data: Odometry):
         self.ball_odom = data
 
-    def reset(self, _: EmptyRequest):
+    def reset(self, _: Empty_Request):
         req = self.path_req(self.car_odom, self.ball_odom, self.goal_pos)
         res = self.path_client(req)
         if self.linear_path_pub:
@@ -146,7 +146,7 @@ class PathPlanner(object):
             bezier_path_list = BezierPathList()
             bezier_path_list.paths = res.bezier_paths
             self.bezier_path_pub.publish(bezier_path_list)
-        return EmptyResponse()
+        return Empty_Response()
 
 if __name__ == '__main__':
     PathPlanner()

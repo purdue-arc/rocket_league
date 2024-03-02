@@ -15,6 +15,7 @@ from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 import rclpy
 import sys
+from rclpy.exceptions import ROSInterruptException
 
 from rktl_dependencies.transformations import euler_from_quaternion
 
@@ -42,11 +43,11 @@ class VisualizerROS(object):
         # goal_width = rospy.get_param('/field/goal/width')
         # wall_thickness = rospy.get_param('/field/wall_thickness')
         # ball_radius = rospy.get_param("/ball/radius")
-        field_width = node.declare_parameter('/field/width').value
-        field_length = node.declare_parameter('/field/length').value
-        goal_width = node.declare_parameter('/field/goal/width').value
-        wall_thickness = node.declare_parameter('/field/wall_thickness').value
-        ball_radius = node.declare_parameter("/ball/radius").value
+        field_width = node.declare_parameter('/field/width').get_parameter_value().double_value
+        field_length = node.declare_parameter('/field/length').get_parameter_value().double_value
+        goal_width = node.declare_parameter('/field/goal/width').get_parameter_value().double_value
+        wall_thickness = node.declare_parameter('/field/wall_thickness').get_parameter_value().double_value
+        ball_radius = node.declare_parameter("/ball/radius").get_parameter_value().double_value
 
 
 
@@ -54,7 +55,6 @@ class VisualizerROS(object):
         
         self.window = visualizer.Window(
             field_width, field_length, wall_thickness,
-            # rospy.get_param('~window_name', 'Rocket League Visualizer'))
             node.declare_parameter('~window_name', 'Rocket League Visualizer').value)
         
         # Collecting private parameters
@@ -65,7 +65,7 @@ class VisualizerROS(object):
         # car_length = rospy.get_param("~cars/body_length")
         self.frame_id = node.declare_parameter("~frame_id", "map").value
         self.timeout = node.declare_parameter("~timeout", 10).value
-        rate = rclpy.create_node('simple_node').create_rate((node.declare_parameter("~rate", 20).value))
+        rate = rclpy.create_node('simple_node').create_rate((node.declare_parameter("~rate", 20).get_parameter_value().double_value))
         car_width = node.declare_parameter("~cars/body_width").value
         car_length = node.declare_parameter("~cars/body_length").value
 
@@ -169,11 +169,11 @@ class VisualizerROS(object):
         # rospy.Subscriber("/cars/car0/lookahead_pnt", Float32, self.lookahead_cb)
         # rospy.Subscriber("/agents/agent0/bezier_path", BezierPathList, self.bezier_path_cb)
 
-        node.create_subscription(Odometry, "/ball/odom", self.ball_odom_cb)
-        node.create_subscription(Odometry, "/cars/car0/odom", self.car_odom_cb)
-        node.create_subscription(Path, "/cars/car0/path", self.path_arr_cb)
-        node.create_subscription(Float32, "/cars/car0/lookahead_pnt", self.lookahead_cb)
-        node.create_subscription(BezierPathList, "/agents/agent0/bezier_path", self.bezier_path_cb)
+        node.create_subscription(Odometry, "/ball/odom", self.ball_odom_cb, qos_profile=1)
+        node.create_subscription(Odometry, "/cars/car0/odom", self.car_odom_cb, qos_profile=1)
+        node.create_subscription(Path, "/cars/car0/path", self.path_arr_cb, qos_profile=1)
+        node.create_subscription(Float32, "/cars/car0/lookahead_pnt", self.lookahead_cb, qos_profile=1)
+        node.create_subscription(BezierPathList, "/agents/agent0/bezier_path", self.bezier_path_cb, qos_profile=1)
         
 
         while not rclpy.ok():
@@ -183,7 +183,7 @@ class VisualizerROS(object):
                 exit()
             try:
                 rate.sleep()
-            except rclpy.ROSInterruptException:
+            except ROSInterruptException:
                 pass
 
 
