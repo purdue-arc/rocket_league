@@ -8,7 +8,7 @@ License:
 # 3rd party modules
 import numpy as np
 import math
-from rktl_dependencies.rktl_dependencies.transformations import euler_from_quaternion
+from rktl_dependencies.transformations import euler_from_quaternion
 
 
 def find_intersection(path_seg, bot_path, lookahead_dist):

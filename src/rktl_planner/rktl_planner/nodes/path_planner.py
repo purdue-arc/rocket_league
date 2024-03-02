@@ -4,7 +4,7 @@ import math
 import rclpy
 import numpy as np
 from rktl_dependencies.transformations import quaternion_from_euler, euler_from_quaternion
-from std_msgs.msg import Duration
+from rclpy.duration import Duration
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
 from rktl_msgs.msg import BezierPathList, Path
@@ -25,7 +25,7 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
     pose0.position.z = 0.0
     pose0.orientation = car_odom.pose.pose.orientation
     req.target_poses.append(pose0)
-    req.target_durations.append(Duration(data=node.create_rate(5.0)))
+    req.target_durations.append(Duration(data=node.create_rate(5.0)).to_msg())
 
     # Target 1 (ball pos)
     final_vec_x = goal_pos[0] - ball_odom.pose.pose.position.x
@@ -42,7 +42,7 @@ def create_simple_path_req(car_odom, ball_odom, goal_pos):
     pose1.orientation.z = final_quat[2]
     pose1.orientation.w = final_quat[3]
     req.target_poses.append(pose1)
-    req.target_durations.append(Duration(data=node.create_rate(1.0)))
+    req.target_durations.append(Duration(data=node.create_rate(1.0)).to_msg())
 
     # Target 2 (stop)
     pose2 = Pose()
@@ -67,7 +67,7 @@ def create_backup_path_req(car_odom, ball_odom, goal_pos):
     pose0.position.z = 0.0
     pose0.orientation = car_odom.pose.pose.orientation
     req.target_poses.append(pose0)
-    req.target_durations.append(Duration(data=node.create_rate(1.0)))
+    req.target_durations.append(Duration(data=node.create_rate(1.0)).to_msg())
 
     # Target 1 (in front of ball)
     final_vec_x = goal_pos[0] - ball_odom.pose.pose.position.x
