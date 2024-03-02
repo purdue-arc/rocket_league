@@ -24,6 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'game_manager = rktl_game.node.game_manager:main'
         ],
     },
 )
