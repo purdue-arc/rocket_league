@@ -8,7 +8,7 @@ from rclpy.duration import Duration
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
 from rktl_msgs.msg import BezierPathList, Path
-from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
+from std_srvs.srv import Empty, Empty_Request, Empty_Response
 from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest
 
 def create_simple_path_req(car_odom, ball_odom, goal_pos):
