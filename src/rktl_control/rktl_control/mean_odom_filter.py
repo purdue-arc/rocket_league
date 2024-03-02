@@ -39,14 +39,14 @@ class MeanOdomFilter(object):
         self.PREDICT_TIME = self.node.declare_parameter('~delay/duration', 0.0)
 
         # variables
-        self.buffer = deque(maxlen=max(self.POS_COUNT, self.VEL_COUNT+1))
+        self.buffer = deque(maxlen=max(self.POS_COUNT.get_parameter_value().integer_value, self.VEL_COUNT.get_parameter_value().integer_value+1))
 
         # pubs / subs
-        self.odom_pub = self.node.create_publisher(Odometry, 'odom', queue_size=1)
-        self.node.create_subscription(PoseWithCovarianceStamped, 'pose_sync', self.pose_cb)
+        self.odom_pub = self.node.create_publisher(Odometry, 'odom', qos_profile=1)
+        self.node.create_subscription(PoseWithCovarianceStamped, 'pose_sync', self.pose_cb, qos_profile=1)
 
         # main loop
-        rclpy.spin()
+        rclpy.spin(self.node)
 
     def pose_cb(self, pose_msg):
         """Callback for new poses."""
@@ -80,9 +80,9 @@ class MeanOdomFilter(object):
         # wildly extrapolate to a future time if requested
         if self.PREDICT_ENABLE:
             # perform a very simple prediction of location / orientation
-            x += vx * self.PREDICT_TIME
-            y += vy * self.PREDICT_TIME
-            yaw += omega * self.PREDICT_TIME
+            x += vx * self.PREDICT_TIME.get_parameter_value().double_value
+            y += vy * self.PREDICT_TIME.get_parameter_value().double_value
+            yaw += omega * self.PREDICT_TIME.get_parameter_value().double_value
 
         # publish message
         odom_msg = Odometry()
