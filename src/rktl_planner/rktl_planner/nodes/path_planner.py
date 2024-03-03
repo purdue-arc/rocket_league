@@ -9,10 +9,10 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose
 from rktl_msgs.msg import BezierPathList, Path
 from std_srvs.srv import Empty, Empty_Request, Empty_Response
-from rktl_planner.srv import CreateBezierPath, CreateBezierPathRequest
+from rktl_msgs.srv import CreateBezierPath
 
 def create_simple_path_req(car_odom, ball_odom, goal_pos):
-    req = CreateBezierPathRequest()
+    req = CreateBezierPath.Request()
 
     req.velocity = 0.5
     req.bezier_segment_duration.data = node.create_rate(0.5)

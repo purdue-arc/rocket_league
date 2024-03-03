@@ -14,7 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
         (os.path.join('lib', package_name), glob(os.path.join(package_name, '*.py'))),
-        (os.path.join('lib', package_name), glob(os.path.join(package_name, 'nodes', '*.py'))),
+        (os.path.join('lib', package_name, 'nodes'), glob(os.path.join(package_name, 'nodes', '*.py'))),
         (os.path.join('share', package_name, 'config'), glob(os.path.join('config', '*.yaml'))),
     ],
     install_requires=['setuptools'],
@@ -26,10 +26,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'bezier_path_server = rktl_planner.nodes.bezier_path_server.py:main',
-            'path_follower = rktl_planner.nodes.path_follower.py:main',
-            'path_planner = rktl_planner.nodes.path_planner.py:main',
-            'patrol_planner = rktl_planner.nodes.patrol_planner.py:main'
+            'bezier_path_server = rktl_planner.nodes.bezier_path_server:main',
+            'path_follower = rktl_planner.nodes.path_follower:main',
+            'path_planner = rktl_planner.nodes.path_planner:main',
+            'patrol_planner = rktl_planner.nodes.patrol_planner:main'
         ],
     },
 )

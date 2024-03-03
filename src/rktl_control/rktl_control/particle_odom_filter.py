@@ -31,67 +31,68 @@ class ParticleOdomFilter(object):
         self.node = rclpy.create_node('particle_odom_filter')
 
         # physical constants (global)
-        self.FIELD_WIDTH = self.node.declare_parameter('/field/width')
-        self.FIELD_HEIGHT = self.node.declare_parameter('/field/length')
-        self.CAR_LENGTH = self.node.declare_parameter('/cars/length')
-        self.MAX_SPEED = self.node.declare_parameter('/cars/throttle/max_speed')
-        self.THROTTLE_TAU = self.node.declare_parameter('/cars/throttle/tau')
-        self.STEERING_THROW = self.node.declare_parameter('/cars/steering/max_throw')
-        self.STEERING_RATE = self.node.declare_parameter('/cars/steering/rate')
+        self.FIELD_WIDTH = self.node.declare_parameter('/field/width', 3).value
+        self.FIELD_HEIGHT = self.node.declare_parameter('/field/length', 4.25).value
+        self.CAR_LENGTH = self.node.declare_parameter('/cars/length', 0.12).value
+        self.MAX_SPEED = self.node.declare_parameter('/cars/throttle/max_speed', 2.3).value
+        self.THROTTLE_TAU = self.node.declare_parameter('/cars/throttle/tau', 0.2).value
+        self.STEERING_THROW = self.node.declare_parameter('/cars/steering/max_throw', 0.1826).value
+        self.STEERING_RATE = self.node.declare_parameter('/cars/steering/rate', 0.9128).value
 
         # node configuration
-        self.MAP_FRAME = self.node.declare_parameter('~frame_ids/map', 'map')
-        self.BODY_FRAME = self.node.declare_parameter('~frame_ids/body', 'base_link')
-        self.DELTA_T = rclpy.time.Time(1.0/self.node.declare_parameter('~rate', 10.0))
-        self.SUPERSAMPLING = self.node.declare_parameter('~supersampling', 1)
-        self.PUB_PARTICLES = self.node.declare_parameter('~publish_particles', False)
-        self.WATCHDOG_DELTA_T = self.DELTA_T * \
-            self.node.declare_parameter('~allowable_latency', 1.2)
-        self.OPEN_LOOP_LIMIT = self.node.declare_parameter('~open_loop_limit', 10)
+        self.MAP_FRAME = self.node.declare_parameter('~frame_ids/map', 'map').value
+        self.BODY_FRAME = self.node.declare_parameter('~frame_ids/body', 'base_link').value
+        self.TEMP_RATE = self.node.declare_parameter('~rate', 10.0).value
+        self.DELTA_T = rclpy.duration.Duration(nanoseconds=1.0/self.TEMP_RATE)
+        self.SUPERSAMPLING = self.node.declare_parameter('~supersampling', 1).value
+        self.PUB_PARTICLES = self.node.declare_parameter('~publish_particles', False).value
+        self.WATCHDOG_DELTA_T = self.DELTA_T.nanoseconds * \
+            self.node.declare_parameter('~allowable_latency', 1.2).value
+        self.OPEN_LOOP_LIMIT = self.node.declare_parameter('~open_loop_limit', 10).value
 
         # should the filter compensate for delay by trying to predict the future?
-        self.PREDICT_ENABLE = self.node.declare_parameter('~delay/compensate', False)
-        self.PREDICT_TIME = rclpy.time.Time(
-            self.node.declare_parameter('~delay/duration', 0.0))
+        self.PREDICT_ENABLE = self.node.declare_parameter('~delay/compensate', False).value
+        self.PREDICT_TIME = rclpy.time.Time(seconds=
+            self.node.declare_parameter('~delay/duration', 0.0).value)
 
         # should the filter weigh particles based on a boundary check?
-        boundary_check = self.node.declare_parameter('~boundary_check', False)
+        boundary_check = self.node.declare_parameter('~boundary_check', False).value
 
         # filter tuning options
-        num_particles = self.node.declare_parameter('~num_particles', 1000)
-        resample_proportion = self.node.declare_parameter('~resample_proportion', 0.1)
+        num_particles = self.node.declare_parameter('~num_particles', 1000).value
+        resample_proportion = self.node.declare_parameter('~resample_proportion', 0.1).value
 
         # standard deviation of incoming measurements used to assign particle weights
         self.MEAS_LOC_STD_DEV = self.node.declare_parameter(
-            '~measurement_error/location', 0.05)
+            '~measurement_error/location', 0.05).value
         self.MEAS_DIR_STD_DEV = self.node.declare_parameter(
-            '~measurement_error/orientation', np.deg2rad(5))
+            '~measurement_error/orientation', np.deg2rad(5)).value
 
         # standard deviation when generating random states based off current guess
         self.GEN_LOC_STD_DEV = self.node.declare_parameter(
-            '~generator_noise/location', 0.05)
+            '~generator_noise/location', 0.05).value
         self.GEN_DIR_STD_DEV = self.node.declare_parameter(
-            '~generator_noise/orientation', 0.05)
+            '~generator_noise/orientation', 0.05).value
         self.GEN_VEL_STD_DEV = self.node.declare_parameter(
-            '~generator_noise/velocity', 0.05)
+            '~generator_noise/velocity', 0.05).value
         self.GEN_PSI_STD_DEV = self.node.declare_parameter(
-            '~generator_noise/steering_angle', np.deg2rad(1))
+            '~generator_noise/steering_angle', np.deg2rad(1)).value
 
         # should the filter use historic effort data to get a more accurate idea of where the car is?
-        use_efforts = self.node.declare_parameter('~efforts/enable', False)
-        effort_buffer_size = self.node.declare_parameter('~efforts/buffer_size', 0)
+        use_efforts = self.node.declare_parameter('~efforts/enable', False).value
+        effort_buffer_size = self.node.declare_parameter('~efforts/buffer_size', 0).value
 
         # standard deviation to add noise to effort when effort is known and enabled
         self.THR_EFFORT_STD_DEV = self.node.declare_parameter(
-            '~efforts/throttle/noise', 0.05)
+            '~efforts/throttle/noise', 0.05).value
         self.STR_EFFORT_STD_DEV = self.node.declare_parameter(
-            '~efforts/steering/noise', 0.05)
+            '~efforts/steering/noise', 0.05).value
 
         # max and min for uniform effort distribution when effort is not known or disabled
-        self.MAX_THROTTLE = self.node.declare_parameter('~efforts/throttle/max',  1.0)
-        self.MIN_THROTTLE = self.node.declare_parameter('~efforts/throttle/min', -1.0)
-        self.MAX_STEERING = self.node.declare_parameter('~efforts/steering/max',  1.0)
-        self.MIN_STEERING = self.node.declare_parameter('~efforts/steering/min', -1.0)
+        self.MAX_THROTTLE = self.node.declare_parameter('~efforts/throttle/max',  1.0).value
+        self.MIN_THROTTLE = self.node.declare_parameter('~efforts/throttle/min', -1.0).value
+        self.MAX_STEERING = self.node.declare_parameter('~efforts/steering/max',  1.0).value
+        self.MIN_STEERING = self.node.declare_parameter('~efforts/steering/min', -1.0).value
 
         # variables
         self.effort_buffer = deque(maxlen=effort_buffer_size)
@@ -113,16 +114,16 @@ class ParticleOdomFilter(object):
         self.filter.mean_state = None
 
         # pubs / subs
-        self.odom_pub = self.node.create_publisher(Odometry, 'odom', queue_size=1)
-        self.node.create_subscription(PoseWithCovarianceStamped, 'pose_sync', self.pose_cb)
+        self.odom_pub = self.node.create_publisher(Odometry, 'odom', 1)
+        self.node.create_subscription(PoseWithCovarianceStamped, 'pose_sync', self.pose_cb, 1)
         if use_efforts:
-            self.node.create_subscription(ControlEffort, 'effort', self.effort_cb)
+            self.node.create_subscription(ControlEffort, 'effort', self.effort_cb, 1)
         if self.PUB_PARTICLES:
             self.cloud_pub = self.node.create_publisher(PoseArray,
-                'odom_particles', queue_size=1)
+                'odom_particles', 1)
 
         # main loop
-        rclpy.spin()
+        rclpy.spin(self.node)
 
     def effort_cb(self, effort_msg):
         """Callback for new efforts."""

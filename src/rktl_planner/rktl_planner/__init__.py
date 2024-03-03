@@ -5,8 +5,8 @@ License:
   All rights reserved.
 """
 
-from bezier_curve import BezierCurve
-from bezier_path import BezierPath
+from .bezier_curve import BezierCurve
+from .bezier_path import BezierPath
 
 __all__ = [
     "BezierCurve",
