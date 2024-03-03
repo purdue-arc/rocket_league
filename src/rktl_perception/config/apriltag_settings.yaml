@@ -1,0 +1,12 @@
+/**:
+  ros__parameters:
+    tag_family:        'tag25h9'
+    tag_border:        1 
+    tag_threads:       4
+    tag_decimate:      1.0
+    tag_blur:          0.0
+    tag_refine_edges:  1
+    tag_refine_decode: 0
+    tag_refine_pose:   0
+    tag_debug:         0
+    publish_tf:        false

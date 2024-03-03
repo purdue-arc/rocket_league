@@ -1,0 +1,5 @@
+image_proc::RectifyNode;lib/librectify.so
+image_proc::DebayerNode;lib/libdebayer.so
+image_proc::ResizeNode;lib/libresize.so
+image_proc::CropDecimateNode;lib/libcrop_decimate.so
+image_proc::CropNonZeroNode;lib/libcrop_non_zero.so

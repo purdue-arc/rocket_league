@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Use ball location to determine when a goal is scored.
+License:
+  BSD 3-Clause License
+  Copyright (c) 2023, Autonomous Robotics Club of Purdue (Purdue ARC)
+  All rights reserved.
+"""
+
+
+
+# ROS
+import rclpy
+from rclpy.parameter import Parameter
+from std_msgs.msg import Bool, Header
+from nav_msgs.msg import Odometry
+from rktl_msgs.msg import Score, MatchStatus
+from std_srvs.srv import Empty, Empty_Response
+
+class ScoreKeeper():
+    def __init__(self):
+        rclpy.init()
+        global node
+        node = rclpy.create_node('score_keeper')
+
+        self.orange_score = 0
+        self.blue_score = 0
+        self.orange_goal = (node.get_parameter_or('/field/length', Parameter(1)).get_parameter_value().double_value - 0.15) / 2 
+        self.blue_goal = (node.get_parameter_or('/field/length', Parameter(1)).get_parameter_value().double_value  - 0.15) / -2
+        self.enabled = False
+        self.match_status = 0
+        self.game_clock = node.get_parameter_or('/game_length', Parameter(90))
+        self.manager_rate = node.get_parameter_or('manager_rate', Parameter(10))
+
+        # Publishers
+        self.match_status_pub = node.create_publisher(MatchStatus, 'match_status', qos_profile=1)
+        self.active_pub = node.create_publisher(Bool, 'cars/enable', qos_profile=1)
+
+        # Subscribers
+        node.create_subscription(Odometry, 'ball/odom', self.check_goal, qos_profile=1)
+        node.create_subscription(Bool, 'cars/enable', self.enable, qos_profile=1)
+
+        # Services
+        node.create_service(srv_type=Empty, srv_name='reset_game', callback=self.reset)
+        node.create_service(srv_type=Empty, srv_name='unpause_game', callback=self.unpause)
+        node.create_service(srv_type=Empty, srv_name='pause_game', callback=self.pause)
+
+        # Counts loops and decrements game clock every second
+        self.timer_ctr = 0
+        # main loop
+        rate = node.create_rate(self.manager_rate.get_parameter_value().double_value)
+        while rclpy.ok():
+            if self.match_status == 1:
+                self.timer_ctr += 1
+                if self.timer_ctr == self.manager_rate:
+                    self.timer_ctr = 0
+                    self.game_clock -= 1
+            self.update_status()
+            rate.sleep()
+
+    def update_status(self):
+        if (self.match_status == 1 and self.game_clock == 0):
+            if (self.orange_score > self.blue_score):
+                self.match_status = 3
+            else:
+                self.match_status = 4
+        score = Score(self.orange_score, self.blue_score)
+        header = Header()
+        header.stamp = node.get_clock().now()
+        self.match_status_pub.publish(MatchStatus(header, self.match_status, self.game_clock, score))
+
+    def pause(self, _):
+        self.enabled = False
+        self.match_status = 0
+        self.active_pub.publish(False)
+        return Empty_Response()
+
+    def reset(self, _):
+        self.orange_score = 0
+        self.blue_score = 0
+        self.enabled = False
+        self.match_status = 0
+        self.game_clock = node.get_parameter_or('/game_length', Parameter(90)).get_parameter_value().double_value
+        self.active_pub.publish(False)
+        header = Header()
+        header.stamp = node.get_clock().now()
+        self.match_status_pub.publish(MatchStatus(header, 0, self.game_clock, Score(0, 0)))
+        return Empty_Response()
+
+    def unpause(self, _):
+        self.enabled = True
+        self.match_status = 1
+        self.active_pub.publish(True)
+        return Empty_Response()
+
+    def check_goal(self, ball_pose: Odometry):
+        if self.enabled:
+            # Check if ball is in goal
+            if ball_pose.pose.pose.position.x >= self.orange_goal:
+                self.orange_score += 1
+                self.pause(self)
+            elif ball_pose.pose.pose.position.x <= self.blue_goal:
+                self.blue_score += 1
+                self.pause(self)
+
+    def enable(self, data: Bool):
+        # enable after a goal is scored & cars are replaced
+        if data.data:
+            self.enabled = True
+
+if __name__ == "__main__":
+    ScoreKeeper()

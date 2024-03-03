@@ -1,0 +1,8 @@
+source;share/image_pipeline/hook/cmake_prefix_path.ps1
+source;share/image_pipeline/hook/cmake_prefix_path.dsv
+source;share/image_pipeline/hook/cmake_prefix_path.sh
+source;share/image_pipeline/local_setup.bash
+source;share/image_pipeline/local_setup.dsv
+source;share/image_pipeline/local_setup.ps1
+source;share/image_pipeline/local_setup.sh
+source;share/image_pipeline/local_setup.zsh

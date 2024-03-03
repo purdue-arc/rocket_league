@@ -1,0 +1,5 @@
+/**:
+  ros__parameters:
+    lookahead_dist: 0.25
+    lookahead_gain: 0.1
+    lookahead_pnts: -1

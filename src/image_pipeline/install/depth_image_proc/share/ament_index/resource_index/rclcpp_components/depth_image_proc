@@ -1,0 +1,10 @@
+depth_image_proc::ConvertMetricNode;lib/libdepth_image_proc.so
+depth_image_proc::CropForemostNode;lib/libdepth_image_proc.so
+depth_image_proc::DisparityNode;lib/libdepth_image_proc.so
+depth_image_proc::PointCloudXyzNode;lib/libdepth_image_proc.so
+depth_image_proc::PointCloudXyzrgbNode;lib/libdepth_image_proc.so
+depth_image_proc::PointCloudXyziNode;lib/libdepth_image_proc.so
+depth_image_proc::PointCloudXyzRadialNode;lib/libdepth_image_proc.so
+depth_image_proc::PointCloudXyziRadialNode;lib/libdepth_image_proc.so
+depth_image_proc::PointCloudXyziRadialNode;lib/libdepth_image_proc.so
+depth_image_proc::RegisterNode;lib/libdepth_image_proc.so
