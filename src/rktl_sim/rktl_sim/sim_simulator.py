@@ -62,8 +62,8 @@ class Simulator(object):
         # setting config parameters (stay constant for the whole simulator run)
         # rospy.init_node('simulator')
         rclpy.init(args=sys.argv)
-        global node
-        node = rclpy.create_node("simulator")
+        #global node
+        self.node = rclpy.create_node("simulator")
         
 
         mode = self.get_sim_param('~mode')
@@ -73,31 +73,31 @@ class Simulator(object):
             self.mode = SimulatorMode.REALISTIC
         else:
             #rospy.signal_shutdown('unknown sim mode set "{}"'.format(mode))
-            self.destroy_node('unknown sim mode set "{}"'.format(mode))
+            self.node.destroy_node()#f'unknown sim mode set "{mode}"')
 
 
         self.cmd_lock = Lock()
         self.reset_lock = Lock()
         self.car_cmd = (0.0, 0.0)
 
-        render_enabled = self.get_sim_param('~render', secondParam=False)
+        #render_enabled = self.get_sim_param('~render', secondParam=False)
         #self.status_pub = rospy.Publisher('match_status', MatchStatus, queue_size=1)
-        self.status_pub = node.create_publisher(MatchStatus, 'match_status', 1)
+        self.status_pub = self.node.create_publisher(MatchStatus, 'match_status', 1)
         self.ball_pose_pub, self.ball_odom_pub = None, None
         if self.mode == SimulatorMode.REALISTIC:
             #self.ball_pose_pub = rospy.Publisher('/ball/pose_sync_early', PoseWithCovarianceStamped, queue_size=1)
-            self.ball_pose_pub = node.create_publisher(PoseWithCovarianceStamped, '/ball/pose_sync_early', 1)
+            self.ball_pose_pub = self.node.create_publisher(PoseWithCovarianceStamped, '/ball/pose_sync_early', 1)
             #self.ball_odom_pub = rospy.Publisher('/ball/odom_truth', Odometry, queue_size=1)
-            self.ball_odom_pub = node.create_publisher(Odometry, '/ball/odom_truth', 1)
+            self.ball_odom_pub = self.node.create_publisher(Odometry, '/ball/odom_truth', 1)
         elif self.mode == SimulatorMode.IDEAL:
             #self.ball_odom_pub = rospy.Publisher('/ball/odom', Odometry, queue_size=1)
-            self.ball_odom_pub = node.create_publisher(Odometry, '/ball/odom', 1)
+            self.ball_odom_pub = self.node.create_publisher(Odometry, '/ball/odom', 1)
 
         # Services
         # rospy.Service('sim_reset_car_and_ball', Empty, self.reset_cb)
         # rospy.Service('sim_reset_ball', Empty, self.reset_ball_cb)
-        node.create_service(Empty, 'sim_reset_car_and_ball', self.reset_cb)
-        node.create_service(Empty, 'sim_reset_ball', self.reset_ball_cb)
+        self.node.create_service(Empty, 'sim_reset_car_and_ball', self.reset_cb)
+        self.node.create_service(Empty, 'sim_reset_ball', self.reset_ball_cb)
 
 
         while not rclpy.ok():
@@ -117,7 +117,7 @@ class Simulator(object):
             try:
                 raise Exception('no urdf path set for "{}"'.format(urdf_path))
             except Exception as e:
-                node.get_logger().error(str(e))
+                self.node.get_logger().error(str(e))
                 rclpy.shutdown()
         i = 0
         while not os.path.isfile(urdf_path) and i < 5:
@@ -318,7 +318,7 @@ class Simulator(object):
                     #return rospy.get_param(f'{path}')
                     return self.node.declare_parameter(f'{path}')
 
-            type_rospy = type(rclpy_param)
+            type_rclpy = type(rclpy_param)
 
 
             if type_rclpy == dict:
@@ -422,13 +422,13 @@ class Simulator(object):
                 # self.car_effort_subs[car_name] = rospy.Subscriber(
                 #     f'/cars/{car_name}/effort', ControlEffort,
                 #     self.effort_cb, callback_args=car_id)
-                self.car_effort_subs[car_name] = node.create_subscription(
+                self.car_effort_subs[car_name] = self.node.create_subscription(
                     ControlEffort, f'/cars/{car_name}/effort',
                     self.effort_cb, callback_args=car_id)
                 # self.car_cmd_subs[car_name] = rospy.Subscriber(
                 #     f'/cars/{car_name}/command', ControlCommand,
                 #     self.cmd_cb, callback_args=car_id)
-                self.car_cmd_subs[car_name] = node.create_subscription(
+                self.car_cmd_subs[car_name] = self.node.create_subscription(
                     ControlCommand, f'/cars/{car_name}/command',
 
                     self.cmd_cb, callback_args=car_id)
@@ -438,19 +438,19 @@ class Simulator(object):
                     # self.car_pose_pubs[car_name] = rospy.Publisher(
                     #     f'/cars/{car_name}/pose_sync_early',
                     #     PoseWithCovarianceStamped, queue_size=1)
-                    self.car_pose_pubs[car_name] = node.create_publisher(
+                    self.car_pose_pubs[car_name] = self.node.create_publisher(
                         PoseWithCovarianceStamped, f'/cars/{car_name}/pose_sync_early',
                         1)
                     
                     # self.car_odom_pubs[car_name] = rospy.Publisher(
                     #     f'/cars/{car_name}/odom_truth', Odometry, queue_size=1)
-                    self.car_pose_pubs[car_name] = node.create_publisher(
+                    self.car_pose_pubs[car_name] = self.node.create_publisher(
                         Odometry, f'/cars/{car_name}/odom_truth', 1)
                 
                 elif self.mode == SimulatorMode.IDEAL:
                     # self.car_odom_pubs[car_name] = rospy.Publisher(
                     #     f'/cars/{car_name}/odom', Odometry, queue_size=1)
-                    self.car_odom_pubs[car_name] = node.create_publisher(
+                    self.car_odom_pubs[car_name] = self.node.create_publisher(
                         Odometry, f'/cars/{car_name}/odom', 1)
 
         return True
