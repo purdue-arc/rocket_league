@@ -10,6 +10,7 @@ License:
 
 # ROS
 import rclpy
+from rclpy.parameter import Parameter
 from std_msgs.msg import Bool, Header
 from nav_msgs.msg import Odometry
 from rktl_msgs.msg import Score, MatchStatus
@@ -23,30 +24,30 @@ class ScoreKeeper():
 
         self.orange_score = 0
         self.blue_score = 0
-        self.orange_goal = (node.get_parameter('/field/length', 1) - 0.15) / 2 
-        self.blue_goal = (node.get_parameter('/field/length', 1)  - 0.15) / -2
+        self.orange_goal = (node.get_parameter_or('/field/length', Parameter(1)).get_parameter_value().double_value - 0.15) / 2 
+        self.blue_goal = (node.get_parameter_or('/field/length', Parameter(1)).get_parameter_value().double_value  - 0.15) / -2
         self.enabled = False
         self.match_status = 0
-        self.game_clock = node.get_parameter('/game_length', 90)
-        self.manager_rate = node.get_parameter('manager_rate', 10)
+        self.game_clock = node.get_parameter_or('/game_length', Parameter(90))
+        self.manager_rate = node.get_parameter_or('manager_rate', Parameter(10))
 
         # Publishers
-        self.match_status_pub = node.create_publisher(MatchStatus, 'match_status', queue_size=1)
-        self.active_pub = node.create_publisher(Bool, 'cars/enable', queue_size=1)
+        self.match_status_pub = node.create_publisher(MatchStatus, 'match_status', qos_profile=1)
+        self.active_pub = node.create_publisher(Bool, 'cars/enable', qos_profile=1)
 
         # Subscribers
-        node.create_subscription(Odometry, 'ball/odom', self.check_goal)
-        node.create_subscription(Bool, 'cars/enable', self.enable)
+        node.create_subscription(Odometry, 'ball/odom', self.check_goal, qos_profile=1)
+        node.create_subscription(Bool, 'cars/enable', self.enable, qos_profile=1)
 
         # Services
-        node.create_service('reset_game', Empty, self.reset)
-        node.create_service('unpause_game', Empty, self.unpause)
-        node.create_service('pause_game', Empty, self.pause)
+        node.create_service(srv_type=Empty, srv_name='reset_game', callback=self.reset)
+        node.create_service(srv_type=Empty, srv_name='unpause_game', callback=self.unpause)
+        node.create_service(srv_type=Empty, srv_name='pause_game', callback=self.pause)
 
         # Counts loops and decrements game clock every second
         self.timer_ctr = 0
         # main loop
-        rate = node.create_rate(self.manager_rate)
+        rate = node.create_rate(self.manager_rate.get_parameter_value().double_value)
         while rclpy.ok():
             if self.match_status == 1:
                 self.timer_ctr += 1
@@ -78,7 +79,7 @@ class ScoreKeeper():
         self.blue_score = 0
         self.enabled = False
         self.match_status = 0
-        self.game_clock = node.get_parameter('/game_length', 90)
+        self.game_clock = node.get_parameter_or('/game_length', Parameter(90)).get_parameter_value().double_value
         self.active_pub.publish(False)
         header = Header()
         header.stamp = node.get_clock().now()
